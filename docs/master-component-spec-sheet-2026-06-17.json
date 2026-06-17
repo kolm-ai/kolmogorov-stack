@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 696,
-    "direct_test_reference_pct": 84,
-    "components_without_direct_test_reference": 133,
+    "direct_test_referenced_components": 697,
+    "direct_test_reference_pct": 84.1,
+    "components_without_direct_test_reference": 132,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -4253,7 +4253,8 @@
           "tests/wave482-sdk-catalog-honesty.test.js",
           "tests/wave674-runtime-rs-cid-contract.test.js",
           "tests/wave675-runtime-rs-tofu-contract.test.js",
-          "tests/wave676-runtime-rs-zip-reader-contract.test.js"
+          "tests/wave676-runtime-rs-zip-reader-contract.test.js",
+          "tests/wave677-runtime-rs-verify-tamper-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -4787,8 +4788,8 @@
       "language": "rust",
       "composition": {
         "metrics": {
-          "bytes": 15147,
-          "lines": 419,
+          "bytes": 16452,
+          "lines": 448,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -4805,7 +4806,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "21b772f8199c63ffa499c13560a5740ed1b2f30d1d79d09700740d26d2bc42ef"
+        "sha256": "906b37ac47f363f8f6bc3b2890dcc626a6bbecd28d3ffc266eaae8c5ffe2c56c"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -4814,7 +4815,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave602-backend-atomic-deep-dive.test.js"
+          "tests/wave602-backend-atomic-deep-dive.test.js",
+          "tests/wave677-runtime-rs-verify-tamper-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -4993,8 +4995,8 @@
       "language": "rust",
       "composition": {
         "metrics": {
-          "bytes": 19031,
-          "lines": 479,
+          "bytes": 23545,
+          "lines": 630,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -5009,9 +5011,9 @@
           "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "bfabdc28494092b469e87d5040d71b9fb942157a432c561f929b80c2df2b3870"
+        "sha256": "6185c5fc4c45fc1779478608f5c29aaf5ddc3fb3cea312d4f5eeae5e3a09099c"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5019,15 +5021,10 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "kv-cache",
-            "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          }
+        "direct_test_refs": [
+          "tests/wave677-runtime-rs-verify-tamper-contract.test.js"
         ],
+        "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
         "suggested_verification": [
@@ -5035,11 +5032,8 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "packages/sdk-kotlin/build.gradle.kts",
@@ -8586,7 +8580,14 @@
           "tests/wrapper-r-enrich.test.js",
           "tests/wrapper-r1-r8.test.js"
         ],
-        "category_links": [],
+        "category_links": [
+          {
+            "id": "kv-cache",
+            "stack_area": "runtime",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
         "suggested_verification": [
@@ -8594,8 +8595,10 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
     },
     {
       "path": "src/artifact-lineage.js",

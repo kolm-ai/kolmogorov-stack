@@ -2,7 +2,7 @@
 //! every verification path: happy, tampered manifest, tampered adapter,
 //! broken chain, wrong secret.
 //!
-//! No external fixtures required — the helper builds an artifact byte-for-byte
+//! No external fixtures required - the helper builds an artifact byte-for-byte
 //! identical to what `src/artifact.js` produces on the Node side, so the
 //! Rust verifier verifies its own output.
 
@@ -33,7 +33,14 @@ struct BuiltArtifact {
     zip_buf: Vec<u8>,
 }
 
-#[allow(clippy::too_many_arguments)]
+#[derive(Clone, Copy, Default)]
+struct BuildKnobs {
+    tamper_manifest_post_sign: bool,
+    tamper_chain_hmac_index: Option<usize>,
+    tamper_chain_step_name: Option<(usize, &'static str)>,
+    tamper_receipt_artifact_hash: bool,
+}
+
 fn build_synthetic(
     secret: &str,
     model_pointer_bytes: &[u8],
@@ -44,8 +51,7 @@ fn build_synthetic(
     // Knobs the tests use to break things. When `tamper_manifest_post_sign`
     // is true, the manifest text is rewritten AFTER signing so the on-disk
     // hashes block disagrees with what the signature.sig was computed over.
-    tamper_manifest_post_sign: bool,
-    tamper_chain_index: Option<usize>,
+    knobs: BuildKnobs,
 ) -> BuiltArtifact {
     let secret_bytes = secret.as_bytes();
     let hashes_value = json!({
@@ -63,7 +69,7 @@ fn build_synthetic(
     let cid_digest = sha256_hex(canonical_json(&cid_input).as_bytes());
     let cid = format!("cidv1:sha256:{}", cid_digest);
 
-    // Manifest body — order matches src/artifact.js so the JSON.stringify
+    // Manifest body - order matches src/artifact.js so the JSON.stringify
     // text we serialize is byte-stable.
     let manifest = json!({
         "spec": "kolm-1",
@@ -99,14 +105,14 @@ fn build_synthetic(
     // task field after we have already hashed and signed the original. The
     // signature was computed over manifest_text_signed; the bytes the
     // verifier actually sees are manifest_text_on_disk.
-    let manifest_text_on_disk = if tamper_manifest_post_sign {
+    let manifest_text_on_disk = if knobs.tamper_manifest_post_sign {
         manifest_text_signed.replace("\"task\": \"spam-detect\"", "\"task\": \"different-task\"")
     } else {
         manifest_text_signed.clone()
     };
     let eval_set_hash = sha256_hex(evals_bytes);
 
-    // artifact_hash — mirror of src/artifact.js construction.
+    // artifact_hash - mirror of src/artifact.js construction.
     let artifact_hash_canon = canonical_json(&json!({
         "manifest_hash": manifest_hash,
         "model_pointer_hash": manifest["hashes"]["model_pointer"],
@@ -136,13 +142,17 @@ fn build_synthetic(
         .iter()
         .enumerate()
         .map(|(i, (step, input_hash, output_hash))| {
+            let step = match knobs.tamper_chain_step_name {
+                Some((target, replacement)) if target == i => replacement,
+                _ => *step,
+            };
             let body = canonical_json(&json!({
                 "step": step,
                 "input_hash": input_hash,
                 "output_hash": output_hash,
             }));
             let mut hmac = hmac_hex(secret_bytes, body.as_bytes());
-            if Some(i) == tamper_chain_index {
+            if Some(i) == knobs.tamper_chain_hmac_index {
                 // Flip a single hex character to break the HMAC.
                 let mut bytes = hmac.into_bytes();
                 bytes[0] = if bytes[0] == b'a' { b'b' } else { b'a' };
@@ -157,11 +167,16 @@ fn build_synthetic(
         })
         .collect();
 
+    let receipt_artifact_hash = if knobs.tamper_receipt_artifact_hash {
+        "f".repeat(64)
+    } else {
+        artifact_hash.clone()
+    };
     let mut receipt_body = json!({
         "kolm_version": "0.1",
         "receipt_id": "11111111-1111-1111-1111-111111111111",
         "cid": cid,
-        "artifact_hash": artifact_hash,
+        "artifact_hash": receipt_artifact_hash,
         "eval_set_hash": eval_set_hash,
         "eval_score": 0.95,
         "judge_id": "kolm-pattern-synth-1",
@@ -177,7 +192,7 @@ fn build_synthetic(
     receipt_body["signature"] = json!(body_sig);
     let receipt_text = serde_json::to_string_pretty(&receipt_body).unwrap();
 
-    // Legacy signature.sig — bare + rich payload supported by the verifier.
+    // Legacy signature.sig - bare + rich payload supported by the verifier.
     let sig_canon = canonical_json(&json!({
         "spec": "kolm-1",
         "manifest_hash": manifest_hash,
@@ -265,7 +280,7 @@ fn fresh_inputs() -> (Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>) {
 #[test]
 fn happy_path_verifies() {
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, None);
+    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
     let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     let report = artifact.verify_report(FIXTURE_SECRET);
     assert!(report.ok, "expected ok, got {:?}", report);
@@ -278,7 +293,7 @@ fn happy_path_verifies() {
 #[test]
 fn wrong_secret_fails_signature_and_chain() {
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, None);
+    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
     let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     let report = artifact.verify_report("not-the-secret");
     assert!(!report.ok);
@@ -294,7 +309,7 @@ fn tampered_adapter_bytes_break_body_hash_check() {
     // reflects the original sha256; the in-zip bytes now hash differently.
     // The body_hashes check must catch this.
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, None);
+    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
     let tampered_recipes = b"{\"spec\":\"rs-1\",\"n\":0,\"recipes\":[]}".to_vec();
     let tampered_zip = repack_with_replacement(
         &built.zip_buf,
@@ -314,7 +329,7 @@ fn tampered_adapter_bytes_break_body_hash_check() {
     // Independently: artifact_hash on the loaded artifact will diverge from
     // the receipt's artifact_hash because compute_artifact_hash reads from
     // the manifest's hashes block (not the on-disk bytes), so this remains
-    // equal to receipt.artifact_hash — the body_hashes check is the
+    // equal to receipt.artifact_hash - the body_hashes check is the
     // authoritative tamper detector.
 }
 
@@ -347,14 +362,57 @@ fn repack_with_replacement(zip_bytes: &[u8], target: &str, new_bytes: &[u8]) -> 
     out
 }
 
+/// Re-pack `zip_bytes`, then append a second file with the same `target`
+/// name. The loader must reject the duplicate instead of letting either copy
+/// win by insertion order.
+fn repack_with_duplicate_entry(zip_bytes: &[u8], target: &str) -> Vec<u8> {
+    let cursor = std::io::Cursor::new(zip_bytes);
+    let mut archive = zip::ZipArchive::new(cursor).expect("open zip");
+    let mut out = Vec::new();
+    let mut duplicate_body = None;
+    {
+        let cursor = std::io::Cursor::new(&mut out);
+        let mut z = zip::ZipWriter::new(cursor);
+        let opts: zip::write::SimpleFileOptions =
+            zip::write::SimpleFileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+        for i in 0..archive.len() {
+            let mut entry = archive.by_index(i).expect("entry");
+            let name = entry.name().to_string();
+            let mut body = Vec::new();
+            use std::io::Read;
+            entry.read_to_end(&mut body).expect("read");
+            if name == target {
+                duplicate_body = Some(body.clone());
+            }
+            z.start_file(&name, opts).unwrap();
+            z.write_all(&body).unwrap();
+        }
+        z.start_file(target, opts).unwrap();
+        z.write_all(&duplicate_body.expect("target entry present")).unwrap();
+        z.finish().expect("finish");
+    }
+    out
+}
+
 #[test]
 fn tampered_manifest_breaks_signature() {
     // Build a valid artifact then rewrite the manifest body (changing
     // `task`) post-sign. signature.sig was computed over the original text
     // so the manifest_hash recorded inside signature.sig no longer matches
-    // the in-zip manifest.json bytes — manifest_signature check must fail.
+    // the in-zip manifest.json bytes - manifest_signature check must fail.
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, true, None);
+    let built = build_synthetic(
+        FIXTURE_SECRET,
+        &mp,
+        &r,
+        &l,
+        &i,
+        &e,
+        BuildKnobs {
+            tamper_manifest_post_sign: true,
+            ..BuildKnobs::default()
+        },
+    );
     let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     let report = artifact.verify_report(FIXTURE_SECRET);
     assert!(!report.ok, "expected verification to fail; got {:?}", report);
@@ -365,7 +423,18 @@ fn tampered_manifest_breaks_signature() {
 #[test]
 fn broken_chain_hmac_breaks_chain() {
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, Some(2));
+    let built = build_synthetic(
+        FIXTURE_SECRET,
+        &mp,
+        &r,
+        &l,
+        &i,
+        &e,
+        BuildKnobs {
+            tamper_chain_hmac_index: Some(2),
+            ..BuildKnobs::default()
+        },
+    );
     let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     let report = artifact.verify_report(FIXTURE_SECRET);
     assert!(!report.ok);
@@ -378,9 +447,73 @@ fn broken_chain_hmac_breaks_chain() {
 }
 
 #[test]
+fn wrong_chain_step_name_breaks_chain_shape() {
+    let (mp, r, l, i, e) = fresh_inputs();
+    let built = build_synthetic(
+        FIXTURE_SECRET,
+        &mp,
+        &r,
+        &l,
+        &i,
+        &e,
+        BuildKnobs {
+            tamper_chain_step_name: Some((2, "weights")),
+            ..BuildKnobs::default()
+        },
+    );
+    let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
+    let report = artifact.verify_report(FIXTURE_SECRET);
+    assert!(!report.ok);
+    assert!(!report.receipt_chain.ok);
+    assert!(
+        report.receipt_chain.reason.contains("expected step recipes"),
+        "expected step-shape failure, got: {}",
+        report.receipt_chain.reason
+    );
+}
+
+#[test]
+fn receipt_artifact_hash_mismatch_breaks_chain_shape() {
+    let (mp, r, l, i, e) = fresh_inputs();
+    let built = build_synthetic(
+        FIXTURE_SECRET,
+        &mp,
+        &r,
+        &l,
+        &i,
+        &e,
+        BuildKnobs {
+            tamper_receipt_artifact_hash: true,
+            ..BuildKnobs::default()
+        },
+    );
+    let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
+    let report = artifact.verify_report(FIXTURE_SECRET);
+    assert!(!report.ok);
+    assert!(!report.receipt_chain.ok);
+    assert!(
+        report.receipt_chain.reason.contains("artifact_hash"),
+        "expected artifact_hash failure, got: {}",
+        report.receipt_chain.reason
+    );
+    assert!(report.receipt_body.ok);
+}
+
+#[test]
 fn verify_method_returns_error_on_failure() {
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, Some(0));
+    let built = build_synthetic(
+        FIXTURE_SECRET,
+        &mp,
+        &r,
+        &l,
+        &i,
+        &e,
+        BuildKnobs {
+            tamper_chain_hmac_index: Some(0),
+            ..BuildKnobs::default()
+        },
+    );
     let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     let err = artifact.verify(FIXTURE_SECRET).unwrap_err();
     match err {
@@ -394,7 +527,7 @@ fn verify_method_returns_error_on_failure() {
 #[test]
 fn cid_is_stable_across_loads() {
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, None);
+    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
     let a1 = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     let a2 = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     assert_eq!(a1.cid(), a2.cid());
@@ -406,7 +539,7 @@ fn cid_is_stable_across_loads() {
 fn missing_zip_entry_is_error() {
     // Build a zip that lacks signature.sig.
     let (mp, r, l, i, e) = fresh_inputs();
-    let _ok = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, None);
+    let _ok = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
     let mut zip_buf = Vec::new();
     {
         let cursor = std::io::Cursor::new(&mut zip_buf);
@@ -423,6 +556,24 @@ fn missing_zip_entry_is_error() {
 }
 
 #[test]
+fn duplicate_zip_entry_is_error() {
+    let (mp, r, l, i, e) = fresh_inputs();
+    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
+    let dup = repack_with_duplicate_entry(&built.zip_buf, "manifest.json");
+    let err = Artifact::load_from_bytes(&dup).unwrap_err();
+    match err {
+        Error::MalformedManifest(reason) => {
+            assert!(
+                reason.contains("duplicate zip entry name"),
+                "expected duplicate entry reason, got: {}",
+                reason
+            );
+        }
+        other => panic!("expected MalformedManifest, got {:?}", other),
+    }
+}
+
+#[test]
 fn invalid_zip_bytes_is_error() {
     let err = Artifact::load_from_bytes(b"not-a-zip").unwrap_err();
     match err {
@@ -435,7 +586,7 @@ fn invalid_zip_bytes_is_error() {
 fn tofu_pin_then_reuse_is_ok() {
     use kolm_runtime::TrustStore;
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, None);
+    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
     let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     let mut store = TrustStore::new();
     let r1 = artifact.verify_with_store(FIXTURE_SECRET, &mut store);
@@ -450,7 +601,7 @@ fn tofu_pin_then_reuse_is_ok() {
 fn tofu_pin_mismatch_fails() {
     use kolm_runtime::TrustStore;
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, None);
+    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
     let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     let mut store = TrustStore::new();
     // Pre-pin a different namespace.
@@ -468,7 +619,7 @@ fn tofu_pin_mismatch_fails() {
 #[test]
 fn verify_report_is_json_serializable() {
     let (mp, r, l, i, e) = fresh_inputs();
-    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, false, None);
+    let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
     let artifact = Artifact::load_from_bytes(&built.zip_buf).expect("load");
     let report = artifact.verify_report(FIXTURE_SECRET);
     let j = report.to_json_pretty();

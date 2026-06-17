@@ -1794,17 +1794,6 @@
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {
-            "path": "packages/runtime-rs/tests/verify_tamper.rs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 5,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface"
-            ],
-            "test_refs": [],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
             "path": "services/mcp/server.js",
             "domain": "runtime_serving_routing",
             "priority_score": 5,
@@ -1833,6 +1822,22 @@
               "tests/wave195-quantize-worker.test.js"
             ],
             "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache"
+          },
+          {
+            "path": "src/artifact-lifecycle.js",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 5,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/r2-artifact-lifecycle.test.js",
+              "tests/wrapper-r-enrich.test.js",
+              "tests/wrapper-r1-r8.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
         ],
         "count": 134,

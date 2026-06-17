@@ -2,7 +2,7 @@
 //!
 //! The verification flow mirrors what `/v1/receipts/verify` does on the Node
 //! side, so this crate can stand alone as an offline verifier. Inputs all
-//! arrive as the literal bytes that appear inside the zip — no field
+//! arrive as the literal bytes that appear inside the zip - no field
 //! reconstruction from typed objects, so future schema additions do not drift
 //! between the producer and the verifier.
 
@@ -120,7 +120,7 @@ impl VerifyReport {
 }
 
 /// Run every verification check and return a structured report. Never fails
-/// at the IO layer — bad inputs fail their respective checks instead.
+/// at the IO layer - bad inputs fail their respective checks instead.
 pub fn verify_report(
     secret: &[u8],
     manifest: &Manifest,
@@ -134,7 +134,8 @@ pub fn verify_report(
 
     report.cid = check_cid(manifest, receipt, cid_value);
     report.manifest_signature = check_manifest_signature(secret, manifest_json_text, signature_json_text);
-    report.receipt_chain = check_receipt_chain(secret, receipt);
+    let artifact_hash = compute_artifact_hash(manifest, manifest_json_text);
+    report.receipt_chain = check_receipt_chain(secret, receipt, &artifact_hash);
     report.receipt_body = check_receipt_body_signature(secret, receipt);
     if let Some(actuals) = actual_body_hashes {
         report.body_hashes = check_body_hashes(manifest, &actuals);
@@ -310,11 +311,26 @@ fn check_manifest_signature(
     CheckOutcome::failed("signature.sig hmac mismatch")
 }
 
-fn check_receipt_chain(secret: &[u8], receipt: &Receipt) -> CheckOutcome {
+fn check_receipt_chain(secret: &[u8], receipt: &Receipt, artifact_hash: &str) -> CheckOutcome {
+    const EXPECTED_CHAIN_STEPS: [&str; 5] = ["task", "seeds", "recipes", "evals", "package"];
     if receipt.chain.is_empty() {
         return CheckOutcome::failed("receipt chain empty");
     }
+    if receipt.chain.len() != EXPECTED_CHAIN_STEPS.len() {
+        return CheckOutcome::failed(format!(
+            "receipt chain length mismatch: expected {} got {}",
+            EXPECTED_CHAIN_STEPS.len(),
+            receipt.chain.len()
+        ));
+    }
     for (i, link) in receipt.chain.iter().enumerate() {
+        let expected_step = EXPECTED_CHAIN_STEPS[i];
+        if link.step != expected_step {
+            return CheckOutcome::failed(format!(
+                "chain[{}] expected step {} got {}",
+                i, expected_step, link.step
+            ));
+        }
         let v = serde_json::json!({
             "step": link.step,
             "input_hash": link.input_hash,
@@ -338,6 +354,19 @@ fn check_receipt_chain(secret: &[u8], receipt: &Receipt) -> CheckOutcome {
                 i - 1
             ));
         }
+    }
+    let package_output_hash = &receipt.chain[EXPECTED_CHAIN_STEPS.len() - 1].output_hash;
+    if package_output_hash != &receipt.artifact_hash {
+        return CheckOutcome::failed(format!(
+            "receipt artifact_hash mismatch: chain package output {} receipt {}",
+            package_output_hash, receipt.artifact_hash
+        ));
+    }
+    if receipt.artifact_hash != artifact_hash {
+        return CheckOutcome::failed(format!(
+            "artifact_hash recompute mismatch: receipt {} computed {}",
+            receipt.artifact_hash, artifact_hash
+        ));
     }
     CheckOutcome::passed()
 }

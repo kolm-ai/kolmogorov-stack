@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 696,
-    "components_without_direct_test_reference": 133,
+    "test_referenced_components": 697,
+    "components_without_direct_test_reference": 132,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -3230,7 +3230,8 @@
         "tests/wave482-sdk-catalog-honesty.test.js",
         "tests/wave674-runtime-rs-cid-contract.test.js",
         "tests/wave675-runtime-rs-tofu-contract.test.js",
-        "tests/wave676-runtime-rs-zip-reader-contract.test.js"
+        "tests/wave676-runtime-rs-zip-reader-contract.test.js",
+        "tests/wave677-runtime-rs-verify-tamper-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -3894,10 +3895,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "21b772f8199c63ffa499c13560a5740ed1b2f30d1d79d09700740d26d2bc42ef",
+      "sha256": "906b37ac47f363f8f6bc3b2890dcc626a6bbecd28d3ffc266eaae8c5ffe2c56c",
       "metrics": {
-        "bytes": 15147,
-        "lines": 419,
+        "bytes": 16452,
+        "lines": 448,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3909,7 +3910,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave602-backend-atomic-deep-dive.test.js"
+        "tests/wave602-backend-atomic-deep-dive.test.js",
+        "tests/wave677-runtime-rs-verify-tamper-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -4134,10 +4136,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "bfabdc28494092b469e87d5040d71b9fb942157a432c561f929b80c2df2b3870",
+      "sha256": "6185c5fc4c45fc1779478608f5c29aaf5ddc3fb3cea312d4f5eeae5e3a09099c",
       "metrics": {
-        "bytes": 19031,
-        "lines": 479,
+        "bytes": 23545,
+        "lines": 630,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -4148,12 +4150,14 @@
         "crypto_refs": 21,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave677-runtime-rs-verify-tamper-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
