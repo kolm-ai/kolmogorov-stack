@@ -1,6 +1,6 @@
 {
   "counts": {
-    "account_links": 33,
+    "account_links": 24,
     "api_routes": 69,
     "cli_commands": 64,
     "customization_dimensions": 8,
@@ -136,9 +136,8 @@
   "journeys": [
     {
       "account": [
-        "/account/connectors",
-        "/account/captured",
-        "/account/lake"
+        "/account/overview",
+        "/account/api-control-center"
       ],
       "api": [
         "POST /v1/chat/completions",
@@ -165,7 +164,8 @@
         "src/product-experience.js",
         "src/router.js",
         "src/daemon-connector.js",
-        "public/account/connectors.html"
+        "public/account/overview.html",
+        "public/account/api-control-center.html"
       ],
       "happy_path": [
         "connect provider",
@@ -178,11 +178,11 @@
       "name": "Gateway Capture",
       "next_actions": [
         {
-          "href": "/account/connectors",
+          "href": "/account/overview",
           "kind": "account",
           "label": "Connect a provider or point an SDK at the Kolm base URL.",
           "priority": "P0",
-          "value": "/account/connectors"
+          "value": "/account/overview"
         },
         {
           "kind": "command",
@@ -219,9 +219,8 @@
     },
     {
       "account": [
-        "/account/lake",
-        "/account/privacy-events",
-        "/account/storage"
+        "/account/overview",
+        "/account/api-control-center"
       ],
       "api": [
         "GET /v1/lake/stats",
@@ -247,7 +246,8 @@
         "src/lake.js",
         "src/privacy-membrane.js",
         "src/event-store.js",
-        "public/account/lake.html"
+        "public/account/overview.html",
+        "public/account/api-control-center.html"
       ],
       "happy_path": [
         "view lake",
@@ -260,11 +260,11 @@
       "name": "Privacy Lake",
       "next_actions": [
         {
-          "href": "/account/lake",
+          "href": "/account/overview",
           "kind": "account",
           "label": "Filter the lake by provider, model, status, namespace, and latency.",
           "priority": "P0",
-          "value": "/account/lake"
+          "value": "/account/overview"
         },
         {
           "kind": "command",
@@ -300,10 +300,8 @@
     },
     {
       "account": [
-        "/account/datasets",
-        "/account/labeling",
-        "/account/simulations",
-        "/account/bakeoffs"
+        "/account/train",
+        "/account/overview"
       ],
       "api": [
         "GET /v1/datasets",
@@ -326,8 +324,8 @@
       "evidence_paths": [
         "src/dataset-workbench.js",
         "src/simulation.js",
-        "public/account/datasets.html",
-        "public/account/labeling.html"
+        "public/account/train.html",
+        "public/account/overview.html"
       ],
       "happy_path": [
         "rank opportunities",
@@ -340,11 +338,11 @@
       "name": "Datasets And Labeling",
       "next_actions": [
         {
-          "href": "/account/datasets",
+          "href": "/account/train",
           "kind": "account",
           "label": "Approve the next highest-value example or create a dataset from repeated work.",
           "priority": "P0",
-          "value": "/account/datasets"
+          "value": "/account/train"
         },
         {
           "kind": "command",
@@ -383,9 +381,8 @@
     },
     {
       "account": [
-        "/account/builds",
-        "/account/distill-runs",
-        "/account/multimodal-bakeoff"
+        "/account/train",
+        "/account/overview"
       ],
       "api": [
         "GET /v1/builds",
@@ -416,7 +413,7 @@
         "scripts/benchmark-evidence.mjs",
         "src/remote-compute.js",
         "src/compute/registry.json",
-        "public/account/builds.html"
+        "public/account/train.html"
       ],
       "happy_path": [
         "choose dataset",
@@ -429,11 +426,11 @@
       "name": "Train And Distill",
       "next_actions": [
         {
-          "href": "/account/builds",
+          "href": "/account/train",
           "kind": "account",
           "label": "Choose teacher, student, compute backend, eval gate, and output target before starting a build.",
           "priority": "P0",
-          "value": "/account/builds"
+          "value": "/account/train"
         },
         {
           "kind": "command",
@@ -479,9 +476,8 @@
     },
     {
       "account": [
-        "/models",
-        "/account/builds",
-        "/account/devices"
+        "/account/train",
+        "/account/overview"
       ],
       "api": [
         "GET /v1/models",
@@ -507,7 +503,8 @@
         "src/models.js",
         "src/model-registry.js",
         "src/model-weights-manifest.js",
-        "public/models.html"
+        "public/account/train.html",
+        "tests/wave409rs-models-devices.test.js"
       ],
       "happy_path": [
         "inspect model catalog",
@@ -520,11 +517,11 @@
       "name": "Models And Backbones",
       "next_actions": [
         {
-          "href": "/models",
+          "href": "/account/train",
           "kind": "account",
           "label": "Pick the best backbone for the task and target device before starting a distill or compile.",
           "priority": "P0",
-          "value": "/models"
+          "value": "/account/train"
         },
         {
           "kind": "command",
@@ -564,9 +561,8 @@
     },
     {
       "account": [
-        "/account/multimodal-bakeoff",
-        "/account/lake",
-        "/account/datasets"
+        "/account/train",
+        "/account/overview"
       ],
       "api": [
         "GET /v1/multimodal/tokenize/doctor",
@@ -588,8 +584,8 @@
       ],
       "evidence_paths": [
         "services/embed/multimodal.js",
-        "public/account/multimodal-bakeoff.html",
-        "tests/wave552-gemma-multimodal-account.test.js"
+        "public/account/train.html",
+        "tests/wave466-multimodal-bakeoff.test.js"
       ],
       "happy_path": [
         "detect modality",
@@ -602,11 +598,11 @@
       "name": "Multimodal Tokenization",
       "next_actions": [
         {
-          "href": "/account/multimodal-bakeoff",
+          "href": "/account/train",
           "kind": "account",
           "label": "Tokenize media into sidecars, then review/bake off the generated examples before training.",
           "priority": "P0",
-          "value": "/account/multimodal-bakeoff"
+          "value": "/account/train"
         },
         {
           "kind": "command",
@@ -646,7 +642,8 @@
     },
     {
       "account": [
-        "/account/artifacts"
+        "/account/overview",
+        "/account/train"
       ],
       "api": [
         "GET /v1/artifacts",
@@ -674,7 +671,8 @@
         "src/format-governance-packet.js",
         "scripts/format-governance-packet.mjs",
         "docs/kolm-format-v1.md",
-        "public/account/artifacts.html"
+        "public/account/overview.html",
+        "public/verify.html"
       ],
       "happy_path": [
         "compile",
@@ -687,11 +685,11 @@
       "name": "Compile And Verify",
       "next_actions": [
         {
-          "href": "/account/artifacts",
+          "href": "/account/overview",
           "kind": "account",
           "label": "Compile, choose quantization/runtime strategy, verify, and export an artifact with receipts.",
           "priority": "P0",
-          "value": "/account/artifacts"
+          "value": "/account/overview"
         },
         {
           "kind": "command",
@@ -730,8 +728,7 @@
     },
     {
       "account": [
-        "/account/devices",
-        "/account/artifacts"
+        "/account/overview"
       ],
       "api": [
         "POST /v1/chat/completions",
@@ -761,7 +758,8 @@
         "scripts/package-release-readiness.mjs",
         "scripts/runtime-adoption-packets.mjs",
         "public/sdk.js",
-        "public/tui.html"
+        "public/account/overview.html",
+        "public/runtimes.html"
       ],
       "happy_path": [
         "select model",
@@ -774,11 +772,11 @@
       "name": "Runtime Inference",
       "next_actions": [
         {
-          "href": "/account/devices",
+          "href": "/account/overview",
           "kind": "account",
           "label": "Select artifact, fallback chain, runtime target, and device class.",
           "priority": "P0",
-          "value": "/account/devices"
+          "value": "/account/overview"
         },
         {
           "kind": "command",
@@ -819,9 +817,8 @@
     },
     {
       "account": [
-        "/account/devices",
-        "/account/storage",
-        "/account/settings"
+        "/account/train",
+        "/account/overview"
       ],
       "api": [
         "GET /v1/cloud/readiness",
@@ -858,7 +855,8 @@
         "src/remote-compute.js",
         "docs/cloud-product-readiness.md",
         "scripts/cloud-readiness.mjs",
-        "scripts/cloud-compute-broker.mjs"
+        "scripts/cloud-compute-broker.mjs",
+        "public/account/train.html"
       ],
       "happy_path": [
         "run readiness",
@@ -871,11 +869,11 @@
       "name": "Compute And Cloud",
       "next_actions": [
         {
-          "href": "/account/devices",
+          "href": "/account/train",
           "kind": "account",
           "label": "Run the cloud broker and readiness doctors to choose the cheapest compliant compute, storage, and deployment profile before launching work.",
           "priority": "P0",
-          "value": "/account/devices"
+          "value": "/account/train"
         },
         {
           "kind": "command",
@@ -924,7 +922,8 @@
     },
     {
       "account": [
-        "/account/devices"
+        "/account/overview",
+        "/account/dashboard"
       ],
       "api": [
         "GET /v1/devices",
@@ -951,7 +950,8 @@
       "evidence_paths": [
         "src/device-capabilities.js",
         "src/router.js",
-        "public/account/devices.html"
+        "public/account/overview.html",
+        "public/account/dashboard.html"
       ],
       "happy_path": [
         "detect device",
@@ -965,11 +965,11 @@
       "name": "Devices And Fleet",
       "next_actions": [
         {
-          "href": "/account/devices",
+          "href": "/account/overview",
           "kind": "account",
           "label": "Detect hardware, recommend runtime targets, create team tunnels when needed, and install verified artifacts.",
           "priority": "P0",
-          "value": "/account/devices"
+          "value": "/account/overview"
         },
         {
           "kind": "command",
@@ -1009,11 +1009,9 @@
     },
     {
       "account": [
-        "/account/api-keys",
-        "/account/audit-log",
-        "/account/billing",
-        "/account/settings",
-        "/account/privacy-events"
+        "/account/org",
+        "/account/api-control-center",
+        "/account-billing"
       ],
       "api": [
         "GET /v1/account",
@@ -1045,8 +1043,8 @@
         "src/audit.js",
         "src/compliance-certification-packet.js",
         "scripts/compliance-certification-packet.mjs",
-        "public/account/api-keys.html",
-        "public/account/audit-log.html"
+        "public/account/org.html",
+        "public/account/api-control-center.html"
       ],
       "happy_path": [
         "verify tenant",
@@ -1059,11 +1057,11 @@
       "name": "Enterprise Governance",
       "next_actions": [
         {
-          "href": "/account/api-keys",
+          "href": "/account/org",
           "kind": "account",
           "label": "Review access, cost, audit, and compliance state before scaling usage.",
           "priority": "P0",
-          "value": "/account/api-keys"
+          "value": "/account/org"
         },
         {
           "kind": "command",
@@ -1106,8 +1104,8 @@
     },
     {
       "account": [
-        "/account/agent-telemetry",
-        "/account/artifacts"
+        "/account/api-control-center",
+        "/account/overview"
       ],
       "api": [
         "GET /v1/artifacts",
@@ -1129,7 +1127,8 @@
       "evidence_paths": [
         "services/mcp/server.js",
         "cli/kolm.js",
-        "public/account/agent-telemetry.html"
+        "public/account/api-control-center.html",
+        "public/account/overview.html"
       ],
       "happy_path": [
         "compile as MCP",
@@ -1142,11 +1141,11 @@
       "name": "Agents And Registry",
       "next_actions": [
         {
-          "href": "/account/agent-telemetry",
+          "href": "/account/api-control-center",
           "kind": "account",
           "label": "Install the verified artifact into the user agent harness or registry.",
           "priority": "P0",
-          "value": "/account/agent-telemetry"
+          "value": "/account/api-control-center"
         },
         {
           "kind": "command",
@@ -1603,9 +1602,8 @@
             "src/kscore.js",
             "src/kscore-bench.js",
             "src/router.js",
-            "public/kolm-bench.json",
-            "public/kscore-leaderboard.json",
-            "tests/wave275-kscore-deep.test.js",
+            "public/benchmarks/trinity-500-benchmark.json",
+            "tests/wave145-kscore-t-axis.test.js",
             "tests/wave587-kscore-calibration-contract.test.js",
             "docs/PRODUCT.md",
             "public/spec.html"
@@ -1646,7 +1644,8 @@
           "evidence_paths": [
             "cli/kolm.js",
             "src/production-ready.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave587-kscore-calibration-contract.test.js",
+            "tests/product-compiler-contract.test.js"
           ],
           "group_id": "compile-train-distill",
           "id": "compile-failure-diagnostics",
@@ -1739,7 +1738,8 @@
           "evidence_paths": [
             "src/router.js",
             "src/daemon-connector.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave444-lake-storage-retention.test.js",
+            "tests/finalized-c10-capture-idempotency.test.js"
           ],
           "group_id": "capture-gateway-lake",
           "id": "zero-retention-mode",
@@ -1752,8 +1752,8 @@
           "evidence_paths": [
             "src/router.js",
             "src/lake.js",
-            "public/account/lake.html",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "public/account/overview.html",
+            "tests/wave444-lake-storage-retention.test.js"
           ],
           "group_id": "capture-gateway-lake",
           "id": "capture-filtering",
@@ -1764,10 +1764,10 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "src/event-schema.js",
             "src/event-store.js",
+            "src/event-schema.js",
             "src/lake.js",
-            "public/account/lake.html"
+            "public/account/overview.html"
           ],
           "group_id": "capture-gateway-lake",
           "id": "event-lake-schema",
@@ -1778,15 +1778,12 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "src/privacy-membrane.js",
-            "src/phi-redactor.js",
             "src/redaction-benchmark.js",
-            "src/router.js",
             "scripts/bench-redaction-fixtures.mjs",
             "test/fixtures/redaction-public-benchmark.json",
-            "public/benchmarks/redaction-public-benchmark.json",
+            "tests/wave581-redaction-benchmark.test.js",
             "tests/wave586-redaction-public-benchmark-contract.test.js",
-            "public/account/privacy-events.html"
+            "public/account/api-control-center.html"
           ],
           "group_id": "capture-gateway-lake",
           "id": "redaction-quality",
@@ -1797,9 +1794,9 @@
         {
           "claim_scope": "local-code-and-tests",
           "evidence_paths": [
-            "src/privacy-membrane.js",
-            "src/router.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "src/dp-training.js",
+            "tests/finalized-c2-dp-training-dp-sgd-pate.test.js",
+            "public/account/api-control-center.html"
           ],
           "group_id": "capture-gateway-lake",
           "id": "differential-privacy",
@@ -1822,13 +1819,11 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "src/auth.js",
             "src/team-capture-rbac.js",
-            "src/audit.js",
-            "src/router.js",
-            "public/account/api-keys.html",
-            "public/account/audit-log.html",
-            "public/account/overview.html"
+            "tests/finalized-c9-capability-scopes.test.js",
+            "tests/wave921-account-ui-routes.test.js",
+            "public/account/org.html",
+            "public/account/api-control-center.html"
           ],
           "group_id": "capture-gateway-lake",
           "id": "team-capture-rbac",
@@ -1915,10 +1910,10 @@
         {
           "claim_scope": "local-code-and-tests",
           "evidence_paths": [
-            "src/compute/registry.json",
             "src/compute/backends/local-openvino.js",
             "src/compute/backends/local-qnn.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave551-compute-training-contract.test.js",
+            "public/runtimes.html"
           ],
           "group_id": "runtime-compute",
           "id": "compute-openvino-qnn",
@@ -1975,8 +1970,9 @@
           "claim_scope": "local-implementation",
           "evidence_paths": [
             "src/marketplace.js",
-            "cli/kolm.js",
-            "public/marketplace.html"
+            "src/marketplace-routes.js",
+            "tests/wave409x-marketplace-gate.test.js",
+            "tests/wave428-marketplace-verified-provisional.test.js"
           ],
           "group_id": "registry-marketplace",
           "id": "registry-search",
@@ -1987,9 +1983,10 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "cli/kolm.js",
-            "src/registry.js",
-            "public/account/artifacts.html"
+            "src/artifact-diff.js",
+            "src/artifact-dependency-graph.js",
+            "docs/kolm-format-v1.md",
+            "public/account/overview.html"
           ],
           "group_id": "registry-marketplace",
           "id": "version-diff",
@@ -2000,11 +1997,10 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "cli/kolm.js",
-            "src/deployment-plans.js",
-            "src/router.js",
             "src/device-install.js",
-            "public/device-transfer.html"
+            "src/deployment-plans.js",
+            "public/runtimes.html",
+            "tests/wave888c-devices.test.js"
           ],
           "group_id": "registry-marketplace",
           "id": "deploy-buttons",
@@ -2015,11 +2011,9 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "src/marketplace.js",
             "src/publisher-verification.js",
-            "src/router.js",
-            "public/marketplace.html",
-            "cli/kolm.js"
+            "src/marketplace.js",
+            "tests/wave428-marketplace-verified-provisional.test.js"
           ],
           "group_id": "registry-marketplace",
           "id": "verified-publishers",
@@ -2030,9 +2024,9 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "src/registry.js",
-            "src/router.js",
-            "public/account/artifacts.html"
+            "src/marketplace-store.js",
+            "src/marketplace-routes.js",
+            "public/account/api-control-center.html"
           ],
           "group_id": "registry-marketplace",
           "id": "private-registry",
@@ -2043,11 +2037,8 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "docs/kolm-format-v1.md",
-            "src/artifact.js",
             "src/artifact-dependency-graph.js",
-            "src/router.js",
-            "public/account/artifacts.html"
+            "public/account/overview.html"
           ],
           "group_id": "registry-marketplace",
           "id": "dependency-graphs",
@@ -2091,15 +2082,11 @@
         {
           "claim_scope": "benchmark-gated",
           "evidence_paths": [
-            "src/benchmarks.js",
             "src/benchmark-evidence.js",
-            "scripts/bench-compare.mjs",
             "scripts/benchmark-evidence.mjs",
-            "scripts/bench-redaction-fixtures.mjs",
-            "scripts/quantization-oracle.mjs",
-            "public/benchmarks.html",
             "docs/benchmark-evidence.md",
-            "docs/benchmark-results-v0.1.0.md"
+            "tests/wave589-benchmark-evidence-contract.test.js",
+            "public/benchmarks/trinity-500-benchmark.json"
           ],
           "group_id": "infrastructure-enterprise",
           "id": "benchmarking-infra",
@@ -2110,10 +2097,10 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "src/replay.js",
+            "src/adversarial-bakeoff.js",
             "src/bakeoff.js",
-            "src/trace-compile.js",
-            "public/account/bakeoffs.html"
+            "public/account/train.html",
+            "tests/wave409nop-datasets-labels-bakeoffs.test.js"
           ],
           "group_id": "infrastructure-enterprise",
           "id": "shadow-mode",
@@ -2124,10 +2111,9 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
-            "src/cost-estimator.js",
             "src/billing-breakdown.js",
-            "src/lake.js",
-            "public/account/billing.html"
+            "public/account-billing.html",
+            "tests/wave465-billing-breakdown.test.js"
           ],
           "group_id": "infrastructure-enterprise",
           "id": "cost-attribution",
@@ -2151,8 +2137,8 @@
           "claim_scope": "local-implementation",
           "evidence_paths": [
             "src/router.js",
-            "src/audit.js",
-            "public/account/api-keys.html"
+            "public/account/api-control-center.html",
+            "tests/product-compiler-contract.test.js"
           ],
           "group_id": "infrastructure-enterprise",
           "id": "webhooks-events",
@@ -2192,10 +2178,10 @@
         {
           "claim_scope": "local-implementation",
           "evidence_paths": [
+            "src/keys.js",
             "src/auth.js",
-            "src/secrets-vault.js",
-            "public/account/api-keys.html",
-            "docs/kolm-format-v1.md"
+            "public/account/api-control-center.html",
+            "tests/finalized-c9-capability-scopes.test.js"
           ],
           "group_id": "infrastructure-enterprise",
           "id": "secrets-management",
@@ -2231,7 +2217,8 @@
           "evidence_paths": [
             "src/optimization.js",
             "src/runtime-policy.js",
-            "public/research/prompt-cache.html",
+            "src/kv-cache-policy.js",
+            "docs/kv-cache-shard.md",
             "apps/trainer/inference_cache.py"
           ],
           "group_id": "ai-ml-optimizer",
@@ -2247,7 +2234,9 @@
             "src/runtime.js",
             "src/runtime-policy.js",
             "src/optimization.js",
-            "public/account/repeated-workflows.html"
+            "src/semantic-cache.js",
+            "tests/wave921-semantic-cache.test.js",
+            "tests/wave921-semantic-cache-wiring.test.js"
           ],
           "group_id": "ai-ml-optimizer",
           "id": "semantic-cache",
@@ -2262,7 +2251,8 @@
             "src/completions-api.js",
             "src/router.js",
             "cli/kolm.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave921-fallback-reason-clamp.test.js",
+            "tests/wave422-distill-tenant-fallback.test.js"
           ],
           "group_id": "ai-ml-optimizer",
           "id": "fallback-chains",
@@ -2281,7 +2271,6 @@
             "scripts/bench-quality-calibration.mjs",
             "scripts/quality-calibration.mjs",
             "docs/quality-calibration.md",
-            "public/benchmarks/quality-judge-calibration.json",
             "tests/wave588-quality-calibration-contract.test.js",
             "cli/kolm.js"
           ],
@@ -2312,7 +2301,8 @@
             "src/router.js",
             "src/capture-stream.js",
             "src/streaming-contract.js",
-            "public/account/lake.html"
+            "public/account/overview.html",
+            "tests/wave723-streaming-load.test.js"
           ],
           "group_id": "ai-ml-optimizer",
           "id": "streaming",
@@ -2340,7 +2330,8 @@
             "src/bakeoff.js",
             "src/replay.js",
             "src/trace-compile.js",
-            "public/account/bakeoffs.html"
+            "public/account/train.html",
+            "tests/wave409nop-datasets-labels-bakeoffs.test.js"
           ],
           "group_id": "ai-ml-optimizer",
           "id": "evals-ab",
@@ -2357,7 +2348,8 @@
           "claim_scope": "local-code-and-tests",
           "evidence_paths": [
             "cli/kolm.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/finalized-c11-cli-tui-dx-contract.test.js",
+            "tests/wave921-cli-dx.test.js"
           ],
           "group_id": "developer-experience",
           "id": "cli-world-class",
@@ -2370,7 +2362,8 @@
           "evidence_paths": [
             "cli/kolm.js",
             "services/mcp/server.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave921-mcp-signed-receipts.test.js",
+            "tests/connector-mcp.test.js"
           ],
           "group_id": "developer-experience",
           "id": "compile-as-mcp",
@@ -2382,9 +2375,11 @@
           "claim_scope": "local-implementation",
           "evidence_paths": [
             "public/account/overview.html",
-            "public/account/connectors.html",
-            "public/account/lake.html",
-            "public/account/billing.html"
+            "public/account/api-control-center.html",
+            "public/account/train.html",
+            "public/account/org.html",
+            "public/account/dashboard.html",
+            "public/account-billing.html"
           ],
           "group_id": "developer-experience",
           "id": "local-account-ui",
@@ -2831,9 +2826,6 @@
         "compile-as-mcp",
         "compile-cache",
         "compile-failure-diagnostics",
-        "dependency-graphs",
-        "deploy-buttons",
-        "differential-privacy",
         "distill-strategy-oracle",
         "doctor-diagnostics",
         "export-quantize-targets",
@@ -2842,20 +2834,14 @@
         "k-score-calibration",
         "openai-anthropic-gateway",
         "opentelemetry",
-        "private-registry",
         "quality-scoring",
         "rate-limits-quotas",
-        "redaction-quality",
-        "registry-search",
         "runtime-local-artifact",
         "runtime-telemetry-opt-in",
         "secrets-management",
         "standalone-verify",
         "streaming",
-        "team-capture-rbac",
         "token-budget",
-        "verified-publishers",
-        "version-diff",
         "webhooks-events",
         "zero-retention-mode"
       ],
@@ -3488,14 +3474,11 @@
       "readiness_requirement_ids": [
         "artifact-signing-pipeline",
         "async-compile-webhooks",
-        "benchmarking-infra",
         "cli-world-class",
         "cloud-compute-broker",
         "compile-as-mcp",
         "compile-cache",
         "compile-failure-diagnostics",
-        "dependency-graphs",
-        "deploy-buttons",
         "distill-strategy-oracle",
         "doctor-diagnostics",
         "export-quantize-targets",
@@ -3503,7 +3486,6 @@
         "incremental-compile",
         "k-score-calibration",
         "kolm-format-spec",
-        "private-registry",
         "quality-scoring",
         "rag-artifact",
         "registry-search",
@@ -3511,8 +3493,7 @@
         "runtime-telemetry-opt-in",
         "standalone-verify",
         "token-budget",
-        "verified-publishers",
-        "version-diff"
+        "verified-publishers"
       ],
       "route_groups": [
         {
@@ -3839,7 +3820,6 @@
         "compile-as-mcp",
         "compile-cache",
         "compile-failure-diagnostics",
-        "deploy-buttons",
         "distill-strategy-oracle",
         "doctor-diagnostics",
         "ecosystem-runtime-adoption",
@@ -3849,16 +3829,13 @@
         "model-routing",
         "openai-anthropic-gateway",
         "quality-scoring",
-        "registry-search",
         "runtime-edge",
         "runtime-local-artifact",
         "runtime-telemetry-opt-in",
         "semantic-cache",
         "standalone-verify",
         "streaming",
-        "token-budget",
-        "verified-publishers",
-        "version-diff"
+        "token-budget"
       ],
       "route_groups": [
         {
@@ -4072,8 +4049,8 @@
         "/capture",
         "/training",
         "/distill",
-        "/account/datasets",
-        "/account/lake",
+        "/account/train",
+        "/account/overview",
         "/v1/capture/log",
         "/v1/datasets",
         "/v1/eval/k-score-calibration",
@@ -4295,8 +4272,6 @@
         "compile-as-mcp",
         "compile-cache",
         "compile-failure-diagnostics",
-        "cost-attribution",
-        "deploy-buttons",
         "distill-strategy-oracle",
         "doctor-diagnostics",
         "event-lake-schema",
@@ -4305,13 +4280,10 @@
         "incremental-compile",
         "k-score-calibration",
         "quality-scoring",
-        "registry-search",
         "runtime-local-artifact",
         "runtime-telemetry-opt-in",
         "standalone-verify",
-        "token-budget",
-        "verified-publishers",
-        "version-diff"
+        "token-budget"
       ],
       "route_groups": [
         {
@@ -4539,7 +4511,9 @@
         "/security",
         "/privacy",
         "/enterprise",
-        "/account/audit-log",
+        "/account/org",
+        "/account/api-control-center",
+        "/account-billing",
         "/v1/audit/log",
         "/v1/privacy/scan",
         "/v1/privacy/redaction-benchmark",
@@ -4711,18 +4685,12 @@
         "async-compile-webhooks",
         "capture-filtering",
         "compliance-certifications",
-        "dependency-graphs",
-        "deploy-buttons",
-        "differential-privacy",
         "fallback-chains",
         "k-score-calibration",
         "openai-anthropic-gateway",
         "opentelemetry",
-        "private-registry",
         "redaction-quality",
         "streaming",
-        "team-capture-rbac",
-        "verified-publishers",
         "webhooks-events",
         "zero-retention-mode"
       ],

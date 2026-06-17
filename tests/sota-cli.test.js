@@ -35,6 +35,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(__dirname, '..');
 const CLI = path.join(REPO, 'cli', 'kolm.js');
 const INSTALL_SH = path.join(REPO, 'scripts', 'install.sh');
+const HAS_POSIX_SH = spawnSync('sh', ['-c', 'exit 0'], { encoding: 'utf8' }).status === 0;
 
 // Isolated home + data dir so the CLI never touches the developer's real config.
 function freshEnv(extra = {}) {
@@ -68,7 +69,8 @@ function runCli(args, env = freshEnv()) {
 // [p0] install.sh node-version probe.
 // ---------------------------------------------------------------------------
 
-test('install.sh: passes `sh -n` syntax check', () => {
+test('install.sh: passes `sh -n` syntax check', (t) => {
+  if (!HAS_POSIX_SH) return t.skip('POSIX sh is not available on this host');
   const r = spawnSync('sh', ['-n', INSTALL_SH], { encoding: 'utf8' });
   assert.equal(r.status, 0, 'install.sh has a shell syntax error: ' + (r.stderr || ''));
 });
@@ -84,7 +86,8 @@ test('install.sh: node-version probe has no broken inner-quote escaping', () => 
   assert.ok(/NODE_MAJOR="\$\{NODE_MAJOR%%\.\*\}"/.test(text), 'install.sh should strip to the major version in shell');
 });
 
-test('install.sh: the require_node probe yields a numeric major under set -eu', () => {
+test('install.sh: the require_node probe yields a numeric major under set -eu', (t) => {
+  if (!HAS_POSIX_SH) return t.skip('POSIX sh is not available on this host');
   // Execute exactly the probe logic the installer uses, under `set -eu`, and
   // assert it produces a numeric result (this is the line that used to abort).
   const probe = [

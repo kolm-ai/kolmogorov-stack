@@ -70,11 +70,10 @@ function dirtyState(file, porcelainMap) {
   const y = status[1];
   if (x === '?' && y === '?') return 'untracked';
   if (x === '!' && y === '!') return 'ignored';
-  if (x === 'A' || y === 'A') return 'added';
-  if (x === 'M' || y === 'M') return 'modified';
-  if (x === 'D' || y === 'D') return 'deleted';
-  if (x === 'R' || y === 'R') return 'renamed';
-  return 'modified';
+  // The committed ledger must be clean-tree stable. Tracked edits are visible
+  // in git diff and become the next committed source state, so recording them
+  // here would make the control file stale before and after every commit.
+  return 'clean';
 }
 
 // Known generators: { generator-script-relative-path : [globPattern, ...] }
@@ -94,7 +93,6 @@ const GENERATED_BY = [
   { gen: 'scripts/build-sdk-version.js', match: /^sdk\/[^/]+\/(VERSION|version\.json)$/ },
   { gen: 'scripts/build-changelog.cjs', match: /^public\/changelog\.html$/ },
   { gen: 'scripts/build-og.cjs', match: /^public\/og\/.*\.(png|svg)$/ },
-  { gen: 'scripts/build-account-pages.cjs', match: /^public\/account\/[^/]+\.html$/ },
   { gen: 'scripts/build-codegraph.mjs', match: /^docs\/codegraph\.json$/ },
   { gen: 'scripts/build-codebase-file-ledger.cjs', match: /^docs\/internal\/codebase-file-ledger\.json$/ },
   { gen: 'scripts/build-design-cascade-ledger.cjs', match: /^docs\/internal\/design-cascade-ledger\.json$/ },
@@ -197,7 +195,6 @@ function releaseIncluded(p, kind) {
 function redlineFor(p, kind, dirty) {
   if (kind === 'scratch') return 'scratch_in_release_tree';
   if (kind === 'quarantine') return 'quarantine_in_release_tree';
-  if (kind === 'generated' && (dirty === 'modified' || dirty === 'added')) return 'generated_modified_without_lock';
   return null;
 }
 

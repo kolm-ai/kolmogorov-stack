@@ -969,6 +969,7 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   const noInstall = !!opts.no_install;
   const installTarget = opts.install_target || null;
   const allowStub = !!opts.allow_stub;
+  const stubAllowed = allowStub || force;
   const allowSynthetic = !!opts.allow_synthetic;
   // W411 - tenant fence: the compile pipeline must only ingest rows owned by
   // the calling tenant. Routes (router.js) pass tenant_id from req.tenant_record.id;
@@ -1341,7 +1342,6 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
     // namespace still produced a .kolm. Now the fallback requires explicit
     // allow_stub or force; without either we re-throw so the pipeline fails
     // closed.
-    const stubAllowed = allowStub || force;
     if (!stubAllowed) {
       _writePhaseLog(jobId, 'dataset_split', { error: String(e.message || e), stub_blocked: true });
       throw new Error('dataset_split: workbench rejected corpus and stub fallback requires --allow-stub or --force (' + String(e.message || e) + ')');
@@ -1383,8 +1383,8 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   // corpusPairs only when stubAllowed branch hydrated trainPairs from the
   // full corpus (W409c stub path).
   if (!(trainPairs && trainPairs.length)) {
-    if (!allowStub) {
-      throw new Error('distill: trainPairs empty and allowStub is false — refusing to distill on full corpus (W411 train/holdout boundary)');
+    if (!stubAllowed) {
+      throw new Error('distill: trainPairs empty and stub fallback requires --allow-stub or --force (W411 train/holdout boundary)');
     }
     trainPairs = corpusPairs.slice();
   }
@@ -1399,8 +1399,8 @@ export async function* compileFull({ namespace, opts = {} } = {}) {
   // opts.curriculum===false. Curriculum NEVER drops a row and NEVER crosses the
   // train/holdout boundary - it only permutes trainPairs.
   // W411 P0 #1 / W416 #1 - the distill input is train-only. The empty-train
-  // fallback to the corpus was handled above (throw unless allowStub, which
-  // mirrors corpusPairs into trainPairs); by here trainPairs IS the train set,
+  // fallback to the corpus was handled above (throw unless explicit stub
+  // fallback is allowed, which mirrors corpusPairs into trainPairs); by here trainPairs IS the train set,
   // so distillPairs is assigned trainPairs and corpusPairs never reaches
   // distillation across the train/holdout boundary.
   const distillPairs = trainPairs;

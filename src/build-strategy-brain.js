@@ -276,7 +276,7 @@ export function buildStrategyCatalog() {
     surfaces: {
       cli: 'kolm build plan --task extraction --rows 500 --json',
       api: 'POST /v1/build/strategy',
-      account: '/account/builds',
+      account: '/account/train',
       tui: 'builds',
     },
     invariant: 'Every recommendation must expose data sufficiency, privacy mode, provider availability, compute plan, quantization plan, proof requirements, and exact next command without exposing secret values.',

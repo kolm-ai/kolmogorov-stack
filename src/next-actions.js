@@ -193,8 +193,8 @@ function buildIdle(snapshot) {
     priority: ACTION_PRIORITIES.idle,
     title: `No captures in ${Math.floor(days)} days`,
     body: `Your last capture was ${Math.floor(days)} days ago. If your traffic shifted, point your SDK at the capture proxy to keep distilling.`,
-    cta_label: 'Open connectors',
-    cta_href: '/account/connectors',
+    cta_label: 'Open capture setup',
+    cta_href: '/account/api-control-center',
     params: { days: Math.floor(days) },
     dismiss_key: 'idle:global',
   });
@@ -213,8 +213,8 @@ function buildCost(snapshot) {
     priority: ACTION_PRIORITIES.cost,
     title: `Spend trending ${Math.round((ratio - 1) * 100)}% over forecast`,
     body: `$${actual.toFixed(2)} this period vs $${forecast.toFixed(2)} forecast. Review routing weights or move repeated workflows to a specialist.`,
-    cta_label: 'Open opportunities',
-    cta_href: '/account/opportunities',
+    cta_label: 'Open training',
+    cta_href: '/account/train',
     params: { actual, forecast, ratio },
     dismiss_key: 'cost:burn',
   });
@@ -230,8 +230,8 @@ function buildSecurity(snapshot) {
     priority: ACTION_PRIORITIES.security,
     title: `${flagged.toLocaleString()} captures detected sensitive content without redaction`,
     body: `Turn on the PII membrane so future captures land redacted. The flagged captures stay quarantined until you review them.`,
-    cta_label: 'Review privacy events',
-    cta_href: '/account/privacy-events',
+    cta_label: 'Review API controls',
+    cta_href: '/account/api-control-center',
     params: { flagged },
     dismiss_key: 'security:pii',
   });
@@ -251,8 +251,8 @@ function buildFallbacks(snapshot) {
       priority: ACTION_PRIORITIES.fallbacks,
       title: `${(rate * 100).toFixed(1)}% fallback rate in ${ns.namespace}`,
       body: `${fallbacks} of ${total} calls fell back to the frontier teacher. Lower the gate, retrain, or widen the specialist's scope.`,
-      cta_label: 'Inspect drift',
-      cta_href: `/account/drift?namespace=${encodeURIComponent(ns.namespace)}`,
+      cta_label: 'Inspect training',
+      cta_href: `/account/train?namespace=${encodeURIComponent(ns.namespace)}`,
       params: { namespace: ns.namespace, rate, total, fallbacks },
       dismiss_key: `fallbacks:${ns.namespace}`,
     });

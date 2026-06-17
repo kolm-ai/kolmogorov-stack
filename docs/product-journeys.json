@@ -64,7 +64,7 @@
       "happy_path": ["connect provider", "send request", "capture receipt", "filter or zero-store", "promote useful rows"],
       "proof_commands": ["kolm capture --provider openai --as local --json", "kolm capture --provider anthropic --as local --json", "kolm tail captures --limit 5"],
       "cloud_or_customization": ["model-provider", "privacy-mode", "deployment-mode"],
-      "evidence_paths": ["src/product-experience.js", "src/router.js", "src/daemon-connector.js", "public/account/connectors.html"]
+      "evidence_paths": ["src/product-experience.js", "src/router.js", "src/daemon-connector.js", "public/account/overview.html", "public/account/api-control-center.html"]
     },
     {
       "id": "privacy-lake",
@@ -73,7 +73,7 @@
       "happy_path": ["view lake", "filter events", "scan privacy", "export evidence", "configure retention"],
       "proof_commands": ["kolm lake stats --json", "kolm privacy report --json", "kolm privacy scan --json"],
       "cloud_or_customization": ["privacy-mode", "storage-plane", "proof-mode"],
-      "evidence_paths": ["src/lake.js", "src/privacy-membrane.js", "src/event-store.js", "public/account/lake.html"]
+      "evidence_paths": ["src/lake.js", "src/privacy-membrane.js", "src/event-store.js", "public/account/overview.html", "public/account/api-control-center.html"]
     },
     {
       "id": "datasets-labeling",
@@ -82,7 +82,7 @@
       "happy_path": ["rank opportunities", "review labels", "create dataset", "split holdout", "run bakeoff"],
       "proof_commands": ["kolm opportunities --json", "kolm label next --json", "kolm dataset list --json"],
       "cloud_or_customization": ["proof-mode", "privacy-mode", "model-provider"],
-      "evidence_paths": ["src/dataset-workbench.js", "src/simulation.js", "public/account/datasets.html", "public/account/labeling.html"]
+      "evidence_paths": ["src/dataset-workbench.js", "src/simulation.js", "public/account/train.html", "public/account/overview.html"]
     },
     {
       "id": "train-distill",
@@ -91,7 +91,7 @@
       "happy_path": ["choose dataset", "choose teacher", "choose student", "choose compute", "run eval-gated build"],
       "proof_commands": ["kolm build plan --task generation --rows 1500 --holdout-pairs 300 --no-local-gpu --json", "kolm cloud readiness --json", "kolm cloud broker --json", "kolm train plan <dataset> --strategy", "kolm distill strategy --json", "kolm bench evidence --summary", "kolm distill runs --json"],
       "cloud_or_customization": ["model-provider", "compute-target", "artifact-runtime", "proof-mode"],
-      "evidence_paths": ["src/build-strategy-brain.js", "scripts/build-strategy-brain.mjs", "src/distill-pipeline.js", "src/distill-strategy.js", "src/benchmark-evidence.js", "scripts/benchmark-evidence.mjs", "src/remote-compute.js", "src/compute/registry.json", "public/account/builds.html"]
+      "evidence_paths": ["src/build-strategy-brain.js", "scripts/build-strategy-brain.mjs", "src/distill-pipeline.js", "src/distill-strategy.js", "src/benchmark-evidence.js", "scripts/benchmark-evidence.mjs", "src/remote-compute.js", "src/compute/registry.json", "public/account/train.html"]
     },
     {
       "id": "models-backbones",
@@ -100,7 +100,7 @@
       "happy_path": ["inspect model catalog", "recommend by task/device", "check license and modality", "bind to compile or distill spec", "verify runtime target fit"],
       "proof_commands": ["kolm models list --json", "kolm models recommend --json", "kolm models info google/gemma-3n-E2B-it", "kolm devices recommend --json"],
       "cloud_or_customization": ["model-provider", "compute-target", "artifact-runtime", "proof-mode"],
-      "evidence_paths": ["src/models.js", "src/model-registry.js", "src/model-weights-manifest.js", "public/models.html"]
+      "evidence_paths": ["src/models.js", "src/model-registry.js", "src/model-weights-manifest.js", "public/account/train.html", "tests/wave409rs-models-devices.test.js"]
     },
     {
       "id": "multimodal-tokenization",
@@ -109,7 +109,7 @@
       "happy_path": ["detect modality", "emit local feature sidecar", "capture media event", "review generated rows", "run multimodal bakeoff"],
       "proof_commands": ["kolm media tokenize --path ./scan.png --json", "kolm media tokenize --dir ./evidence --json", "kolm bakeoff multimodal --json"],
       "cloud_or_customization": ["privacy-mode", "model-provider", "storage-plane", "proof-mode"],
-      "evidence_paths": ["services/embed/multimodal.js", "public/account/multimodal-bakeoff.html", "tests/wave552-gemma-multimodal-account.test.js"]
+      "evidence_paths": ["services/embed/multimodal.js", "public/account/train.html", "tests/wave466-multimodal-bakeoff.test.js"]
     },
     {
       "id": "compile-verify",
@@ -118,7 +118,7 @@
       "happy_path": ["compile", "verify", "inspect", "diff", "export target"],
       "proof_commands": ["kolm compile --spec spec.json --out task.kolm", "kolm quantize oracle --json", "kolm verify task.kolm", "kolm export task.kolm --target gguf --preview", "kolm evidence format-governance --summary"],
       "cloud_or_customization": ["artifact-runtime", "proof-mode", "storage-plane"],
-      "evidence_paths": ["src/compile-pipeline.js", "src/quantization-oracle.js", "src/artifact.js", "src/format-governance-packet.js", "scripts/format-governance-packet.mjs", "docs/kolm-format-v1.md", "public/account/artifacts.html"]
+      "evidence_paths": ["src/compile-pipeline.js", "src/quantization-oracle.js", "src/artifact.js", "src/format-governance-packet.js", "scripts/format-governance-packet.mjs", "docs/kolm-format-v1.md", "public/account/overview.html", "public/verify.html"]
     },
     {
       "id": "runtime-inference",
@@ -127,7 +127,7 @@
       "happy_path": ["select model", "select runtime", "run request", "stream result", "log receipt"],
       "proof_commands": ["kolm run task.kolm \"input\"", "kolm serve --mcp --http", "kolm tui --views --json", "kolm packages release-readiness --summary", "kolm evidence runtime-adoption --summary"],
       "cloud_or_customization": ["model-provider", "artifact-runtime", "deployment-mode", "compute-target"],
-      "evidence_paths": ["src/completions-api.js", "src/runtime-policy.js", "src/package-release-readiness.js", "src/runtime-adoption-packets.js", "scripts/package-release-readiness.mjs", "scripts/runtime-adoption-packets.mjs", "public/sdk.js", "public/tui.html"]
+      "evidence_paths": ["src/completions-api.js", "src/runtime-policy.js", "src/package-release-readiness.js", "src/runtime-adoption-packets.js", "scripts/package-release-readiness.mjs", "scripts/runtime-adoption-packets.mjs", "public/sdk.js", "public/account/overview.html", "public/runtimes.html"]
     },
     {
       "id": "compute-cloud",
@@ -136,7 +136,7 @@
       "happy_path": ["run readiness", "pick storage", "pick GPU/train backend", "deploy BYOC", "verify attestation"],
       "proof_commands": ["kolm cloud broker --json", "kolm cloud readiness --json", "kolm cloud storage --json", "kolm cloud storage --provider local-artifacts --smoke --json", "kolm cloud readiness --remote --json", "GET /v1/cloud/readiness", "GET /v1/storage/object-readiness", "GET /v1/cloud/broker/catalog", "POST /v1/cloud/broker", "kolm cloud doctor", "kolm compute list --json", "kolm remote recommend --json"],
       "cloud_or_customization": ["compute-target", "storage-plane", "deployment-mode", "governance-mode"],
-      "evidence_paths": ["src/platform-capabilities.js", "src/object-storage.js", "src/cloud-compute-broker.js", "src/remote-compute.js", "docs/cloud-product-readiness.md", "scripts/cloud-readiness.mjs", "scripts/cloud-compute-broker.mjs"]
+      "evidence_paths": ["src/platform-capabilities.js", "src/object-storage.js", "src/cloud-compute-broker.js", "src/remote-compute.js", "docs/cloud-product-readiness.md", "scripts/cloud-readiness.mjs", "scripts/cloud-compute-broker.mjs", "public/account/train.html"]
     },
     {
       "id": "devices-fleet",
@@ -145,7 +145,7 @@
       "happy_path": ["detect device", "recommend target", "open team tunnel if needed", "install artifact", "test run", "audit install"],
       "proof_commands": ["kolm devices detect --json", "kolm devices recommend --json", "kolm tunnel new --team <id>", "kolm airgap verify task.kolm"],
       "cloud_or_customization": ["compute-target", "artifact-runtime", "deployment-mode"],
-      "evidence_paths": ["src/device-capabilities.js", "src/router.js", "public/account/devices.html"]
+      "evidence_paths": ["src/device-capabilities.js", "src/router.js", "public/account/overview.html", "public/account/dashboard.html"]
     },
     {
       "id": "enterprise-governance",
@@ -154,7 +154,7 @@
       "happy_path": ["verify tenant", "scope keys", "review audit", "set billing plan", "export compliance pack"],
       "proof_commands": ["kolm whoami --json", "kolm audit --json", "kolm billing usage --json", "kolm keys list --json", "kolm evidence compliance-certification --summary"],
       "cloud_or_customization": ["governance-mode", "privacy-mode", "storage-plane", "proof-mode"],
-      "evidence_paths": ["src/auth.js", "src/keys.js", "src/audit.js", "src/compliance-certification-packet.js", "scripts/compliance-certification-packet.mjs", "public/account/api-keys.html", "public/account/audit-log.html"]
+      "evidence_paths": ["src/auth.js", "src/keys.js", "src/audit.js", "src/compliance-certification-packet.js", "scripts/compliance-certification-packet.mjs", "public/account/org.html", "public/account/api-control-center.html"]
     },
     {
       "id": "agents-registry",
@@ -163,7 +163,7 @@
       "happy_path": ["compile as MCP", "serve tools", "install harness", "run agent", "inspect logs"],
       "proof_commands": ["kolm compile --as-mcp --spec spec.json", "kolm serve --mcp", "kolm install claude-code --apply", "kolm hub list"],
       "cloud_or_customization": ["deployment-mode", "governance-mode", "proof-mode"],
-      "evidence_paths": ["services/mcp/server.js", "cli/kolm.js", "public/account/agent-telemetry.html"]
+      "evidence_paths": ["services/mcp/server.js", "cli/kolm.js", "public/account/api-control-center.html", "public/account/overview.html"]
     }
   ]
 }

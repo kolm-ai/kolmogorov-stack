@@ -164,13 +164,15 @@ test('W411 — compile-pipeline source enforces train-only distill (no silent co
   assert.match(src, /const distillPairs = trainPairs;/,
     'distillPairs must be assigned trainPairs (train-only)');
 
-  // The fail-closed throw must be present and gated on allowStub.
+  // The fail-closed throw must be present and gated on explicit stub fallback.
   assert.match(src, /if \(!\(trainPairs && trainPairs\.length\)\) \{/,
     'must guard on empty trainPairs');
-  assert.match(src, /if \(!allowStub\) \{/,
-    'empty-train guard must require allowStub before mirroring the corpus');
-  assert.match(src, /refusing to distill on full corpus/,
-    'must throw a W411 train/holdout boundary error when allowStub is false');
+  assert.match(src, /const stubAllowed = allowStub \|\| force;/,
+    'empty-train guard must derive the explicit stub fallback contract');
+  assert.match(src, /if \(!stubAllowed\) \{/,
+    'empty-train guard must require --allow-stub or --force before mirroring the corpus');
+  assert.match(src, /stub fallback requires --allow-stub or --force/,
+    'must throw a W411 train/holdout boundary error when stub fallback is not explicit');
   assert.match(src, /trainPairs = corpusPairs\.slice\(\);/,
-    'the honest stub path must mirror the corpus into trainPairs only when allowStub');
+    'the stub path must mirror the corpus into trainPairs only when explicitly allowed');
 });

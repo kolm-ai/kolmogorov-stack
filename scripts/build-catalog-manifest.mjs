@@ -58,7 +58,7 @@ const CONSUMER_PATHS = {
   provider_anthropic: ['src/provider-registry.js', 'src/daemon-connector.js', 'src/router.js'],
   provider_openrouter: ['src/provider-registry.js', 'src/daemon-connector.js', 'src/router.js'],
   provider_gemini: ['src/provider-registry.js', 'src/daemon-connector.js', 'src/router.js'],
-  frontier_model: ['src/model-registry.js', 'cli/kolm.js (compile, models)', 'public/models.html'],
+  frontier_model: ['src/model-registry.js', 'cli/kolm.js (compile, models)', 'public/account/train.html', 'public/runtimes.html'],
   candidate_model: ['src/model-registry.js', 'cli/kolm.js (compile --unverified)'],
   baseline_model: ['src/models.js', 'cli/kolm.js (compile, train)'],
   device: ['src/devices.js', 'cli/kolm.js (doctor)'],

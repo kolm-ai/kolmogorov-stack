@@ -39,15 +39,11 @@ Verification:
 - `node scripts/bench-compare.mjs --help`
 
 Evidence paths:
-- `src/benchmarks.js`
 - `src/benchmark-evidence.js`
-- `scripts/bench-compare.mjs`
 - `scripts/benchmark-evidence.mjs`
-- `scripts/bench-redaction-fixtures.mjs`
-- `scripts/quantization-oracle.mjs`
-- `public/benchmarks.html`
 - `docs/benchmark-evidence.md`
-- `docs/benchmark-results-v0.1.0.md`
+- `tests/wave589-benchmark-evidence-contract.test.js`
+- `public/benchmarks/trinity-500-benchmark.json`
 
 ### W573-compliance-certification - compliance-certifications
 

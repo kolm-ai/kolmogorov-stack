@@ -56,7 +56,7 @@ test('W597 #1 - catalog exposes the shared CLI/API/account/TUI contract', () => 
   assert.equal(catalog.spec, 'kolm-build-strategy-brain/1');
   assert.match(catalog.surfaces.cli, /kolm build plan/);
   assert.match(catalog.surfaces.api, /\/v1\/build\/strategy/);
-  assert.match(catalog.surfaces.account, /\/account\/builds/);
+  assert.match(catalog.surfaces.account, /\/account\/train/);
   assert.match(catalog.surfaces.tui, /builds/);
   assert.ok(catalog.action_families.includes('training'));
   assert.ok(catalog.action_families.includes('compute'));

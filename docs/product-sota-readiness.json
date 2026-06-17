@@ -121,9 +121,8 @@
             "src/kscore.js",
             "src/kscore-bench.js",
             "src/router.js",
-            "public/kolm-bench.json",
-            "public/kscore-leaderboard.json",
-            "tests/wave275-kscore-deep.test.js",
+            "public/benchmarks/trinity-500-benchmark.json",
+            "tests/wave145-kscore-t-axis.test.js",
             "tests/wave587-kscore-calibration-contract.test.js",
             "docs/PRODUCT.md",
             "public/spec.html"
@@ -158,7 +157,8 @@
           "evidence_paths": [
             "cli/kolm.js",
             "src/production-ready.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave587-kscore-calibration-contract.test.js",
+            "tests/product-compiler-contract.test.js"
           ]
         },
         {
@@ -239,7 +239,8 @@
           "evidence_paths": [
             "src/router.js",
             "src/daemon-connector.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave444-lake-storage-retention.test.js",
+            "tests/finalized-c10-capture-idempotency.test.js"
           ]
         },
         {
@@ -250,8 +251,8 @@
           "evidence_paths": [
             "src/router.js",
             "src/lake.js",
-            "public/account/lake.html",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "public/account/overview.html",
+            "tests/wave444-lake-storage-retention.test.js"
           ]
         },
         {
@@ -260,10 +261,10 @@
           "title": "Local event lake has canonical schema, spend, latency, redaction, provider, and exportable rows.",
           "status": "implemented",
           "evidence_paths": [
-            "src/event-schema.js",
             "src/event-store.js",
+            "src/event-schema.js",
             "src/lake.js",
-            "public/account/lake.html"
+            "public/account/overview.html"
           ]
         },
         {
@@ -272,15 +273,12 @@
           "title": "PII/PHI redaction is fail-closed, class-counted, and backed by a public synthetic precision/recall/F1 benchmark.",
           "status": "implemented",
           "evidence_paths": [
-            "src/privacy-membrane.js",
-            "src/phi-redactor.js",
             "src/redaction-benchmark.js",
-            "src/router.js",
             "scripts/bench-redaction-fixtures.mjs",
             "test/fixtures/redaction-public-benchmark.json",
-            "public/benchmarks/redaction-public-benchmark.json",
+            "tests/wave581-redaction-benchmark.test.js",
             "tests/wave586-redaction-public-benchmark-contract.test.js",
-            "public/account/privacy-events.html"
+            "public/account/api-control-center.html"
           ]
         },
         {
@@ -289,9 +287,9 @@
           "title": "Lake aggregates can be returned with deterministic Laplace differential privacy noise.",
           "status": "shipped",
           "evidence_paths": [
-            "src/privacy-membrane.js",
-            "src/router.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "src/dp-training.js",
+            "tests/finalized-c2-dp-training-dp-sgd-pate.test.js",
+            "public/account/api-control-center.html"
           ]
         },
         {
@@ -310,13 +308,11 @@
           "title": "Team capture, tenant fencing, and role/key scope controls are represented across auth, account, and audit surfaces.",
           "status": "implemented",
           "evidence_paths": [
-            "src/auth.js",
             "src/team-capture-rbac.js",
-            "src/audit.js",
-            "src/router.js",
-            "public/account/api-keys.html",
-            "public/account/audit-log.html",
-            "public/account/overview.html"
+            "tests/finalized-c9-capability-scopes.test.js",
+            "tests/wave921-account-ui-routes.test.js",
+            "public/account/org.html",
+            "public/account/api-control-center.html"
           ]
         }
       ]
@@ -437,10 +433,10 @@
           "title": "Local compute matrix covers OpenVINO and Qualcomm QNN/Hexagon in addition to CPU/CUDA/MPS/ROCm/DirectML.",
           "status": "shipped",
           "evidence_paths": [
-            "src/compute/registry.json",
             "src/compute/backends/local-openvino.js",
             "src/compute/backends/local-qnn.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave551-compute-training-contract.test.js",
+            "public/runtimes.html"
           ]
         },
         {
@@ -489,8 +485,9 @@
           "status": "implemented",
           "evidence_paths": [
             "src/marketplace.js",
-            "cli/kolm.js",
-            "public/marketplace.html"
+            "src/marketplace-routes.js",
+            "tests/wave409x-marketplace-gate.test.js",
+            "tests/wave428-marketplace-verified-provisional.test.js"
           ]
         },
         {
@@ -499,9 +496,10 @@
           "title": "Artifact/version diff and rollback surfaces exist for governance.",
           "status": "implemented",
           "evidence_paths": [
-            "cli/kolm.js",
-            "src/registry.js",
-            "public/account/artifacts.html"
+            "src/artifact-diff.js",
+            "src/artifact-dependency-graph.js",
+            "docs/kolm-format-v1.md",
+            "public/account/overview.html"
           ]
         },
         {
@@ -510,11 +508,10 @@
           "title": "One-click deploy plans and button metadata exist for BYOC, edge, SSH, GPU, and managed training targets.",
           "status": "implemented",
           "evidence_paths": [
-            "cli/kolm.js",
-            "src/deployment-plans.js",
-            "src/router.js",
             "src/device-install.js",
-            "public/device-transfer.html"
+            "src/deployment-plans.js",
+            "public/runtimes.html",
+            "tests/wave888c-devices.test.js"
           ]
         },
         {
@@ -523,11 +520,9 @@
           "title": "Registry supports publisher badge policy, verification evaluation, and artifact-level readiness metadata.",
           "status": "implemented",
           "evidence_paths": [
-            "src/marketplace.js",
             "src/publisher-verification.js",
-            "src/router.js",
-            "public/marketplace.html",
-            "cli/kolm.js"
+            "src/marketplace.js",
+            "tests/wave428-marketplace-verified-provisional.test.js"
           ]
         },
         {
@@ -536,9 +531,9 @@
           "title": "Private tenant registry/account artifact inventory exists; air-gapped/private registry productization needs deployment proof.",
           "status": "implemented",
           "evidence_paths": [
-            "src/registry.js",
-            "src/router.js",
-            "public/account/artifacts.html"
+            "src/marketplace-store.js",
+            "src/marketplace-routes.js",
+            "public/account/api-control-center.html"
           ]
         },
         {
@@ -547,11 +542,8 @@
           "title": "Artifact dependency graph and blast-radius inspection are generated from manifest/provenance metadata.",
           "status": "implemented",
           "evidence_paths": [
-            "docs/kolm-format-v1.md",
-            "src/artifact.js",
             "src/artifact-dependency-graph.js",
-            "src/router.js",
-            "public/account/artifacts.html"
+            "public/account/overview.html"
           ]
         }
       ]
@@ -589,15 +581,11 @@
           "title": "Benchmark harness and hardware/model catalog exist; public reproducible leaderboard data needs publication.",
           "status": "needs_public_benchmark_data",
           "evidence_paths": [
-            "src/benchmarks.js",
             "src/benchmark-evidence.js",
-            "scripts/bench-compare.mjs",
             "scripts/benchmark-evidence.mjs",
-            "scripts/bench-redaction-fixtures.mjs",
-            "scripts/quantization-oracle.mjs",
-            "public/benchmarks.html",
             "docs/benchmark-evidence.md",
-            "docs/benchmark-results-v0.1.0.md"
+            "tests/wave589-benchmark-evidence-contract.test.js",
+            "public/benchmarks/trinity-500-benchmark.json"
           ],
           "closeout": {
             "current_scope": "The benchmark harness, local evidence contract, and sample reference report exist; competitor and hardware leaderboard claims need reproducible public runs.",
@@ -626,10 +614,10 @@
           "title": "Replay, bakeoff, trace, and eval surfaces can compare candidates before promotion.",
           "status": "implemented",
           "evidence_paths": [
-            "src/replay.js",
+            "src/adversarial-bakeoff.js",
             "src/bakeoff.js",
-            "src/trace-compile.js",
-            "public/account/bakeoffs.html"
+            "public/account/train.html",
+            "tests/wave409nop-datasets-labels-bakeoffs.test.js"
           ]
         },
         {
@@ -638,10 +626,9 @@
           "title": "Spend attribution by tenant/namespace/provider/model/billing period exists.",
           "status": "implemented",
           "evidence_paths": [
-            "src/cost-estimator.js",
             "src/billing-breakdown.js",
-            "src/lake.js",
-            "public/account/billing.html"
+            "public/account-billing.html",
+            "tests/wave465-billing-breakdown.test.js"
           ]
         },
         {
@@ -661,8 +648,8 @@
           "status": "implemented",
           "evidence_paths": [
             "src/router.js",
-            "src/audit.js",
-            "public/account/api-keys.html"
+            "public/account/api-control-center.html",
+            "tests/product-compiler-contract.test.js"
           ]
         },
         {
@@ -722,10 +709,10 @@
           "title": "API keys are scoped/hashed, local BYOK secrets are encrypted, and external Vault/1Password/AWS/GCP/Azure refs stay out of artifacts.",
           "status": "implemented",
           "evidence_paths": [
+            "src/keys.js",
             "src/auth.js",
-            "src/secrets-vault.js",
-            "public/account/api-keys.html",
-            "docs/kolm-format-v1.md"
+            "public/account/api-control-center.html",
+            "tests/finalized-c9-capability-scopes.test.js"
           ]
         },
         {
@@ -778,7 +765,8 @@
           "evidence_paths": [
             "src/optimization.js",
             "src/runtime-policy.js",
-            "public/research/prompt-cache.html",
+            "src/kv-cache-policy.js",
+            "docs/kv-cache-shard.md",
             "apps/trainer/inference_cache.py"
           ]
         },
@@ -792,7 +780,9 @@
             "src/runtime.js",
             "src/runtime-policy.js",
             "src/optimization.js",
-            "public/account/repeated-workflows.html"
+            "src/semantic-cache.js",
+            "tests/wave921-semantic-cache.test.js",
+            "tests/wave921-semantic-cache-wiring.test.js"
           ]
         },
         {
@@ -805,7 +795,8 @@
             "src/completions-api.js",
             "src/router.js",
             "cli/kolm.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave921-fallback-reason-clamp.test.js",
+            "tests/wave422-distill-tenant-fallback.test.js"
           ]
         },
         {
@@ -822,7 +813,6 @@
             "scripts/bench-quality-calibration.mjs",
             "scripts/quality-calibration.mjs",
             "docs/quality-calibration.md",
-            "public/benchmarks/quality-judge-calibration.json",
             "tests/wave588-quality-calibration-contract.test.js",
             "cli/kolm.js"
           ]
@@ -849,7 +839,8 @@
             "src/router.js",
             "src/capture-stream.js",
             "src/streaming-contract.js",
-            "public/account/lake.html"
+            "public/account/overview.html",
+            "tests/wave723-streaming-load.test.js"
           ]
         },
         {
@@ -873,7 +864,8 @@
             "src/bakeoff.js",
             "src/replay.js",
             "src/trace-compile.js",
-            "public/account/bakeoffs.html"
+            "public/account/train.html",
+            "tests/wave409nop-datasets-labels-bakeoffs.test.js"
           ]
         }
       ]
@@ -888,7 +880,8 @@
           "status": "shipped",
           "evidence_paths": [
             "cli/kolm.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/finalized-c11-cli-tui-dx-contract.test.js",
+            "tests/wave921-cli-dx.test.js"
           ]
         },
         {
@@ -899,7 +892,8 @@
           "evidence_paths": [
             "cli/kolm.js",
             "services/mcp/server.js",
-            "tests/wave552-gemma-multimodal-account.test.js"
+            "tests/wave921-mcp-signed-receipts.test.js",
+            "tests/connector-mcp.test.js"
           ]
         },
         {
@@ -909,9 +903,11 @@
           "status": "implemented",
           "evidence_paths": [
             "public/account/overview.html",
-            "public/account/connectors.html",
-            "public/account/lake.html",
-            "public/account/billing.html"
+            "public/account/api-control-center.html",
+            "public/account/train.html",
+            "public/account/org.html",
+            "public/account/dashboard.html",
+            "public/account-billing.html"
           ]
         },
         {

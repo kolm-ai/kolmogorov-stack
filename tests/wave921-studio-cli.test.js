@@ -140,7 +140,7 @@ test('W921-STUDIO.11 cmdDistillGrpo is wired into cmdDistill', () => {
   assert.match(SRC, /if \(args\[0\] === 'grpo'\) return cmdDistillGrpo\(args\.slice\(1\)\)/);
   assert.match(SRC, /async function cmdDistillGrpo\(args\)/);
   const start = SRC.indexOf('async function cmdDistillGrpo(args)');
-  const body = SRC.slice(start, start + 4000);
+  const body = SRC.slice(start, start + 14000);
   assert.match(body, /buildPromptsJsonl, trainGrpo/, 'imports buildPromptsJsonl + trainGrpo');
   assert.match(body, /buildPromptsJsonl\(seeds, \{ family: rewards\[0\] \}, promptsPath\)/);
   assert.match(body, /trainGrpo\(\{/);
@@ -288,4 +288,3 @@ test('W921-STUDIO.26 gate + data are in COMPLETION_VERBS with dispatch + subs', 
   assert.match(SRC, /data:\s*\['synth'\]/, 'data subs');
   assert.match(SRC, /distill:\s*\[[^\]]*'grpo'[^\]]*\]/, 'grpo in distill subs');
 });
-

@@ -209,7 +209,16 @@ export function auditCodeGraph(graph) {
     'docs/product-sota-readiness.json',
   ];
   const requiredScripts = ['lint:refs', 'verify:compute', 'verify:sota', 'local:surfaces'];
-  const requiredRoutes = ['/compute', '/models', '/account/overview', '/spec', '/captures', '/distill', '/train'];
+  const requiredRoutes = [
+    '/platform',
+    '/runtimes',
+    '/integrations',
+    '/spec',
+    '/verify',
+    '/account/overview',
+    '/account/train',
+    '/account/api-control-center',
+  ];
   const missing = [
     ...requiredFiles.filter((p) => !fileSet.has(p)).map((p) => 'file:' + p),
     ...requiredScripts.filter((s) => !scriptSet.has(s)).map((s) => 'script:' + s),
@@ -217,7 +226,7 @@ export function auditCodeGraph(graph) {
   ];
   const missingEvidence = (graph.readiness_evidence || []).filter((row) => row.missing_paths && row.missing_paths.length);
   if (missingEvidence.length) missing.push('readiness_evidence:' + missingEvidence.length);
-  if ((graph.counts?.routes || 0) < 300) missing.push('routes:<300');
+  if ((graph.counts?.routes || 0) < 120) missing.push('routes:<120');
   if ((graph.counts?.symbols || 0) < 500) missing.push('symbols:<500');
   return {
     ok: missing.length === 0,

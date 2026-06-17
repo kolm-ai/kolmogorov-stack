@@ -8,6 +8,18 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'public', 'account');
+
+if (process.env.KOLM_ALLOW_RETIRED_ACCOUNT_GENERATOR !== '1') {
+  console.error([
+    'scripts/build-account-pages.cjs is retired.',
+    'Active account pages are public/account/overview.html, public/account/train.html,',
+    'public/account/api-control-center.html, public/account/org.html, public/account/dashboard.html,',
+    'and public/account-billing.html.',
+    'Set KOLM_ALLOW_RETIRED_ACCOUNT_GENERATOR=1 only to inspect the archived generator output.',
+  ].join(' '));
+  process.exit(1);
+}
+
 fs.mkdirSync(OUT, { recursive: true });
 
 const SECTIONS = [
