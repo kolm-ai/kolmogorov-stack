@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 92.2,
+    "local_engineering_score": 92.3,
     "frontier_product_score": 69.3,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 695,
-    "direct_test_reference_pct": 83.8,
-    "components_without_direct_test_reference": 134,
+    "direct_test_referenced_components": 696,
+    "direct_test_reference_pct": 84,
+    "components_without_direct_test_reference": 133,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -4252,7 +4252,8 @@
         "direct_test_refs": [
           "tests/wave482-sdk-catalog-honesty.test.js",
           "tests/wave674-runtime-rs-cid-contract.test.js",
-          "tests/wave675-runtime-rs-tofu-contract.test.js"
+          "tests/wave675-runtime-rs-tofu-contract.test.js",
+          "tests/wave676-runtime-rs-zip-reader-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -4889,8 +4890,8 @@
       "language": "rust",
       "composition": {
         "metrics": {
-          "bytes": 1151,
-          "lines": 32,
+          "bytes": 6612,
+          "lines": 196,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -4905,9 +4906,9 @@
           "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "89457d3ff17110cf96afa766a46a198ae6969568dcada24174b4ab1541d32c2a"
+        "sha256": "5aa67214a754178143fd3b93ab1533e08c38fdbba6b41982d38d1f214f5be4a3"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -4915,15 +4916,10 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "kv-cache",
-            "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          }
+        "direct_test_refs": [
+          "tests/wave676-runtime-rs-zip-reader-contract.test.js"
         ],
+        "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
         "suggested_verification": [
@@ -4931,11 +4927,8 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "packages/runtime-rs/tests/fixtures.rs",
@@ -7436,6 +7429,12 @@
           "tests/wave727-accelerate.test.js"
         ],
         "category_links": [
+          {
+            "id": "kv-cache",
+            "stack_area": "runtime",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          },
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
