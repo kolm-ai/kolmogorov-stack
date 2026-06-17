@@ -38,6 +38,7 @@ import { gateQuantKScore } from './quant-accuracy-recovery.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WORKER_PATH = path.resolve(__dirname, '..', 'workers', 'quantize', 'scripts', 'quantize.py');
+export const DEFAULT_QUANT_ACCURACY_MAX_REL_DROP = 0.03;
 
 /**
  * Run the mixed-precision quantize bakeoff over a list of candidate profiles.
@@ -55,6 +56,8 @@ const WORKER_PATH = path.resolve(__dirname, '..', 'workers', 'quantize', 'script
  *     vram_gb: number,
  *     latency_ms: number,
  *     accepted: boolean,
+ *     accuracy_gate?: object,
+ *     rejection_reasons?: string[],
  *     error?: string,
  *   }> | null,
  * }>}
@@ -179,10 +182,9 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
     // or recorded by the worker in the receipt (receipt.accuracy_gate with
     // fp16/quant perplexity + KL) - score the candidate with the REAL K-score
     // harness (gateQuantKScore -> kscore-v2, not Jaccard) and carry the verdict.
-    // When NO measured metrics exist we fall back to the Jaccard/avg-bits surrogate
-    // exactly as before (default path; no behavior change for callers that do not
-    // run a real model). This is the moat replacement the atom names: the quant
-    // verdict becomes a measured K-score delta when the data is there.
+    // When NO measured metrics exist we still compute the old surrogate for
+    // ordering, but enforceAccuracyFloor below fails acceptance closed unless
+    // the caller explicitly opts out. Surrogate-ranked rows are advisory only.
     let kscore;
     let kscore_gate = null;
     let scorer = 'jaccard-surrogate';
@@ -200,17 +202,23 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
         kscore_gate = gate;
         scorer = gate.scorer;
       } catch {
-        kscore = scoreJaccard(profile, eval_set);
+        const surrogate = scoreProfile(profile, eval_set);
+        kscore = surrogate.kscore;
+        scorer = surrogate.scorer;
       }
     } else {
-      kscore = scoreJaccard(profile, eval_set);
+      const surrogate = scoreProfile(profile, eval_set);
+      kscore = surrogate.kscore;
+      scorer = surrogate.scorer;
     }
+    const avg_weight_bits = averageWeightBits(profile);
     results.push({
       profile_id,
       kscore: Number(kscore.toFixed(4)),
       vram_gb,
       latency_ms,
       scorer,
+      avg_weight_bits,
       ...(kscore_gate ? { kscore_gate } : {}),
       accepted: true, // pareto pass happens after the loop
     });
@@ -229,6 +237,10 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
       }
     }
   }
+  enforceAccuracyFloor(results, {
+    maxRelDrop: opts.maxRelDrop ?? opts.max_rel_drop,
+    requireMeasured: opts.requireMeasuredAccuracy ?? opts.require_measured_accuracy,
+  });
 
   // Sort descending by kscore for caller-friendly top-N selection.
   results.sort((a, b) => b.kscore - a.kscore);
@@ -236,6 +248,54 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
   // W350-style cleanup - drop the per-profile out dirs but KEEP the receipt
   // chain by leaving tmpRoot to OS GC. Bakeoff is informational, not signed.
   return { ok: true, results };
+}
+
+export function enforceAccuracyFloor(results, opts = {}) {
+  if (!Array.isArray(results) || results.length === 0) return results;
+  const maxRelDrop = finiteNumber(opts.maxRelDrop ?? opts.max_rel_drop, DEFAULT_QUANT_ACCURACY_MAX_REL_DROP);
+  const requireMeasured = opts.requireMeasured ?? opts.require_measured ?? true;
+  const scored = results.filter((row) => !row.error && Number.isFinite(Number(row.kscore)));
+  if (scored.length === 0) return results;
+  const baseline = chooseAccuracyBaseline(scored);
+  const baselineKScore = Number(baseline.kscore);
+  const baselineId = baseline.profile_id || baseline.method || 'baseline';
+
+  for (const row of scored) {
+    const kscore = Number(row.kscore);
+    const measured = row.scorer === 'kscore-v2-harness'
+      || row.scorer === 'external_kscore'
+      || row.accuracy_measured === true
+      || Boolean(row.kscore_gate);
+    const relativeDrop = baselineKScore > 0
+      ? Math.max(0, (baselineKScore - kscore) / baselineKScore)
+      : 0;
+    const gateFailed = row.kscore_gate && row.kscore_gate.ships === false;
+    const passes = (!requireMeasured || measured)
+      && relativeDrop <= maxRelDrop
+      && !gateFailed;
+
+    row.accuracy_gate = {
+      required: true,
+      metric: 'kscore',
+      baseline_profile_id: baselineId,
+      baseline_kscore: roundGate(baselineKScore),
+      kscore: roundGate(kscore),
+      relative_drop: roundGate(relativeDrop),
+      max_rel_drop: maxRelDrop,
+      measured,
+      passed: passes,
+      status: passes ? 'pass' : 'fail',
+    };
+
+    if (!passes) {
+      row.accepted = false;
+      if (!Array.isArray(row.rejection_reasons)) row.rejection_reasons = [];
+      if (requireMeasured && !measured) row.rejection_reasons.push('accuracy_gate_unmeasured');
+      if (relativeDrop > maxRelDrop) row.rejection_reasons.push('accuracy_below_floor');
+      if (gateFailed) row.rejection_reasons.push('kscore_gate_failed');
+    }
+  }
+  return results;
 }
 
 // finalized-c5: read measured fp16/quant accuracy metrics from the worker's
@@ -254,6 +314,10 @@ function readMeasuredFromReceipt(outDir) {
 }
 
 function scoreJaccard(profile, eval_set) {
+  return scoreProfile(profile, eval_set).kscore;
+}
+
+function scoreProfile(profile, eval_set) {
   // The profile itself is informational - without an actual student to run, we
   // synthesize a deterministic surrogate score derived from the profile's
   // weighted-avg-bits (higher bits ≈ closer to bf16 baseline ≈ higher score).
@@ -267,18 +331,45 @@ function scoreJaccard(profile, eval_set) {
         [JSON.stringify({ profile, eval_set })], { encoding: 'utf8', timeout: 5 * 60 * 1000, shell: true });
       if (res.status === 0) {
         const parsed = JSON.parse(res.stdout || '{}');
-        if (Number.isFinite(parsed.kscore)) return parsed.kscore;
+        if (Number.isFinite(parsed.kscore)) return { kscore: parsed.kscore, scorer: 'external_kscore' };
       }
     } catch { /* fall through to surrogate */ }
   }
   // Surrogate: average weight_bits / 8 (uniform-int8 baseline = 1.0).
   // Eval set length factors in modestly so larger eval sets get a small bump
   // (reflects coverage credit - same surrogate spirit as W466 multimodal).
-  let sum = 0;
-  for (const layer of profile) sum += layer.weight_bits;
-  const avgBits = sum / profile.length;
+  const avgBits = averageWeightBits(profile);
   const baseline = avgBits / 8;
   // Coverage credit: log10(1 + n) / 5 caps the bump at ~+0.5 for 10^9 evals.
   const coverage = Math.log10(1 + eval_set.length) / 5;
-  return Math.min(1.0, baseline * 0.9 + coverage * 0.1);
+  return { kscore: Math.min(1.0, baseline * 0.9 + coverage * 0.1), scorer: 'jaccard-surrogate' };
+}
+
+function averageWeightBits(profile) {
+  if (!Array.isArray(profile) || profile.length === 0) return 0;
+  let sum = 0;
+  for (const layer of profile) sum += Number(layer.weight_bits) || 0;
+  return Number((sum / profile.length).toFixed(4));
+}
+
+function finiteNumber(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function roundGate(value) {
+  return Number(Number(value).toFixed(6));
+}
+
+function chooseAccuracyBaseline(rows) {
+  const explicit = rows.filter((row) => row.baseline === true || row.method === 'fp16' || row.profile_kind === 'baseline');
+  const pool = explicit.length ? explicit : rows;
+  const maxBits = Math.max(...pool.map((row) => finiteNumber(
+    row.avg_weight_bits ?? row.weighted_avg_bits ?? row.bits ?? row.weight_bits,
+    0,
+  )));
+  const highestBit = maxBits > 0
+    ? pool.filter((row) => finiteNumber(row.avg_weight_bits ?? row.weighted_avg_bits ?? row.bits ?? row.weight_bits, 0) === maxBits)
+    : pool;
+  return highestBit.slice().sort((a, b) => Number(b.kscore) - Number(a.kscore))[0];
 }

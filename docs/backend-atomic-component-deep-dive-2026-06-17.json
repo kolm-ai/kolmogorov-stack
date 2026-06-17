@@ -35441,10 +35441,10 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "f81e79db83d46ec9295c3cfc372aaa3db06984c3b712e7b1e881a429abd1f4e2",
+      "sha256": "a2f9c2cdee155f510b6225f1eedd31812846e25af8ad19f4e2d58a1d080c1fcd",
       "metrics": {
-        "bytes": 22029,
-        "lines": 604,
+        "bytes": 22318,
+        "lines": 612,
         "imports": 0,
         "exports": 5,
         "routes": 0,
@@ -35458,7 +35458,8 @@
       "test_refs": [
         "tests/sota-computequant.test.js",
         "tests/wave582-quantization-oracle.test.js",
-        "tests/wave605-quantization-oracle-frontier.test.js"
+        "tests/wave605-quantization-oracle-frontier.test.js",
+        "tests/wave606-quant-accuracy-floor.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary"
@@ -35501,12 +35502,12 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "719c2a029721042be3c48a23a976dd229d15cd9dab7b1d0f679eea62bbdf3238",
+      "sha256": "6a111a786ff8bcf7aa3c5af74253e182939a1e14167d6505ca99dda3c7ed1865",
       "metrics": {
-        "bytes": 11552,
-        "lines": 285,
+        "bytes": 15130,
+        "lines": 376,
         "imports": 8,
-        "exports": 1,
+        "exports": 3,
         "routes": 0,
         "env_refs": 3,
         "fs_writes": 0,
@@ -35516,7 +35517,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+        "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js",
+        "tests/wave606-quant-accuracy-floor.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",

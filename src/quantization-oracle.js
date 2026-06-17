@@ -488,10 +488,18 @@ export function rankQuantizationStrategies(input = {}) {
         : primary.feasible && primary.export_format
           ? `kolm export <artifact.kolm> --format ${primary.export_format} --quant ${primary.export_quant} --out <out-dir>`
           : null,
+      accuracy_gate: {
+        required: true,
+        metric: 'kscore',
+        max_rel_drop: 0.03,
+        baseline: 'fp16_or_highest_bit_profile',
+        enforcement: 'quantize-bakeoff.enforceAccuracyFloor',
+        fail_closed_without_measured_holdout: true,
+      },
       proof: [
         'run method-specific doctor before execution',
         'record source model hash, calibration hash, method, bits, runtime, and output shard hashes',
-        'run holdout eval before promoting quantized artifact',
+        'enforce post-quant accuracy_gate before promoting quantized artifact',
       ],
     } : null,
     candidates,

@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 284,
+    "orphan_tests": 285,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 287,
+    "state_local_green": 288,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 452,
-    "test_only_waves": 284,
-    "waves": 300
+    "test_files": 453,
+    "test_only_waves": 285,
+    "waves": 301
   },
-  "generated_at": "2026-06-17T09:01:31.913Z",
+  "generated_at": "2026-06-17T09:12:36.960Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -298,6 +298,7 @@
       "W603",
       "W604",
       "W605",
+      "W606",
       "W708",
       "W709",
       "W710",
@@ -591,6 +592,7 @@
       "W603",
       "W604",
       "W605",
+      "W606",
       "W708",
       "W709",
       "W710",
@@ -3587,7 +3589,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js",
+          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js",
           "script": "npm:verify:quant-oracle"
         }
       ],
@@ -4017,7 +4019,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js",
+          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js",
           "script": "npm:verify:quant-oracle"
         }
       ],
@@ -4025,6 +4027,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave605-quantization-oracle-frontier.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W606",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256 && node --test --test-concurrency=1 tests/wave582-quantization-oracle.test.js tests/wave605-quantization-oracle-frontier.test.js tests/wave606-quant-accuracy-floor.test.js",
+          "script": "npm:verify:quant-oracle"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave606-quant-accuracy-floor.test.js"
       ],
       "test_letter_suffixes": []
     },

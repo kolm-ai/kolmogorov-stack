@@ -78,10 +78,10 @@ test('3. Hopper TensorRT and Ada CUDA targets do not get Blackwell-only FP4 reco
   assert.ok(adaNvfp4.warnings.includes('runtime_mismatch:cuda'));
 });
 
-test('4. backend spec records W605 closure while leaving accuracy-gate work open', () => {
+test('4. backend spec records W605 closure while leaving FP4 calibration-plan work open', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
 
   assert.match(spec, /W605/);
   assert.match(spec, /NVFP4\/MXFP4 oracle routing/);
-  assert.match(spec, /No automated post-quantization accuracy gate/);
+  assert.match(spec, /Wire the FP4 calibration plan into the oracle recommendation/);
 });
