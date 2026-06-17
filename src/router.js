@@ -24959,6 +24959,10 @@ res.json({
         artifact_path: typeof body.artifact_path === 'string' ? body.artifact_path : null,
         pack_dir: typeof body.pack_dir === 'string' ? body.pack_dir : null,
         n_samples: typeof body.n_samples === 'number' ? body.n_samples : null,
+        dataset_revision: typeof body.dataset_revision === 'string' ? body.dataset_revision : null,
+        run_seed: typeof body.run_seed === 'string' ? body.run_seed : null,
+        generation_timeout_ms: typeof body.generation_timeout_ms === 'number' ? body.generation_timeout_ms : null,
+        sandbox_timeout_ms: typeof body.sandbox_timeout_ms === 'number' ? body.sandbox_timeout_ms : null,
         runOnArtifact: null,
         sandbox_cmd: null,
       });
