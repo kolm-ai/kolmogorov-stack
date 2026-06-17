@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 706,
-    "components_without_direct_test_reference": 123,
+    "test_referenced_components": 707,
+    "components_without_direct_test_reference": 122,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -28480,26 +28480,28 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "f176f7b926781432021f29f9d90ed08a55f3e3ded218e58272337099a493f04e",
+      "sha256": "32d7343320363cc1e88961ff3e8d6ffcaa4736057a1425acfbb8d3b12e1f442b",
       "metrics": {
-        "bytes": 11740,
-        "lines": 267,
-        "imports": 0,
-        "exports": 7,
+        "bytes": 19974,
+        "lines": 472,
+        "imports": 1,
+        "exports": 11,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 4,
-        "crypto_refs": 1,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave687-licensing-allowlist-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

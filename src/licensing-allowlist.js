@@ -42,6 +42,38 @@
 // string against three frozen lists. Live URL fetching is out of scope: the
 // verifier is offline-first by design (RS-1 air-gap rule).
 
+import crypto from 'node:crypto';
+
+export const LICENSING_ALLOWLIST_VERSION = 'w194-v2';
+export const LICENSING_LIMITS = Object.freeze({
+  MAX_SOURCES: 256,
+  MAX_NAME_CHARS: 160,
+  MAX_LICENSE_CHARS: 128,
+  MAX_SOURCE_URL_CHARS: 2048,
+  MAX_IDENTIFIER_CHARS: 512,
+  MAX_REASON_CHARS: 320,
+});
+
+const CONTROL_RE = /[\u0000-\u001f\u007f]/g;
+
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(value == null ? '' : value).digest('hex');
+}
+
+function _stableJson(value) {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return '[' + value.map((v) => _stableJson(v)).join(',') + ']';
+  return '{' + Object.keys(value).sort().map((k) => JSON.stringify(k) + ':' + _stableJson(value[k])).join(',') + '}';
+}
+
+function _cleanText(value, max = LICENSING_LIMITS.MAX_REASON_CHARS) {
+  return String(value == null ? '' : value).replace(CONTROL_RE, ' ').trim().slice(0, max);
+}
+
+function _hashEvidence(value) {
+  return _sha256Hex(_stableJson(value));
+}
+
 // SAFE_LICENSES. Every entry is a real SPDX identifier or named catalog
 // license a regulated tenant's legal team has approved as buyer-safe for
 // distillation training data. Adding to this list is a contract change;
@@ -127,48 +159,158 @@ export const DENY_LICENSES = Object.freeze([
   }
 })();
 
+function _licenseLookup() {
+  const map = new Map();
+  for (const lic of [...SAFE_LICENSES, ...AMBER_LICENSES, ...DENY_LICENSES]) {
+    map.set(String(lic).toLowerCase(), lic);
+  }
+  map.set('apache2', 'Apache-2.0');
+  map.set('apache 2.0', 'Apache-2.0');
+  map.set('apache-2', 'Apache-2.0');
+  map.set('apache2.0', 'Apache-2.0');
+  map.set('bsd 3 clause', 'BSD-3-Clause');
+  map.set('bsd 2 clause', 'BSD-2-Clause');
+  map.set('public domain', 'public-domain');
+  map.set('all rights reserved', 'all-rights-reserved');
+  map.set('tos violated', 'tos-violated');
+  return map;
+}
+
+const LICENSE_LOOKUP = _licenseLookup();
+
+export function normalizeLicenseId(license) {
+  if (typeof license !== 'string' || license.trim() === '') {
+    return { ok: false, normalized: null, reason: 'license_missing' };
+  }
+  if (license.length > LICENSING_LIMITS.MAX_LICENSE_CHARS || CONTROL_RE.test(license)) {
+    CONTROL_RE.lastIndex = 0;
+    return { ok: false, normalized: null, reason: 'license_invalid_or_too_long' };
+  }
+  const clean = _cleanText(license, LICENSING_LIMITS.MAX_LICENSE_CHARS);
+  const canonical = LICENSE_LOOKUP.get(clean.toLowerCase()) || clean;
+  return {
+    ok: true,
+    normalized: canonical,
+    original_sha256: _sha256Hex(clean),
+    normalized_sha256: _sha256Hex(canonical),
+  };
+}
+
 // Classify a single license string into one of four buckets.
 //   'safe'    present in SAFE_LICENSES
 //   'amber'   present in AMBER_LICENSES
 //   'deny'    present in DENY_LICENSES
 //   'unknown' absent or empty (treated like DENY by the verifier)
 export function classifyLicense(license) {
-  if (typeof license !== 'string' || license.length === 0) return 'unknown';
-  if (SAFE_LICENSES.includes(license)) return 'safe';
-  if (AMBER_LICENSES.includes(license)) return 'amber';
-  if (DENY_LICENSES.includes(license)) return 'deny';
+  const normalized = normalizeLicenseId(license);
+  if (!normalized.ok) return 'unknown';
+  if (SAFE_LICENSES.includes(normalized.normalized)) return 'safe';
+  if (AMBER_LICENSES.includes(normalized.normalized)) return 'amber';
+  if (DENY_LICENSES.includes(normalized.normalized)) return 'deny';
   return 'unknown';
+}
+
+export function classifyLicenseDetailed(license) {
+  const normalized = normalizeLicenseId(license);
+  const bucket = normalized.ok ? classifyLicense(normalized.normalized) : 'unknown';
+  return {
+    bucket,
+    normalized_license: normalized.normalized,
+    license_sha256: normalized.normalized ? _sha256Hex(normalized.normalized) : null,
+    reason: normalized.ok ? null : normalized.reason,
+  };
+}
+
+function _safeSourceReason(reason, sourceUrl) {
+  return `${_cleanText(reason, LICENSING_LIMITS.MAX_REASON_CHARS)} (source_url_sha256=${_sha256Hex(String(sourceUrl == null ? '' : sourceUrl)).slice(0, 16)})`;
+}
+
+function _privateOrLoopbackHost(hostname) {
+  const h = String(hostname || '').toLowerCase();
+  if (!h) return true;
+  if (h === 'localhost' || h.endsWith('.localhost') || h.endsWith('.local')) return true;
+  if (h === '::1' || h === '[::1]') return true;
+  if (/^127\./.test(h) || /^10\./.test(h) || /^192\.168\./.test(h) || /^169\.254\./.test(h)) return true;
+  const m = h.match(/^172\.(\d{1,3})\./);
+  return !!(m && Number(m[1]) >= 16 && Number(m[1]) <= 31);
+}
+
+function _validIdentifierRest(prefix, rest) {
+  if (!rest) return { ok: false, reason: `source_url has prefix '${prefix}' but no identifier after it` };
+  if (rest.length > LICENSING_LIMITS.MAX_IDENTIFIER_CHARS || CONTROL_RE.test(rest)) {
+    CONTROL_RE.lastIndex = 0;
+    return { ok: false, reason: `source_url identifier for prefix '${prefix}' is invalid or too long` };
+  }
+  if (rest.includes('..') || /^[a-zA-Z]:[\\/]/.test(rest) || rest.startsWith('/') || rest.startsWith('\\')) {
+    return { ok: false, reason: `source_url identifier for prefix '${prefix}' must not be a filesystem path` };
+  }
+  if (prefix === 'huggingface:' || prefix === 'hf:') {
+    if (!/^[A-Za-z0-9][A-Za-z0-9._-]*\/[A-Za-z0-9][A-Za-z0-9._-]*$/.test(rest)) {
+      return { ok: false, reason: `source_url identifier for prefix '${prefix}' must be owner/name` };
+    }
+  }
+  return { ok: true };
 }
 
 // URL identifier shape. A source_url field can be:
 //   * a real http(s) URL                          must parse via URL ctor
-//   * a `local:<path>` identifier                 pass-through, no fetch
+//   * a `local:<dataset-id>` identifier           pass-through, no fetch
 //   * an `internal:<id>` identifier               pass-through, no fetch
 //   * a `huggingface:<owner>/<name>` ref          pass-through, no fetch
 // Anything else (empty, garbage) fails the source_url check.
-const NON_URL_PREFIXES = ['local:', 'internal:', 'huggingface:', 'hf:', 's3:', 'gs:', 'file:'];
+const NON_URL_PREFIXES = ['local:', 'internal:', 'huggingface:', 'hf:', 's3:', 'gs:'];
 
 export function validSourceUrl(source_url) {
-  if (typeof source_url !== 'string' || source_url.length === 0) {
-    return { ok: false, reason: 'source_url missing or empty' };
+  if (typeof source_url !== 'string' || source_url.trim().length === 0) {
+    return { ok: false, reason: 'source_url missing or empty', source_url_sha256: _sha256Hex('') };
   }
+  if (source_url.length > LICENSING_LIMITS.MAX_SOURCE_URL_CHARS || CONTROL_RE.test(source_url)) {
+    CONTROL_RE.lastIndex = 0;
+    return {
+      ok: false,
+      reason: _safeSourceReason('source_url contains control characters or is too long', source_url),
+      source_url_sha256: _sha256Hex(source_url),
+    };
+  }
+  const clean = source_url.trim();
   for (const prefix of NON_URL_PREFIXES) {
-    if (source_url.startsWith(prefix)) {
-      const rest = source_url.slice(prefix.length);
-      if (rest.length === 0) {
-        return { ok: false, reason: `source_url='${source_url}' has prefix '${prefix}' but no identifier after it` };
+    if (clean.startsWith(prefix)) {
+      const rest = clean.slice(prefix.length);
+      const ident = _validIdentifierRest(prefix, rest);
+      if (!ident.ok) {
+        return { ok: false, reason: _safeSourceReason(ident.reason, clean), source_url_sha256: _sha256Hex(clean) };
       }
-      return { ok: true, kind: 'identifier', prefix };
+      return { ok: true, kind: 'identifier', prefix, identifier_sha256: _sha256Hex(rest), source_url_sha256: _sha256Hex(clean) };
     }
+  }
+  if (clean.startsWith('file:')) {
+    return {
+      ok: false,
+      reason: _safeSourceReason('file: URLs are not accepted; use local:<dataset-id> for offline corpus identifiers', clean),
+      source_url_sha256: _sha256Hex(clean),
+    };
   }
   try {
-    const u = new URL(source_url);
+    const u = new URL(clean);
     if (u.protocol !== 'http:' && u.protocol !== 'https:') {
-      return { ok: false, reason: `source_url='${source_url}' protocol '${u.protocol}' not http/https` };
+      return { ok: false, reason: _safeSourceReason(`source_url protocol '${u.protocol}' not http/https`, clean), source_url_sha256: _sha256Hex(clean) };
     }
-    return { ok: true, kind: 'url', protocol: u.protocol };
+    if (u.username || u.password) {
+      return { ok: false, reason: _safeSourceReason('source_url must not contain credentials', clean), source_url_sha256: _sha256Hex(clean) };
+    }
+    if (_privateOrLoopbackHost(u.hostname)) {
+      return { ok: false, reason: _safeSourceReason('source_url host is private or loopback; use internal:<id> instead', clean), source_url_sha256: _sha256Hex(clean) };
+    }
+    return {
+      ok: true,
+      kind: 'url',
+      protocol: u.protocol,
+      host_sha256: _sha256Hex(u.hostname.toLowerCase()),
+      source_url_sha256: _sha256Hex(clean),
+      normalized_url_sha256: _sha256Hex(u.href),
+    };
   } catch (e) {
-    return { ok: false, reason: `source_url='${source_url}' does not parse as URL: ${e.message}` };
+    return { ok: false, reason: _safeSourceReason(`source_url does not parse as URL: ${e.message}`, clean), source_url_sha256: _sha256Hex(clean) };
   }
 }
 
@@ -177,7 +319,7 @@ export function validSourceUrl(source_url) {
 // already shipped or might ship:
 //   1. manifest.corpus_sources[]                  the canonical Wave 194 shape
 //   2. manifest.spec?.sources[]                   older proposed shape
-//   3. manifest.spec?.train?.corpora[]            RS-1 §9 proposed shape
+//   3. manifest.spec?.train?.corpora[]            RS-1 proposed shape
 //   4. manifest.spec?.data_sources[]              alternate proposed shape
 // If none are present, returns []; the check then passes with a legacy note.
 //
@@ -202,6 +344,36 @@ export function extractCorpusSources(manifest) {
   return [];
 }
 
+function _sourceName(source, index) {
+  const raw = source && typeof source.name === 'string' ? source.name : `source[${index}]`;
+  return _cleanText(raw, LICENSING_LIMITS.MAX_NAME_CHARS) || `source[${index}]`;
+}
+
+function _resultEnvelope({ status, detail, sources, evaluatedSources, caveats = [], bad = [], classCounts = null, sourceEvidence = [] }) {
+  const evidence = {
+    version: LICENSING_ALLOWLIST_VERSION,
+    sources_count: Array.isArray(sources) ? sources.length : 0,
+    sources_evaluated: Array.isArray(evaluatedSources) ? evaluatedSources.length : 0,
+    caveat_count: caveats.length,
+    bad_count: bad.length,
+    class_counts: classCounts || { safe: 0, amber: 0, deny: 0, unknown: 0 },
+    source_evidence: sourceEvidence,
+  };
+  return {
+    status,
+    detail,
+    ...(caveats.length ? { caveats } : {}),
+    ...(bad.length ? { bad } : {}),
+    sources_count: evidence.sources_count,
+    sources_evaluated: evidence.sources_evaluated,
+    class_counts: evidence.class_counts,
+    source_evidence: sourceEvidence,
+    source_evidence_sha256: _hashEvidence(sourceEvidence),
+    license_gate_sha256: _hashEvidence(evidence),
+    version: LICENSING_ALLOWLIST_VERSION,
+  };
+}
+
 // The verifier check. Returns { status, detail, caveats?, bad?, sources_count }.
 // Called from src/binder.js as check #25. The signature matches the existing
 // 24 checks' shape: a plain object with name/status/detail, where status is
@@ -209,58 +381,91 @@ export function extractCorpusSources(manifest) {
 export function checkCorpusLicensing(manifest) {
   const sources = extractCorpusSources(manifest);
   if (sources.length === 0) {
-    return {
+    return _resultEnvelope({
       status: 'pass',
       detail: 'no corpus sources declared (legacy or template manifest); to gate the corpus URL licensing layer, add manifest.corpus_sources[]={name, source_url, license} entries declaring every dataset the recipe distilled from',
-      sources_count: 0,
-    };
+      sources,
+      evaluatedSources: [],
+    });
   }
+  const evaluatedSources = sources.slice(0, LICENSING_LIMITS.MAX_SOURCES);
   const caveats = [];
   const bad = [];
   const okSummaries = [];
-  for (let i = 0; i < sources.length; i++) {
-    const s = sources[i] || {};
-    const name = s.name || `source[${i}]`;
-    // (a) source_url shape
+  const sourceEvidence = [];
+  const classCounts = { safe: 0, amber: 0, deny: 0, unknown: 0 };
+  if (sources.length > LICENSING_LIMITS.MAX_SOURCES) {
+    bad.push(`too_many_sources: ${sources.length} declared, max ${LICENSING_LIMITS.MAX_SOURCES}`);
+  }
+  for (let i = 0; i < evaluatedSources.length; i++) {
+    const s = evaluatedSources[i] || {};
+    const name = _sourceName(s, i);
     const urlCheck = validSourceUrl(s.source_url);
     if (!urlCheck.ok) {
       bad.push(`${name}: ${urlCheck.reason}`);
+      classCounts.unknown += 1;
+      sourceEvidence.push({
+        name_sha256: _sha256Hex(name),
+        source_url_sha256: urlCheck.source_url_sha256 || null,
+        license_sha256: typeof s.license === 'string' ? _sha256Hex(_cleanText(s.license, LICENSING_LIMITS.MAX_LICENSE_CHARS)) : null,
+        bucket: 'unknown',
+        url_ok: false,
+      });
       continue;
     }
-    // (b) license classification
-    const cls = classifyLicense(s.license);
+    const licenseDetail = classifyLicenseDetailed(s.license);
+    const cls = licenseDetail.bucket;
+    classCounts[cls] = (classCounts[cls] || 0) + 1;
+    sourceEvidence.push({
+      name_sha256: _sha256Hex(name),
+      source_url_sha256: urlCheck.source_url_sha256,
+      url_kind: urlCheck.kind,
+      license_sha256: licenseDetail.license_sha256,
+      normalized_license: licenseDetail.normalized_license,
+      bucket: cls,
+      url_ok: true,
+    });
     if (cls === 'deny' || cls === 'unknown') {
-      const lic = (typeof s.license === 'string' && s.license.length > 0) ? s.license : '(missing)';
+      const lic = licenseDetail.normalized_license || '(missing)';
       bad.push(`${name}: license='${lic}' is in DENY_LICENSES or unknown (must be a buyer-safe SPDX / catalog license; see SAFE_LICENSES + AMBER_LICENSES in src/licensing-allowlist.js)`);
       continue;
     }
     if (cls === 'amber') {
-      caveats.push(`${name}: license='${s.license}' is research-only / non-commercial; requires manual procurement review before shipping commercial output (amber)`);
-      okSummaries.push(`${name} (${s.license}, amber)`);
+      caveats.push(`${name}: license='${licenseDetail.normalized_license}' is research-only / non-commercial; requires manual procurement review before shipping commercial output (amber)`);
+      okSummaries.push(`${name} (${licenseDetail.normalized_license}, amber)`);
       continue;
     }
-    okSummaries.push(`${name} (${s.license})`);
+    okSummaries.push(`${name} (${licenseDetail.normalized_license})`);
   }
   if (bad.length > 0) {
-    return {
+    return _resultEnvelope({
       status: 'fail',
       detail: `manifest.corpus_sources licensing gate rejected ${bad.length} of ${sources.length} declared source(s): ${bad.join('; ')}. Every corpus the recipe distilled from must declare {name, source_url, license} where license is in SAFE_LICENSES or AMBER_LICENSES (see src/licensing-allowlist.js). DENY_LICENSES (${DENY_LICENSES.join(', ')}) and unknown / missing license strings are rejected so a manifest cannot ship with a corpus URL pointing at scraped, proprietary, or unlicensed training data.`,
       bad,
       caveats,
-      sources_count: sources.length,
-    };
+      sources,
+      evaluatedSources,
+      classCounts,
+      sourceEvidence,
+    });
   }
   if (caveats.length > 0) {
-    return {
+    return _resultEnvelope({
       status: 'pass',
       detail: `${sources.length} corpus source(s) declared; ${okSummaries.length} verified license-clean (${okSummaries.join(', ')}). note: ${caveats.length} amber license(s) require manual procurement review: ${caveats.join('; ')}`,
       caveats,
-      sources_count: sources.length,
-    };
+      sources,
+      evaluatedSources,
+      classCounts,
+      sourceEvidence,
+    });
   }
-  return {
+  return _resultEnvelope({
     status: 'pass',
     detail: `${sources.length} corpus source(s) declared; every license string in SAFE_LICENSES and every source_url parses (${okSummaries.join(', ')})`,
-    sources_count: sources.length,
-  };
+    sources,
+    evaluatedSources,
+    classCounts,
+    sourceEvidence,
+  });
 }
