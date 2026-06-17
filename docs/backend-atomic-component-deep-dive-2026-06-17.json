@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 694,
-    "components_without_direct_test_reference": 135,
+    "test_referenced_components": 695,
+    "components_without_direct_test_reference": 134,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -3228,7 +3228,8 @@
       },
       "test_refs": [
         "tests/wave482-sdk-catalog-honesty.test.js",
-        "tests/wave674-runtime-rs-cid-contract.test.js"
+        "tests/wave674-runtime-rs-cid-contract.test.js",
+        "tests/wave675-runtime-rs-tofu-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -3833,10 +3834,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "2dfb9d27e6c3673218ecd774729c30eb4bdda4fba6365093c858e882b2dd0603",
+      "sha256": "20414f36cd651b182b074ca3f6d38014ca4087db451a546aeedf6582e5ba8f21",
       "metrics": {
-        "bytes": 8166,
-        "lines": 229,
+        "bytes": 10195,
+        "lines": 302,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3844,15 +3845,17 @@
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 17,
+        "crypto_refs": 3,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave675-runtime-rs-tofu-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

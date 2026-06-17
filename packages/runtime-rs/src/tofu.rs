@@ -9,6 +9,8 @@
 //! `BTreeMap<CID, TrustEntry>` that serializes to JSON; callers persist it on
 //! disk wherever it suits their deployment.
 
+use crate::cid::is_valid_cid_format;
+use crate::error::Error;
 use crate::verify::VerifyReport;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -42,7 +44,22 @@ impl TrustStore {
     /// Load a store from JSON bytes. Returns an empty store on parse failure
     /// rather than erroring — callers can layer stricter handling on top.
     pub fn from_json(bytes: &[u8]) -> Self {
-        serde_json::from_slice(bytes).unwrap_or_default()
+        Self::try_from_json(bytes).unwrap_or_default()
+    }
+
+    /// Strictly load a store from JSON bytes. Unlike [`Self::from_json`],
+    /// malformed input is returned to the caller instead of erasing pins.
+    pub fn try_from_json(bytes: &[u8]) -> Result<Self, Error> {
+        let store: Self = serde_json::from_slice(bytes).map_err(Error::Json)?;
+        for (cid, entry) in &store.entries {
+            if !valid_pin_inputs(cid, &entry.signed_by) {
+                return Err(Error::VerificationFailed(format!(
+                    "trust store contains invalid pin: {}",
+                    cid
+                )));
+            }
+        }
+        Ok(store)
     }
 
     /// Serialize the store to pretty JSON.
@@ -62,6 +79,9 @@ impl TrustStore {
     /// they see a mismatch (the high-level `Artifact::verify_with_store` does
     /// this for you).
     pub fn observe(&mut self, cid: &str, signed_by: &str, _report: &VerifyReport) {
+        if !valid_pin_inputs(cid, signed_by) {
+            return;
+        }
         if let Some(existing) = self.entries.get_mut(cid) {
             if existing.signed_by == signed_by {
                 existing.seen_count = existing.seen_count.saturating_add(1);
@@ -81,6 +101,9 @@ impl TrustStore {
     /// Force-pin (or repin) a CID to a known namespace. Use sparingly — this
     /// bypasses TOFU semantics.
     pub fn force_pin(&mut self, cid: &str, signed_by: &str) {
+        if !valid_pin_inputs(cid, signed_by) {
+            return;
+        }
         self.entries.insert(
             cid.to_string(),
             TrustEntry {
@@ -110,6 +133,18 @@ impl TrustStore {
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
+}
+
+fn valid_pin_inputs(cid: &str, signed_by: &str) -> bool {
+    is_valid_cid_format(cid) && valid_signed_by(signed_by)
+}
+
+fn valid_signed_by(signed_by: &str) -> bool {
+    !signed_by.is_empty()
+        && signed_by.len() <= 256
+        && signed_by
+            .bytes()
+            .all(|b| b.is_ascii_graphic() && b != b'"' && b != b'\\')
 }
 
 /// Best-effort ISO-8601 timestamp without pulling in `chrono`. Returns
@@ -155,65 +190,103 @@ fn epoch_to_civil(secs: u64) -> (i64, u32, u32, u32, u32, u32) {
 mod tests {
     use super::*;
 
+    fn cid(byte: char) -> String {
+        format!(
+            "cidv1:sha256:{}",
+            std::iter::repeat(byte).take(64).collect::<String>()
+        )
+    }
+
     fn empty_report() -> VerifyReport {
-        VerifyReport::new("cidv1:sha256:abc".into(), "kolm-dev-hmac-1".into())
+        VerifyReport::new(cid('a'), "kolm-dev-hmac-1".into())
     }
 
     #[test]
     fn observe_pins_new_cid() {
         let mut s = TrustStore::new();
-        s.observe("cidv1:sha256:a", "kolm-dev-hmac-1", &empty_report());
-        assert_eq!(s.get_pinned_namespace("cidv1:sha256:a"), Some("kolm-dev-hmac-1"));
+        let c = cid('a');
+        s.observe(&c, "kolm-dev-hmac-1", &empty_report());
+        assert_eq!(s.get_pinned_namespace(&c), Some("kolm-dev-hmac-1"));
         assert_eq!(s.len(), 1);
     }
 
     #[test]
     fn observe_increments_seen_count() {
         let mut s = TrustStore::new();
-        s.observe("cidv1:sha256:a", "kolm-dev-hmac-1", &empty_report());
-        s.observe("cidv1:sha256:a", "kolm-dev-hmac-1", &empty_report());
-        let e = s.entries.get("cidv1:sha256:a").unwrap();
+        let c = cid('a');
+        s.observe(&c, "kolm-dev-hmac-1", &empty_report());
+        s.observe(&c, "kolm-dev-hmac-1", &empty_report());
+        let e = s.entries.get(&c).unwrap();
         assert_eq!(e.seen_count, 2);
     }
 
     #[test]
     fn observe_does_not_overwrite_pin() {
         let mut s = TrustStore::new();
-        s.observe("cidv1:sha256:a", "kolm-dev-hmac-1", &empty_report());
+        let c = cid('a');
+        s.observe(&c, "kolm-dev-hmac-1", &empty_report());
         // Attempt to clobber with a different namespace — must be ignored.
-        s.observe("cidv1:sha256:a", "imposter-key", &empty_report());
-        assert_eq!(s.get_pinned_namespace("cidv1:sha256:a"), Some("kolm-dev-hmac-1"));
+        s.observe(&c, "imposter-key", &empty_report());
+        assert_eq!(s.get_pinned_namespace(&c), Some("kolm-dev-hmac-1"));
     }
 
     #[test]
     fn force_pin_overrides() {
         let mut s = TrustStore::new();
-        s.force_pin("cidv1:sha256:a", "k1");
-        s.force_pin("cidv1:sha256:a", "k2");
-        assert_eq!(s.get_pinned_namespace("cidv1:sha256:a"), Some("k2"));
+        let c = cid('a');
+        s.force_pin(&c, "k1");
+        s.force_pin(&c, "k2");
+        assert_eq!(s.get_pinned_namespace(&c), Some("k2"));
     }
 
     #[test]
     fn unpin_removes_entry() {
         let mut s = TrustStore::new();
-        s.force_pin("cidv1:sha256:a", "k1");
-        assert!(s.unpin("cidv1:sha256:a"));
-        assert!(!s.unpin("cidv1:sha256:a"));
+        let c = cid('a');
+        s.force_pin(&c, "k1");
+        assert!(s.unpin(&c));
+        assert!(!s.unpin(&c));
         assert!(s.is_empty());
     }
 
     #[test]
     fn round_trip_json() {
         let mut s = TrustStore::new();
-        s.force_pin("cidv1:sha256:a", "k1");
+        let c = cid('a');
+        s.force_pin(&c, "k1");
         let j = s.to_json_pretty();
         let s2 = TrustStore::from_json(j.as_bytes());
-        assert_eq!(s2.get_pinned_namespace("cidv1:sha256:a"), Some("k1"));
+        assert_eq!(s2.get_pinned_namespace(&c), Some("k1"));
     }
 
     #[test]
     fn from_json_invalid_returns_empty() {
         let s = TrustStore::from_json(b"not-json");
+        assert!(s.is_empty());
+    }
+
+    #[test]
+    fn try_from_json_invalid_returns_error() {
+        assert!(TrustStore::try_from_json(b"not-json").is_err());
+        let bad_pin = br#"{
+          "entries": {
+            "cidv1:sha256:a": {
+              "signed_by": "kolm-dev-hmac-1",
+              "first_seen": "2026-06-18T00:00:00Z",
+              "seen_count": 1
+            }
+          }
+        }"#;
+        assert!(TrustStore::try_from_json(bad_pin).is_err());
+    }
+
+    #[test]
+    fn invalid_pin_inputs_are_ignored() {
+        let mut s = TrustStore::new();
+        s.observe("cidv1:sha256:a", "kolm-dev-hmac-1", &empty_report());
+        s.force_pin(&cid('a'), "");
+        s.force_pin(&cid('b'), "bad namespace");
+        s.force_pin(&cid('c'), "bad\"namespace");
         assert!(s.is_empty());
     }
 
