@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 688,
-    "direct_test_reference_pct": 83,
-    "components_without_direct_test_reference": 141,
+    "direct_test_referenced_components": 689,
+    "direct_test_reference_pct": 83.1,
+    "components_without_direct_test_reference": 140,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -2595,7 +2595,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave602-backend-atomic-deep-dive.test.js"
+          "tests/wave602-backend-atomic-deep-dive.test.js",
+          "tests/wave670-tdx-attestation-contract.test.js"
         ],
         "category_links": [
           {
@@ -2723,25 +2724,26 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 2499,
-          "lines": 76,
+          "bytes": 5114,
+          "lines": 154,
           "imports": 1,
-          "exports": 1,
+          "exports": 4,
           "routes": 0,
-          "env_refs": 0,
+          "env_refs": 1,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 2,
+          "crypto_refs": 3,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
-          "distribution_or_worker_surface"
+          "distribution_or_worker_surface",
+          "environment_configuration_boundary"
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "42baf794a10783e3312786b4cf7ac8fad7a34303d4ea19637cbfc6262f696ed1"
+        "sha256": "0fc35d772bc5bb1e8541c3a418aea1f53e3289343027210a06ebfc3073012915"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -2749,7 +2751,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave670-tdx-attestation-contract.test.js"
+        ],
         "category_links": [
           {
             "id": "mcp-tool-gateway-receipts",
@@ -2766,10 +2770,9 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing",
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
     },
     {
       "path": "packages/attestation/tests/attestation.test.js",
@@ -2779,7 +2782,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 6164,
+          "bytes": 6203,
           "lines": 184,
           "imports": 4,
           "exports": 0,
@@ -2797,7 +2800,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "c676ca93eaab1068028fe5fab22d782bf7e7a6aabe5e047994914d1a6c407ab4"
+        "sha256": "badd1513bfb61c98067b5683b4dba855ea1f728f52d50fc64a4269a427f8c4d2"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

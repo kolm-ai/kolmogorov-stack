@@ -4987,9 +4987,12 @@
             "priority_score": 5,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface"
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary"
             ],
-            "test_refs": [],
+            "test_refs": [
+              "tests/wave670-tdx-attestation-contract.test.js"
+            ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
           {
@@ -5198,7 +5201,8 @@
               "distribution_or_worker_surface"
             ],
             "test_refs": [
-              "tests/wave602-backend-atomic-deep-dive.test.js"
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave670-tdx-attestation-contract.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },

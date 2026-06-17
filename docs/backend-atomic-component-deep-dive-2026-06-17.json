@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 688,
-    "components_without_direct_test_reference": 141,
+    "test_referenced_components": 689,
+    "components_without_direct_test_reference": 140,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -68,7 +68,7 @@
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 402,
       "distribution_or_worker_surface": 169,
-      "environment_configuration_boundary": 312,
+      "environment_configuration_boundary": 313,
       "execution_or_subprocess_boundary": 233,
       "http_route_surface": 36,
       "large_component_contract_risk": 37,
@@ -1278,7 +1278,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave602-backend-atomic-deep-dive.test.js"
+        "tests/wave602-backend-atomic-deep-dive.test.js",
+        "tests/wave670-tdx-attestation-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -1442,24 +1443,27 @@
       "surface": "package-distribution",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "42baf794a10783e3312786b4cf7ac8fad7a34303d4ea19637cbfc6262f696ed1",
+      "sha256": "0fc35d772bc5bb1e8541c3a418aea1f53e3289343027210a06ebfc3073012915",
       "metrics": {
-        "bytes": 2499,
-        "lines": 76,
+        "bytes": 5114,
+        "lines": 154,
         "imports": 1,
-        "exports": 1,
+        "exports": 4,
         "routes": 0,
-        "env_refs": 0,
+        "env_refs": 1,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 2,
+        "crypto_refs": 3,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave670-tdx-attestation-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface"
+        "distribution_or_worker_surface",
+        "environment_configuration_boundary"
       ],
       "priority_score": 5,
       "deep_dive": {
@@ -1499,9 +1503,9 @@
       "surface": "package-distribution",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "c676ca93eaab1068028fe5fab22d782bf7e7a6aabe5e047994914d1a6c407ab4",
+      "sha256": "badd1513bfb61c98067b5683b4dba855ea1f728f52d50fc64a4269a427f8c4d2",
       "metrics": {
-        "bytes": 6164,
+        "bytes": 6203,
         "lines": 184,
         "imports": 4,
         "exports": 0,

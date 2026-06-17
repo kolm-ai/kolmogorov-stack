@@ -97,8 +97,8 @@ test('tdx: parses minimal quote', () => {
   buf.writeUInt16LE(2, 2);   // attestation_key_type
   // mr_seam at offset 64
   for (let i = 0; i < 48; i++) buf[64 + i] = 0xCC;
-  // mr_td at offset 232
-  for (let i = 0; i < 48; i++) buf[232 + i] = 0xDD;
+  // mr_td at absolute offset 184 (TD10 report body offset 136)
+  for (let i = 0; i < 48; i++) buf[184 + i] = 0xDD;
   const r = parseAttestation('tdx', buf);
   assert.equal(r.ok, true);
   assert.equal(r.vendor, 'intel');
