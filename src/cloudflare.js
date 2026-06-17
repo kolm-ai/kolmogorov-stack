@@ -17,23 +17,42 @@
 //   https://developers.cloudflare.com/waf/custom-rules/
 //   https://developers.cloudflare.com/email-routing/setup/email-routing-rules/
 
-const ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || process.env.cloudflare_account_id || '';
-const API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || process.env.Cloudflare_api_token || '';
-const KOLM_DOMAIN = process.env.KOLM_DOMAIN || 'kolm.ai';
+import net from 'node:net';
+
+function accountId() {
+  return process.env.CLOUDFLARE_ACCOUNT_ID || process.env.cloudflare_account_id || '';
+}
+
+function apiToken() {
+  return process.env.CLOUDFLARE_API_TOKEN || process.env.Cloudflare_api_token || '';
+}
+
+function defaultDomain() {
+  return process.env.KOLM_DOMAIN || 'kolm.ai';
+}
 
 function authHeaders(extra = {}) {
-  if (!API_TOKEN) throw new Error('CLOUDFLARE_API_TOKEN not set');
-  return { Authorization: `Bearer ${API_TOKEN}`, ...extra };
+  const token = apiToken();
+  if (!token) throw new Error('CLOUDFLARE_API_TOKEN not set');
+  return { Authorization: `Bearer ${token}`, ...extra };
 }
 
 const API = 'https://api.cloudflare.com/client/v4';
 
 export function cloudflareConfigured() {
-  return Boolean(ACCOUNT_ID && API_TOKEN);
+  return Boolean(accountId() && apiToken());
+}
+
+function fetchTimeoutMs() {
+  const n = Number(process.env.KOLM_CLOUDFLARE_FETCH_TIMEOUT_MS || 10_000);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 10_000;
 }
 
 async function cfFetch(url, init = {}) {
-  const r = await fetch(url, { ...init, headers: { ...authHeaders(), ...(init.headers || {}) } });
+  const signal = init.signal || (typeof AbortSignal !== 'undefined' && AbortSignal.timeout
+    ? AbortSignal.timeout(fetchTimeoutMs())
+    : undefined);
+  const r = await fetch(url, { ...init, signal, headers: { ...authHeaders(), ...(init.headers || {}) } });
   const j = await r.json().catch(() => ({}));
   if (!j.success) {
     const errs = JSON.stringify(j.errors || j);
@@ -43,17 +62,17 @@ async function cfFetch(url, init = {}) {
 }
 
 export async function listZones() {
-  const j = await cfFetch(`${API}/zones?account.id=${ACCOUNT_ID}&per_page=50`);
+  const j = await cfFetch(`${API}/zones?account.id=${encodeURIComponent(accountId())}&per_page=50`);
   return j.result || [];
 }
 
-export async function discoverZoneId(domain = KOLM_DOMAIN) {
+export async function discoverZoneId(domain = defaultDomain()) {
   if (process.env.CLOUDFLARE_ZONE_ID || process.env.cloudflare_zone_id) {
     return process.env.CLOUDFLARE_ZONE_ID || process.env.cloudflare_zone_id;
   }
   const zones = await listZones();
   const z = zones.find(z => z.name === domain);
-  if (!z) throw new Error(`zone ${domain} not found on account ${ACCOUNT_ID}`);
+  if (!z) throw new Error(`zone ${domain} not found on account ${accountId()}`);
   return z.id;
 }
 
@@ -101,8 +120,32 @@ export async function putCustomRules(zone_id, rules) {
 
 // Default rule set: block traversal probes, drop obvious credential-stuffing
 // patterns on /v1/signin, gate WordPress probes, gate /v1/admin to ADMIN_ALLOW_CIDR.
+function normalizeCidr(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+  const [addr, bits, extra] = raw.split('/');
+  if (extra !== undefined || !net.isIP(addr)) {
+    throw new Error(`invalid ADMIN_ALLOW_CIDR entry: ${raw}`);
+  }
+  if (bits === undefined) return addr;
+  if (!/^\d+$/.test(bits)) throw new Error(`invalid ADMIN_ALLOW_CIDR entry: ${raw}`);
+  const n = Number(bits);
+  const max = net.isIP(addr) === 4 ? 32 : 128;
+  if (!Number.isInteger(n) || n < 0 || n > max) {
+    throw new Error(`invalid ADMIN_ALLOW_CIDR entry: ${raw}`);
+  }
+  return `${addr}/${n}`;
+}
+
+function adminAllowCidrs() {
+  return (process.env.ADMIN_ALLOW_CIDR || '')
+    .split(',')
+    .map(normalizeCidr)
+    .filter(Boolean);
+}
+
 export function defaultWafRules() {
-  const adminAllow = (process.env.ADMIN_ALLOW_CIDR || '').split(',').map(s => s.trim()).filter(Boolean);
+  const adminAllow = adminAllowCidrs();
   const rules = [
     {
       description: 'block path traversal probes',
@@ -128,7 +171,7 @@ export function defaultWafRules() {
   if (adminAllow.length) {
     rules.push({
       description: 'gate /v1/admin to ADMIN_ALLOW_CIDR',
-      expression: `(starts_with(http.request.uri.path, "/v1/admin") and not ip.src in {${adminAllow.map(c => JSON.stringify(c)).join(' ')}})`,
+      expression: `(starts_with(http.request.uri.path, "/v1/admin") and not ip.src in {${adminAllow.join(' ')}})`,
       action: 'block',
     });
   }
@@ -141,6 +184,13 @@ async function ratelimitRulesetId(zone_id) {
   const j = await cfFetch(`${API}/zones/${zone_id}/rulesets?phase=http_ratelimit`);
   const entry = (j.result || []).find(rs => rs.phase === 'http_ratelimit');
   return entry ? entry.id : null;
+}
+
+export async function listRateLimitRules(zone_id) {
+  const rid = await ratelimitRulesetId(zone_id);
+  if (!rid) return [];
+  const j = await cfFetch(`${API}/zones/${zone_id}/rulesets/${rid}`);
+  return j.result?.rules || [];
 }
 
 export async function putRateLimitRules(zone_id, rules) {
@@ -235,30 +285,54 @@ function forwardTo() {
   return process.env.KOLM_EMAIL_FORWARD || 'dev@kolm.ai';
 }
 
-export function defaultEmailRules() {
-  const dest = forwardTo();
+function normalizeDomain(value) {
+  const domain = String(value || defaultDomain()).trim().toLowerCase().replace(/\.$/, '');
+  const labels = domain.split('.');
+  if (
+    domain.length < 3
+    || domain.length > 253
+    || labels.length < 2
+    || labels.some((label) => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))
+  ) {
+    throw new Error(`invalid Cloudflare zone domain: ${value}`);
+  }
+  return domain;
+}
+
+function normalizeEmail(value) {
+  const email = String(value || '').trim().toLowerCase();
+  if (!/^[^\s@<>"]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$/.test(email)) {
+    throw new Error(`invalid KOLM_EMAIL_FORWARD: ${value}`);
+  }
+  return email;
+}
+
+export function defaultEmailRules(options = {}) {
+  const opts = typeof options === 'string' ? { domain: options } : (options || {});
+  const domain = normalizeDomain(opts.domain || defaultDomain());
+  const dest = normalizeEmail(opts.forwardTo || forwardTo());
   const mkRule = (local, label) => ({
     actions: [{ type: 'forward', value: [dest] }],
-    matchers: [{ field: 'to', type: 'literal', value: `${local}@${KOLM_DOMAIN}` }],
+    matchers: [{ field: 'to', type: 'literal', value: `${local}@${domain}` }],
     enabled: true,
     name: label,
     priority: 0,
   });
   return [
-    mkRule('sales',      'sales → owner'),
-    mkRule('dev',        'dev → owner'),
-    mkRule('support',    'support → owner'),
-    mkRule('security',   'security → owner'),
-    mkRule('legal',      'legal → owner'),
-    mkRule('compliance', 'compliance → owner'),
-    mkRule('hi',         'hi → owner'),
-    mkRule('contact',    'contact → owner'),
+    mkRule('sales', 'sales owner'),
+    mkRule('dev', 'dev owner'),
+    mkRule('support', 'support owner'),
+    mkRule('security', 'security owner'),
+    mkRule('legal', 'legal owner'),
+    mkRule('compliance', 'compliance owner'),
+    mkRule('hi', 'hi owner'),
+    mkRule('contact', 'contact owner'),
   ];
 }
 
 // ---- One-shot bootstrap -------------------------------------------------
 
-export async function bootstrapZoneHardening({ domain = KOLM_DOMAIN } = {}) {
+export async function bootstrapZoneHardening({ domain = defaultDomain() } = {}) {
   if (!cloudflareConfigured()) throw new Error('Cloudflare not configured (need account_id + api_token)');
   const zone_id = await discoverZoneId(domain);
   const out = { zone_id, domain, applied: {} };
@@ -278,7 +352,7 @@ export async function bootstrapZoneHardening({ domain = KOLM_DOMAIN } = {}) {
   // + rate-limit work as applied.
   try {
     await enableEmailRouting(zone_id).catch(() => {}); // idempotent
-    const emailRules = defaultEmailRules();
+    const emailRules = defaultEmailRules({ domain });
     for (const r of emailRules) await putEmailRule(zone_id, r);
     out.applied.email_rules = emailRules.length;
   } catch (e) {

@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 91.9,
+    "local_engineering_score": 92,
     "frontier_product_score": 69.1,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 687,
-    "direct_test_reference_pct": 82.9,
-    "components_without_direct_test_reference": 142,
+    "direct_test_referenced_components": 688,
+    "direct_test_reference_pct": 83,
+    "components_without_direct_test_reference": 141,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -1878,25 +1878,26 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 5093,
-          "lines": 124,
-          "imports": 1,
+          "bytes": 7655,
+          "lines": 251,
+          "imports": 2,
           "exports": 1,
           "routes": 0,
-          "env_refs": 7,
+          "env_refs": 10,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 6,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "environment_configuration_boundary",
           "http_route_surface"
         ],
-        "priority_score": 3,
-        "priority_band": "normal",
-        "sha256": "b139f514dffb56f837e7a9358b6f1d49b799c58518b537d446a527193049ba13"
+        "priority_score": 5,
+        "priority_band": "medium",
+        "sha256": "c37b79f62540c4531e492935c59d39c6babba14eba1253d796d52e0220ae44f8"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -1904,7 +1905,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave669-cf-config-api-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
         "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
@@ -1913,10 +1916,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
     },
     {
       "path": "api/r2.js",
@@ -12761,12 +12762,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 11003,
-          "lines": 290,
-          "imports": 0,
-          "exports": 14,
+          "bytes": 13194,
+          "lines": 364,
+          "imports": 1,
+          "exports": 15,
           "routes": 0,
-          "env_refs": 11,
+          "env_refs": 12,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 18,
@@ -12779,7 +12780,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "97e8eb0ce31bedc2bafdf519edf12a3002fcaab5cdd7ae41e807fc4f283e28d3"
+        "sha256": "f15e4637b2ac0254949a7dcd71a16b3fa23cbaac752454429c9b29c9de444f4d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -12791,7 +12792,8 @@
           "tests/wave553-codegraph-cloud-platform.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js",
           "tests/wave558-object-storage-cloud-contract.test.js",
-          "tests/wave583-cloud-compute-broker.test.js"
+          "tests/wave583-cloud-compute-broker.test.js",
+          "tests/wave669-cf-config-api-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",

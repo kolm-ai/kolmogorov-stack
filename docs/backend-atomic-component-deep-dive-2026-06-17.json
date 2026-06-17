@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 687,
-    "components_without_direct_test_reference": 142,
+    "test_referenced_components": 688,
+    "components_without_direct_test_reference": 141,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 401,
+      "cryptographic_or_proof_boundary": 402,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 312,
       "execution_or_subprocess_boundary": 233,
@@ -515,26 +515,29 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "b139f514dffb56f837e7a9358b6f1d49b799c58518b537d446a527193049ba13",
+      "sha256": "c37b79f62540c4531e492935c59d39c6babba14eba1253d796d52e0220ae44f8",
       "metrics": {
-        "bytes": 5093,
-        "lines": 124,
-        "imports": 1,
+        "bytes": 7655,
+        "lines": 251,
+        "imports": 2,
         "exports": 1,
         "routes": 0,
-        "env_refs": 7,
+        "env_refs": 10,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave669-cf-config-api-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "http_route_surface"
       ],
-      "priority_score": 3,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -13045,14 +13048,14 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "97e8eb0ce31bedc2bafdf519edf12a3002fcaab5cdd7ae41e807fc4f283e28d3",
+      "sha256": "f15e4637b2ac0254949a7dcd71a16b3fa23cbaac752454429c9b29c9de444f4d",
       "metrics": {
-        "bytes": 11003,
-        "lines": 290,
-        "imports": 0,
-        "exports": 14,
+        "bytes": 13194,
+        "lines": 364,
+        "imports": 1,
+        "exports": 15,
         "routes": 0,
-        "env_refs": 11,
+        "env_refs": 12,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 18,
@@ -13063,7 +13066,8 @@
         "tests/wave553-codegraph-cloud-platform.test.js",
         "tests/wave555-user-completion-cloud-optimizer.test.js",
         "tests/wave558-object-storage-cloud-contract.test.js",
-        "tests/wave583-cloud-compute-broker.test.js"
+        "tests/wave583-cloud-compute-broker.test.js",
+        "tests/wave669-cf-config-api-contract.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary",

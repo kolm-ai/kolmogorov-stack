@@ -1,123 +1,250 @@
 // Vercel serverless function for Cloudflare zone hardening.
-// Applies WAF custom rules, rate-limit rules, and Email Routing forward
-// rules to the kolm.ai zone. Gated by ADMIN_KEY (x-admin-key header).
+// Applies WAF custom rules, rate-limit rules, and Email Routing forward rules.
+// Admin operations are gated by ADMIN_KEY in the x-admin-key header.
 //
 // Routes (path determined by ?op= query):
-//   GET  /api/cf-config?op=ping              — verify env + discover zone
-//   GET  /api/cf-config?op=zones             — list visible zones
-//   GET  /api/cf-config?op=waf               — list current WAF custom rules
-//   POST /api/cf-config?op=apply-waf         — apply default WAF custom rules
-//   GET  /api/cf-config?op=rate-limit        — list current rate-limit rules
-//   POST /api/cf-config?op=apply-rate-limit  — apply default rate-limit rules
-//   GET  /api/cf-config?op=email             — Email Routing status + rules
-//   POST /api/cf-config?op=apply-email       — enable Email Routing + apply forwards
-//   POST /api/cf-config?op=bootstrap         — one-shot: all of the above
+//   GET  /api/cf-config?op=ping
+//   GET  /api/cf-config?op=zones
+//   GET  /api/cf-config?op=waf
+//   POST /api/cf-config?op=apply-waf
+//   GET  /api/cf-config?op=rate-limit
+//   POST /api/cf-config?op=apply-rate-limit
+//   GET  /api/cf-config?op=email
+//   POST /api/cf-config?op=apply-email
+//   POST /api/cf-config?op=bootstrap
+
+import crypto from 'node:crypto';
 import * as CF from '../src/cloudflare.js';
 
+const OP_METHODS = {
+  ping: new Set(['GET']),
+  zones: new Set(['GET']),
+  waf: new Set(['GET']),
+  'apply-waf': new Set(['POST']),
+  'rate-limit': new Set(['GET']),
+  'apply-rate-limit': new Set(['POST']),
+  email: new Set(['GET']),
+  'apply-email': new Set(['POST']),
+  bootstrap: new Set(['POST']),
+};
+
+class HttpError extends Error {
+  constructor(status, error, detail = null) {
+    super(detail || error);
+    this.status = status;
+    this.error = error;
+    this.detail = detail;
+  }
+}
+
+function _header(req, name) {
+  const headers = req.headers || {};
+  return headers[name] ?? headers[name.toLowerCase()] ?? headers[name.toUpperCase()];
+}
+
+function _sha256(s) {
+  return crypto.createHash('sha256').update(String(s || '')).digest();
+}
+
+function _safeEqual(a, b) {
+  return crypto.timingSafeEqual(_sha256(a), _sha256(b));
+}
+
+function _json(res, status, payload) {
+  return res.status(status).json(payload);
+}
+
+function _accountId() {
+  return process.env.CLOUDFLARE_ACCOUNT_ID || process.env.cloudflare_account_id || '';
+}
+
+function _apiToken() {
+  return process.env.CLOUDFLARE_API_TOKEN || process.env.Cloudflare_api_token || '';
+}
+
+function _configuredEnvelope(error = 'cloudflare_not_configured') {
+  return {
+    ok: false,
+    error,
+    hint: 'set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN env vars',
+    have_account: !!_accountId(),
+    have_token: !!_apiToken(),
+  };
+}
+
+function _accountPrefix() {
+  const id = _accountId();
+  return id ? `${id.slice(0, 8)}...` : null;
+}
+
+function _redact(s) {
+  let out = String(s || '');
+  for (const secret of [_apiToken(), process.env.ADMIN_KEY, _accountId()].filter((v) => String(v || '').length >= 4)) {
+    out = out.split(String(secret)).join('[redacted]');
+  }
+  return out
+    .replace(/\/accounts\/[^/?\s]+/g, '/accounts/[redacted]')
+    .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [redacted]');
+}
+
+function _errorDetail(e) {
+  if (!process.env.KOLM_DEBUG) return 'operation failed';
+  return _redact(e?.message || e).slice(0, 1000);
+}
+
+function _assertMethod(req, res, op) {
+  const method = String(req.method || 'GET').toUpperCase();
+  const allowed = OP_METHODS[op] || null;
+  if (!allowed) return true;
+  if (allowed.has(method)) return true;
+  res.setHeader('Allow', Array.from(allowed).join(', '));
+  _json(res, 405, { ok: false, error: 'method_not_allowed', op, allowed: Array.from(allowed) });
+  return false;
+}
+
 function requireAdmin(req, res) {
-  const k = req.headers['x-admin-key'] || req.query?.admin_key;
-  if (!k || k !== process.env.ADMIN_KEY) {
-    res.status(403).json({ error: 'admin only' });
+  const expected = process.env.ADMIN_KEY || '';
+  const supplied = _header(req, 'x-admin-key');
+  if (!expected || !supplied || !_safeEqual(supplied, expected)) {
+    _json(res, 403, { ok: false, error: expected ? 'admin_only' : 'admin_not_configured' });
     return false;
   }
   return true;
 }
 
+function _domain(value) {
+  const domain = String(value || process.env.KOLM_DOMAIN || 'kolm.ai').trim().toLowerCase().replace(/\.$/, '');
+  const labels = domain.split('.');
+  if (
+    domain.length < 3
+    || domain.length > 253
+    || labels.length < 2
+    || labels.some((label) => !/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(label))
+  ) {
+    throw new HttpError(400, 'invalid_domain', 'domain must be a DNS zone name');
+  }
+  return domain;
+}
+
+function _sanitizeZone(z) {
+  return {
+    id: z.id,
+    name: z.name,
+    status: z.status,
+    paused: z.paused,
+    type: z.type,
+  };
+}
+
+function _sanitizeSoftError(e) {
+  return { ok: false, error: 'cloudflare_operation_failed', detail: _errorDetail(e) };
+}
+
 export default async function handler(req, res) {
   try {
+    const op = String(req.query?.op || 'ping');
+    if (!OP_METHODS[op]) {
+      return _json(res, 400, { ok: false, error: 'unknown_op', op, ops: Object.keys(OP_METHODS) });
+    }
+    if (!_assertMethod(req, res, op)) return;
+
     if (!CF.cloudflareConfigured()) {
-      return res.status(500).json({
-        error: 'cloudflare not configured',
-        hint: 'set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN env vars',
-        have_account: !!(process.env.CLOUDFLARE_ACCOUNT_ID || process.env.cloudflare_account_id),
-        have_token: !!(process.env.CLOUDFLARE_API_TOKEN || process.env.Cloudflare_api_token),
+      return _json(res, 500, _configuredEnvelope());
+    }
+
+    if (op === 'ping') {
+      return _json(res, 200, {
+        ok: true,
+        configured: true,
+        account_prefix: _accountPrefix(),
+        zone_id_configured: !!(process.env.CLOUDFLARE_ZONE_ID || process.env.cloudflare_zone_id),
       });
     }
 
-    const op = String(req.query.op || 'ping');
-
-    if (op === 'ping') {
-      try {
-        const zones = await CF.listZones();
-        return res.status(200).json({ ok: true, zone_count: zones.length, zones: zones.map(z => ({ id: z.id, name: z.name })) });
-      } catch (e) {
-        return res.status(500).json({ ok: false, error: String(e.message || e) });
-      }
-    }
+    if (!requireAdmin(req, res)) return;
 
     if (op === 'zones') {
-      if (!requireAdmin(req, res)) return;
       const zones = await CF.listZones();
-      return res.status(200).json({ zones });
+      return _json(res, 200, { ok: true, count: zones.length, zones: zones.map(_sanitizeZone) });
     }
 
-    const domain = String(req.query.domain || process.env.KOLM_DOMAIN || 'kolm.ai');
+    const domain = _domain(req.query?.domain);
 
     if (op === 'waf') {
-      if (!requireAdmin(req, res)) return;
       const zone_id = await CF.discoverZoneId(domain);
       const rules = await CF.listCustomRules(zone_id);
-      return res.status(200).json({ zone_id, rules });
+      return _json(res, 200, { ok: true, zone_id, domain, rules });
     }
 
     if (op === 'apply-waf') {
-      if (!requireAdmin(req, res)) return;
       const zone_id = await CF.discoverZoneId(domain);
       const rules = CF.defaultWafRules();
       await CF.putCustomRules(zone_id, rules);
-      return res.status(200).json({ ok: true, zone_id, applied: rules.length });
+      return _json(res, 200, { ok: true, zone_id, domain, applied: rules.length });
     }
 
     if (op === 'rate-limit') {
-      if (!requireAdmin(req, res)) return;
       const zone_id = await CF.discoverZoneId(domain);
-      // Reads via the same rulesets endpoint family; reuse the apply helper
-      // logic indirectly by hitting the ruleset list endpoint.
-      const rules = CF.defaultRateLimitRules();
-      return res.status(200).json({ zone_id, planned: rules });
+      const rules = await CF.listRateLimitRules(zone_id);
+      return _json(res, 200, {
+        ok: true,
+        zone_id,
+        domain,
+        rules,
+        planned_count: CF.defaultRateLimitRules().length,
+      });
     }
 
     if (op === 'apply-rate-limit') {
-      if (!requireAdmin(req, res)) return;
       const zone_id = await CF.discoverZoneId(domain);
       const rules = CF.defaultRateLimitRules();
       await CF.putRateLimitRules(zone_id, rules);
-      return res.status(200).json({ ok: true, zone_id, applied: rules.length });
+      return _json(res, 200, { ok: true, zone_id, domain, applied: rules.length });
     }
 
     if (op === 'email') {
-      if (!requireAdmin(req, res)) return;
       const zone_id = await CF.discoverZoneId(domain);
-      const status = await CF.emailRoutingStatus(zone_id).catch(e => ({ error: String(e.message || e) }));
+      const status = await CF.emailRoutingStatus(zone_id).catch(_sanitizeSoftError);
       const rules = await CF.listEmailRules(zone_id).catch(() => []);
-      return res.status(200).json({ zone_id, status, rules });
+      return _json(res, 200, { ok: true, zone_id, domain, status, rules });
     }
 
     if (op === 'apply-email') {
-      if (!requireAdmin(req, res)) return;
       const zone_id = await CF.discoverZoneId(domain);
-      await CF.enableEmailRouting(zone_id).catch(() => {});
-      const rules = CF.defaultEmailRules();
+      const enable = await CF.enableEmailRouting(zone_id)
+        .then(() => ({ ok: true }))
+        .catch(_sanitizeSoftError);
+      const rules = CF.defaultEmailRules({ domain });
       const results = [];
       for (const r of rules) {
         try {
           await CF.putEmailRule(zone_id, r);
-          results.push({ name: r.name, ok: true });
+          results.push({ name: r.name, inbound: r.matchers?.[0]?.value, ok: true });
         } catch (e) {
-          results.push({ name: r.name, ok: false, error: String(e.message || e) });
+          results.push({
+            name: r.name,
+            inbound: r.matchers?.[0]?.value,
+            ok: false,
+            error: 'cloudflare_email_rule_failed',
+            detail: _errorDetail(e),
+          });
         }
       }
-      return res.status(200).json({ ok: true, zone_id, applied: results });
+      return _json(res, 200, { ok: true, zone_id, domain, enable, applied: results });
     }
 
     if (op === 'bootstrap') {
-      if (!requireAdmin(req, res)) return;
       const out = await CF.bootstrapZoneHardening({ domain });
-      return res.status(200).json({ ok: true, ...out });
+      return _json(res, 200, { ok: true, ...out });
     }
-
-    return res.status(400).json({ error: 'unknown op', ops: ['ping', 'zones', 'waf', 'apply-waf', 'rate-limit', 'apply-rate-limit', 'email', 'apply-email', 'bootstrap'] });
   } catch (e) {
-    return res.status(500).json({ error: String(e.message || e), stack: process.env.KOLM_DEBUG ? String(e.stack || '') : undefined });
+    if (e instanceof HttpError) {
+      return _json(res, e.status, { ok: false, error: e.error, detail: e.detail });
+    }
+    return _json(res, 500, {
+      ok: false,
+      error: 'cf_config_api_error',
+      detail: _errorDetail(e),
+    });
   }
 }
