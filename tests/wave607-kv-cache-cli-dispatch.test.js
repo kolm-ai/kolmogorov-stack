@@ -8,12 +8,28 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { selectKvCachePolicy } from '../src/serve-config.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
 const CLI = path.join(ROOT, 'cli', 'kolm.js');
+const KVPOLICY = path.join(ROOT, 'workers', 'itkv', 'scripts', 'kvpolicy.py');
+const ITKV_REQUIREMENTS = path.join(ROOT, 'workers', 'itkv', 'requirements.txt');
+
+function findPython() {
+  const candidates = process.platform === 'win32'
+    ? ['python', 'python3', 'py']
+    : ['python3', 'python'];
+  for (const bin of candidates) {
+    const res = spawnSync(bin, ['--version'], { encoding: 'utf8', timeout: 5000 });
+    if (!res.error && (res.status === 0 || /python/i.test((res.stdout || '') + (res.stderr || '')))) {
+      return bin;
+    }
+  }
+  return null;
+}
 
 test('1. serve usage exposes the full KV policy set and tuning flags', () => {
   const src = fs.readFileSync(CLI, 'utf8');
@@ -52,4 +68,54 @@ test('4. backend spec records W607 closure while leaving KV measurement open', (
   assert.match(spec, /W607/);
   assert.match(spec, /real KV policy dispatcher into `kolm serve`/);
   assert.match(spec, /No measurement: probe\.py records the kv_policy NAME/);
+});
+
+test('5. ITKV kvpolicy sidecar mirrors serve.py policy builders and pins worker deps', () => {
+  assert.equal(fs.existsSync(KVPOLICY), true, 'workers/itkv/scripts/kvpolicy.py must exist');
+  assert.equal(fs.existsSync(ITKV_REQUIREMENTS), true, 'workers/itkv/requirements.txt must exist');
+
+  const sidecar = fs.readFileSync(KVPOLICY, 'utf8');
+  assert.match(sidecar, /def build_press\(/);
+  assert.match(sidecar, /def quantized_cache_for\(/);
+  for (const symbol of [
+    'StreamingLLMPress',
+    'SnapKVPress',
+    'ObservedAttentionPress',
+    'PyramidKVPress',
+    'HQQQuantizedCache',
+    'QuantizedCacheConfig',
+  ]) {
+    assert.ok(sidecar.includes(symbol), `kvpolicy.py missing ${symbol}`);
+  }
+  assert.match(sidecar, /--doctor/);
+  assert.match(sidecar, /return 0 if out\["ok"\] else 2/);
+
+  const reqs = fs.readFileSync(ITKV_REQUIREMENTS, 'utf8');
+  assert.match(reqs, /^kvpress==0\.5\.3$/m);
+  assert.match(reqs, /^hqq==0\.2\.8\.post1$/m);
+  assert.match(reqs, /^transformers>=4\.42$/m);
+});
+
+test('6. ITKV kvpolicy sidecar self-test and doctor are GPU-free', (t) => {
+  const py = findPython();
+  if (!py) return t.skip('python not available');
+
+  const self = spawnSync(py, [KVPOLICY, '--self-test'], { encoding: 'utf8', timeout: 10000 });
+  assert.equal(self.status, 0, `self-test failed: ${self.stderr || self.stdout}`);
+  const selfJson = JSON.parse(self.stdout.trim());
+  assert.equal(selfJson.ok, true);
+  assert.equal(selfJson.version, 'w633-v1');
+
+  const doctor = spawnSync(py, [KVPOLICY, '--doctor'], { encoding: 'utf8', timeout: 10000 });
+  assert.ok([0, 2].includes(doctor.status), `doctor exits 0 when deps exist or 2 when missing; got ${doctor.status}`);
+  const report = JSON.parse(doctor.stdout.trim());
+  assert.equal(report.spec, 'kolm-itkv-kvpolicy-doctor');
+  assert.equal(report.version, 'w633-v1');
+  for (const dep of ['kvpress', 'transformers', 'hqq']) {
+    assert.equal(typeof report.dependencies[dep].ok, 'boolean');
+  }
+  if (doctor.status === 2) {
+    assert.equal(report.ok, false);
+    assert.match(report.install_hint, /workers\/itkv\/requirements\.txt/);
+  }
 });

@@ -2,7 +2,7 @@
   "name": "@kolm/itkv-worker",
   "version": "0.1.0",
   "private": true,
-  "description": "W722 - isolated kolm Importance-Tiered KV Cache (ITKV) tier selector worker. Thin Node shell that spawns a Python tier-classifier (verbatim port of src/itkv-profile.js classifyToken). NO heavy deps - root kolm install stays light. Runtime KV cache tier DISPATCH (vLLM PagedAttention / SGLang radix cache) is a future wave; this worker only ships the classifier so an external runtime can call it as a sidecar.",
+  "description": "W722/W633 - isolated kolm Importance-Tiered KV Cache (ITKV) worker. Thin Node shell spawns the stdlib Python tier-classifier; optional workers/itkv/requirements.txt installs kvpress/transformers/hqq for the KV policy sidecar. Root kolm install stays light.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "itkv.mjs",
@@ -19,7 +19,7 @@
   "optionalDependencies": {},
   "external": {
     "python": {
-      "note": "Default tier selector is python3 workers/itkv/scripts/itkv.py. Uses ONLY the Python stdlib (argparse + json + sys); no heavy ML deps. Override via $ITKV_TIER_CMD (single command or JSON array form, e.g. ITKV_TIER_CMD='[\"node\",\"stub.js\"]')."
+      "note": "Default tier selector is python3 workers/itkv/scripts/itkv.py and uses only the Python stdlib. Optional KV policy runtime sidecar lives at workers/itkv/scripts/kvpolicy.py; install workers/itkv/requirements.txt in an isolated worker env for kvpress/transformers/hqq. Override tier selection via $ITKV_TIER_CMD (single command or JSON array form, e.g. ITKV_TIER_CMD='[\"node\",\"stub.js\"]')."
     }
   }
 }

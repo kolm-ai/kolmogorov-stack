@@ -38,8 +38,8 @@
     "frontier_improvement_or_invention"
   ],
   "summary": {
-    "component_count": 826,
-    "test_referenced_components": 660,
+    "component_count": 828,
+    "test_referenced_components": 662,
     "components_without_direct_test_reference": 166,
     "high_priority_components": 48,
     "domains": {
@@ -51,7 +51,7 @@
       "identity_access": 31,
       "infra_cloud_device": 69,
       "platform_support": 199,
-      "runtime_serving_routing": 24,
+      "runtime_serving_routing": 26,
       "storage_state": 26,
       "training_model_optimization": 118,
       "trust_security_compliance": 63
@@ -62,14 +62,14 @@
       "core-backend": 625,
       "package-distribution": 91,
       "service": 3,
-      "worker": 73
+      "worker": 75
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 399,
-      "distribution_or_worker_surface": 167,
+      "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 306,
-      "execution_or_subprocess_boundary": 231,
+      "execution_or_subprocess_boundary": 233,
       "http_route_surface": 36,
       "large_component_contract_risk": 36,
       "money_or_entitlement_path": 17,
@@ -47951,9 +47951,9 @@
       "surface": "worker",
       "domain": "runtime_serving_routing",
       "language": "json",
-      "sha256": "6e6955b31e70c917e6c54e4778e7aaa63348d4c619215cd758ed563f37a70d68",
+      "sha256": "1c0796f4af54dce233c98d2a39fa92fd6c532cfb770e001b1921a41b1a44d6ef",
       "metrics": {
-        "bytes": 1082,
+        "bytes": 1077,
         "lines": 26,
         "imports": 0,
         "exports": 0,
@@ -47971,6 +47971,72 @@
         "execution_or_subprocess_boundary"
       ],
       "priority_score": 3,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache",
+      "innovation_opportunity": "Close the semantic routing flywheel by recording outcomes, training route stats, and emitting runtime passports.",
+      "suggested_verification": [
+        "npm run verify:codegraph",
+        "npm run verify:surfaces"
+      ]
+    },
+    {
+      "path": "workers/itkv/requirements.txt",
+      "id": "workers-itkv-requirements-txt",
+      "surface": "worker",
+      "domain": "runtime_serving_routing",
+      "language": "text",
+      "sha256": "77ac08b0c58f2d9b849c582b9c017ff55bfee500e7428814a806e8ac1d55e8b3",
+      "metrics": {
+        "bytes": 366,
+        "lines": 11,
+        "imports": 0,
+        "exports": 0,
+        "routes": 0,
+        "env_refs": 0,
+        "fs_writes": 0,
+        "subprocess_refs": 0,
+        "network_refs": 0,
+        "crypto_refs": 0,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/product-kernel-envelope.test.js",
+        "tests/wave144-verifier-states.test.js",
+        "tests/wave195-quantize-worker.test.js",
+        "tests/wave464-multimodal-audio-redact.test.js",
+        "tests/wave593-invention-implementation-spec.test.js",
+        "tests/wave595-product-frontier-map.test.js",
+        "tests/wave596-product-math-frontier.test.js",
+        "tests/wave597-build-strategy-brain.test.js"
+      ],
+      "risk_signals": [
+        "distribution_or_worker_surface",
+        "execution_or_subprocess_boundary"
+      ],
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -48028,6 +48094,65 @@
         "execution_or_subprocess_boundary"
       ],
       "priority_score": 3,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache",
+      "innovation_opportunity": "Close the semantic routing flywheel by recording outcomes, training route stats, and emitting runtime passports.",
+      "suggested_verification": [
+        "npm run verify:codegraph",
+        "npm run verify:surfaces"
+      ]
+    },
+    {
+      "path": "workers/itkv/scripts/kvpolicy.py",
+      "id": "workers-itkv-scripts-kvpolicy-py",
+      "surface": "worker",
+      "domain": "runtime_serving_routing",
+      "language": "python",
+      "sha256": "b88ca035a57dbfbed165a4f3a2e4372549e75a8a76853fd26925e919d7af4d6b",
+      "metrics": {
+        "bytes": 11643,
+        "lines": 334,
+        "imports": 0,
+        "exports": 17,
+        "routes": 0,
+        "env_refs": 0,
+        "fs_writes": 0,
+        "subprocess_refs": 0,
+        "network_refs": 0,
+        "crypto_refs": 0,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/wave607-kv-cache-cli-dispatch.test.js"
+      ],
+      "risk_signals": [
+        "distribution_or_worker_surface",
+        "execution_or_subprocess_boundary"
+      ],
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

@@ -1,0 +1,10 @@
+# W633 - optional KV-cache runtime sidecar dependencies.
+# Install inside the isolated workers/itkv environment only:
+#   pip install -r workers/itkv/requirements.txt
+
+# NVIDIA kvpress supplies StreamingLLM/SnapKV/H2O/PyramidKV presses.
+kvpress==0.5.3
+
+# Transformers supplies QuantizedCacheConfig/QuantizedCache; hqq backs KIVI.
+transformers>=4.42
+hqq==0.2.8.post1
