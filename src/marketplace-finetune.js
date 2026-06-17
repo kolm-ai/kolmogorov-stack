@@ -21,10 +21,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { getListing } from './marketplace-w825.js';
+import { getListing, _digestPath } from './marketplace-w825.js';
 import { appendEvent } from './event-store.js';
 
-export const MARKETPLACE_FINETUNE_VERSION = 'w825-finetune-v1';
+export const MARKETPLACE_FINETUNE_VERSION = 'w650-marketplace-finetune-v2';
 
 function _home() {
   return process.env.HOME || process.env.USERPROFILE || os.homedir();
@@ -48,8 +48,12 @@ export async function finetuneFromMarketplace(opts = {}) {
   const artifact_id = String(opts.artifact_id || '').trim();
   const tenant_id = String(opts.tenant_id || '').trim();
   const captures_namespace = String(opts.captures_namespace || 'default').trim();
-  const k_target = Number.isFinite(Number(opts.k_target)) ? Number(opts.k_target) : 0.85;
-  const max_steps = Number.isFinite(Number(opts.max_steps)) ? Math.trunc(Number(opts.max_steps)) : 500;
+  const k_target = _clamp(Number.isFinite(Number(opts.k_target)) ? Number(opts.k_target) : 0.85, 0, 1);
+  const max_steps = _clamp(
+    Number.isFinite(Number(opts.max_steps)) ? Math.trunc(Number(opts.max_steps)) : 500,
+    1,
+    100000,
+  );
 
   if (!artifact_id) {
     return { ok: false, error: 'artifact_id_required', version: MARKETPLACE_FINETUNE_VERSION };
@@ -68,36 +72,131 @@ export async function finetuneFromMarketplace(opts = {}) {
   }
 
   // Step 1: copy the artifact bytes into the tenant's local ~/.kolm/artifacts
-  // directory under a stable filename. If artifact_uri is missing or the
-  // source file does not exist, we still emit a honest envelope (the route
-  // layer can decide whether to surface this as a hard failure).
+  // directory under a stable filename. This is the base model for a later
+  // worker, so it must fail closed: remote/missing/tampered listings are not
+  // queueable fine-tune bases.
+  const artifactUri = String(listing.artifact_uri || '').trim();
+  if (!artifactUri || !_isLocalPath(artifactUri)) {
+    return {
+      ok: false,
+      error: 'artifact_uri_unavailable_for_finetune',
+      reason: !artifactUri ? 'artifact_uri_missing' : 'artifact_uri_remote',
+      artifact_id,
+      artifact_uri: artifactUri || null,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
+  }
+  const sourcePath = path.resolve(artifactUri);
+  if (!fs.existsSync(sourcePath)) {
+    return {
+      ok: false,
+      error: 'artifact_uri_missing_on_disk',
+      artifact_id,
+      artifact_uri: artifactUri,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
+  }
+  let sourceStat = null;
+  try { sourceStat = fs.statSync(sourcePath); } catch (_e) { sourceStat = null; }
+  if (!sourceStat || !sourceStat.isFile()) {
+    return {
+      ok: false,
+      error: 'artifact_uri_not_file',
+      artifact_id,
+      artifact_uri: artifactUri,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
+  }
+  const actualSha256 = _digestPath(sourcePath);
+  const expectedSha256 = String(listing.manifest_sha256 || '').trim().toLowerCase();
+  if (!actualSha256) {
+    return {
+      ok: false,
+      error: 'artifact_sha256_unreadable',
+      artifact_id,
+      artifact_uri: artifactUri,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
+  }
+  if (expectedSha256 && actualSha256.toLowerCase() !== expectedSha256) {
+    return {
+      ok: false,
+      error: 'artifact_sha256_mismatch',
+      artifact_id,
+      expected_sha256: expectedSha256,
+      actual_sha256: actualSha256,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
+  }
+
   const destDir = _artifactsDir();
-  const destPath = path.join(destDir, `${artifact_id}.kolm`);
+  const destPath = path.join(destDir, _artifactFilename(artifact_id));
+  const resolvedDestDir = path.resolve(destDir);
+  const resolvedDestPath = path.resolve(destPath);
+  if (!_pathWithinDir(resolvedDestPath, resolvedDestDir)) {
+    return {
+      ok: false,
+      error: 'artifact_destination_escape',
+      artifact_id,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
+  }
   let copied_to = null;
-  let copy_skipped_reason = null;
-  if (listing.artifact_uri && _isLocalPath(listing.artifact_uri)) {
-    try {
-      if (fs.existsSync(listing.artifact_uri)) {
-        fs.copyFileSync(listing.artifact_uri, destPath);
-        copied_to = destPath;
-      } else {
-        copy_skipped_reason = 'artifact_uri_missing_on_disk';
-      }
-    } catch (e) {
+  let copied_sha256 = null;
+  const tmpPath = path.join(destDir, `.kolm-finetune-${process.pid}-${Date.now()}-${crypto.randomBytes(4).toString('hex')}.tmp`);
+  try {
+    fs.copyFileSync(sourcePath, tmpPath);
+    copied_sha256 = _digestPath(tmpPath);
+    if (copied_sha256 !== actualSha256) {
+      try { fs.rmSync(tmpPath, { force: true }); } catch (_e) { /* best-effort */ }
       return {
         ok: false,
-        error: 'artifact_copy_failed',
-        detail: String(e && e.message || e),
+        error: 'artifact_copy_sha256_mismatch',
         artifact_id,
+        expected_sha256: actualSha256,
+        actual_sha256: copied_sha256,
         version: MARKETPLACE_FINETUNE_VERSION,
       };
     }
-  } else {
-    copy_skipped_reason = 'artifact_uri_is_remote_or_unset';
+    fs.renameSync(tmpPath, destPath);
+    copied_to = destPath;
+  } catch (e) {
+    try { fs.rmSync(tmpPath, { force: true }); } catch (_e) { /* best-effort */ }
+    return {
+      ok: false,
+      error: 'artifact_copy_failed',
+      detail: String(e && e.message || e),
+      artifact_id,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
+  }
+
+  const copiedStat = fs.statSync(copied_to);
+  const copied_bytes = copiedStat.size;
+
+  if (copied_sha256 !== expectedSha256 && expectedSha256) {
+    try { fs.rmSync(copied_to, { force: true }); } catch (_e) { /* best-effort */ }
+    return {
+      ok: false,
+      error: 'copied_artifact_sha256_mismatch',
+      artifact_id,
+      expected_sha256: expectedSha256,
+      actual_sha256: copied_sha256,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
+  }
+
+  if (!copied_to) {
+    return {
+      ok: false,
+      error: 'artifact_copy_missing',
+      artifact_id,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
   }
 
   // Step 2: queue the distill run. We do NOT spawn the full distill worker
-  // here - we just persist a queued row that the worker can pick up.
+  // here - we persist a queued row that the worker can pick up.
   const run_id = 'distill_' + Date.now().toString(36) + '_' + crypto.randomBytes(3).toString('hex');
   try {
     await appendEvent({
@@ -109,6 +208,12 @@ export async function finetuneFromMarketplace(opts = {}) {
         run_id,
         base_artifact_id: artifact_id,
         base_artifact_path: copied_to,
+        base_artifact_sha256: copied_sha256,
+        base_artifact_bytes: copied_bytes,
+        listing_manifest_sha256: listing.manifest_sha256 || null,
+        publisher_tenant_id: listing.publisher_tenant_id || null,
+        listing_paid: !!listing.paid,
+        listing_price_micro_usd: Math.max(0, Math.trunc(Number(listing.price_micro_usd) || 0)),
         captures_namespace,
         k_target,
         max_steps,
@@ -116,7 +221,16 @@ export async function finetuneFromMarketplace(opts = {}) {
         version: MARKETPLACE_FINETUNE_VERSION,
       }),
     });
-  } catch (_e) { /* queue-write best-effort; envelope still honest */ }
+  } catch (e) {
+    try { fs.rmSync(copied_to, { force: true }); } catch (_rmErr) { /* best-effort */ }
+    return {
+      ok: false,
+      error: 'queue_write_failed',
+      detail: String(e && e.message || e),
+      artifact_id,
+      version: MARKETPLACE_FINETUNE_VERSION,
+    };
+  }
 
   return {
     ok: true,
@@ -124,7 +238,9 @@ export async function finetuneFromMarketplace(opts = {}) {
     base_artifact_id: artifact_id,
     status: 'queued',
     copied_to,
-    copy_skipped_reason,
+    base_artifact_sha256: copied_sha256,
+    base_artifact_bytes: copied_bytes,
+    listing_manifest_sha256: listing.manifest_sha256 || null,
     captures_namespace,
     k_target,
     max_steps,
@@ -141,4 +257,22 @@ function _isLocalPath(uri) {
   if (/^s3:\/\//i.test(uri)) return false;
   if (/^gs:\/\//i.test(uri)) return false;
   return true;
+}
+
+function _clamp(n, min, max) {
+  if (!Number.isFinite(n)) return min;
+  return Math.max(min, Math.min(max, n));
+}
+
+function _artifactFilename(artifactId) {
+  const raw = String(artifactId || '').trim();
+  if (/^[A-Za-z0-9._-]{1,128}$/.test(raw) && !raw.includes('..')) return `${raw}.kolm`;
+  const safe = raw.replace(/[^A-Za-z0-9._-]/g, '_').replace(/^\.+/, '_').slice(0, 80) || 'artifact';
+  const suffix = crypto.createHash('sha256').update(raw).digest('hex').slice(0, 12);
+  return `${safe}-${suffix}.kolm`;
+}
+
+function _pathWithinDir(candidate, dir) {
+  const rel = path.relative(dir, candidate);
+  return rel && !rel.startsWith('..') && !path.isAbsolute(rel);
 }

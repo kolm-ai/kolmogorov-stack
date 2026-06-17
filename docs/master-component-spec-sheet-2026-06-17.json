@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 90.3,
+    "local_engineering_score": 90.8,
     "frontier_product_score": 68.7,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,12 +35,12 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 669,
-    "direct_test_reference_pct": 80.7,
-    "components_without_direct_test_reference": 160,
+    "direct_test_referenced_components": 670,
+    "direct_test_reference_pct": 80.8,
+    "components_without_direct_test_reference": 159,
     "high_priority_components": 48,
-    "high_priority_direct_test_referenced": 46,
-    "high_priority_direct_test_reference_pct": 95.8,
+    "high_priority_direct_test_referenced": 47,
+    "high_priority_direct_test_reference_pct": 97.9,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 10,
     "categories_with_major_frontier_work_open": 13,
@@ -1547,35 +1547,6 @@
       ]
     },
     {
-      "path": "src/marketplace-finetune.js",
-      "domain": "billing_marketplace",
-      "surface": "core-backend",
-      "priority_score": 7,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "money_or_entitlement_path"
-      ],
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "high_priority_direct_test_missing",
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Add a direct contract/security/regression test before expanding this component.",
-      "suggested_verification": [
-        "node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js"
-      ]
-    },
-    {
       "path": "workers/runtime-build/build.mjs",
       "domain": "compile_artifact_runtime",
       "surface": "worker",
@@ -1818,6 +1789,53 @@
     },
     {
       "path": "src/deploy-pipeline.js",
+      "domain": "infra_cloud_device",
+      "surface": "core-backend",
+      "priority_score": 7,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary",
+        "network_or_provider_boundary",
+        "stateful_storage_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "finetune-frameworks",
+          "stack_area": "training",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "ondevice-inference",
+          "stack_area": "cross-device",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "confidential-compute",
+          "stack_area": "enterprise",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "compile-api-to-model-competitors",
+          "stack_area": "compiler-platform",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: capability_probe_attested_byoc_worker_and_deploy_readiness.",
+      "suggested_verification": [
+        "npm run verify:platform",
+        "npm run verify:package-release"
+      ]
+    },
+    {
+      "path": "src/device-install.js",
       "domain": "infra_cloud_device",
       "surface": "core-backend",
       "priority_score": 7,
@@ -26516,27 +26534,28 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 5300,
-          "lines": 145,
+          "bytes": 9592,
+          "lines": 279,
           "imports": 6,
           "exports": 2,
           "routes": 0,
           "env_refs": 4,
-          "fs_writes": 0,
+          "fs_writes": 4,
           "subprocess_refs": 1,
           "network_refs": 0,
-          "crypto_refs": 3,
+          "crypto_refs": 7,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
           "environment_configuration_boundary",
           "execution_or_subprocess_boundary",
-          "money_or_entitlement_path"
+          "money_or_entitlement_path",
+          "stateful_storage_boundary"
         ],
         "priority_score": 7,
         "priority_band": "high",
-        "sha256": "dfc38a2cef7f96b809bbd6d4818044055de70affc40a5e66e21891671407524f"
+        "sha256": "79b056b1bce5fa88072de60436645512a1e5a419a6a69926a041ae26b2a73c15"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -26544,7 +26563,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave650-marketplace-finetune-contract.test.js"
+        ],
         "category_links": [
           {
             "id": "finetune-frameworks",
@@ -26553,18 +26574,16 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof",
         "innovation_opportunity": "Bind Stripe event id, entitlement grant, artifact delivery, and invoice line into one signed fulfillment chain.",
         "suggested_verification": [
           "node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js"
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing",
-        "high_priority_direct_test_missing",
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Add a direct contract/security/regression test before expanding this component."
+      "next_best_action": "Execute the linked frontier track: signed_entitlement_ledger_and_webhook_idempotency_proof."
     },
     {
       "path": "src/marketplace-payouts.js",
@@ -26806,7 +26825,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave647-marketplace-routes-contract.test.js"
+          "tests/wave647-marketplace-routes-contract.test.js",
+          "tests/wave650-marketplace-finetune-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof",
