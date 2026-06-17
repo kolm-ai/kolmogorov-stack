@@ -201,10 +201,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 135
+        "line": 136
       },
       "local_sota_review": {
-        "line": 135,
+        "line": 136,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -335,6 +335,22 @@
             "test_refs": [
               "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "src/cloud-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c8-durable-compute-scheduler.test.js",
+              "tests/wave644-cloud-distill-bridge.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -519,21 +535,6 @@
               "tests/finalized-c4-distill-method-truthfulness.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/data/scripts/compute_grads.py",
-            "domain": "capture_data_eval",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
-            ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           }
         ],
         "count": 197,
@@ -636,10 +637,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 189
+        "line": 190
       },
       "local_sota_review": {
-        "line": 189,
+        "line": 190,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -795,6 +796,22 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
+            "path": "src/cloud-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c8-durable-compute-scheduler.test.js",
+              "tests/wave644-cloud-distill-bridge.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "src/compile-pipeline.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 8,
@@ -951,24 +968,6 @@
             ],
             "test_refs": [],
             "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
-            "path": "workers/vision-tokenize/tokenize.mjs",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c1-recipe-synthesis-engine.test.js",
-              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "count": 227,
@@ -1069,10 +1068,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 236
+        "line": 237
       },
       "local_sota_review": {
-        "line": 236,
+        "line": 237,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1224,6 +1223,22 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
+            "path": "src/cloud-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c8-durable-compute-scheduler.test.js",
+              "tests/wave644-cloud-distill-bridge.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "src/compile-pipeline.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 8,
@@ -1380,24 +1395,6 @@
             ],
             "test_refs": [],
             "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
-          },
-          {
-            "path": "workers/vision-tokenize/tokenize.mjs",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c1-recipe-synthesis-engine.test.js",
-              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "count": 266,
@@ -1517,10 +1514,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 281
+        "line": 282
       },
       "local_sota_review": {
-        "line": 281,
+        "line": 282,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -1953,10 +1950,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 323
+        "line": 324
       },
       "local_sota_review": {
-        "line": 323,
+        "line": 324,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -2065,6 +2062,22 @@
             "test_refs": [
               "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "src/cloud-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c8-durable-compute-scheduler.test.js",
+              "tests/wave644-cloud-distill-bridge.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -2256,23 +2269,6 @@
               "tests/wave921-trainer-unification.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/scripts/train_lora.py",
-            "domain": "training_model_optimization",
-            "priority_score": 6,
-            "risk_signals": [
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "http_route_surface"
-            ],
-            "test_refs": [
-              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js",
-              "tests/wave602-backend-atomic-deep-dive.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "count": 148,
@@ -2358,10 +2354,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 357
+        "line": 358
       },
       "local_sota_review": {
-        "line": 357,
+        "line": 358,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2488,6 +2484,22 @@
             "test_refs": [
               "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "src/cloud-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c8-durable-compute-scheduler.test.js",
+              "tests/wave644-cloud-distill-bridge.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -2666,23 +2678,6 @@
               "tests/sota-persistence.test.js"
             ],
             "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
-          },
-          {
-            "path": "src/cloud-sync.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave378-cloud-sync.test.js",
-              "tests/wave384-cli-wiring.test.js",
-              "tests/wave384-router-wiring.test.js"
-            ],
-            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
           }
         ],
         "count": 200,
@@ -2816,10 +2811,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 398
+        "line": 399
       },
       "local_sota_review": {
-        "line": 398,
+        "line": 399,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -2943,6 +2938,22 @@
             "test_refs": [
               "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "src/cloud-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c8-durable-compute-scheduler.test.js",
+              "tests/wave644-cloud-distill-bridge.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -3127,21 +3138,6 @@
               "tests/finalized-c4-distill-method-truthfulness.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/data/scripts/compute_grads.py",
-            "domain": "capture_data_eval",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
-            ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           }
         ],
         "count": 198,
@@ -3267,10 +3263,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 441
+        "line": 442
       },
       "local_sota_review": {
-        "line": 441,
+        "line": 442,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3439,6 +3435,22 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
+            "path": "src/cloud-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c8-durable-compute-scheduler.test.js",
+              "tests/wave644-cloud-distill-bridge.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "src/compile-pipeline.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 8,
@@ -3582,19 +3594,6 @@
               "tests/wave292-teacher-bridge-fail-closed.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/runtime-build/build.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
           }
         ],
         "count": 223,
@@ -3721,10 +3720,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 476
+        "line": 477
       },
       "local_sota_review": {
-        "line": 476,
+        "line": 477,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -4186,10 +4185,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 504
+        "line": 505
       },
       "local_sota_review": {
-        "line": 504,
+        "line": 505,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4648,10 +4647,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 551
+        "line": 552
       },
       "local_sota_review": {
-        "line": 551,
+        "line": 552,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -5115,10 +5114,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 584
+        "line": 585
       },
       "local_sota_review": {
-        "line": 584,
+        "line": 585,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5622,10 +5621,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 615
+        "line": 616
       },
       "local_sota_review": {
-        "line": 615,
+        "line": 616,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6121,10 +6120,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 661
+        "line": 662
       },
       "local_sota_review": {
-        "line": 661,
+        "line": 662,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -6282,6 +6281,22 @@
               "tests/agent-audit-routes.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "src/cloud-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/finalized-c8-durable-compute-scheduler.test.js",
+              "tests/wave644-cloud-distill-bridge.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/deploy-pipeline.js",
@@ -6449,18 +6464,6 @@
               "tests/finalized-c4-distill-method-truthfulness.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "src/airgap-bundle.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
           }
         ],
         "count": 253,
@@ -6583,10 +6586,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 711
+        "line": 712
       },
       "local_sota_review": {
-        "line": 711,
+        "line": 712,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -7056,14 +7059,14 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 758
+        "line": 759
       },
       "local_sota_review": {
-        "line": 758,
+        "line": 759,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 8,
-        "improvement_count": 4,
+        "already_at_frontier_count": 9,
+        "improvement_count": 3,
         "gaps": {
           "critical": 1,
           "major": 1,
@@ -7112,14 +7115,16 @@
           {
             "path": "src/cloud-distill.js",
             "domain": "training_model_optimization",
-            "priority_score": 5,
+            "priority_score": 8,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
               "environment_configuration_boundary",
+              "large_component_contract_risk",
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c8-durable-compute-scheduler.test.js"
+              "tests/finalized-c8-durable-compute-scheduler.test.js",
+              "tests/wave644-cloud-distill-bridge.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },

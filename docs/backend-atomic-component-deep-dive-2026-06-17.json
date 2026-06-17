@@ -41,7 +41,7 @@
     "component_count": 829,
     "test_referenced_components": 663,
     "components_without_direct_test_reference": 166,
-    "high_priority_components": 48,
+    "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -71,7 +71,7 @@
       "environment_configuration_boundary": 307,
       "execution_or_subprocess_boundary": 233,
       "http_route_surface": 36,
-      "large_component_contract_risk": 36,
+      "large_component_contract_risk": 37,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 163,
       "open_marker_requires_owner_review": 8,
@@ -391,6 +391,18 @@
         "improvement_track": "tenant_scoped_cas_storage_retention_and_migration_simulation"
       },
       {
+        "path": "src/cloud-distill.js",
+        "domain": "training_model_optimization",
+        "priority_score": 8,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
+          "large_component_contract_risk",
+          "network_or_provider_boundary"
+        ],
+        "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+      },
+      {
         "path": "src/red-team.js",
         "domain": "identity_access",
         "priority_score": 8,
@@ -449,18 +461,6 @@
           "http_route_surface"
         ],
         "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests"
-      },
-      {
-        "path": "src/transparency-log-routes.js",
-        "domain": "api_surface",
-        "priority_score": 8,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "environment_configuration_boundary",
-          "http_route_surface",
-          "network_or_provider_boundary"
-        ],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
       }
     ]
   },
@@ -879,10 +879,10 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "9da64070a6338a78b6256983bb2b1352f04fac1ee4812a9e3248a4ca97302c4d",
+      "sha256": "a01fe3a1beb53b8a9730a9e2d73cdc28e7307b960646ae7cb6dedf11ee072024",
       "metrics": {
-        "bytes": 2623476,
-        "lines": 57093,
+        "bytes": 2624189,
+        "lines": 57100,
         "imports": 541,
         "exports": 1,
         "routes": 0,
@@ -12639,29 +12639,31 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "ab619f8ed349953afc10316b076ba440330e23523fa76a6f9056aa25fc91a3b6",
+      "sha256": "50f97b65cd08b6509b15a8df8bd2d3f542c83c874215b4ea74eb6bc199588235",
       "metrics": {
-        "bytes": 26866,
-        "lines": 745,
+        "bytes": 33684,
+        "lines": 923,
         "imports": 5,
         "exports": 14,
         "routes": 0,
-        "env_refs": 5,
+        "env_refs": 11,
         "fs_writes": 0,
         "subprocess_refs": 0,
-        "network_refs": 0,
+        "network_refs": 3,
         "crypto_refs": 3,
         "markers": 0
       },
       "test_refs": [
-        "tests/finalized-c8-durable-compute-scheduler.test.js"
+        "tests/finalized-c8-durable-compute-scheduler.test.js",
+        "tests/wave644-cloud-distill-bridge.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
+        "large_component_contract_risk",
         "network_or_provider_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 8,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -13886,7 +13888,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/finalized-c8-durable-compute-scheduler.test.js"
+        "tests/finalized-c8-durable-compute-scheduler.test.js",
+        "tests/wave644-cloud-distill-bridge.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -37337,10 +37340,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "b2a1f75b93bc9b2d2f8799ba72c90fe212e87b7c1bbfa7484d8867604440e76b",
+      "sha256": "e21f35d89b53da16805e7f888066c19b5ce4de8142c6bc50da04267e366d0231",
       "metrics": {
-        "bytes": 1462281,
-        "lines": 30665,
+        "bytes": 1462492,
+        "lines": 30668,
         "imports": 535,
         "exports": 8,
         "routes": 810,

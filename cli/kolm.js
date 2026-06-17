@@ -32940,7 +32940,11 @@ async function cmdCloud(args) {
       if (out.cloud_backend_status === 'no_pool_configured') {
         console.log('');
         console.log('  NOTE: no managed pool reachable. Job is queued in the local ledger but');
-        console.log('  cannot execute until the operator sets KOLM_CLOUD_DISTILL_ENDPOINT.');
+        console.log('  cannot execute until the operator sets KOLM_CLOUD_DISTILL_ENDPOINT or KOLM_TRAINER_BRIDGE_URL.');
+      } else if (out.cloud_backend_status === 'reachable_via_bridge') {
+        console.log(`bridge_source:         ${out.bridge_source || 'remote_trainer'}`);
+        if (out.bridge_job_id) console.log(`bridge_job_id:         ${out.bridge_job_id}`);
+        if (out.poll_url || out.bridge_status_url) console.log(`poll_url:              ${out.poll_url || out.bridge_status_url}`);
       }
       console.log(`gpu_sku:               ${out.gpu_sku || '(default)'}`);
       console.log(`vram_tier:             ${out.vram_tier || '(default)'}`);
@@ -32960,6 +32964,9 @@ async function cmdCloud(args) {
       console.log(`job_id:               ${out.job_id}`);
       console.log(`state:                ${out.state}`);
       console.log(`cloud_backend_status: ${out.cloud_backend_status}`);
+      if (out.bridge_source) console.log(`bridge_source:        ${out.bridge_source}`);
+      if (out.bridge_job_id) console.log(`bridge_job_id:        ${out.bridge_job_id}`);
+      if (out.poll_url || out.bridge_status_url) console.log(`poll_url:             ${out.poll_url || out.bridge_status_url}`);
       console.log(`namespace:            ${out.namespace}`);
       console.log(`created_at:           ${out.created_at}`);
       if (out.started_at) console.log(`started_at:           ${out.started_at}`);

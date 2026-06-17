@@ -8,7 +8,8 @@
 //
 // Honesty contract (W347 pattern, also applied W604):
 //   Until a real Kolm-hosted worker pool is deployed and KOLM_CLOUD_DISTILL_ENDPOINT
-//   points at it, submitJob returns state='queued' + cloud_backend_status='no_pool_configured'.
+//   points at it, submitJob returns state='queued' + cloud_backend_status='no_pool_configured'
+//   unless KOLM_TRAINER_BRIDGE_URL points at an operator-managed trainer bridge.
 //   We NEVER pretend a job ran when no backend exists. The TUI / landing page must
 //   surface this state honestly so a user paying for a managed distill run knows
 //   whether their bytes are actually moving.
@@ -23,7 +24,7 @@
 // Why this is separate from src/cloud-compute-broker.js:
 //   broker.js is a PLANNER (which lane should I rent?). cloud-distill.js is
 //   the RUNTIME orchestrator that actually submits / polls / cancels jobs once
-//   the operator has chosen the Kolm-hosted lane.
+//   the operator has chosen the Kolm-hosted lane or configured a trainer bridge.
 //
 // Why this is separate from src/cloud-sync.js:
 //   sync pushes captured rows to a shared namespace for team retrieval.
@@ -59,9 +60,11 @@ export const CLOUD_DISTILL_STATES = Object.freeze([
 // Backend status surfaces whether a real Kolm-hosted worker pool is
 // reachable. 'no_pool_configured' is the honest default for self-hosted
 // installs; 'reachable' requires KOLM_CLOUD_DISTILL_ENDPOINT to be set.
+// 'reachable_via_bridge' means an operator-managed trainer bridge is
+// configured: not a Kolm-hosted fleet, but a real dispatch target.
 // 'simulated' is reserved for development envs that wire a stub pool.
 export const CLOUD_BACKEND_STATUSES = Object.freeze([
-  'no_pool_configured', 'reachable', 'simulated', 'unreachable',
+  'no_pool_configured', 'reachable', 'reachable_via_bridge', 'simulated', 'unreachable',
 ]);
 
 // Training meter is FUNDAMENTALLY different from inference meter:
@@ -175,21 +178,119 @@ function _findOne(tenant, job_id) {
 function _now() { return new Date().toISOString(); }
 function _newJobId() { return 'cdj_' + crypto.randomBytes(8).toString('hex'); }
 
+function _cleanBaseUrl(raw) {
+  const s = typeof raw === 'string' ? raw.trim() : '';
+  return s ? s.replace(/\/+$/, '') : '';
+}
+
+function _publicBase() {
+  return _cleanBaseUrl(process.env.PUBLIC_BASE || process.env.KOLM_PUBLIC_BASE || 'https://kolm.ai');
+}
+
+function _trainerBridgeUrl(opts) {
+  const o = opts || {};
+  return _cleanBaseUrl(o.trainer_bridge_url || process.env.KOLM_TRAINER_BRIDGE_URL || process.env.REM_LABS_BRIDGE_URL || '');
+}
+
+function _trainerBridgeToken(opts) {
+  const o = opts || {};
+  const token = o.trainer_bridge_token || process.env.KOLM_TRAINER_BRIDGE_TOKEN || process.env.REM_LABS_BRIDGE_TOKEN || '';
+  return typeof token === 'string' && token.trim() ? token.trim() : '';
+}
+
+function _bridgePollUrl(base, body) {
+  if (body && typeof body.status_url === 'string' && body.status_url.trim()) return body.status_url.trim();
+  if (body && typeof body.poll_url === 'string' && body.poll_url.trim()) return body.poll_url.trim();
+  if (body && typeof body.job_id === 'string' && body.job_id.trim()) {
+    return _cleanBaseUrl(base) + '/jobs/' + encodeURIComponent(body.job_id.trim());
+  }
+  return null;
+}
+
+async function _postTrainerBridge({ backend, token, job_id, scheduler_job_id, tenant, namespace, capture_window, recipe_id, gpu_sku, vram_tier, fetchImpl }) {
+  const doFetch = typeof fetchImpl === 'function' ? fetchImpl : (typeof fetch === 'function' ? fetch : null);
+  if (typeof doFetch !== 'function') {
+    return { ok: false, error: 'fetch_unavailable', detail: 'global fetch is unavailable for trainer bridge submission' };
+  }
+  if (!token) {
+    return {
+      ok: false,
+      error: 'trainer_bridge_token_missing',
+      detail: 'KOLM_TRAINER_BRIDGE_URL is set but KOLM_TRAINER_BRIDGE_TOKEN (or REM_LABS_BRIDGE_TOKEN) is missing.',
+    };
+  }
+  const endpoint = _cleanBaseUrl(backend.endpoint) + '/distill';
+  const payload = {
+    tenant,
+    namespace,
+    source: 'cloud-distill',
+    cloud_distill_job_id: job_id,
+    scheduler_job_id,
+    capture_window,
+    recipe_id,
+    gpu_sku,
+    vram_tier,
+    callback_url: _publicBase() + '/v1/cloud/distill/' + encodeURIComponent(job_id),
+  };
+  let res;
+  try {
+    res = await doFetch(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+    });
+  } catch (e) {
+    return { ok: false, error: 'trainer_bridge_unreachable', detail: String((e && e.message) || e) };
+  }
+  const text = await res.text().catch(() => '');
+  let body;
+  try { body = text ? JSON.parse(text) : {}; } catch { body = { _raw: text }; }
+  if (!res.ok) {
+    return {
+      ok: false,
+      error: 'trainer_bridge_rejected',
+      status: res.status,
+      detail: (body && (body.error || body.detail || body.message)) || text || ('HTTP ' + res.status),
+    };
+  }
+  return {
+    ok: true,
+    bridge_job_id: body && typeof body.job_id === 'string' && body.job_id ? body.job_id : null,
+    bridge_status_url: _bridgePollUrl(backend.endpoint, body),
+    bridge_response: body || {},
+  };
+}
+
 // _backendStatus - the honesty check. Returns the current backend status
 // based on env vars + opts (DI seam for tests). If KOLM_CLOUD_DISTILL_ENDPOINT
-// is unset, status is 'no_pool_configured' and submitJob will queue the work
-// but flag it openly. If the env var is set to 'simulated://...', we surface
-// 'simulated' so tests + dev can route work without pretending it ran.
+// is unset, but KOLM_TRAINER_BRIDGE_URL is set, the job can dispatch through
+// that operator-managed trainer bridge. If both are unset, status is
+// 'no_pool_configured' and submitJob queues the work but flags it openly. If
+// the env var is set to 'simulated://...', we surface 'simulated' so tests +
+// dev can route work without pretending it ran.
 export function getCloudBackendStatus(opts) {
   const o = opts || {};
   const explicit = (typeof o.backend_endpoint === 'string' && o.backend_endpoint)
     ? o.backend_endpoint
     : (process.env.KOLM_CLOUD_DISTILL_ENDPOINT || '');
+  const bridge = _trainerBridgeUrl(o);
   if (!explicit) {
+    if (bridge) {
+      const hasToken = !!_trainerBridgeToken(o);
+      return {
+        status: hasToken ? 'reachable_via_bridge' : 'unreachable',
+        endpoint: bridge,
+        hint: hasToken
+          ? 'operator-managed trainer bridge configured; not a Kolm-hosted worker pool'
+          : 'set KOLM_TRAINER_BRIDGE_TOKEN when KOLM_TRAINER_BRIDGE_URL is configured',
+        bridge_source: 'remote_trainer',
+        version: CLOUD_DISTILL_VERSION,
+      };
+    }
     return {
       status: 'no_pool_configured',
       endpoint: null,
-      hint: 'set KOLM_CLOUD_DISTILL_ENDPOINT to enable the managed pool',
+      hint: 'set KOLM_CLOUD_DISTILL_ENDPOINT to enable the managed pool, or KOLM_TRAINER_BRIDGE_URL to use an operator-managed trainer bridge',
       version: CLOUD_DISTILL_VERSION,
     };
   }
@@ -216,7 +317,7 @@ export function getCloudBackendStatus(opts) {
 //   (a) a real backend POSTs a /v1/cloud/distill/:job_id status update, or
 //   (b) advanceJobState is called locally (for tests / simulated backends).
 // =============================================================================
-export function submitJob(opts) {
+export async function submitJob(opts) {
   const o = opts || {};
   const tenant = (typeof o.tenant === 'string' && o.tenant) ? o.tenant : null;
   if (!tenant) {
@@ -258,8 +359,19 @@ export function submitJob(opts) {
   }
 
   const backend = getCloudBackendStatus(o);
+  if (backend.status === 'unreachable' && backend.bridge_source === 'remote_trainer') {
+    return {
+      ok: false,
+      error: 'trainer_bridge_token_missing',
+      detail: 'KOLM_TRAINER_BRIDGE_URL is set but KOLM_TRAINER_BRIDGE_TOKEN (or REM_LABS_BRIDGE_TOKEN) is missing.',
+      cloud_backend_status: backend.status,
+      cloud_backend_endpoint: backend.endpoint,
+      version: CLOUD_DISTILL_VERSION,
+    };
+  }
   const now = _now();
   const job_id = _newJobId();
+  const usesBridge = backend.status === 'reachable_via_bridge';
   const scheduler_idempotency_key = (typeof o.idempotency_key === 'string' && o.idempotency_key)
     ? o.idempotency_key
     : null;
@@ -269,7 +381,9 @@ export function submitJob(opts) {
     operation: 'distill',
     idempotency_key: scheduler_idempotency_key,
     priority: o.priority || o.plan_tier,
-    lane: backend.status === 'no_pool_configured' ? 'managed-distill-pool-unconfigured' : 'managed-distill-pool',
+    lane: backend.status === 'no_pool_configured'
+      ? 'managed-distill-pool-unconfigured'
+      : (usesBridge ? 'managed-distill-trainer-bridge' : 'managed-distill-pool'),
     estimated_cost_usd: o.estimated_cost_usd,
     budget_usd: o.budget_usd,
     max_attempts: o.max_attempts || 3,
@@ -311,6 +425,10 @@ export function submitJob(opts) {
         state: existing.state,
         cloud_backend_status: existing.cloud_backend_status,
         cloud_backend_endpoint: existing.cloud_backend_endpoint,
+        bridge_source: existing.bridge_source || null,
+        bridge_job_id: existing.bridge_job_id || null,
+        bridge_status_url: existing.bridge_status_url || null,
+        poll_url: existing.poll_url || existing.bridge_status_url || null,
         scheduler_job_id: scheduler.job_id,
         scheduler_state: scheduler.job?.state || null,
         namespace: existing.namespace,
@@ -325,6 +443,22 @@ export function submitJob(opts) {
       };
     }
   }
+  let bridge = null;
+  if (usesBridge) {
+    bridge = await _postTrainerBridge({
+      backend,
+      token: _trainerBridgeToken(o),
+      job_id,
+      scheduler_job_id: scheduler.job_id,
+      tenant,
+      namespace,
+      capture_window,
+      recipe_id,
+      gpu_sku,
+      vram_tier,
+      fetchImpl: o.fetchImpl,
+    });
+  }
   const row = {
     job_id,
     tenant_id: tenant,
@@ -335,12 +469,16 @@ export function submitJob(opts) {
     gpu_sku,
     vram_tier,
     state: 'queued',
-    cloud_backend_status: backend.status,
+    cloud_backend_status: bridge && !bridge.ok ? 'unreachable' : backend.status,
     cloud_backend_endpoint: backend.endpoint,
+    bridge_source: usesBridge ? 'remote_trainer' : null,
+    bridge_job_id: bridge && bridge.ok ? bridge.bridge_job_id : null,
+    bridge_status_url: bridge && bridge.ok ? bridge.bridge_status_url : null,
+    poll_url: bridge && bridge.ok ? bridge.bridge_status_url : null,
     scheduler_job_id: scheduler.job_id,
     scheduler_state: scheduler.job?.state || 'queued',
     artifact_url: null,
-    error: null,
+    error: bridge && !bridge.ok ? (bridge.error || 'trainer_bridge_error') : null,
     created_at: now,
     updated_at: now,
     started_at: null,
@@ -348,6 +486,22 @@ export function submitJob(opts) {
     submitted_by: typeof o.submitted_by === 'string' ? o.submitted_by : tenant,
     version: CLOUD_DISTILL_VERSION,
   };
+  if (bridge && !bridge.ok) {
+    row.state = 'failed';
+    row.finished_at = now;
+    try {
+      advanceSchedulerJobState({
+        tenant,
+        job_id: scheduler.job_id,
+        state: 'dead_letter',
+        error: row.error,
+        reason: 'trainer_bridge_submit_failed',
+      });
+      row.scheduler_state = 'dead_letter';
+    } catch (_) {
+      // The cloud-distill failure row remains authoritative.
+    }
+  }
   _appendLine(_jobsPath(), row);
 
   // Initial meter row - $0 reserved, units to be filled in by meterRun once
@@ -369,12 +523,32 @@ export function submitJob(opts) {
   };
   _appendLine(_meterPath(), meter_initial);
 
+  if (bridge && !bridge.ok) {
+    return {
+      ok: false,
+      error: bridge.error || 'trainer_bridge_error',
+      detail: bridge.detail || null,
+      status: bridge.status || null,
+      job_id: row.job_id,
+      state: row.state,
+      cloud_backend_status: row.cloud_backend_status,
+      cloud_backend_endpoint: row.cloud_backend_endpoint,
+      scheduler_job_id: scheduler.job_id,
+      scheduler_state: row.scheduler_state,
+      version: CLOUD_DISTILL_VERSION,
+    };
+  }
+
   return {
     ok: true,
     job_id: row.job_id,
     state: 'queued',
     cloud_backend_status: backend.status,
     cloud_backend_endpoint: backend.endpoint,
+    bridge_source: row.bridge_source,
+    bridge_job_id: row.bridge_job_id,
+    bridge_status_url: row.bridge_status_url,
+    poll_url: row.poll_url,
     scheduler_job_id: scheduler.job_id,
     scheduler_state: scheduler.job?.state || 'queued',
     meter_initial,
@@ -418,6 +592,10 @@ export function getJobStatus(opts) {
     state: row.state,
     cloud_backend_status: row.cloud_backend_status,
     cloud_backend_endpoint: row.cloud_backend_endpoint,
+    bridge_source: row.bridge_source || null,
+    bridge_job_id: row.bridge_job_id || null,
+    bridge_status_url: row.bridge_status_url || null,
+    poll_url: row.poll_url || row.bridge_status_url || null,
     scheduler_job_id: row.scheduler_job_id || null,
     scheduler_state: row.scheduler_state || null,
     artifact_url: row.artifact_url,

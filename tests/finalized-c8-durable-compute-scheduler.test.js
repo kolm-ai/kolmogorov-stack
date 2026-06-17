@@ -46,6 +46,12 @@ function freshEnv(t) {
   process.env.KOLM_ENV = 'test';
   delete process.env.KOLM_COMPUTE_SCHEDULER_DIR;
   delete process.env.KOLM_CLOUD_DISTILL_ENDPOINT;
+  delete process.env.KOLM_TRAINER_BRIDGE_URL;
+  delete process.env.KOLM_TRAINER_BRIDGE_TOKEN;
+  delete process.env.REM_LABS_BRIDGE_URL;
+  delete process.env.REM_LABS_BRIDGE_TOKEN;
+  delete process.env.PUBLIC_BASE;
+  delete process.env.KOLM_PUBLIC_BASE;
   delete process.env.KOLM_FORCE_LOCAL_CUDA;
   fs.mkdirSync(process.env.KOLM_DATA_DIR, { recursive: true });
   _resetSchedulerForTests();
@@ -321,9 +327,9 @@ test('C8 broker can enqueue a planned compute run instead of executing it', asyn
   assert.equal(replay.scheduler.idempotent_replay, true);
 });
 
-test('C8 cloud-distill submissions carry durable scheduler linkage and idempotency', (t) => {
+test('C8 cloud-distill submissions carry durable scheduler linkage and idempotency', async (t) => {
   freshEnv(t);
-  const submitted = submitCloudDistillJob({
+  const submitted = await submitCloudDistillJob({
     tenant: 'tenant_cd',
     namespace: 'support',
     idempotency_key: 'cd-once',
@@ -342,7 +348,7 @@ test('C8 cloud-distill submissions carry durable scheduler linkage and idempoten
   assert.equal(schedulerJob.job.lineage.cloud_distill_job_id, submitted.job_id);
   assert.equal(JSON.stringify(schedulerJob.job).includes('billing-secret'), false);
 
-  const replay = submitCloudDistillJob({
+  const replay = await submitCloudDistillJob({
     tenant: 'tenant_cd',
     namespace: 'support',
     idempotency_key: 'cd-once',

@@ -29498,7 +29498,7 @@ res.json({
     try {
       const mod = await import('./cloud-distill.js');
       const body = req.body || {};
-      const env = mod.submitJob({
+      const env = await mod.submitJob({
         tenant: req.tenant_record.id,
         namespace: typeof body.namespace === 'string' ? body.namespace : null,
         capture_window: typeof body.capture_window === 'string' ? body.capture_window : null,
@@ -29506,6 +29506,9 @@ res.json({
         billing_token: typeof body.billing_token === 'string' ? body.billing_token : null,
         gpu_sku: typeof body.gpu_sku === 'string' ? body.gpu_sku : null,
         vram_tier: typeof body.vram_tier === 'string' ? body.vram_tier : null,
+        idempotency_key: typeof body.idempotency_key === 'string'
+          ? body.idempotency_key
+          : (typeof req.headers['idempotency-key'] === 'string' ? req.headers['idempotency-key'] : null),
         submitted_by: typeof body.submitted_by === 'string' ? body.submitted_by : req.tenant_record.id,
       });
       return res.status(env.ok ? 200 : 400).json(env);

@@ -6,12 +6,12 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 
 ## How Close To Perfect
 
-- Local engineering perfection: **88.8/100**
+- Local engineering perfection: **88.9/100**
 - Frontier/product perfection: **68.5/100**
 - Atomic components inventoried: **829**
 - Atomic deep dives complete: **100%**
 - Direct test referenced: **663/829 (80%)**
-- High-priority direct test referenced: **43/48 (89.6%)**
+- High-priority direct test referenced: **44/49 (89.8%)**
 - Readiness closed locally: **49/57 (86%)**
 - SOTA categories still carrying critical work: **10/16**
 - SOTA categories still carrying major work: **13/16**
@@ -37,7 +37,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | model-signing-standards | trust | sota_review_complete_external_or_release_gate_open | at=8 open=0/0/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | confidential-compute | enterprise | sota_review_complete_critical_frontier_work_open | at=7 open=1/2/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | agent-security-eval | enterprise | sota_review_complete_critical_frontier_work_open | at=7 open=1/2/1 | 3 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
-| compile-api-to-model-competitors | compiler-platform | sota_review_complete_critical_frontier_work_open | at=8 open=1/1/4 | 4 | npm run verify:stack-sota<br>npm run verify:inventions |
+| compile-api-to-model-competitors | compiler-platform | sota_review_complete_critical_frontier_work_open | at=9 open=1/1/4 | 4 | npm run verify:stack-sota<br>npm run verify:inventions |
 
 ## Top Component Gaps
 
