@@ -2,7 +2,7 @@
 //
 // W921 BET-3 — lock-in tests for the in-toto / SLSA / OpenSSF Model-Signing-
 // compatible attestation form of a kolm inference receipt:
-//   * statement shape valid (in-toto v1 Statement: _type, subject[name,digest.sha256],
+//   * statement shape valid (in-toto v1 Statement: _type, subject[name,digest],
 //     predicateType, predicate)
 //   * sign -> verify round-trip (DSSE bundle + OMS bundle)
 //   * tamper detected (mutated payload / wrong key / subject-digest mismatch)
@@ -97,9 +97,12 @@ test('statement: receipt subject digest is a FULL 64-hex sha256 of the canonical
   const receiptSubj = subjects.find((s) => s.name === `receipt:${r.receipt_id}`);
   assert.ok(receiptSubj);
   assert.equal(receiptSubj.digest.sha256.length, 64);
+  assert.equal(receiptSubj.digest.blake2b.length, 128);
   // Recompute independently from the canonical (signature-stripped) receipt.
   const expected = crypto.createHash('sha256').update(canonicalReceiptForDigest(r), 'utf8').digest('hex');
+  const expectedBlake = crypto.createHash('blake2b512').update(canonicalReceiptForDigest(r), 'utf8').digest('hex');
   assert.equal(receiptSubj.digest.sha256, expected);
+  assert.equal(receiptSubj.digest.blake2b, expectedBlake);
 });
 
 test('statement: an output subject carries the receipt output_hash hex', () => {
@@ -109,6 +112,7 @@ test('statement: an output subject carries the receipt output_hash hex', () => {
   assert.ok(outSubj, 'output subject present when output_hash exists');
   const outHex = r.output_hash.replace(/^sha256:/, '');
   assert.equal(outSubj.digest.sha256, outHex);
+  assert.equal(outSubj.digest.blake2b, undefined, 'do not fabricate BLAKE2b without output bytes');
 });
 
 test('statement: canonical receipt digest excludes the signature blocks (seal does not cover itself)', () => {
@@ -197,8 +201,12 @@ test('roundtrip: subjectDigestMap content check passes for the real bytes', () =
   const r = sampleReceipt();
   const signed = signInTotoBundle(r, signer);
   const receiptDigest = crypto.createHash('sha256').update(canonicalReceiptForDigest(r), 'utf8').digest('hex');
+  const receiptBlake = crypto.createHash('blake2b512').update(canonicalReceiptForDigest(r), 'utf8').digest('hex');
   const outHex = r.output_hash.replace(/^sha256:/, '');
-  const dm = { [`receipt:${r.receipt_id}`]: receiptDigest, [`output:${r.receipt_id}`]: outHex };
+  const dm = {
+    [`receipt:${r.receipt_id}`]: { sha256: receiptDigest, blake2b: receiptBlake },
+    [`output:${r.receipt_id}`]: { sha256: outHex },
+  };
   const v = verifyInTotoBundle(signed.bundle, { publicKey: signer.publicKey, subjectDigestMap: dm });
   assert.equal(v.ok, true, v.reason);
   assert.equal(v.subjects_matched, v.subjects_total);

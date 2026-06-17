@@ -8,7 +8,7 @@
 //      offline (item: "Write a build-time OMS/SLSA DSSE sidecar into the .kolm
 //      container").
 //   2) model.sig.bundle - an OpenSSF Model-Signing (OMS) file manifest whose
-//      subjects are (member path, sha256) over the artifact's ACTUAL weight
+//      subjects are (member path, digest map) over the artifact's ACTUAL weight
 //      members, so `model-signing verify` accepts a kolm artifact (item: "Add an
 //      OMS file-manifest bundle over the artifact's actual weight members").
 //
@@ -68,6 +68,23 @@ function fileBuf(payload, name) {
   return f ? f.content : null;
 }
 
+function byteDigests(buf) {
+  return {
+    sha256: crypto.createHash('sha256').update(buf).digest('hex'),
+    blake2b: crypto.createHash('blake2b512').update(buf).digest('hex'),
+  };
+}
+
+function sidecarDigestMap(payload) {
+  const seals = new Set(['signature.sig', 'receipt.json', 'credential.json', 'provenance.intoto.dsse.json', 'model.sig.bundle']);
+  const out = {};
+  for (const f of payload.files) {
+    if (!f || typeof f.filename !== 'string' || seals.has(f.filename)) continue;
+    if (Buffer.isBuffer(f.content)) out[f.filename] = byteDigests(f.content);
+  }
+  return out;
+}
+
 // ===========================================================================
 // (1) SLSA Provenance v1 DSSE sidecar
 // ===========================================================================
@@ -92,10 +109,11 @@ test('sidecar: a rule-class .kolm carries provenance.intoto.dsse.json that verif
   assert.equal(v.ok, true, v.reason);
   assert.equal(v.statement._type, INTOTO_STATEMENT_TYPE);
   assert.equal(v.statement.predicateType, SLSA_PROVENANCE_PREDICATE_TYPE);
-  // Subjects are the real bundled members, each with a 64-hex byte sha256.
+  // Subjects are the real bundled members, each with sha256 + BLAKE2b digests.
   assert.ok(Array.isArray(v.statement.subject) && v.statement.subject.length >= 1);
   for (const s of v.statement.subject) {
     assert.match(s.digest.sha256, /^[0-9a-f]{64}$/);
+    assert.match(s.digest.blake2b, /^[0-9a-f]{128}$/);
   }
 });
 
@@ -106,18 +124,20 @@ test('sidecar: DSSE subject digests are the ACTUAL bundled bytes (not lineage-fo
   const payload = buildPayload(ruleArgs({ base_model: 'Qwen/Qwen2.5-3B-Instruct' }));
   const envelope = JSON.parse(fileBuf(payload, 'provenance.intoto.dsse.json').toString('utf8'));
   const statement = JSON.parse(Buffer.from(envelope.payload, 'base64').toString('utf8'));
-  const byName = Object.fromEntries(statement.subject.map((s) => [s.name, s.digest.sha256]));
+  const byName = Object.fromEntries(statement.subject.map((s) => [s.name, s.digest]));
 
   // recipes.json subject == sha256 of the actual recipes.json bytes in the zip.
   const recipesBytes = fileBuf(payload, 'recipes.json');
-  const recipesSha = crypto.createHash('sha256').update(recipesBytes).digest('hex');
-  assert.equal(byName['recipes.json'], recipesSha);
+  const recipesDigest = byteDigests(recipesBytes);
+  assert.equal(byName['recipes.json'].sha256, recipesDigest.sha256);
+  assert.equal(byName['recipes.json'].blake2b, recipesDigest.blake2b);
 
   // model.gguf subject == sha256 of the pointer bytes, NOT the folded slot.
   const ptrBytes = fileBuf(payload, 'model.gguf');
   if (ptrBytes) {
-    const ptrSha = crypto.createHash('sha256').update(ptrBytes).digest('hex');
-    assert.equal(byName['model.gguf'], ptrSha, 'model.gguf subject must be the byte hash of the pointer member');
+    const ptrDigest = byteDigests(ptrBytes);
+    assert.equal(byName['model.gguf'].sha256, ptrDigest.sha256, 'model.gguf subject must be the byte hash of the pointer member');
+    assert.equal(byName['model.gguf'].blake2b, ptrDigest.blake2b, 'model.gguf BLAKE2b subject must be the byte hash of the pointer member');
   }
 });
 
@@ -143,19 +163,22 @@ test('sidecar: a weight-class .kolm carries model.sig.bundle whose subjects are 
   assert.match(bundle.mediaType, /sigstore\.bundle/);
 
   // It verifies against the embedded key and uses the OMS predicateType.
-  const v = verifyInTotoBundle(bundle);
+  const v = verifyInTotoBundle(bundle, { subjectDigestMap: sidecarDigestMap(payload) });
   assert.equal(v.ok, true, v.reason);
   assert.equal(v.predicateType, OMS_SIGNATURE_PREDICATE_TYPE);
   assert.equal(v.predicateType, 'https://model_signing/signature/v1.0');
 
-  // The weight member is a subject whose digest is the real byte sha256.
+  // The weight member is a subject whose digest is the real byte digest map.
   const statement = JSON.parse(Buffer.from(bundle.dsseEnvelope.payload, 'base64').toString('utf8'));
-  const byName = Object.fromEntries(statement.subject.map((s) => [s.name, s.digest.sha256]));
-  const weightSha = crypto.createHash('sha256').update(weightBytes).digest('hex');
-  assert.equal(byName['model.gguf'], weightSha, 'OMS subject must be the real weight bytes');
+  const byName = Object.fromEntries(statement.subject.map((s) => [s.name, s.digest]));
+  const weightDigest = byteDigests(weightBytes);
+  assert.equal(byName['model.gguf'].sha256, weightDigest.sha256, 'OMS subject must be the real weight bytes');
+  assert.equal(byName['model.gguf'].blake2b, weightDigest.blake2b, 'OMS BLAKE2b subject must be the real weight bytes');
   // Predicate is an OMS resource manifest.
   assert.ok(Array.isArray(statement.predicate.resources));
   assert.equal(statement.predicate.model_signing_version, '1.0');
+  const modelResource = statement.predicate.resources.find((r) => r.name === 'model.gguf');
+  assert.equal(modelResource.digest.blake2b, weightDigest.blake2b);
 });
 
 test('sidecar: a pure rule-class .kolm (no real weights) emits an OMS manifest over the recipe bundle', () => {
@@ -170,9 +193,10 @@ test('sidecar: a pure rule-class .kolm (no real weights) emits an OMS manifest o
   const names = statement.subject.map((s) => s.name);
   assert.ok(names.includes('recipe.bundle.mjs'), 'recipe bundle is an OMS subject');
   const bundleBytes = fileBuf(payload, 'recipe.bundle.mjs');
-  const sha = crypto.createHash('sha256').update(bundleBytes).digest('hex');
-  const byName = Object.fromEntries(statement.subject.map((s) => [s.name, s.digest.sha256]));
-  assert.equal(byName['recipe.bundle.mjs'], sha);
+  const digest = byteDigests(bundleBytes);
+  const byName = Object.fromEntries(statement.subject.map((s) => [s.name, s.digest]));
+  assert.equal(byName['recipe.bundle.mjs'].sha256, digest.sha256);
+  assert.equal(byName['recipe.bundle.mjs'].blake2b, digest.blake2b);
 });
 
 // ===========================================================================
@@ -233,12 +257,13 @@ test('sidecar: the two reserved sidecar filenames cannot be shadowed by extra_fi
 // toOmsArtifactManifest unit behaviour (the new src/intoto-receipt.js export)
 // ===========================================================================
 
-test('toOmsArtifactManifest: subjects are (path, byte-sha256) and verify; bad hashes are dropped', () => {
+test('toOmsArtifactManifest: subjects are (path, byte-digests) and verify; bad hashes are dropped', () => {
   const { publicKey, privateKey } = generateKeyPair();
   const signer = { publicKey, privateKey, key_fingerprint: keyFingerprint(publicKey) };
   const good = 'a'.repeat(64);
+  const goodBlake = 'b'.repeat(128);
   const bundle = toOmsArtifactManifest([
-    { name: 'model.safetensors', sha256: good },
+    { name: 'model.safetensors', sha256: good, blake2b: goodBlake },
     { name: 'short.bin', sha256: 'abc' }, // dropped: not 64-hex
     { name: null, sha256: good },          // dropped: no name
   ], signer);
@@ -248,6 +273,9 @@ test('toOmsArtifactManifest: subjects are (path, byte-sha256) and verify; bad ha
   const statement = JSON.parse(Buffer.from(bundle.dsseEnvelope.payload, 'base64').toString('utf8'));
   assert.equal(statement.subject.length, 1, 'only the valid member becomes a subject');
   assert.equal(statement.subject[0].name, 'model.safetensors');
+  assert.equal(statement.subject[0].digest.sha256, good);
+  assert.equal(statement.subject[0].digest.blake2b, goodBlake);
+  assert.equal(statement.predicate.resources[0].digest.blake2b, goodBlake);
 });
 
 test('toOmsArtifactManifest: throws when no member has a valid sha256 (never signs an empty manifest)', () => {
@@ -257,13 +285,15 @@ test('toOmsArtifactManifest: throws when no member has a valid sha256 (never sig
   assert.throws(() => toOmsArtifactManifest('not-an-array', signer), /must be an array/);
 });
 
-test('W615 closure: backend spec and depth gate include model-signing sidecars', () => {
+test('W615/W638 closure: backend spec and depth gate include model-signing sidecar digests', () => {
   const root = process.cwd();
   const spec = fs.readFileSync(path.join(root, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
   const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
 
   assert.match(spec, /CLOSED W615: write a build-time OMS\/SLSA DSSE sidecar into the \.kolm container/);
   assert.match(spec, /CLOSED W615: add an OMS file-manifest bundle over the artifact's actual weight members/);
+  assert.match(spec, /CLOSED W638: add BLAKE2b digests to SLSA\/OMS subjects and manifests/);
+  assert.doesNotMatch(spec, /SHA-256 only; OMS permits BLAKE2b/);
   assert.match(spec, /provenance\.intoto\.dsse\.json/);
   assert.match(spec, /model\.sig\.bundle/);
   assert.match(pkg.scripts['verify:model-signing'], /tests\/model-signing-sidecars\.test\.js/);

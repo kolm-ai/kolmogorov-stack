@@ -48,6 +48,41 @@ export const KOLM_BUILD_TYPE = 'https://kolm.ai/compile/v1';
 export const KOLM_SLSA_CONFORMANCE = 'SLSA Provenance v1 (Build L2 shape)';
 
 const HEX64_RE = /^[0-9a-f]{64}$/;
+const HEX128_RE = /^[0-9a-f]{128}$/;
+
+function _normalizeDigestValue(v) {
+  if (typeof v === 'string') return { sha256: v.toLowerCase() };
+  if (!v || typeof v !== 'object') return {};
+  const out = {};
+  for (const [alg, value] of Object.entries(v)) {
+    if (typeof alg === 'string' && typeof value === 'string' && value.length > 0) {
+      out[alg] = value.toLowerCase();
+    }
+  }
+  return out;
+}
+
+function _digestMapsMatch(wantDigest, haveValue) {
+  const want = _normalizeDigestValue(wantDigest);
+  const have = _normalizeDigestValue(haveValue);
+  const common = Object.keys(want).filter((alg) => typeof have[alg] === 'string');
+  if (common.length === 0) return false;
+  return common.every((alg) => want[alg] === have[alg]);
+}
+
+function _subjectDigestFromValue(v) {
+  if (typeof v === 'string') {
+    const sha256 = v.toLowerCase();
+    return HEX64_RE.test(sha256) ? { sha256 } : null;
+  }
+  if (!v || typeof v !== 'object') return null;
+  const digest = {};
+  const sha256 = typeof v.sha256 === 'string' ? v.sha256.toLowerCase() : null;
+  const blake2b = typeof v.blake2b === 'string' ? v.blake2b.toLowerCase() : null;
+  if (sha256 && HEX64_RE.test(sha256)) digest.sha256 = sha256;
+  if (blake2b && HEX128_RE.test(blake2b)) digest.blake2b = blake2b;
+  return Object.keys(digest).length > 0 ? digest : null;
+}
 
 // ---------------------------------------------------------------------------
 // DSSE Pre-Authentication Encoding (PAE).
@@ -338,8 +373,10 @@ export function verifyDsseEnvelope(envelope, { publicKey } = {}) {
 
 // ---------------------------------------------------------------------------
 // Verify the DSSE envelope AND that its Statement subjects match the actual
-// artifact bytes. `digestMap` maps subject name -> sha256 hex of the real
-// (zipped) bytes. Every subject digest in the Statement must match.
+// artifact bytes. `digestMap` maps subject name -> sha256 hex or a digest map
+// of the real (zipped) bytes. Every subject must match on at least one common
+// algorithm; when the caller supplies multiple algorithms, all common
+// algorithms must match.
 // ---------------------------------------------------------------------------
 export function verifyInTotoAgainstArtifact(envelope, digestMap, { publicKey } = {}) {
   const base = verifyDsseEnvelope(envelope, { publicKey });
@@ -353,9 +390,8 @@ export function verifyInTotoAgainstArtifact(envelope, digestMap, { publicKey } =
   const mismatches = [];
   const dm = digestMap && typeof digestMap === 'object' ? digestMap : {};
   for (const s of subjects) {
-    const want = s.digest && s.digest.sha256;
     const have = dm[s.name];
-    if (typeof want === 'string' && typeof have === 'string' && want.toLowerCase() === have.toLowerCase()) {
+    if (_digestMapsMatch(s.digest, have)) {
       matched += 1;
     } else {
       mismatches.push(s.name);
@@ -381,13 +417,14 @@ export function verifyInTotoAgainstArtifact(envelope, digestMap, { publicKey } =
 
 // ---------------------------------------------------------------------------
 // Top-level emitter: assemble Statement (subjects from a digestMap of real
-// zip-byte sha256s) + SLSA predicate, DSSE-envelope it, and return the JSON
+// zip-byte digests) + SLSA predicate, DSSE-envelope it, and return the JSON
 // string for the sidecar provenance.intoto.dsse.json.
 //
-// `subjectDigests` maps entry name -> sha256 hex of the actual bytes. The
-// caller (artifact.js) supplies these from the zipped bytes - NOT from
-// hashes.model_pointer (which may be lineage-folded). If omitted, the artifact
-// itself (<jobId>.kolm with artifact_hash) is used as the single subject.
+// `subjectDigests` maps entry name -> sha256 hex or digest map of the actual
+// bytes. The caller (artifact.js) supplies these from the zipped bytes - NOT
+// from hashes.model_pointer (which may be lineage-folded). If omitted, the
+// artifact itself (<jobId>.kolm with artifact_hash) is used as the single
+// subject.
 // ---------------------------------------------------------------------------
 export function emitArtifactAttestation({
   ed25519Signer,
@@ -410,9 +447,9 @@ export function emitArtifactAttestation({
   const subjects = [];
   if (subjectDigests && typeof subjectDigests === 'object' && Object.keys(subjectDigests).length > 0) {
     for (const name of Object.keys(subjectDigests).sort()) {
-      const sha256 = subjectDigests[name];
-      if (typeof sha256 === 'string' && HEX64_RE.test(sha256)) {
-        subjects.push({ name, digest: { sha256 } });
+      const digest = _subjectDigestFromValue(subjectDigests[name]);
+      if (digest) {
+        subjects.push({ name, digest });
       }
     }
   }

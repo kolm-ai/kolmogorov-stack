@@ -186,6 +186,10 @@ function sha256(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
+function blake2b(buf) {
+  return crypto.createHash('blake2b512').update(buf).digest('hex');
+}
+
 // Chunked sync hash for files that exceed Node's 2 GiB readFileSync limit
 // (large GGUF exports). Same semantics as sha256(Buffer) but on a path.
 function sha256File(absPath) {
@@ -200,6 +204,33 @@ function sha256File(absPath) {
       h.update(buf.subarray(0, read));
     }
     return h.digest('hex');
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+function digestPair(buf) {
+  return {
+    sha256: sha256(buf),
+    blake2b: blake2b(buf),
+  };
+}
+
+function digestFilePair(absPath) {
+  const sha = crypto.createHash('sha256');
+  const b2 = crypto.createHash('blake2b512');
+  const fd = fs.openSync(absPath, 'r');
+  try {
+    const CHUNK = 1024 * 1024;
+    const buf = Buffer.alloc(CHUNK);
+    while (true) {
+      const read = fs.readSync(fd, buf, 0, CHUNK, null);
+      if (read <= 0) break;
+      const chunk = buf.subarray(0, read);
+      sha.update(chunk);
+      b2.update(chunk);
+    }
+    return { sha256: sha.digest('hex'), blake2b: b2.digest('hex') };
   } finally {
     fs.closeSync(fd);
   }
@@ -2193,7 +2224,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // Both are SEALS over the bytes, exactly like signature.sig: they are added
   // AFTER artifact_hash and are NOT folded into manifest.hashes nor into
   // receipt.artifact_files, so they do NOT change artifact_hash / the CID. Their
-  // subjects are the (member path, sha256-over-real-bytes) pairs of the members
+  // subjects are the (member path, digest-over-real-bytes) pairs of the members
   // already in `files` - NOT the lineage-folded manifest slots - so a model
   // verifier pins the runnable artifact's actual bytes. signature.sig /
   // receipt.json / credential.json are themselves seals, so they are not
@@ -2205,12 +2236,12 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       if (!f || typeof f.filename !== 'string' || SEAL_FILES.has(f.filename)) continue;
       let digest = null;
       try {
-        if (Buffer.isBuffer(f.content)) digest = sha256(f.content);
-        else if (f.absPath) digest = sha256File(f.absPath);
+        if (Buffer.isBuffer(f.content)) digest = digestPair(f.content);
+        else if (f.absPath) digest = digestFilePair(f.absPath);
       } catch { digest = null; }
-      if (digest) memberDigests[f.filename] = digest;
+      if (digest && digest.sha256) memberDigests[f.filename] = digest;
     }
-    const memberList = Object.keys(memberDigests).sort().map((name) => ({ name, sha256: memberDigests[name] }));
+    const memberList = Object.keys(memberDigests).sort().map((name) => ({ name, ...memberDigests[name] }));
 
     // SLSA Provenance v1 DSSE sidecar over the real member byte digests.
     try {

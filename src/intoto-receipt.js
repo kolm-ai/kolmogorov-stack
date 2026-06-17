@@ -26,7 +26,7 @@
 // STANDARDS (web-confirmed 2026-05-29):
 //   * in-toto Statement v1 - _type "https://in-toto.io/Statement/v1", a
 //     non-empty `subject` array of ResourceDescriptors each with a non-empty
-//     `digest` (sha256 hex), a `predicateType` URI, and a `predicate` object.
+//     `digest` map, a `predicateType` URI, and a `predicate` object.
 //     (in-toto/attestation spec/v1/statement.md)
 //   * SLSA / ITE-6 - the in-toto attestation framework; a custom predicateType
 //     is permitted alongside the standard SLSA ones. We mint a kolm inference
@@ -72,6 +72,8 @@ export const KOLM_INFERENCE_CONFORMANCE =
   'in-toto Statement v1 + ITE-6 inference predicate (Ed25519 key-custody attestation; not proof-of-compute)';
 
 const HEX_RE = /^[0-9a-f]+$/i;
+const HEX64_RE = /^[0-9a-f]{64}$/i;
+const HEX128_RE = /^[0-9a-f]{128}$/i;
 
 // ---------------------------------------------------------------------------
 // _sha256Hex(s) - full 64-hex sha256 of a UTF-8 string. Used to give the
@@ -81,6 +83,30 @@ const HEX_RE = /^[0-9a-f]+$/i;
 // ---------------------------------------------------------------------------
 function _sha256Hex(s) {
   return crypto.createHash('sha256').update(String(s ?? ''), 'utf8').digest('hex');
+}
+
+function _blake2bHex(s) {
+  return crypto.createHash('blake2b512').update(String(s ?? ''), 'utf8').digest('hex');
+}
+
+function _normalizeDigestValue(v) {
+  if (typeof v === 'string') return { sha256: v.toLowerCase() };
+  if (!v || typeof v !== 'object') return {};
+  const out = {};
+  for (const [alg, value] of Object.entries(v)) {
+    if (typeof alg === 'string' && typeof value === 'string' && value.length > 0) {
+      out[alg] = value.toLowerCase();
+    }
+  }
+  return out;
+}
+
+function _digestMapsMatch(wantDigest, haveValue) {
+  const want = _normalizeDigestValue(wantDigest);
+  const have = _normalizeDigestValue(haveValue);
+  const common = Object.keys(want).filter((alg) => typeof have[alg] === 'string');
+  if (common.length === 0) return false;
+  return common.every((alg) => want[alg] === have[alg]);
 }
 
 // Pull the hex out of a kolm short hash `sha256:<hex>` (or pass a bare hex
@@ -111,7 +137,7 @@ export function canonicalReceiptForDigest(receipt) {
 // receiptSubjects(receipt) - the in-toto subject array for an inference receipt.
 //
 // Two subjects when an output hash is present:
-//   1. the receipt itself        name "receipt:<receipt_id>"  digest = sha256(canonical receipt)
+//   1. the receipt itself        name "receipt:<receipt_id>"  digest = sha256 + blake2b(canonical receipt)
 //   2. the model output it covers name "output:<receipt_id>"  digest = output_hash hex
 // Always at least the receipt subject. Each subject carries a non-empty digest,
 // satisfying the in-toto v1 requirement. NEVER fabricates a digest.
@@ -121,10 +147,11 @@ export function receiptSubjects(receipt) {
   const rid = typeof r.receipt_id === 'string' && r.receipt_id ? r.receipt_id : 'unknown';
   const subjects = [];
 
-  const receiptDigest = _sha256Hex(canonicalReceiptForDigest(r));
+  const canonicalReceipt = canonicalReceiptForDigest(r);
+  const receiptDigest = _sha256Hex(canonicalReceipt);
   const receiptSubj = {
     name: `receipt:${rid}`,
-    digest: { sha256: receiptDigest },
+    digest: { sha256: receiptDigest, blake2b: _blake2bHex(canonicalReceipt) },
   };
   const ann = {};
   if (typeof r.verify_url === 'string' && r.verify_url) ann.verify_url = r.verify_url;
@@ -310,20 +337,22 @@ export function toOmsBundle(receipt, signer, opts = {}) {
 // toOmsArtifactManifest(members, signer, opts) -> bundle (OpenSSF Model-Signing
 // shape) whose subjects are the ACTUAL bundled artifact members.
 //
-// `members` is an array of { name, sha256 } over the real bytes that ship in the
-// .kolm (a weight member, the recipe bundle, etc). Each member must carry a
-// 64-hex sha256 over its actual bytes and a non-empty name; entries that fail
-// either check are DROPPED (never silently signed as a placeholder). Throws when
-// `members` is not an array, or when NO member survives validation (we never
-// sign an empty manifest - an OMS bundle with zero subjects attests nothing).
+// `members` is an array of { name, sha256, blake2b? } over the real bytes that
+// ship in the .kolm (a weight member, the recipe bundle, etc). Each member must
+// carry a 64-hex sha256 over its actual bytes and a non-empty name; a valid
+// 128-hex BLAKE2b-512 digest is included when supplied. Entries that fail the
+// required checks are DROPPED (never silently signed as a placeholder). Throws
+// when `members` is not an array, or when NO member survives validation (we
+// never sign an empty manifest - an OMS bundle with zero subjects attests
+// nothing).
 //
 // Unlike toOmsBundle (which derives subjects from a kolm inference receipt),
-// this binds a plain (path, byte-sha256) file list, so `model-signing verify`
+// this binds a plain (path, byte digest map) file list, so `model-signing verify`
 // (and any in-toto verifier) accepts a kolm artifact directly.
 // ---------------------------------------------------------------------------
 export function toOmsArtifactManifest(members, signer, opts = {}) {
   if (!Array.isArray(members)) {
-    throw new Error('toOmsArtifactManifest: members must be an array of { name, sha256 }');
+    throw new Error('toOmsArtifactManifest: members must be an array of { name, sha256, blake2b? }');
   }
   if (!signer || !signer.privateKey) {
     throw new Error('toOmsArtifactManifest: signer with privateKey required');
@@ -333,9 +362,12 @@ export function toOmsArtifactManifest(members, signer, opts = {}) {
     if (!m || typeof m !== 'object') continue;
     const name = typeof m.name === 'string' ? m.name : null;
     const sha256 = typeof m.sha256 === 'string' ? m.sha256.toLowerCase() : null;
+    const blake2b = typeof m.blake2b === 'string' ? m.blake2b.toLowerCase() : null;
     if (!name) continue;                      // dropped: no name
-    if (!sha256 || !/^[0-9a-f]{64}$/.test(sha256)) continue; // dropped: not 64-hex
-    subjects.push({ name, digest: { sha256 } });
+    if (!sha256 || !HEX64_RE.test(sha256)) continue; // dropped: not 64-hex
+    const digest = { sha256 };
+    if (blake2b && HEX128_RE.test(blake2b)) digest.blake2b = blake2b;
+    subjects.push({ name, digest });
   }
   if (subjects.length === 0) {
     throw new Error('toOmsArtifactManifest: no members with a valid 64-hex sha256; refusing to sign an empty manifest');
@@ -367,9 +399,10 @@ export function toOmsArtifactManifest(members, signer, opts = {}) {
 // When the key is taken from the bundle, the verdict flags `key_from_bundle`
 // so callers know the key was not externally pinned (trust-on-first-use).
 //
-// When opts.subjectDigestMap is supplied (subject name -> sha256 hex of the
-// real bytes), also confirm every subject digest matches - full content
-// verification, not just signature.
+// When opts.subjectDigestMap is supplied (subject name -> sha256 hex or digest
+// map of the real bytes), also confirm every subject digest matches - full
+// content verification, not just signature. Legacy string maps still verify
+// against sha256; object maps compare every common algorithm.
 // ---------------------------------------------------------------------------
 export function verifyInTotoBundle(bundleOrEnvelope, opts = {}) {
   if (!bundleOrEnvelope || typeof bundleOrEnvelope !== 'object') {
@@ -424,9 +457,8 @@ export function verifyInTotoBundle(bundleOrEnvelope, opts = {}) {
     subjects_matched = 0;
     const mismatches = [];
     for (const s of statement.subject) {
-      const want = s.digest && s.digest.sha256;
       const have = dm[s.name];
-      if (typeof want === 'string' && typeof have === 'string' && want.toLowerCase() === have.toLowerCase()) {
+      if (_digestMapsMatch(s.digest, have)) {
         subjects_matched += 1;
       } else {
         mismatches.push(s.name);

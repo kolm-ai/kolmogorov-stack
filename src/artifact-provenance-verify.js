@@ -25,8 +25,31 @@ export const ARTIFACT_PROVENANCE_SEAL_FILES = new Set([
   'model.sig.bundle',
 ]);
 
-function sha256(buf) {
-  return crypto.createHash('sha256').update(buf).digest('hex');
+function digestBuffer(buf) {
+  return {
+    sha256: crypto.createHash('sha256').update(buf).digest('hex'),
+    blake2b: crypto.createHash('blake2b512').update(buf).digest('hex'),
+  };
+}
+
+function digestFile(absPath) {
+  const sha = crypto.createHash('sha256');
+  const b2 = crypto.createHash('blake2b512');
+  const fd = fs.openSync(absPath, 'r');
+  try {
+    const CHUNK = 1024 * 1024;
+    const buf = Buffer.alloc(CHUNK);
+    while (true) {
+      const read = fs.readSync(fd, buf, 0, CHUNK, null);
+      if (read <= 0) break;
+      const chunk = buf.subarray(0, read);
+      sha.update(chunk);
+      b2.update(chunk);
+    }
+    return { sha256: sha.digest('hex'), blake2b: b2.digest('hex') };
+  } finally {
+    fs.closeSync(fd);
+  }
 }
 
 function parseJsonEntry(entries, name) {
@@ -61,10 +84,14 @@ async function readLargeZipEntriesAndDigests(artifactPath) {
         const dest = path.join(tmpDir, crypto.randomBytes(8).toString('hex'));
         const res = await extractEntryToFile(artifactPath, ent.name, dest, { computeSha256: true });
         if (!res.ok) throw new Error(`could not hash large entry ${ent.name}: ${res.reason}`);
-        digests[ent.name] = res.sha256;
+        const digest = digestFile(dest);
+        if (res.sha256 && digest.sha256 !== res.sha256) {
+          throw new Error(`sha256 drift while hashing large entry ${ent.name}`);
+        }
+        digests[ent.name] = digest;
       } else {
         const buf = readEntryFromLargeZip(artifactPath, ent.name);
-        if (buf) digests[ent.name] = sha256(buf);
+        if (buf) digests[ent.name] = digestBuffer(buf);
       }
     }
     return { entries, digests };
@@ -77,7 +104,7 @@ function memberDigestMap(entries) {
   const out = {};
   for (const name of Object.keys(entries).sort()) {
     if (ARTIFACT_PROVENANCE_SEAL_FILES.has(name)) continue;
-    out[name] = sha256(entries[name]);
+    out[name] = digestBuffer(entries[name]);
   }
   return out;
 }
