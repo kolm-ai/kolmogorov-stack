@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 684,
-    "components_without_direct_test_reference": 145,
+    "test_referenced_components": 685,
+    "components_without_direct_test_reference": 144,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -68,7 +68,7 @@
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 399,
       "distribution_or_worker_surface": 169,
-      "environment_configuration_boundary": 310,
+      "environment_configuration_boundary": 311,
       "execution_or_subprocess_boundary": 233,
       "http_route_surface": 36,
       "large_component_contract_risk": 37,
@@ -17751,6 +17751,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave666-score-errors-worker-contract.test.js",
         "tests/wave921-data-engine-modules.test.js"
       ],
       "risk_signals": [],
@@ -46439,23 +46440,26 @@
       "surface": "worker",
       "domain": "capture_data_eval",
       "language": "python",
-      "sha256": "c3b49443e9dd0e3d8dc7e271c85e380d5401a0e1f0fad5ba9b49c82cf897806c",
+      "sha256": "b1c534668a18b508605df8d5e12d060e8e425cc9c35d77b3b7cfa8e35c73caa5",
       "metrics": {
-        "bytes": 20162,
-        "lines": 516,
+        "bytes": 23261,
+        "lines": 597,
         "imports": 0,
-        "exports": 20,
+        "exports": 23,
         "routes": 5,
-        "env_refs": 0,
+        "env_refs": 1,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave666-score-errors-worker-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
+        "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
         "http_route_surface"
       ],
@@ -46484,7 +46488,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
       "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
       "suggested_verification": [
         "npm run verify:redaction-benchmark",

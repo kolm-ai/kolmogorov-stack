@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 684,
-    "direct_test_reference_pct": 82.5,
-    "components_without_direct_test_reference": 145,
+    "direct_test_referenced_components": 685,
+    "direct_test_reference_pct": 82.6,
+    "components_without_direct_test_reference": 144,
     "high_priority_components": 47,
     "high_priority_direct_test_referenced": 47,
     "high_priority_direct_test_reference_pct": 100,
@@ -16832,6 +16832,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave666-score-errors-worker-contract.test.js",
           "tests/wave921-data-engine-modules.test.js"
         ],
         "category_links": [],
@@ -41419,12 +41420,12 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 20162,
-          "lines": 516,
+          "bytes": 23261,
+          "lines": 597,
           "imports": 0,
-          "exports": 20,
+          "exports": 23,
           "routes": 5,
-          "env_refs": 0,
+          "env_refs": 1,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
@@ -41433,12 +41434,13 @@
         },
         "risk_signals": [
           "distribution_or_worker_surface",
+          "environment_configuration_boundary",
           "execution_or_subprocess_boundary",
           "http_route_surface"
         ],
         "priority_score": 6,
         "priority_band": "medium",
-        "sha256": "c3b49443e9dd0e3d8dc7e271c85e380d5401a0e1f0fad5ba9b49c82cf897806c"
+        "sha256": "b1c534668a18b508605df8d5e12d060e8e425cc9c35d77b3b7cfa8e35c73caa5"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -41446,19 +41448,19 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave666-score-errors-worker-contract.test.js"
+        ],
         "category_links": [],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "workers/data/scripts/score_quality.py",

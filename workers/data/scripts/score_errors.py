@@ -41,7 +41,8 @@ Interface (matches the spec):
 Determinism: no wall-clock / RNG in the scoring path; --seed (default
 0x6b6f6c6d = 1801677709) seeds only the synthetic self-test corpus and the
 hash-bag offset, so identical input + seed -> identical output. Exit 0 on the
-happy path and on graceful degradation; argparse uses 2 for bad args.
+happy path and on graceful degradation, 20 on fail-closed input bounds;
+argparse uses 2 for bad args.
 """
 
 import argparse
@@ -72,6 +73,30 @@ SOFTMAX_BETA = 8.0  # inverse temperature; matches the JS _softmax default
 MARGIN = 0.05       # relaxation on the per-class self-confidence threshold (CL)
 
 EXIT_OK = 0
+EXIT_INPUT = 20
+
+
+def _env_int(name, default):
+    try:
+        value = int(os.environ.get(name, str(default)))
+    except Exception:
+        return default
+    return value if value > 0 else default
+
+
+MAX_ROWS = _env_int("KOLM_SCORE_ERRORS_MAX_ROWS", 200000)
+MAX_LINE_CHARS = _env_int("KOLM_SCORE_ERRORS_MAX_LINE_CHARS", 1000000)
+MAX_TOTAL_CHARS = _env_int("KOLM_SCORE_ERRORS_MAX_TOTAL_CHARS", 50000000)
+MAX_CLUSTERS = _env_int("KOLM_SCORE_ERRORS_MAX_CLUSTERS", 4096)
+MAX_SCORE_CELLS = _env_int("KOLM_SCORE_ERRORS_MAX_SCORE_CELLS", 5000000)
+MAX_CLUSTER_FIELD_CHARS = _env_int("KOLM_SCORE_ERRORS_MAX_CLUSTER_FIELD_CHARS", 256)
+
+
+class InputLimitError(Exception):
+    def __init__(self, code, detail=None):
+        super().__init__(code)
+        self.code = code
+        self.detail = detail or code
 
 _WORD = re.compile(r"[a-z0-9]+")
 
@@ -104,15 +129,33 @@ def load_rows(path):
         fh = sys.stdin
         close = False
     rows = []
+    total_chars = 0
     try:
-        for line in fh:
+        for line_no, line in enumerate(fh, 1):
+            if len(line) > MAX_LINE_CHARS:
+                raise InputLimitError(
+                    "input_line_too_large",
+                    f"line {line_no} exceeds {MAX_LINE_CHARS} chars",
+                )
+            total_chars += len(line)
+            if total_chars > MAX_TOTAL_CHARS:
+                raise InputLimitError(
+                    "input_too_many_chars",
+                    f"input exceeds {MAX_TOTAL_CHARS} total chars",
+                )
             line = line.strip()
             if not line:
                 continue
             try:
-                rows.append(json.loads(line))
+                row = json.loads(line)
             except Exception:  # deliberate: cleanup — skip one bad line
                 continue
+            if len(rows) >= MAX_ROWS:
+                raise InputLimitError(
+                    "input_too_many_rows",
+                    f"row limit {MAX_ROWS} exceeded",
+                )
+            rows.append(row)
     finally:
         if close:
             fh.close()
@@ -155,6 +198,11 @@ def cluster_index_map(rows, cluster_field):
         cid = r.get(cluster_field) if isinstance(r, dict) else None
         cid = "__nocluster__" if cid in (None, "") else str(cid)
         if cid not in mapping:
+            if len(mapping) >= MAX_CLUSTERS:
+                raise InputLimitError(
+                    "cluster_count_too_large",
+                    f"cluster count exceeds {MAX_CLUSTERS}",
+                )
             mapping[cid] = len(mapping)
         idx_of.append(mapping[cid])
     return idx_of, len(mapping), list(mapping.keys())
@@ -288,8 +336,27 @@ def confident_joint_cleanlab(given, probs, k):
 def score_corpus(rows, cluster_field, seed):
     """End-to-end: features -> proxy probs -> confident joint. Returns a dict
     with the spec's stdout shape plus diagnostics. Prefers cleanlab when present."""
+    rows = list(rows or [])
+    if len(rows) > MAX_ROWS:
+        raise InputLimitError("input_too_many_rows", f"row limit {MAX_ROWS} exceeded")
+    cluster_field = str(cluster_field or "cluster_id")
+    if len(cluster_field) > MAX_CLUSTER_FIELD_CHARS:
+        raise InputLimitError(
+            "cluster_field_too_large",
+            f"cluster field exceeds {MAX_CLUSTER_FIELD_CHARS} chars",
+        )
+    try:
+        safe_seed = int(seed) & 0xFFFFFFFF
+    except Exception:
+        safe_seed = DEFAULT_SEED
     idx_of, k, cluster_ids = cluster_index_map(rows, cluster_field)
-    feats = [ngram_features(_pair_output(r), seed) for r in rows]
+    score_cells = len(rows) * max(1, k)
+    if score_cells > MAX_SCORE_CELLS:
+        raise InputLimitError(
+            "score_matrix_too_large",
+            f"score matrix {score_cells} cells exceeds {MAX_SCORE_CELLS}",
+        )
+    feats = [ngram_features(_pair_output(r), safe_seed) for r in rows]
 
     if k <= 1:
         # Single class -> no off-diagonal possible. Report plainly (matches JS).
@@ -460,7 +527,16 @@ def main(argv=None):
     if args.self_test:
         return self_test(args.seed)
 
-    rows = load_rows(args.pairs)
+    try:
+        rows = load_rows(args.pairs)
+    except InputLimitError as e:
+        log(f"[score_errors] input rejected: {e.detail}")
+        _emit({"ok": False, "error": e.code, "detail": e.detail}, args.out)
+        return EXIT_INPUT
+    except OSError as e:
+        log(f"[score_errors] read failed: {e}")
+        _emit({"ok": False, "error": "read_failed", "detail": str(e)}, args.out)
+        return EXIT_OK
     if not rows:
         # Empty corpus is not an error — emit a well-formed, empty envelope.
         result = {
@@ -476,7 +552,12 @@ def main(argv=None):
         _emit(result, args.out)
         return EXIT_OK
 
-    res = score_corpus(rows, args.cluster_field, args.seed)
+    try:
+        res = score_corpus(rows, args.cluster_field, args.seed)
+    except InputLimitError as e:
+        log(f"[score_errors] input rejected: {e.detail}")
+        _emit({"ok": False, "error": e.code, "detail": e.detail}, args.out)
+        return EXIT_INPUT
     result = {
         "ok": True,
         "flagged_indices": res["flagged_indices"],
