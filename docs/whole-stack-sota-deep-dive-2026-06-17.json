@@ -5012,17 +5012,20 @@
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           },
           {
-            "path": "packages/llamaindex-kolm/index.js",
+            "path": "packages/python-llamaindex-kolm/example.py",
             "domain": "developer_distribution",
             "priority_score": 5,
             "risk_signals": [
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "http_route_surface"
             ],
-            "test_refs": [],
-            "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
+            "test_refs": [
+              "tests/active-redteam.test.js",
+              "tests/agent-attestation-report.test.js",
+              "tests/agent-audit-delta-badge-routes.test.js"
+            ],
+            "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           }
         ],
         "count": 164,

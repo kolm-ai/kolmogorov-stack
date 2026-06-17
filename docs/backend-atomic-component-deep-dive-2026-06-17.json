@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 691,
-    "components_without_direct_test_reference": 138,
+    "test_referenced_components": 692,
+    "components_without_direct_test_reference": 137,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -2311,28 +2311,30 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "dd626b6235f99685f8ef1fd5151b9f419d4582369e155414b79f3a341f9ce06e",
+      "sha256": "3235905baf28c678308efee4b3b390dd69256455b814f20aa95c9930d7bc2ee7",
       "metrics": {
-        "bytes": 5100,
-        "lines": 147,
+        "bytes": 10381,
+        "lines": 309,
         "imports": 3,
         "exports": 2,
         "routes": 0,
         "env_refs": 2,
         "fs_writes": 0,
         "subprocess_refs": 3,
-        "network_refs": 1,
+        "network_refs": 3,
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave673-llamaindex-adapter-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -2357,7 +2359,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
       "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
       "suggested_verification": [
         "npm run verify:package-release"

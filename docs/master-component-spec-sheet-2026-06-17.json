@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 691,
-    "direct_test_reference_pct": 83.4,
-    "components_without_direct_test_reference": 138,
+    "direct_test_referenced_components": 692,
+    "direct_test_reference_pct": 83.5,
+    "components_without_direct_test_reference": 137,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -3469,15 +3469,15 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 5100,
-          "lines": 147,
+          "bytes": 10381,
+          "lines": 309,
           "imports": 3,
           "exports": 2,
           "routes": 0,
           "env_refs": 2,
           "fs_writes": 0,
           "subprocess_refs": 3,
-          "network_refs": 1,
+          "network_refs": 3,
           "crypto_refs": 0,
           "markers": 0
         },
@@ -3487,9 +3487,9 @@
           "execution_or_subprocess_boundary",
           "network_or_provider_boundary"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "dd626b6235f99685f8ef1fd5151b9f419d4582369e155414b79f3a341f9ce06e"
+        "sha256": "3235905baf28c678308efee4b3b390dd69256455b814f20aa95c9930d7bc2ee7"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -3497,26 +3497,18 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [
-          {
-            "id": "mcp-tool-gateway-receipts",
-            "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          }
+        "direct_test_refs": [
+          "tests/wave673-llamaindex-adapter-contract.test.js"
         ],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "category_links": [],
+        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
         "suggested_verification": [
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing",
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/llamaindex-kolm/package.json",
@@ -3914,15 +3906,24 @@
           "tests/agent-audit-routes-errorpaths.test.js",
           "tests/agent-audit-routes.test.js"
         ],
-        "category_links": [],
+        "category_links": [
+          {
+            "id": "mcp-tool-gateway-receipts",
+            "stack_area": "agent-integrations",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
         "suggested_verification": [
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "next_best_action": "Execute the linked frontier track: generated_package_sdk_conformance_and_release_evidence."
     },
     {
       "path": "packages/python-llamaindex-kolm/kolm_llamaindex/__init__.py",
