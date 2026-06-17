@@ -115,14 +115,12 @@ export const MODEL_FRAMEWORK_TARGETS = Object.freeze([
     model_types: ['recipe', 'classifier', 'small-llm', 'embedding'],
     runtime_formats: ['wasm', 'webgpu'],
     env: [],
-    evidence: ['public/sdk.js', 'public/device/webgpu-runner.js', 'public/device/webgpu-runner.html', 'server.js', 'docs/kolm-format-v1.md'],
-    // Honest status: the WASM wrapper SDK ships, and a minimal transformers.js
-    // on-device runner (CDN ESM, WebGPU backend with WASM fallback) now exists
-    // at public/device/webgpu-runner.{js,html}. It is a tiny-model demo path,
-    // not a full Kolm-artifact WebGPU inference engine, so this is not yet a
-    // production 'implemented' runtime for arbitrary recipes.
-    status: 'in_progress',
-    note: 'Minimal transformers.js WebGPU/WASM token-generation runner shipped (public/device/webgpu-runner.js); full Kolm-artifact in-browser inference is not yet implemented.',
+    evidence: ['public/sdk.js', 'server.js', 'docs/kolm-format-v1.md'],
+    // Honest status: the browser SDK/WASM artifact path exists, but no WebGPU
+    // model runner is checked in yet. Keep WebGPU as a target until a real
+    // public/device runner and signed-weight verification path ship.
+    status: 'target-declared',
+    note: 'Browser SDK/WASM support exists; WebGPU verify-then-run model execution is planned, not shipped.',
   },
   {
     id: 'vllm',
@@ -215,13 +213,13 @@ export const DEVICE_TARGETS = Object.freeze([
   { id: 'android-litert-qnn', class: 'mobile', runtimes: ['litert', 'qnn'], evidence: ['docs/kolm-format-v1.md', 'docs/product-surfaces.json'], status: 'target-declared' },
   { id: 'browser-wasm', class: 'browser', runtimes: ['wasm'], evidence: ['public/sdk.js', 'server.js'], status: 'implemented' },
   { id: 'browser-webgpu', class: 'browser', runtimes: ['webgpu', 'wasm'], evidence: ['public/sdk.js', 'docs/product-surfaces.json'], status: 'target-declared' },
-  { id: 'jetson-edge', class: 'edge-gpu', runtimes: ['tensorrt-llm', 'triton'], evidence: ['src/compute/registry.json', 'public/compute.html'], status: 'target-declared' },
+  { id: 'jetson-edge', class: 'edge-gpu', runtimes: ['tensorrt-llm', 'triton'], evidence: ['src/compute/registry.json', 'src/target-profiles.js'], status: 'target-declared' },
   { id: 'cloudflare-workers', class: 'edge-cloud', runtimes: ['workers', 'wasm'], evidence: ['docs/cloud-product-readiness.md', 'docs/kolm-format-v1.md'], status: 'target-declared' },
   { id: 'vercel-edge', class: 'edge-cloud', runtimes: ['edge-runtime', 'wasm'], evidence: ['vercel.json', 'docs/cloud-product-readiness.md'], status: 'target-declared' },
   { id: 'aws-lambda', class: 'cloud', runtimes: ['node', 'container'], evidence: ['server.js', 'docs/cloud-product-readiness.md'], status: 'implemented' },
   { id: 'kubernetes-gpu', class: 'cloud-gpu', runtimes: ['vllm', 'sglang', 'tgi', 'triton'], evidence: ['src/compute/registry.json', 'src/remote-compute.js'], status: 'implemented' },
   { id: 'remote-ssh-gpu', class: 'self-hosted-gpu', runtimes: ['ssh', 'docker'], evidence: ['src/remote-compute.js', 'src/compute/registry.json'], status: 'implemented' },
-  { id: 'airgapped-server', class: 'enterprise', runtimes: ['docker', 'offline-cli'], evidence: ['public/airgap.html', 'docs/kolm-format-v1.md'], status: 'implemented' },
+  { id: 'airgapped-server', class: 'enterprise', runtimes: ['docker', 'offline-cli'], evidence: ['src/airgap-routes.js', 'src/airgap-bundle.js', 'docs/kolm-format-v1.md'], status: 'implemented' },
 ]);
 
 export const METHOD_TARGETS = Object.freeze([
@@ -238,7 +236,7 @@ export const METHOD_TARGETS = Object.freeze([
   { id: 'speculative-decoding-train', category: 'distill', evidence: ['src/spec-decode.js', 'cli/kolm.js'], status: 'implemented' },
   { id: 'lora-qlora-train', category: 'train', evidence: ['src/remote-compute.js', 'src/distill-pipeline.js'], status: 'implemented' },
   { id: 'synthetic-seed-generation', category: 'data-generation', evidence: ['src/router.js', 'src/synthesis.js'], status: 'implemented' },
-  { id: 'multimodal-tokenization', category: 'data-prep', evidence: ['services/embed/multimodal.js', 'tests/wave552-gemma-multimodal-account.test.js'], status: 'implemented' },
+  { id: 'multimodal-tokenization', category: 'data-prep', evidence: ['services/embed/multimodal.js', 'tests/wave377-multimodal.test.js'], status: 'implemented' },
   { id: 'rag-index-recall', category: 'retrieval', evidence: ['src/rag.js', 'src/recall.js'], status: 'implemented' },
   { id: 'moe-composition', category: 'composition', evidence: ['src/moe.js', 'tests/wave144-moe-compose.test.js'], status: 'implemented' },
   { id: 'artifact-signing', category: 'artifact', evidence: ['src/artifact.js', 'src/ed25519.js'], status: 'implemented' },
@@ -259,11 +257,11 @@ export const ENTERPRISE_CONTROLS = Object.freeze([
   { id: 'zero-retention', env: [], evidence: ['src/router.js', 'src/daemon-connector.js'], status: 'implemented' },
   { id: 'differential-privacy', env: [], evidence: ['src/privacy-membrane.js', 'src/lake.js'], status: 'implemented' },
   { id: 'audit-log-export', env: [], evidence: ['src/audit.js', 'public/account/api-control-center.html'], status: 'implemented' },
-  { id: 'rbac-team-workspaces', env: [], evidence: ['src/auth.js', 'src/router.js', 'public/teams.html'], status: 'implemented' },
+  { id: 'rbac-team-workspaces', env: [], evidence: ['src/auth.js', 'src/router.js', 'public/account/org.html'], status: 'implemented' },
   { id: 'saml-sso', env: ['KOLM_SAML_METADATA_URL', 'WORKOS_API_KEY', 'AUTH0_DOMAIN'], evidence: ['docs/product-sota-readiness.json'], status: 'integration-ready' },
   { id: 'scim-provisioning', env: ['KOLM_SCIM_TOKEN', 'WORKOS_API_KEY'], evidence: ['docs/product-sota-readiness.json'], status: 'integration-ready' },
   { id: 'customer-managed-keys', env: ['KOLM_KMS_KEY_ID', 'AWS_KMS_KEY_ID'], evidence: ['docs/product-sota-readiness.json'], status: 'config-ready' },
-  { id: 'baa-compliance-pack', env: [], evidence: ['public/baa.html', 'public/compliance-packs.html'], status: 'claim-gated' },
+  { id: 'baa-compliance-pack', env: [], evidence: ['public/baa.html', 'docs/compliance-certification-packet.md'], status: 'claim-gated' },
 ]);
 
 export const OBSERVABILITY_CONTROLS = Object.freeze([
