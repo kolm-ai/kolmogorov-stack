@@ -38,8 +38,8 @@
     "frontier_improvement_or_invention"
   ],
   "summary": {
-    "component_count": 825,
-    "test_referenced_components": 658,
+    "component_count": 826,
+    "test_referenced_components": 659,
     "components_without_direct_test_reference": 167,
     "high_priority_components": 48,
     "domains": {
@@ -53,13 +53,13 @@
       "platform_support": 199,
       "runtime_serving_routing": 24,
       "storage_state": 26,
-      "training_model_optimization": 117,
+      "training_model_optimization": 118,
       "trust_security_compliance": 63
     },
     "surfaces": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 624,
+      "core-backend": 625,
       "package-distribution": 91,
       "service": 3,
       "worker": 73
@@ -68,8 +68,8 @@
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 399,
       "distribution_or_worker_surface": 167,
-      "environment_configuration_boundary": 305,
-      "execution_or_subprocess_boundary": 230,
+      "environment_configuration_boundary": 306,
+      "execution_or_subprocess_boundary": 231,
       "http_route_surface": 36,
       "large_component_contract_risk": 34,
       "money_or_entitlement_path": 17,
@@ -878,14 +878,14 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "11a9f521a67ea83519883d60809ea0fe3049a6f5de1b54cf135754cd6c3cf188",
+      "sha256": "5a9fc7f658f2c56230163eea20e5906f1fb961b270d033c053d5843378b26482",
       "metrics": {
-        "bytes": 2612358,
-        "lines": 56856,
-        "imports": 539,
+        "bytes": 2616583,
+        "lines": 56964,
+        "imports": 540,
         "exports": 1,
         "routes": 0,
-        "env_refs": 413,
+        "env_refs": 414,
         "fs_writes": 7,
         "subprocess_refs": 168,
         "network_refs": 185,
@@ -37154,6 +37154,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave608-semantic-routing-live-loop.test.js",
         "tests/wave921-route-quality-store.test.js"
       ],
       "risk_signals": [
@@ -37192,16 +37193,75 @@
       ]
     },
     {
+      "path": "src/route-training.js",
+      "id": "src-route-training-js",
+      "surface": "core-backend",
+      "domain": "training_model_optimization",
+      "language": "javascript",
+      "sha256": "537513aa37490ee7a1a8a7580d2e77cec59d4bb04fd33fbba9003740de1fa10e",
+      "metrics": {
+        "bytes": 8761,
+        "lines": 282,
+        "imports": 3,
+        "exports": 10,
+        "routes": 0,
+        "env_refs": 1,
+        "fs_writes": 0,
+        "subprocess_refs": 0,
+        "network_refs": 0,
+        "crypto_refs": 0,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/wave608-semantic-routing-live-loop.test.js"
+      ],
+      "risk_signals": [
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary"
+      ],
+      "priority_score": 2,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
+      "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
+      "suggested_verification": [
+        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
+        "npm run verify:quant-oracle"
+      ]
+    },
+    {
       "path": "src/router.js",
       "id": "src-router-js",
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "23bde919a8af51b6df6a5033537a5208c6d3822a8e9f0cd84c76dd80003e05b0",
+      "sha256": "a624de5589b4ce891eb98644615b98ff006dd5d352f587c5cacacf7f94303280",
       "metrics": {
-        "bytes": 1455105,
-        "lines": 30498,
-        "imports": 531,
+        "bytes": 1456521,
+        "lines": 30533,
+        "imports": 532,
         "exports": 8,
         "routes": 810,
         "env_refs": 189,
@@ -39401,6 +39461,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave608-semantic-routing-live-loop.test.js",
         "tests/wave921-multi-signal-routing.test.js",
         "tests/wave921-route-quality-store.test.js",
         "tests/wave921-semantic-router-wiring.test.js",

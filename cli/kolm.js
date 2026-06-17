@@ -16994,12 +16994,120 @@ async function cmdRoute(args) {
   if (maybeHelp('route', args)) return;
   const sub = args[0];
   const rest = args.slice(1);
+  if (sub === 'train') {
+    return cmdRouteTrain(rest);
+  }
   if (sub !== 'doctor') {
     console.error('unknown route subcommand: ' + (sub || ''));
     console.error('try: kolm route doctor [--profile <name>] [--namespace <ns>] [--tenant <id>] [--json]');
+    console.error('     kolm route train --namespace <ns> [--tenant <id>] [--k N] [--max-rows N] [--activate] [--json]');
     process.exit(EXIT.BAD_ARGS);
   }
   return cmdRouteDoctor(rest);
+}
+
+async function cmdRouteTrain(args) {
+  if (maybeHelp('route train', args)) return;
+  const wantJson = args.includes('--json');
+  const flag = (name) => {
+    const eq = args.find((a) => a.startsWith(name + '='));
+    if (eq) return eq.slice(name.length + 1);
+    return pickFlag(args, name);
+  };
+  const namespace = flag('--namespace') || flag('-n') || null;
+  const tenant = flag('--tenant') || flag('--tenant-id') || process.env.KOLM_TENANT_ID || 'local-tenant';
+  const kRaw = flag('--k');
+  const rowsRaw = flag('--max-rows') || flag('--limit');
+  const activate = args.includes('--activate') || args.includes('--enable');
+  const dryRun = args.includes('--dry-run') || args.includes('--no-write');
+  const k = kRaw != null && kRaw !== '' ? Math.max(1, Math.trunc(Number(kRaw))) : 32;
+  const max_rows = rowsRaw != null && rowsRaw !== '' ? Math.max(0, Math.trunc(Number(rowsRaw))) : 50_000;
+
+  const emit = (env, code = 0) => {
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else if (env.ok) {
+      console.log('route train');
+      console.log('  tenant:                 ' + env.tenant);
+      console.log('  namespace:              ' + env.namespace);
+      console.log('  trained_rows:           ' + (env.trained_rows || 0));
+      console.log('  route_quality_outcomes: ' + (env.route_quality_outcomes || 0));
+      console.log('  persisted:              ' + (env.persisted ? 'yes' : 'no'));
+      console.log('  activated:              ' + (env.activated ? 'yes' : 'no'));
+      if (env.route_weights) console.log('  route_weights:          ' + JSON.stringify(env.route_weights));
+      if (!env.persisted) nextStep({ run: 'kolm route train --namespace ' + env.namespace, see: 'docs/reference/namespace-set.md' });
+      else if (!env.activated) nextStep({ run: 'kolm namespace set ' + env.namespace + ' --route-mode cost_quality', see: 'docs/reference/namespace-set.md' });
+    } else {
+      console.error('route train: ' + (env.error || 'failed'));
+      if (env.hint) console.error('  hint: ' + env.hint);
+    }
+    if (code) process.exit(code);
+  };
+
+  if (!namespace) {
+    return emit({
+      ok: false,
+      error: 'missing_namespace',
+      hint: 'pass --namespace <slug>',
+      version: 'w608-route-training-v1',
+    }, EXIT.BAD_ARGS);
+  }
+  if (!Number.isFinite(k) || k < 1 || !Number.isFinite(max_rows) || max_rows < 0) {
+    return emit({
+      ok: false,
+      error: 'invalid_numeric_flag',
+      hint: '--k must be >=1 and --max-rows must be >=0',
+      version: 'w608-route-training-v1',
+    }, EXIT.BAD_ARGS);
+  }
+
+  let mod;
+  try { mod = await import('../src/route-training.js'); }
+  catch (e) {
+    return emit({
+      ok: false,
+      error: 'route_training_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w608-route-training-v1',
+    }, EXIT.MISSING_PREREQ);
+  }
+
+  try {
+    const env = await mod.buildRouteTrainingSnapshot({ tenant, namespace, k, max_rows });
+    const hasCentroids = !!(env && env.snapshot && Array.isArray(env.snapshot.centroids) && env.snapshot.centroids.length);
+    if (!hasCentroids) {
+      return emit({
+        ...env,
+        ok: false,
+        error: 'no_training_rows',
+        hint: 'capture gateway traffic for this tenant/namespace, then rerun route train',
+        persisted: false,
+        activated: false,
+      }, EXIT.GATE_FAIL);
+    }
+    let saved = null;
+    if (!dryRun) {
+      saved = await mod.persistRouteTrainingSnapshot({
+        tenant,
+        namespace: env.namespace,
+        snapshot: env.snapshot,
+        route_weights: env.route_weights,
+        activate,
+      });
+    }
+    return emit({
+      ...env,
+      persisted: !dryRun,
+      activated: !!(saved && saved.route_mode === 'cost_quality'),
+      namespace_row_id: saved && saved.id || null,
+    });
+  } catch (e) {
+    return emit({
+      ok: false,
+      error: e && e.code ? e.code : 'route_train_failed',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w608-route-training-v1',
+    }, EXIT.EXECUTION);
+  }
 }
 
 async function cmdRouteDoctor(args) {

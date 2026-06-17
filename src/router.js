@@ -6972,11 +6972,25 @@ export function buildRouter() {
       // there is zero behavior change until a namespace is both opted-in AND
       // trained. The decision is stamped on the receipt additively (non-signed).
       let _routerDecision = null;
+      let _routeTraining = null;
       if (nsConfig.route_mode === 'cost_quality' || nsConfig.route_mode === 'semantic') {
         try {
           const _sr = await import('./semantic-router.js');
+          _routeTraining = await import('./route-training.js');
           const _routeCfg = { ...nsConfig, ...cfgPF };
-          const _scored = _sr.scoreRoute({ namespaceConfig: _routeCfg, prompt: inputText, candidates: chain, callerConfidence: confidence, stats: null });
+          const _trained = await _routeTraining.loadRouteStatsForNamespace({
+            tenant,
+            namespace: nsSlug,
+            namespaceConfig: nsConfig,
+            candidates: chain,
+          });
+          const _scored = _sr.scoreRoute({
+            namespaceConfig: _routeCfg,
+            prompt: inputText,
+            candidates: chain,
+            callerConfidence: confidence,
+            stats: _trained && _trained.stats ? _trained.stats : null,
+          });
           if (_scored && Array.isArray(_scored.ordered_chain) && _scored.ordered_chain.length) {
             chain = _scored.ordered_chain;
             _routerDecision = _sr.buildRouterDecisionBlock({ scored: _scored, alpha: _scored.alpha, cluster_id: _scored.cluster_id, n_samples: _scored.n_samples, embedder: _scored.embedder, cold_start: _scored.cold_start });
@@ -7151,6 +7165,27 @@ export function buildRouter() {
         try {
           await semcache.semanticCacheWrite({ tenant: _cacheTenant, namespace: nsSlug, model: _cacheModel, canonicalInput: _cacheCanon, userText: _cacheUserText, value: clientJson, source_receipt_id: receipt.receipt_id, config: _cacheCfg });
         } catch (_) { /* cache write is best-effort */ }
+      }
+      // W608 - close the semantic-routing flywheel. After the final provider
+      // result and signed receipt exist, persist a tenant-fenced route-quality
+      // outcome so the next `kolm route train` and live stats reload can learn
+      // per-(cluster,model) cost/latency/success for this namespace.
+      if (_routeTraining && _routerDecision) {
+        try {
+          const _attemptIdx = Math.max(0, (Number(result && result.attempt) || 1) - 1);
+          await _routeTraining.recordRouteOutcomeFromDispatch({
+            tenant,
+            namespace: nsSlug,
+            routerDecision: _routerDecision,
+            result,
+            attemptedEntry: chain[_attemptIdx] || chain[0] || null,
+            prompt_text: inputText,
+            cost: receipt.cost_usd,
+            latency_ms: phases.chain_dispatch_ms,
+            receipt_id: receipt.receipt_id,
+            now: Date.now(),
+          });
+        } catch (_) { /* route-quality learning is best-effort */ }
       }
       try {
         store.insert('observations', {

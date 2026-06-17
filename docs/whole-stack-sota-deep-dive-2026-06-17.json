@@ -83,12 +83,12 @@
   ],
   "summary": {
     "category_count": 16,
-    "categories_with_critical_frontier_work_open": 13,
+    "categories_with_critical_frontier_work_open": 12,
     "categories_with_major_frontier_work_open": 15,
-    "total_atomic_component_links": 3501,
+    "total_atomic_component_links": 3510,
     "status_counts": {
-      "sota_review_complete_critical_frontier_work_open": 13,
-      "sota_review_complete_major_frontier_work_open": 3
+      "sota_review_complete_critical_frontier_work_open": 12,
+      "sota_review_complete_major_frontier_work_open": 4
     },
     "readiness_open_requirements": [
       {
@@ -533,7 +533,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 196,
+        "count": 197,
         "missing_required_paths": []
       },
       "readiness": {
@@ -963,7 +963,7 @@
             "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
           }
         ],
-        "count": 225,
+        "count": 226,
         "missing_required_paths": []
       },
       "readiness": {
@@ -1386,7 +1386,7 @@
             "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary"
           }
         ],
-        "count": 262,
+        "count": 263,
         "missing_required_paths": []
       },
       "readiness": {
@@ -2258,7 +2258,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 145,
+        "count": 146,
         "missing_required_paths": []
       },
       "readiness": {
@@ -2666,7 +2666,7 @@
             "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
           }
         ],
-        "count": 199,
+        "count": 200,
         "missing_required_paths": []
       },
       "readiness": {
@@ -3123,7 +3123,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 197,
+        "count": 198,
         "missing_required_paths": []
       },
       "readiness": {
@@ -3574,7 +3574,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 221,
+        "count": 222,
         "missing_required_paths": []
       },
       "readiness": {
@@ -4160,7 +4160,7 @@
     {
       "id": "llm-routing",
       "stack_area": "gateway",
-      "status": "sota_review_complete_critical_frontier_work_open",
+      "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
         "line": 481
@@ -4169,10 +4169,10 @@
         "line": 481,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 6,
-        "improvement_count": 5,
+        "already_at_frontier_count": 7,
+        "improvement_count": 2,
         "gaps": {
-          "critical": 2,
+          "critical": 0,
           "major": 2,
           "minor": 2
         }
@@ -4201,6 +4201,7 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
+              "tests/wave608-semantic-routing-live-loop.test.js",
               "tests/wave921-route-quality-store.test.js"
             ],
             "improvement_track": "tenant_scoped_cas_storage_retention_and_migration_simulation"
@@ -4214,9 +4215,9 @@
               "large_component_contract_risk"
             ],
             "test_refs": [
+              "tests/wave608-semantic-routing-live-loop.test.js",
               "tests/wave921-multi-signal-routing.test.js",
-              "tests/wave921-route-quality-store.test.js",
-              "tests/wave921-semantic-router-wiring.test.js"
+              "tests/wave921-route-quality-store.test.js"
             ],
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
           }
@@ -4483,7 +4484,7 @@
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           }
         ],
-        "count": 333,
+        "count": 334,
         "missing_required_paths": []
       },
       "readiness": {
@@ -4610,7 +4611,7 @@
           "category_has_verification_commands"
         ]
       },
-      "improvement_track": "surgical_now_plus_spec_followup",
+      "improvement_track": "spec_followup_required",
       "suggested_verification": [
         "npm run verify:stack-sota",
         "npm run verify:surfaces",
@@ -6438,7 +6439,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 252,
+        "count": 253,
         "missing_required_paths": []
       },
       "readiness": {
