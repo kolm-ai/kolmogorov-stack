@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 700,
-    "components_without_direct_test_reference": 129,
+    "test_referenced_components": 701,
+    "components_without_direct_test_reference": 128,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -9081,10 +9081,10 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "05454b71bf3591882231a0363ed126047fbce4565bc2201bd02c98aa44c21285",
+      "sha256": "00644721f34fc920fec83489429224ec93c0a4d0a710eb3825220f466789786a",
       "metrics": {
-        "bytes": 11435,
-        "lines": 329,
+        "bytes": 16439,
+        "lines": 493,
         "imports": 3,
         "exports": 4,
         "routes": 0,
@@ -9092,15 +9092,17 @@
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 1,
-        "crypto_refs": 2,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave681-audio-bakeoff-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 92.4,
+    "local_engineering_score": 92.5,
     "frontier_product_score": 69.4,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 700,
-    "direct_test_reference_pct": 84.4,
-    "components_without_direct_test_reference": 129,
+    "direct_test_referenced_components": 701,
+    "direct_test_reference_pct": 84.6,
+    "components_without_direct_test_reference": 128,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -9291,8 +9291,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 11435,
-          "lines": 329,
+          "bytes": 16439,
+          "lines": 493,
           "imports": 3,
           "exports": 4,
           "routes": 0,
@@ -9300,16 +9300,16 @@
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 1,
-          "crypto_refs": 2,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
           "network_or_provider_boundary"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "05454b71bf3591882231a0363ed126047fbce4565bc2201bd02c98aa44c21285"
+        "sha256": "00644721f34fc920fec83489429224ec93c0a4d0a710eb3825220f466789786a"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -9317,7 +9317,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave681-audio-bakeoff-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
         "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
@@ -9326,10 +9328,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "src/audio-capture.js",

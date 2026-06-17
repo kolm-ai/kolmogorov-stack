@@ -48,6 +48,9 @@ export const INTENT_KINDS = Object.freeze([
 // a 50k-row audio capture set does not melt the runtime.
 const MAX_ROWS = 500;
 const DEFAULT_MAX = 50;
+const MAX_TEXT_CHARS = 64 * 1024;
+const MAX_NAMESPACE_CHARS = 256;
+const MAX_ARTIFACT_PATH_CHARS = 2048;
 
 // =============================================================================
 // runAudioBakeoff
@@ -88,11 +91,12 @@ const DEFAULT_MAX = 50;
  */
 export async function runAudioBakeoff(args) {
   const a = args || {};
-  const tenant_id = a.tenant_id;
-  const namespace = a.namespace || null;
-  const artifact_path = a.artifact_path || null;
+  const tenant_id = typeof a.tenant_id === 'string' ? a.tenant_id.trim() : '';
+  const namespaceResult = _normalizeNamespace(a.namespace);
+  const artifactResult = _normalizeArtifactPath(a.artifact_path);
   const cap = _clampMax(a.max_n);
   const opts = a.opts || {};
+  const judge_kind = typeof opts.judge === 'function' ? 'di_judge' : 'transcript_jaccard';
 
   if (!tenant_id) {
     return {
@@ -112,16 +116,60 @@ export async function runAudioBakeoff(args) {
       created_at: new Date().toISOString(),
     };
   }
+  const namespace = namespaceResult.value;
+  if (!namespaceResult.ok) {
+    return _badInputEnvelope({
+      error: 'invalid_namespace',
+      hint: namespaceResult.hint,
+      tenant_id,
+      namespace: null,
+      artifact_path: null,
+      cap,
+      judge_kind,
+    });
+  }
+  if (!artifactResult.ok) {
+    return _badInputEnvelope({
+      error: 'invalid_artifact_path',
+      hint: artifactResult.hint,
+      tenant_id,
+      namespace,
+      artifact_path: null,
+      cap,
+      judge_kind,
+    });
+  }
+  const artifact_path = artifactResult.value;
 
   // Pull events via DI store seam (defaults to canonical event-store).
   const storeMod = opts.storeMod || (await import('./event-store.js'));
+  if (!storeMod || typeof storeMod.listEvents !== 'function') {
+    return {
+      ok: false,
+      version: AUDIO_BAKEOFF_VERSION,
+      error: 'store_not_wired',
+      hint: 'opts.storeMod must expose listEvents({tenant_id, namespace, media_kind, limit})',
+      tenant_id,
+      namespace,
+      artifact_path,
+      count_total: 0,
+      count_audio_pairs_evaluated: 0,
+      by_intent_kind: _zeroBuckets(),
+      avg_score: 0,
+      judge_kind,
+      transcript_coverage_pct: 0,
+      max_n: cap,
+      row_failures: _zeroFailures(),
+      created_at: new Date().toISOString(),
+    };
+  }
   let events = [];
   try {
     events = await storeMod.listEvents({
       tenant_id,
       namespace: namespace || undefined,
       media_kind: 'audio',
-      limit: cap,
+      limit: MAX_ROWS,
     });
   } catch (e) {
     return {
@@ -136,11 +184,14 @@ export async function runAudioBakeoff(args) {
       count_audio_pairs_evaluated: 0,
       by_intent_kind: _zeroBuckets(),
       avg_score: 0,
-      judge_kind: 'transcript_jaccard',
+      judge_kind,
       transcript_coverage_pct: 0,
+      max_n: cap,
+      row_failures: _zeroFailures(),
       created_at: new Date().toISOString(),
     };
   }
+  if (!Array.isArray(events)) events = [];
 
   // W411 defense-in-depth: per-row tenant_id check even though listEvents
   // already filtered. If the store schema flips one day from tenant_id to
@@ -163,8 +214,10 @@ export async function runAudioBakeoff(args) {
       count_audio_pairs_evaluated: 0,
       by_intent_kind: _zeroBuckets(),
       avg_score: 0,
-      judge_kind: opts.judge ? 'di_judge' : 'transcript_jaccard',
+      judge_kind,
       transcript_coverage_pct: 0,
+      max_n: cap,
+      row_failures: _zeroFailures(),
       message: 'no_audio_captures',
       hint: 'capture audio inputs first (POST /v1/audio/capture-detect + /v1/capture/log)',
       created_at: new Date().toISOString(),
@@ -175,13 +228,19 @@ export async function runAudioBakeoff(args) {
   let total_score = 0;
   let evaluated = 0;
   let with_transcript = 0;
+  const row_failures = _zeroFailures();
+  const candidates = rows.slice(0, cap);
 
   for (const ev of rows) {
-    const transcript = _pickTranscript(ev);
+    const transcript = _boundedText(_pickTranscript(ev));
     if (transcript) with_transcript += 1;
 
     const intent = _classifyIntent(transcript);
     buckets[intent] = (buckets[intent] || 0) + 1;
+  }
+
+  for (const ev of candidates) {
+    const transcript = _boundedText(_pickTranscript(ev));
 
     // Generate the candidate response. DI seam: opts.runOnArtifact lets
     // tests inject a synchronous stub without loading artifact-runner.
@@ -196,14 +255,23 @@ export async function runAudioBakeoff(args) {
           candidate = _resultText(ran);
         }
       } catch (_) {
+        row_failures.artifact_run_failed += 1;
         candidate = '';
       }
     }
+    candidate = _boundedText(candidate);
 
-    const base = _extractBaseResponse(ev);
-    const score = typeof opts.judge === 'function'
-      ? Number(await opts.judge({ transcript, candidate, base, ev }) || 0)
-      : _jaccard(_tokens(base), _tokens(candidate));
+    const base = _boundedText(_extractBaseResponse(ev));
+    let score = 0;
+    try {
+      score = typeof opts.judge === 'function'
+        ? await opts.judge({ transcript, candidate, base, ev })
+        : _jaccard(_tokens(base), _tokens(candidate));
+    } catch (_) {
+      row_failures.judge_failed += 1;
+      score = 0;
+    }
+    score = _normalizeScore(score);
 
     total_score += score;
     evaluated += 1;
@@ -213,6 +281,7 @@ export async function runAudioBakeoff(args) {
   const coverage = rows.length > 0
     ? Math.round((with_transcript / rows.length) * 10000) / 100
     : 0;
+  const created_at = new Date().toISOString();
 
   return {
     ok: true,
@@ -224,9 +293,12 @@ export async function runAudioBakeoff(args) {
     count_audio_pairs_evaluated: evaluated,
     by_intent_kind: buckets,
     avg_score,
-    judge_kind: typeof opts.judge === 'function' ? 'di_judge' : 'transcript_jaccard',
+    judge_kind,
     transcript_coverage_pct: coverage,
-    created_at: new Date().toISOString(),
+    max_n: cap,
+    row_failures,
+    bakeoff_id: _bakeoffId({ tenant_id, namespace, artifact_path, created_at, rows: candidates }),
+    created_at,
   };
 }
 
@@ -236,7 +308,7 @@ export async function runAudioBakeoff(args) {
 
 function _tokens(s) {
   if (s == null) return new Set();
-  const text = String(s).toLowerCase();
+  const text = _boundedText(s).toLowerCase();
   const toks = text.match(/[a-z0-9_]+/g) || [];
   return new Set(toks);
 }
@@ -283,6 +355,13 @@ function _zeroBuckets() {
   return obj;
 }
 
+function _zeroFailures() {
+  return {
+    artifact_run_failed: 0,
+    judge_failed: 0,
+  };
+}
+
 function _pickTranscript(ev) {
   if (!ev || typeof ev !== 'object') return '';
   // Prefer explicit transcript field, then prompt_head (which the W772
@@ -319,6 +398,91 @@ function _clampMax(n) {
   const v = Number(n);
   if (!Number.isFinite(v) || v <= 0) return DEFAULT_MAX;
   return Math.min(MAX_ROWS, Math.floor(v));
+}
+
+function _normalizeNamespace(v) {
+  if (v == null || v === '') return { ok: true, value: null };
+  if (typeof v !== 'string') {
+    return { ok: false, value: null, hint: 'namespace must be a string when provided' };
+  }
+  const s = v.trim();
+  if (!s) return { ok: true, value: null };
+  if (s.length > MAX_NAMESPACE_CHARS) {
+    return { ok: false, value: null, hint: `namespace must be at most ${MAX_NAMESPACE_CHARS} characters` };
+  }
+  if (s.includes('\0') || /[\r\n]/.test(s)) {
+    return { ok: false, value: null, hint: 'namespace must not contain control characters' };
+  }
+  return { ok: true, value: s };
+}
+
+function _normalizeArtifactPath(v) {
+  if (v == null || v === '' || v === false) return { ok: true, value: null };
+  if (typeof v !== 'string') {
+    return { ok: false, value: null, hint: 'artifact_path must be a local filesystem path, file:// URI, or "none"' };
+  }
+  const s = v.trim();
+  if (!s || s.toLowerCase() === 'none') return { ok: true, value: null };
+  if (s.length > MAX_ARTIFACT_PATH_CHARS) {
+    return { ok: false, value: null, hint: `artifact_path must be at most ${MAX_ARTIFACT_PATH_CHARS} characters` };
+  }
+  if (s.includes('\0') || /[\r\n]/.test(s)) {
+    return { ok: false, value: null, hint: 'artifact_path must not contain control characters' };
+  }
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(s) && !/^file:\/\//i.test(s)) {
+    return { ok: false, value: null, hint: 'artifact_path must be local; remote artifact URLs are not accepted by audio bakeoff' };
+  }
+  return { ok: true, value: s };
+}
+
+function _boundedText(s, max = MAX_TEXT_CHARS) {
+  if (s == null) return '';
+  const text = String(s);
+  return text.length > max ? text.slice(0, max) : text;
+}
+
+function _normalizeScore(v) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return 0;
+  if (n < 0) return 0;
+  if (n > 1) return 1;
+  return n;
+}
+
+function _bakeoffId({ tenant_id, namespace, artifact_path, created_at, rows }) {
+  const row_ids = (Array.isArray(rows) ? rows : []).map((ev, idx) =>
+    ev && (ev.event_id || ev.id || ev.receipt_id || `${idx}:${_pickTranscript(ev).slice(0, 32)}`)
+  );
+  const body = JSON.stringify({
+    version: AUDIO_BAKEOFF_VERSION,
+    tenant_id,
+    namespace: namespace || null,
+    artifact_path: artifact_path || null,
+    created_at,
+    row_ids,
+  });
+  return 'abk_' + crypto.createHash('sha256').update(body).digest('hex').slice(0, 16);
+}
+
+function _badInputEnvelope({ error, hint, tenant_id, namespace, artifact_path, cap, judge_kind }) {
+  return {
+    ok: false,
+    version: AUDIO_BAKEOFF_VERSION,
+    error,
+    hint,
+    tenant_id,
+    namespace,
+    artifact_path,
+    count_total: 0,
+    count_audio_pairs_evaluated: 0,
+    by_intent_kind: _zeroBuckets(),
+    avg_score: 0,
+    judge_kind,
+    transcript_coverage_pct: 0,
+    max_n: cap,
+    row_failures: _zeroFailures(),
+    created_at: new Date().toISOString(),
+  };
 }
 
 export default {
