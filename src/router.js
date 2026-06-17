@@ -1392,6 +1392,64 @@ export function buildRouter() {
     } catch (_) { /* never throw from a lifecycle source */ }
   }
 
+  function _denyScope(res, required) {
+    res.status(403).json({
+      error: 'insufficient_scope',
+      required,
+      hint: 'use the tenant primary key or mint a scoped key with the required capability',
+    });
+    return false;
+  }
+
+  function _requireScope(req, res, required) {
+    if (!required) return true;
+    if (keyHasScope(req, required)) return true;
+    return _denyScope(res, required);
+  }
+
+  function _scopeRequiredForRoute(req) {
+    const method = String((req && req.method) || 'GET').toUpperCase();
+    const p = String((req && req.path) || '');
+
+    if (p === '/v1/account/rotate-key') return '*';
+    if (p === '/v1/account/keys' || p.startsWith('/v1/account/keys/')) {
+      return method === 'GET' ? 'account:keys:read' : '*';
+    }
+    if (p === '/v1/account/scoped-keys' || p.startsWith('/v1/account/scoped-keys/')) {
+      return method === 'GET' ? 'account:keys:read' : '*';
+    }
+    if (p === '/v1/account/provider-keys' || p.startsWith('/v1/account/provider-keys/')) {
+      return method === 'GET' ? 'provider_keys:read' : 'provider_keys:write';
+    }
+    if (p === '/v1/account/invoices') return 'billing:read';
+    if (p === '/v1/account/billing' || p.startsWith('/v1/account/billing/')) {
+      return method === 'GET' ? 'billing:read' : 'billing:write';
+    }
+    if (p === '/v1/account/sso/status') return 'identity:read';
+    if (p === '/v1/account/sso/configure' || p === '/v1/account/sso/scim-token') return 'identity:write';
+    if (p === '/v1/webhooks' || p.startsWith('/v1/webhooks/')) {
+      return method === 'GET' ? 'webhook:read' : 'webhook:write';
+    }
+    if (p === '/v1/teams' || p.startsWith('/v1/teams/')) {
+      if (p.startsWith('/v1/teams/invites/') && method === 'GET') return null;
+      if (/\/captures$/.test(p)) return null; // team-capture-rbac owns capture:* checks.
+      if (/\/export$/.test(p)) return 'lake:export';
+      if (method === 'GET') return 'team:read';
+      if (p === '/v1/teams' && method === 'POST') return 'team:write';
+      if (p.includes('/models') || (p.startsWith('/v1/teams/invites/') && method === 'POST')) return 'team:write';
+      return 'team:admin';
+    }
+    if (p === '/v1/orgs' || p.startsWith('/v1/orgs/')) {
+      if (method === 'GET') return 'team:read';
+      if (/\/leave$/.test(p)) return 'team:write';
+      return 'team:admin';
+    }
+    if (p === '/v1/team' || p.startsWith('/v1/team/')) {
+      return method === 'GET' ? 'team:read' : 'team:write';
+    }
+    return null;
+  }
+
   // GW (compute DoS guard) - hard running-job concurrency ceiling before we spawn
   // another worker. Counts THIS tenant's distill/compile jobs in (queued|running)
   // across the disk registry and returns false (+ writes a 429) when at/over the
@@ -6337,6 +6395,12 @@ export function buildRouter() {
   __registerTransparencyLogRoutes(r);
 
   r.use(authMiddleware);
+  r.use((req, res, next) => {
+    const required = _scopeRequiredForRoute(req);
+    if (!required) return next();
+    if (!_requireScope(req, res, required)) return;
+    next();
+  });
 
   // W-INTEG - spend-cap enforcement (src/spend-caps.js). Runs after auth so the
   // tenant is resolved, and gates the metered inference POST routes

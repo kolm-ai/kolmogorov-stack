@@ -995,12 +995,29 @@ export function stopKeyLastUsedFlusher() {
   try { return flushKeyLastUsed(); } catch { return { flushed: 0 }; }
 }
 
+function _scopeAllowsAction(granted, action) {
+  const g = String(granted || '').trim();
+  const a = String(action || '').trim();
+  if (!g || !a) return false;
+  if (g === '*') return true;
+  if (g === a) return true;
+  if (a === '*') return false;
+  // Hierarchical wildcard support: account:* matches account:keys:write,
+  // account:keys:* matches account:keys:read, lake:* matches lake:export.
+  if (g.endsWith(':*')) {
+    const prefix = g.slice(0, -1);
+    return a.startsWith(prefix);
+  }
+  return false;
+}
+
 // Convenience for routes: a full (null-scope) key passes everything; a scoped
-// key passes only when '*' or the exact action scope is present.
+// key passes only when '*', the exact action scope, or an action-family wildcard
+// is present.
 export function keyHasScope(req, action) {
   const sc = req && req.key_scopes;
   if (sc == null) return true;
-  return Array.isArray(sc) && (sc.includes('*') || sc.includes(action));
+  return Array.isArray(sc) && sc.some((scope) => _scopeAllowsAction(scope, action));
 }
 
 export function authMiddleware(req, res, next) {
