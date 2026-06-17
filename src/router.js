@@ -262,6 +262,7 @@ import { objectStorageReadiness } from './object-storage.js';
 import { quantizationOracleCatalog, rankQuantizationStrategies } from './quantization-oracle.js';
 import { cloudComputeBrokerCatalog, planCloudCompute, scheduleCloudCompute } from './cloud-compute-broker.js';
 import { distillStrategyCatalog, planDistillStrategy } from './distill-strategy.js';
+import { classifyTeacher } from './distill-pipeline.js';
 import { buildStrategyCatalog, planBuildStrategy } from './build-strategy-brain.js';
 import {
   auditPackageReleaseReadiness,
@@ -16653,6 +16654,78 @@ export function buildRouter() {
   });
 
   // ---------- W214: click-to-distill from captured corpus ----------
+  function _teacherSourceClassForCandidate(candidate) {
+    const raw = String(candidate || '').trim().toLowerCase();
+    if (!raw) return 'unknown';
+    if (raw === 'open-weights' || raw === 'proprietary' || raw === 'unknown') return raw;
+    return classifyTeacher(raw);
+  }
+  function _teacherCandidatesFromCapture(c) {
+    if (!c || typeof c !== 'object') return [];
+    const out = [];
+    const add = (v) => {
+      const s = String(v || '').trim();
+      if (s) out.push(s);
+    };
+    const addProviderModel = (provider, model) => {
+      const p = String(provider || '').trim();
+      const m = String(model || '').trim();
+      if (p && m) add(`${p}:${m}`);
+      else if (p) add(`${p}:unknown`);
+    };
+    addProviderModel(c.teacher_provider, c.teacher_model);
+    addProviderModel(c.provider, c.model);
+    addProviderModel(c.vendor, c.model);
+    for (const key of [
+      'teacher_source',
+      'teacher_model',
+      'teacher',
+      'teacher_version',
+      'upstream_model',
+      'model',
+    ]) add(c[key]);
+    return [...new Set(out)];
+  }
+  function _classifyTeacherCandidates(candidates) {
+    let sawOpen = false;
+    let sawUnknown = false;
+    for (const candidate of candidates || []) {
+      const source = _teacherSourceClassForCandidate(candidate);
+      if (source === 'proprietary') return 'proprietary';
+      if (source === 'open-weights') sawOpen = true;
+      else sawUnknown = true;
+    }
+    if (sawOpen) return 'open-weights';
+    return 'unknown';
+  }
+  function _teacherSourceVerdict(captures = [], fallbackTeacher = null) {
+    const counts = { 'open-weights': 0, proprietary: 0, unknown: 0 };
+    const models = new Set();
+    for (const c of Array.isArray(captures) ? captures : []) {
+      const candidates = _teacherCandidatesFromCapture(c);
+      for (const candidate of candidates) models.add(candidate);
+      counts[_classifyTeacherCandidates(candidates)] += 1;
+    }
+    if (counts['open-weights'] + counts.proprietary + counts.unknown === 0 && fallbackTeacher) {
+      models.add(String(fallbackTeacher));
+      counts[_teacherSourceClassForCandidate(fallbackTeacher)] += 1;
+    }
+    const teacher_source = counts.proprietary > 0
+      ? 'proprietary'
+      : (counts['open-weights'] > 0 ? 'open-weights' : 'unknown');
+    const policy = String(process.env.KOLM_TEACHER_SOURCE || '').trim().toLowerCase();
+    return {
+      teacher_source,
+      teacher_source_tos_risk: teacher_source === 'proprietary'
+        ? 'high'
+        : (teacher_source === 'open-weights' ? 'low' : 'unknown'),
+      policy_enforced: policy === 'open-weights',
+      teacher_source_policy: policy || 'allow_any',
+      teacher_source_counts: counts,
+      teacher_models: [...models].slice(0, 10),
+    };
+  }
+
   // Preview (GET) is read-only: aggregate the durable capture-store by
   // template-hash and report which clusters are eligible.
   // Commit  (POST) picks recipe vs specialist by count (<1000 vs >=1000),
@@ -16711,6 +16784,7 @@ export function buildRouter() {
         target_k: Number.isFinite(target_k) ? target_k : 0.80,
       });
     } catch (_) { data_budget = null; }
+    const teacherSource = _teacherSourceVerdict(captures);
     res.json({
       namespace,
       total_captures: total,
@@ -16718,6 +16792,7 @@ export function buildRouter() {
       mode_hint: total >= 1000 ? 'specialist' : 'recipe',
       recipe_eligible: top.length > 0 && top[0].count >= 4,
       specialist_eligible: total >= 1000,
+      ...teacherSource,
       data_budget,
     });
   });
@@ -16912,6 +16987,10 @@ export function buildRouter() {
         message: String(e && e.message || e),
       });
     }
+    const teacherSource = _teacherSourceVerdict(
+      captures,
+      body.teacher || body.teacher_model || body.teacher_slug || process.env.KOLM_DISTILL_TEACHER || null
+    );
     if (captures.length < minPairs) {
       return res.status(400).json({
         error: 'not_enough_captures',
@@ -16919,6 +16998,7 @@ export function buildRouter() {
         namespace,
         count: captures.length,
         min_pairs: minPairs,
+        ...teacherSource,
       });
     }
     const mode = forceMode || (captures.length >= 1000 ? 'specialist' : 'recipe');
@@ -16938,6 +17018,7 @@ export function buildRouter() {
           namespace,
           mode: 'recipe',
           best_cluster_size: bestArr.length,
+          ...teacherSource,
         });
       }
       const name = body.name || `auto-${namespace}-${Date.now().toString(36)}`;
@@ -16957,9 +17038,10 @@ export function buildRouter() {
           accepted: !!synth.accepted,
           synth,
           captures_promoted: synth.accepted ? bestArr.length : 0,
+          ...teacherSource,
         });
       } catch (e) {
-        return res.status(400).json({ error: 'synthesize_failed', message: String(e.message || e), namespace });
+        return res.status(400).json({ error: 'synthesize_failed', message: String(e.message || e), namespace, ...teacherSource });
       }
     }
     // mode === 'specialist'
@@ -16985,6 +17067,7 @@ export function buildRouter() {
             poll_url: body2.status_url || (body2.job_id ? `/v1/jobs/${body2.job_id}` : null),
             bridge: body2,
             bridge_source: 'remote_trainer',
+            ...teacherSource,
           });
         }
         // Non-2xx bridge response - fall through to the local worker.
@@ -17008,9 +17091,10 @@ export function buildRouter() {
         poll_url: `/v1/jobs/${job.id}`,
         stream_url: `/v1/jobs/${job.id}/stream`,
         bridge_source: 'local_worker',
+        ...teacherSource,
       });
     } catch (e) {
-      return res.status(500).json({ error: 'distill_bridge_spawn_failed', message: String(e.message || e), namespace });
+      return res.status(500).json({ error: 'distill_bridge_spawn_failed', message: String(e.message || e), namespace, ...teacherSource });
     }
   });
 

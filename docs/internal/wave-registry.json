@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 294,
+    "orphan_tests": 295,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 297,
+    "state_local_green": 298,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 462,
-    "test_only_waves": 294,
-    "waves": 310
+    "test_files": 463,
+    "test_only_waves": 295,
+    "waves": 311
   },
-  "generated_at": "2026-06-17T12:29:33.052Z",
+  "generated_at": "2026-06-17T12:47:32.633Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -308,6 +308,7 @@
       "W613",
       "W614",
       "W616",
+      "W622",
       "W708",
       "W709",
       "W710",
@@ -611,6 +612,7 @@
       "W613",
       "W614",
       "W616",
+      "W622",
       "W708",
       "W709",
       "W710",
@@ -2478,7 +2480,7 @@
           "script": "npm:verify:federated"
         },
         {
-          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && npm run verify:master-component-spec && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:agent-security-eval && npm run verify:quant-oracle && npm run verify:kv-cache && npm run verify:llm-routing && npm run verify:mcp-receipts && npm run verify:small-llm && npm run verify:ondevice && npm run verify:verifiable-inference && npm run verify:model-signing && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && npm run verify:distill-telemetry && npm run verify:distill-bon && npm run verify:airgap && npm run verify:finetune-frameworks && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
+          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && npm run verify:master-component-spec && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:agent-security-eval && npm run verify:quant-oracle && npm run verify:kv-cache && npm run verify:llm-routing && npm run verify:mcp-receipts && npm run verify:small-llm && npm run verify:ondevice && npm run verify:verifiable-inference && npm run verify:model-signing && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && npm run verify:distill-telemetry && npm run verify:distill-captures && npm run verify:distill-bon && npm run verify:airgap && npm run verify:finetune-frameworks && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
           "script": "npm:verify:depth"
         }
       ],
@@ -3628,7 +3630,7 @@
           "script": "npm:verify:redaction-benchmark"
         },
         {
-          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && npm run verify:master-component-spec && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:agent-security-eval && npm run verify:quant-oracle && npm run verify:kv-cache && npm run verify:llm-routing && npm run verify:mcp-receipts && npm run verify:small-llm && npm run verify:ondevice && npm run verify:verifiable-inference && npm run verify:model-signing && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && npm run verify:distill-telemetry && npm run verify:distill-bon && npm run verify:airgap && npm run verify:finetune-frameworks && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
+          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && npm run verify:master-component-spec && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:agent-security-eval && npm run verify:quant-oracle && npm run verify:kv-cache && npm run verify:llm-routing && npm run verify:mcp-receipts && npm run verify:small-llm && npm run verify:ondevice && npm run verify:verifiable-inference && npm run verify:model-signing && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && npm run verify:distill-telemetry && npm run verify:distill-captures && npm run verify:distill-bon && npm run verify:airgap && npm run verify:finetune-frameworks && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
           "script": "npm:verify:depth"
         }
       ],
@@ -3704,7 +3706,7 @@
           "script": "npm:verify:federated"
         },
         {
-          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && npm run verify:master-component-spec && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:agent-security-eval && npm run verify:quant-oracle && npm run verify:kv-cache && npm run verify:llm-routing && npm run verify:mcp-receipts && npm run verify:small-llm && npm run verify:ondevice && npm run verify:verifiable-inference && npm run verify:model-signing && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && npm run verify:distill-telemetry && npm run verify:distill-bon && npm run verify:airgap && npm run verify:finetune-frameworks && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
+          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && npm run verify:master-component-spec && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:agent-security-eval && npm run verify:quant-oracle && npm run verify:kv-cache && npm run verify:llm-routing && npm run verify:mcp-receipts && npm run verify:small-llm && npm run verify:ondevice && npm run verify:verifiable-inference && npm run verify:model-signing && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && npm run verify:distill-telemetry && npm run verify:distill-captures && npm run verify:distill-bon && npm run verify:airgap && npm run verify:finetune-frameworks && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
           "script": "npm:verify:depth"
         }
       ],
@@ -3727,7 +3729,7 @@
           "script": "npm:verify:redaction-benchmark"
         },
         {
-          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && npm run verify:master-component-spec && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:agent-security-eval && npm run verify:quant-oracle && npm run verify:kv-cache && npm run verify:llm-routing && npm run verify:mcp-receipts && npm run verify:small-llm && npm run verify:ondevice && npm run verify:verifiable-inference && npm run verify:model-signing && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && npm run verify:distill-telemetry && npm run verify:distill-bon && npm run verify:airgap && npm run verify:finetune-frameworks && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
+          "command": "node scripts/audit-product-kernel.cjs --json && node scripts/audit-product-journeys.mjs --json && node scripts/cloud-readiness.mjs --summary --json && node scripts/build-codegraph.mjs --check --json && npm run verify:backend-atomic && npm run verify:stack-sota && npm run verify:master-component-spec && node scripts/simulate-invention-portfolio.cjs --summary && npm run verify:invention-spec && npm run verify:frontier-map && npm run verify:math-frontier && npm run verify:invention-buildbook && npm run verify:research-atlas && npm run verify:build-strategy && node scripts/bench-redaction-fixtures.mjs --min-f1 0.95 --min-recall 0.95 --max-fp 0 && node --test --test-concurrency=1 tests/wave581-redaction-benchmark.test.js tests/wave586-redaction-public-benchmark-contract.test.js && npm run verify:kscore-calibration && npm run verify:quality-calibration && npm run verify:benchmark-evidence && npm run verify:governance-packets && npm run verify:compliance-packet && npm run verify:agent-security-eval && npm run verify:quant-oracle && npm run verify:kv-cache && npm run verify:llm-routing && npm run verify:mcp-receipts && npm run verify:small-llm && npm run verify:ondevice && npm run verify:verifiable-inference && npm run verify:model-signing && node scripts/cloud-compute-broker.mjs --simulate runpod-r2 --workload train --params-b 7 --rows 2000 --no-local-gpu --summary --require-ready && npm run verify:distill-strategy && npm run verify:distill-telemetry && npm run verify:distill-captures && npm run verify:distill-bon && npm run verify:airgap && npm run verify:finetune-frameworks && node --test --test-concurrency=1 tests/wave409u-federated-foundation.test.js tests/wave585-federated-robust-aggregation.test.js tests/wave538-federated-route-docs.test.js && npm run verify:package-release && node scripts/audit-sota-readiness.cjs && node scripts/build-readiness-closeout.cjs --check && npm run verify:readiness-workorders && node scripts/audit-claim-scope.cjs && npm run verify:brand",
           "script": "npm:verify:depth"
         }
       ],
@@ -4275,6 +4277,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave616-master-component-spec-sheet.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W622",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "research",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wave622-teacher-source-api.test.js",
+          "script": "npm:verify:distill-captures"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave622-teacher-source-api.test.js"
       ],
       "test_letter_suffixes": []
     },
