@@ -673,6 +673,13 @@ const PUBLIC_API = (p) =>
   // valid key is present, so the handler can decide whether to surface
   // tenant-specific compiled .kolm artifacts (private rows).
   p === '/v1/models' ||
+  p === '/v1/models/manifest' ||
+  p === '/v1/models/pull' ||
+  p === '/v1/models/cache' ||
+  p === '/v1/models/recommend' ||
+  /^\/v1\/models\/info\/[A-Za-z0-9._~:/@-]{1,256}$/.test(p) ||
+  p === '/v1/distill/onpolicy/doctor' ||
+  p === '/v1/distill/preference/doctor' ||
   // W384 - sync inbox accepts pushes from peer daemons; the sender supplies
   // an Authorization: Bearer <key> via the body/headers and validates it itself
   // (the body's source_device_id + state envelope acts as the auth contract).
@@ -811,6 +818,10 @@ const PUBLIC_API = (p) =>
   // header), not tenant auth, so it must bypass the API-key gate; the route
   // handler itself rejects any call without the correct secret.
   p === '/v1/audit/continuous/tick';
+
+export function isPublicApiPath(p) {
+  return PUBLIC_API(String(p || ''));
+}
 
 export function adminApiKey() {
   return process.env.ADMIN_KEY || null;

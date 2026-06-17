@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 683,
-    "components_without_direct_test_reference": 146,
+    "test_referenced_components": 684,
+    "components_without_direct_test_reference": 145,
     "high_priority_components": 47,
     "domains": {
       "api_surface": 32,
@@ -105,7 +105,7 @@
           "large_component_contract_risk",
           "network_or_provider_boundary"
         ],
-        "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests"
+        "improvement_track": "split_or_add_generated_contract_map_before_growth"
       },
       {
         "path": "cli/kolm.js",
@@ -9899,12 +9899,12 @@
       "surface": "core-backend",
       "domain": "identity_access",
       "language": "javascript",
-      "sha256": "4910f4db8fa525d78ac8ab044fd85e57eeebdd02d61fa590997a0d648fe6b361",
+      "sha256": "266496de673c1a57cc83c7c6fab03349cf04c4bdceb4f37ff84fb5885a620007",
       "metrics": {
-        "bytes": 60521,
-        "lines": 1195,
+        "bytes": 60872,
+        "lines": 1206,
         "imports": 7,
-        "exports": 36,
+        "exports": 37,
         "routes": 1,
         "env_refs": 6,
         "fs_writes": 0,
@@ -9956,7 +9956,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
+      "improvement_track": "split_or_add_generated_contract_map_before_growth",
       "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
       "suggested_verification": [
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
@@ -10575,7 +10575,8 @@
         "tests/wave589-benchmark-evidence-contract.test.js",
         "tests/wave595-product-frontier-map.test.js",
         "tests/wave600-product-research-atlas.test.js",
-        "tests/wave601-surface-readiness-smoke-contract.test.js"
+        "tests/wave601-surface-readiness-smoke-contract.test.js",
+        "tests/wave665-router-boundary-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -12423,6 +12424,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave665-router-boundary-contract.test.js",
         "tests/wave783-chargeback.test.js"
       ],
       "risk_signals": [
@@ -15335,6 +15337,7 @@
       "test_refs": [
         "tests/r1-runtime-passport.test.js",
         "tests/wave636-multinode-launch.test.js",
+        "tests/wave665-router-boundary-contract.test.js",
         "tests/wave724-memory-tier.test.js",
         "tests/wave921-cost-estimator-status.test.js",
         "tests/wave921-module-load-regression.test.js",
@@ -33678,11 +33681,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave665-router-boundary-contract.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -35334,7 +35339,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave588-quality-calibration-contract.test.js"
+        "tests/wave588-quality-calibration-contract.test.js",
+        "tests/wave665-router-boundary-contract.test.js"
       ],
       "risk_signals": [],
       "priority_score": 0,
@@ -36461,7 +36467,8 @@
       },
       "test_refs": [
         "tests/wave581-redaction-benchmark.test.js",
-        "tests/wave586-redaction-public-benchmark-contract.test.js"
+        "tests/wave586-redaction-public-benchmark-contract.test.js",
+        "tests/wave665-router-boundary-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -37372,10 +37379,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "acd1783d02f632cdc1eb63c33241e16c021d7c79cae58a6637eb49221382330b",
+      "sha256": "5658a8e994d0044c864ebf31922e57fe0af15ba09520008477e7f90047d79692",
       "metrics": {
-        "bytes": 1466433,
-        "lines": 30756,
+        "bytes": 1466611,
+        "lines": 30760,
         "imports": 535,
         "exports": 8,
         "routes": 810,

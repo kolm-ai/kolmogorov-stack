@@ -6291,16 +6291,20 @@ export function buildRouter() {
     }
   });
 
-  // Models cache - returns the local model-weights cache index for the API
-  // host (cache_dir, total_bytes, per-entry rows). Used by `kolm models cache`
-  // and the device-detect picker to know which weights are already on disk.
+  // Models cache - returns a redacted local model-weights cache index for the
+  // API host. This route is public/read-only, so it never discloses absolute
+  // host paths; the local CLI can still use model-weights-puller directly when
+  // an operator needs cache_dir or per-file paths.
   r.get('/v1/models/cache', async (_req, res) => {
     try {
       const P = await import('./model-weights-puller.js');
       const dir = P.defaultCacheDir();
-      const entries = P.listCache(dir);
+      const entries = P.listCache(dir).map(({ path: _path, ...entry }) => ({
+        ...entry,
+        path_redacted: true,
+      }));
       const total_bytes = P.cacheTotalBytes(dir);
-      res.json({ cache_dir: dir, total_bytes, entries });
+      res.json({ cache_dir: null, cache_dir_redacted: true, total_bytes, entries });
     } catch (e) {
       res.status(500).json({ error: 'cache_error', detail: String(e.message || e) });
     }
