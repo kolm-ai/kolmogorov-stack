@@ -11,7 +11,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { quantizationOracleCatalog, rankQuantizationStrategies } from '../src/quantization-oracle.js';
+import { methodAvailability, quantizationOracleCatalog, rankQuantizationStrategies } from '../src/quantization-oracle.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
@@ -23,12 +23,13 @@ function readJson(file) {
 
 test('1. oracle catalog covers worker methods plus external/runtime-only methods', () => {
   const catalog = quantizationOracleCatalog();
-  for (const method of ['fp16', 'int8', 'smoothquant', 'int4', 'gptq', 'awq', 'nvfp4', 'mxfp4', 'hqq', 'exl2', 'aqlm', 'quip', 'qat', 'kivi_kv']) {
+  for (const method of ['fp16', 'int8', 'smoothquant', 'int4', 'gptq', 'awq', 'nvfp4', 'mxfp4', 'hqq', 'exl2', 'aqlm', 'quip', 'qat', 'moe_mixed_policy', 'mc_moe', 'gemq', 'kivi_kv']) {
     assert.ok(catalog.methods[method], `catalog missing ${method}`);
   }
   assert.equal(catalog.methods.awq.worker_method, 'awq');
   assert.equal(catalog.methods.nvfp4.execution_status, 'export_nvfp4');
   assert.equal(catalog.methods.smoothquant.execution_status, 'external_toolchain');
+  assert.equal(catalog.methods.moe_mixed_policy.execution_status, 'advisory_policy');
   assert.equal(catalog.methods.kivi_kv.execution_status, 'runtime_policy');
 });
 
@@ -125,6 +126,41 @@ test('5b. CLI exposes direct quantization oracle planning before worker install'
   }));
   assert.ok(catalog.methods.awq);
   assert.equal(catalog.methods.kivi_kv.execution_status, 'runtime_policy');
+});
+
+test('5c. CLI quantization oracle accepts MoE topology flags', () => {
+  const stdout = execFileSync(process.execPath, [
+    CLI,
+    'quantize',
+    'oracle',
+    '--runtime',
+    'vllm',
+    '--memory-gb',
+    '24',
+    '--params-b',
+    '47',
+    '--moe-family',
+    'mixtral-8x7b',
+    '--moe',
+    '--json',
+  ], { cwd: ROOT, encoding: 'utf8' });
+  const plan = JSON.parse(stdout);
+  assert.equal(plan.ok, true);
+  assert.equal(plan.input.moe.family, 'mixtral-8x7b');
+  assert.equal(plan.recommendation.primary.method, 'moe_mixed_policy');
+  assert.equal(plan.recommendation.command, null);
+  assert.equal(plan.recommendation.moe_quantization.policy.router, 'fp16');
+});
+
+test('5d. external-only MoE quant methods never masquerade as worker-ready', () => {
+  const gated = methodAvailability('mc_moe', {});
+  assert.equal(gated.available, false);
+  assert.equal(gated.reason, 'experimental_gated');
+
+  const enabled = methodAvailability('mc_moe', { KOLM_ENABLE_EXPERIMENTAL_QUANTS: '1' });
+  assert.equal(enabled.known, true);
+  assert.equal(enabled.available, false);
+  assert.equal(enabled.reason, 'external_repo_only');
 });
 
 async function makeRouterApp() {

@@ -7,6 +7,8 @@
 // the actual quantize/export surfaces can execute or honestly mark external.
 
 import { buildFp4CalibPlan } from './fp4-calib-plan.js';
+import { detectMoE, recommendQuantPolicy } from './moe-support.js';
+import { getFamily } from './moe-registry.js';
 
 const METHOD_CATALOG = Object.freeze({
   fp16: {
@@ -190,6 +192,47 @@ const METHOD_CATALOG = Object.freeze({
     runtimes: ['cuda', 'tensorrt'],
     sources: ['EfficientQAT'],
   },
+  moe_mixed_policy: {
+    label: 'MoE router-fp16 / expert-low-bit policy',
+    worker_method: null,
+    execution_status: 'advisory_policy',
+    moe_only: true,
+    bits: 2,
+    compression: 0.20,
+    quality_loss: 0.018,
+    latency_gain: 2.05,
+    calibration_required: false,
+    runtimes: ['cuda', 'rocm', 'vllm', 'sglang', 'tensorrt', 'gguf', 'llama_cpp'],
+    sources: ['MoE router-fp16 policy', 'Shard/Mixtral quant studies'],
+  },
+  mc_moe: {
+    label: 'MC-MoE 1.5-2.5-bit expert quant',
+    worker_method: null,
+    execution_status: 'worker_external_repo',
+    experimental: true,
+    moe_only: true,
+    bits: 2,
+    compression: 0.13,
+    quality_loss: 0.045,
+    latency_gain: 1.75,
+    calibration_required: true,
+    runtimes: ['cuda', 'vllm', 'sglang'],
+    sources: ['MC-MoE'],
+  },
+  gemq: {
+    label: 'GEMQ expert-aware MoE quant',
+    worker_method: null,
+    execution_status: 'worker_external_repo',
+    experimental: true,
+    moe_only: true,
+    bits: 2,
+    compression: 0.12,
+    quality_loss: 0.04,
+    latency_gain: 1.8,
+    calibration_required: true,
+    runtimes: ['cuda', 'vllm', 'sglang'],
+    sources: ['GEMQ'],
+  },
   kivi_kv: {
     label: 'KIVI 2-bit KV cache',
     worker_method: null,
@@ -300,12 +343,15 @@ function commandForPrimary(primary, fp4CalibrationPlan) {
   return `kolm export <artifact.kolm> --format ${primary.export_format} --quant ${primary.export_quant}${fp4Flags} --out <out-dir>`;
 }
 
-function proofForRecommendation(fp4CalibrationPlan) {
+function proofForRecommendation(primary, fp4CalibrationPlan) {
   const proof = [
     'run method-specific doctor before execution',
     'record source model hash, calibration hash, method, bits, runtime, and output shard hashes',
     'enforce post-quant accuracy_gate before promoting quantized artifact',
   ];
+  if (primary?.moe_policy) {
+    proof.unshift('for MoE checkpoints, keep router fp16 and record shared/expert precision policy before quantization');
+  }
   if (fp4CalibrationPlan?.enabled) {
     proof.splice(
       2,
@@ -371,12 +417,67 @@ function estimateLatencyMs(method, device, paramsB) {
   return round(base / method.latency_gain, 2);
 }
 
-function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens, calibrationRows, qualityFloor, privacyMode, preferenceTuned, experimentalEnabled }) {
-  const quality = estimateQuality(method, task, calibrationRows, preferenceTuned);
-  const memory = estimateMemoryGb(method, paramsB, contextTokens);
-  const latency = estimateLatencyMs(method, device, paramsB);
+function _finitePositive(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function resolveMoeInfo(input = {}, paramsB = 7) {
+  let raw = input.moe_info || input.moeInfo || null;
+  let source = raw ? 'input.moe_info' : null;
+
+  const modelPath = input.model_dir || input.modelDir || input.model_path || input.modelPath;
+  if (!raw && typeof modelPath === 'string' && modelPath.length > 0) {
+    raw = detectMoE(modelPath);
+    source = `detectMoE:${raw.reason || raw.source || 'model_path'}`;
+  }
+
+  const familyId = input.moe_family || input.moeFamily || (raw && raw.family) || null;
+  const family = getFamily(familyId);
+  const forced = Boolean(input.moe || input.is_moe || input.isMoe || family);
+  const detected = Boolean(raw && (raw.is_moe || raw.num_experts > 1 || raw.experts > 1));
+  if (!forced && !detected) return null;
+
+  const numExperts = _finitePositive(raw?.num_experts ?? raw?.experts ?? input.num_experts ?? input.numExperts ?? family?.experts);
+  const topK = _finitePositive(raw?.experts_per_token ?? raw?.top_k ?? input.experts_per_token ?? input.expertsPerToken ?? family?.top_k);
+  let totalParamsB = _finitePositive(raw?.params ?? raw?.total_params_b ?? input.moe_params_b ?? input.moeParamsB ?? paramsB);
+  if (!totalParamsB && family) {
+    totalParamsB = family.shared_size_b + family.expert_size_b * family.experts;
+  }
+
+  return Object.freeze({
+    is_moe: true,
+    num_experts: numExperts || 0,
+    experts_per_token: topK || 0,
+    params: totalParamsB || paramsB,
+    family: family ? family.id : (familyId || raw?.family || null),
+    source: source || (family ? 'moe_family' : 'input_flag'),
+  });
+}
+
+function buildMoeQuantPolicy(moeInfo, device) {
+  if (!moeInfo) return null;
+  try {
+    return recommendQuantPolicy({
+      moe_info: moeInfo,
+      target_vram_gb: device.memory_gb,
+    });
+  } catch (e) {
+    return Object.freeze({
+      ok: false,
+      error: e.message,
+      moe_support_version: 'moe-support-v1',
+    });
+  }
+}
+
+function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens, calibrationRows, qualityFloor, privacyMode, preferenceTuned, experimentalEnabled, moeInfo, moePolicy }) {
+  let quality = estimateQuality(method, task, calibrationRows, preferenceTuned);
+  let memory = estimateMemoryGb(method, paramsB, contextTokens);
+  let latency = estimateLatencyMs(method, device, paramsB);
   const warnings = [];
   let hardFail = false;
+  const moeOnly = method.moe_only === true;
 
   const experimental = isExperimental(method);
   // Experimental methods stay listed for planning, but unless the operator has
@@ -387,6 +488,21 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
   if (experimentalGatedOff) {
     warnings.push(`experimental_requires_${EXPERIMENTAL_ENV}=1`);
     hardFail = true;
+  }
+  if (moeOnly && !moeInfo) {
+    warnings.push('moe_required');
+    hardFail = true;
+  }
+  if (moeOnly && moeInfo && (!moePolicy || moePolicy.ok === false)) {
+    warnings.push(`moe_policy_unavailable:${moePolicy?.error || 'missing_topology'}`);
+    hardFail = true;
+  }
+  if (methodId === 'moe_mixed_policy' && moePolicy && moePolicy.ok !== false) {
+    memory = Number.isFinite(moePolicy.projected_hot_vram_gb)
+      ? moePolicy.projected_hot_vram_gb
+      : memory;
+    latency = round(latency * 0.92, 2);
+    warnings.push('advisory_policy_no_direct_worker_execution');
   }
 
   if (!runtimeCompatible(method, device.runtime)) {
@@ -439,6 +555,7 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
     label: method.label,
     worker_method: method.worker_method,
     execution_status: method.execution_status,
+    moe_only: Boolean(method.moe_only),
     export_format: method.export_format || null,
     export_quant: method.export_quant || null,
     hardware_native: nativeHardwareScore > 0,
@@ -453,6 +570,9 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
       compression_ratio: method.compression,
       bits: method.bits,
     },
+    moe_policy: methodId === 'moe_mixed_policy' && moePolicy && moePolicy.ok !== false
+      ? moePolicy
+      : null,
     warnings,
     sources: method.sources,
   };
@@ -467,6 +587,8 @@ export function rankQuantizationStrategies(input = {}) {
   const qualityFloor = qualityFloorFor(task, input.quality_floor ?? input.qualityFloor);
   const privacyMode = String(input.privacy_mode || input.privacyMode || 'standard').toLowerCase();
   const preferenceTuned = !!(input.preference_tuned ?? input.preferenceTuned);
+  const moeInfo = resolveMoeInfo(input, paramsB);
+  const moePolicy = buildMoeQuantPolicy(moeInfo, device);
   // Explicit boolean override wins (used by callers/tests); otherwise read env.
   const experimentalEnabled = (input.experimental_enabled ?? input.experimentalEnabled) != null
     ? Boolean(input.experimental_enabled ?? input.experimentalEnabled)
@@ -485,6 +607,8 @@ export function rankQuantizationStrategies(input = {}) {
       privacyMode,
       preferenceTuned,
       experimentalEnabled,
+      moeInfo,
+      moePolicy,
     }))
     .sort((a, b) => b.score - a.score || Number(b.feasible) - Number(a.feasible) || a.method.localeCompare(b.method));
 
@@ -510,6 +634,7 @@ export function rankQuantizationStrategies(input = {}) {
       quality_floor: qualityFloor,
       privacy_mode: privacyMode,
       experimental_enabled: experimentalEnabled,
+      moe: moeInfo,
       device,
     },
     experimental_gate: {
@@ -520,7 +645,7 @@ export function rankQuantizationStrategies(input = {}) {
         .map(([id]) => id),
       hint: experimentalEnabled
         ? null
-        : `experimental methods (hqq/exl2/exl3/aqlm/quip/qat) need ${EXPERIMENTAL_ENV}=1 and their external toolchains; default recommendation stays within int4/int8/gptq/awq`,
+        : `experimental methods (${Object.entries(METHOD_CATALOG).filter(([, m]) => isExperimental(m)).map(([id]) => id).join('/')}) need ${EXPERIMENTAL_ENV}=1 and their external toolchains; default recommendation stays within stable worker/export/advisory methods`,
     },
     recommendation: primary ? {
       primary,
@@ -528,6 +653,21 @@ export function rankQuantizationStrategies(input = {}) {
       kv_cache: kvCache && kvCache.feasible ? kvCache : null,
       command: commandForPrimary(primary, fp4CalibrationPlan),
       fp4_calibration_plan: fp4CalibrationPlan,
+      moe_quantization: moeInfo ? {
+        detected: true,
+        info: moeInfo,
+        policy: moePolicy && moePolicy.ok !== false ? moePolicy : null,
+        external_candidates: candidates
+          .filter((c) => c.moe_only && c.method !== 'moe_mixed_policy')
+          .map((c) => ({
+            method: c.method,
+            label: c.label,
+            execution_status: c.execution_status,
+            feasible: c.feasible,
+            warnings: c.warnings,
+            sources: c.sources,
+          })),
+      } : null,
       accuracy_gate: {
         required: true,
         metric: 'kscore',
@@ -536,7 +676,7 @@ export function rankQuantizationStrategies(input = {}) {
         enforcement: 'quantize-bakeoff.enforceAccuracyFloor',
         fail_closed_without_measured_holdout: true,
       },
-      proof: proofForRecommendation(fp4CalibrationPlan),
+      proof: proofForRecommendation(primary, fp4CalibrationPlan),
     } : null,
     candidates,
   };
@@ -627,6 +767,16 @@ export function methodAvailability(methodId, env = process.env) {
       available: false,
       reason: 'experimental_gated',
       hint: `${id} is an experimental quantization method requiring external toolchains; set ${EXPERIMENTAL_ENV}=1 to enable it, or use one of int4/int8/gptq/awq`,
+    };
+  }
+  if (method.execution_status === 'worker_external_repo' && !method.worker_method) {
+    return {
+      method: id,
+      known: true,
+      experimental,
+      available: false,
+      reason: 'external_repo_only',
+      hint: `${id} is cataloged for MoE planning but has no in-repo worker method yet; use the oracle policy as an external execution plan`,
     };
   }
   return {

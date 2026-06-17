@@ -1901,7 +1901,7 @@ SCOPE
   quantize: `kolm quantize - quantize a compiled adapter via the isolated quantize worker (wave 195).
 
 USAGE
-  kolm quantize oracle [--task <t>] [--device <id>] [--params-b N] [--json]
+  kolm quantize oracle [--task <t>] [--device <id>] [--params-b N] [--moe-family <id>|--model-dir <dir>] [--json]
   kolm quantize oracle --catalog [--json]
   kolm quantize --local-worker --method <method> --in <dir> --out <dir>
   kolm quantize --local-worker --doctor
@@ -1934,10 +1934,14 @@ FLAGS
   --out <dir>             destination directory for quantized weights
   --method <name>         one of int4 | int8 | gptq | awq | aqlm | quip |
                           exl2 | exl3 | hqq | qat   (default: int4)
+  --moe                   force MoE-aware oracle planning
+  --moe-family <id>       known MoE topology, e.g. mixtral-8x7b or qwen3-moe-a3b
+  --model-dir <dir>       let the oracle detect MoE from config/index/gguf metadata
   --json                  machine-readable JSON output
 
 EXAMPLES
   kolm quantize oracle --task extraction --device rtx-4090-24gb --params-b 7 --calibration-rows 256 --json
+  kolm quantize oracle --runtime vllm --memory-gb 24 --params-b 47 --moe-family mixtral-8x7b --moe --json
   kolm quantize oracle --catalog --json
   kolm quantize --local-worker --doctor
   kolm quantize --local-worker --doctor --method=hqq    # is HQQ specifically ready?
@@ -16251,6 +16255,11 @@ function quantOracleProfile(args) {
     quality_floor: quantOracleFlag(args, '--quality-floor') == null ? undefined : Number(quantOracleFlag(args, '--quality-floor')),
     privacy_mode: quantOracleFlag(args, '--privacy-mode', 'standard'),
     preference_tuned: args.includes('--preference-tuned'),
+    model_dir: quantOracleFlag(args, '--model-dir', null),
+    moe: args.includes('--moe'),
+    moe_family: quantOracleFlag(args, '--moe-family', null),
+    num_experts: quantOracleFlag(args, '--num-experts') == null ? undefined : Number(quantOracleFlag(args, '--num-experts')),
+    experts_per_token: quantOracleFlag(args, '--experts-per-token') == null ? undefined : Number(quantOracleFlag(args, '--experts-per-token')),
   };
 }
 

@@ -29,12 +29,18 @@ function readProfile() {
     quality_floor: flag('--quality-floor') == null ? undefined : Number(flag('--quality-floor')),
     privacy_mode: flag('--privacy-mode', 'standard'),
     preference_tuned: args.includes('--preference-tuned'),
+    model_dir: flag('--model-dir', null),
+    moe: args.includes('--moe'),
+    moe_family: flag('--moe-family', null),
+    num_experts: flag('--num-experts') == null ? undefined : Number(flag('--num-experts')),
+    experts_per_token: flag('--experts-per-token') == null ? undefined : Number(flag('--experts-per-token')),
   };
 }
 
 if (args.includes('--help')) {
   console.log(`usage:
   node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --params-b 7 --context 8192 --calibration-rows 256
+  node scripts/quantization-oracle.mjs --runtime vllm --params-b 47 --memory-gb 24 --moe-family mixtral-8x7b --moe
   node scripts/quantization-oracle.mjs --profile profile.json
   node scripts/quantization-oracle.mjs --catalog
 
