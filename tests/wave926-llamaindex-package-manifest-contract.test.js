@@ -95,7 +95,7 @@ test('W926 LlamaIndex package manifest is wired into direct depth verification',
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:langchain-package-manifest && npm run verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:langchain-package-manifest && npm run verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.equal(target.root, 'packages/llamaindex-kolm');
   assert.deepEqual(target.manifests, ['package.json']);

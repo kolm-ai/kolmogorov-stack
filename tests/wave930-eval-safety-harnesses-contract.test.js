@@ -334,6 +334,6 @@ test('W930 #8 - depth verification runs eval safety harnesses before SOTA audit'
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:distribution-manifests && npm run verify:eval-safety-harnesses && node scripts\/audit-sota-readiness\.cjs/
+    /verify:distribution-manifests && npm run verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && node scripts\/audit-sota-readiness\.cjs/
   );
 });

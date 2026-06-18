@@ -45,7 +45,7 @@ test('W928 runtime-rs wasm/example atoms are wired into direct depth verificatio
   assert.equal(pkg.scripts['verify:runtime-rs-wasm-example'], VERIFY_SCRIPT);
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.equal(EXAMPLE_REL, 'packages/runtime-rs/examples/verify.rs');
   assert.equal(WASM_REL, 'packages/runtime-rs/src/wasm.rs');

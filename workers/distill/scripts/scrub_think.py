@@ -23,17 +23,23 @@ Usage:
 import argparse
 import json
 import os
+import re
+import shutil
 import sys
 
 # T1.7 — shared UTF-8 console shim (was a 5-line copy here).
 from _console import setup_utf8 as _setup_utf8  # noqa: F401 — import side-effect
 
+_OPEN_THINK_RE = re.compile(r"<think>", re.IGNORECASE)
+_CLOSE_THINK_RE = re.compile(r"</think>", re.IGNORECASE)
+
 
 def scrub(text: str) -> tuple[str, str]:
     """Return (cleaned_text, action) where action ∈ {'pass','closed','open_no_close'}."""
-    if "</think>" in text:
-        return text.rsplit("</think>", 1)[1].lstrip(), "closed"
-    if "<think>" in text:
+    closes = list(_CLOSE_THINK_RE.finditer(text))
+    if closes:
+        return text[closes[-1].end():].lstrip(), "closed"
+    if _OPEN_THINK_RE.search(text):
         return text, "open_no_close"  # caller decides to drop
     return text, "pass"
 
@@ -87,11 +93,10 @@ def main():
         for t in targets:
             bak = t + ".bak"
             if not os.path.exists(bak):
-                os.replace(t, bak)
-            else:
-                # already backed up; read .bak as canonical source
-                pass
-            n, closed, passed, dropped = process_file(bak, t)
+                shutil.copy2(t, bak)
+            tmp = t + f".tmp.{os.getpid()}"
+            n, closed, passed, dropped = process_file(t, tmp)
+            os.replace(tmp, t)
             print(f"[scrub] {t}: in={n}  closed={closed}  pass={passed}  dropped={dropped}")
         return
 

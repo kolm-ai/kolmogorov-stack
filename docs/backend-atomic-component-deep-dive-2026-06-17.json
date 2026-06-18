@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 830,
-    "test_referenced_components": 769,
-    "components_without_direct_test_reference": 61,
+    "test_referenced_components": 783,
+    "components_without_direct_test_reference": 47,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 414,
+      "cryptographic_or_proof_boundary": 418,
       "distribution_or_worker_surface": 170,
       "environment_configuration_boundary": 315,
       "execution_or_subprocess_boundary": 235,
@@ -9342,7 +9342,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave772b-audio-tokenize.test.js"
+        "tests/wave772b-audio-tokenize.test.js",
+        "tests/wave931-worker-safety-contracts.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -45071,7 +45072,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave773b-video-tokenize.test.js"
+        "tests/wave773b-video-tokenize.test.js",
+        "tests/wave931-worker-safety-contracts.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -45802,12 +45804,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -46438,7 +46442,8 @@
         "tests/red-team.test.js",
         "tests/wave658-forge-inspect-contract.test.js",
         "tests/wave809-structured-output.test.js",
-        "tests/wave921-autopilot-stats.test.js"
+        "tests/wave921-autopilot-stats.test.js",
+        "tests/wave931-worker-safety-contracts.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface",
@@ -46497,12 +46502,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -46558,7 +46565,8 @@
         "tests/red-team.test.js",
         "tests/wave658-forge-inspect-contract.test.js",
         "tests/wave809-structured-output.test.js",
-        "tests/wave921-autopilot-stats.test.js"
+        "tests/wave921-autopilot-stats.test.js",
+        "tests/wave931-worker-safety-contracts.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface",
@@ -46909,26 +46917,29 @@
       "surface": "worker",
       "domain": "capture_data_eval",
       "language": "python",
-      "sha256": "afb2d5cea5505ff7f43a9511cb961ee50a00e67b02f4a216ebd4db68ef2d29ff",
+      "sha256": "0ab70dcd5d1de612331c92ee56b1b2d3d9aa3ceab937de35573d62c6b310518d",
       "metrics": {
-        "bytes": 19362,
-        "lines": 471,
+        "bytes": 20333,
+        "lines": 507,
         "imports": 0,
-        "exports": 19,
+        "exports": 21,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 1,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -46966,26 +46977,29 @@
       "surface": "worker",
       "domain": "capture_data_eval",
       "language": "python",
-      "sha256": "f22140d2e809ff554b71df3759763ba5b237ed70c93208b9a3b3063b2fd7aaea",
+      "sha256": "b513dcc3b0902127da11a194903f2d89777f61424e3dd49994446bfbbff5c6e8",
       "metrics": {
-        "bytes": 22389,
-        "lines": 659,
+        "bytes": 23300,
+        "lines": 687,
         "imports": 0,
-        "exports": 34,
+        "exports": 36,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 1,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -47299,12 +47313,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -47356,12 +47372,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -47827,10 +47845,10 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "python",
-      "sha256": "98d540b63f570b188aa5efae1a26f46078ab5288836dc234ab6efd5b3677c6be",
+      "sha256": "74013f913fff3d314c5efdb7e4eab178be865b22e918ef064abfd81714fc1eec",
       "metrics": {
-        "bytes": 4397,
-        "lines": 119,
+        "bytes": 4547,
+        "lines": 124,
         "imports": 0,
         "exports": 3,
         "routes": 0,
@@ -47841,12 +47859,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -48514,12 +48534,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -48623,26 +48645,29 @@
       "surface": "worker",
       "domain": "runtime_serving_routing",
       "language": "python",
-      "sha256": "f8fc3b8a6346feef0ab29725b01f9bc4b70691f5320cd1473c1ba32abd712b5e",
+      "sha256": "518afb5b8feefc1e5b4e1d90476259b94984c30d89e9620dae720e260207fa5f",
       "metrics": {
-        "bytes": 10215,
-        "lines": 302,
+        "bytes": 10314,
+        "lines": 308,
         "imports": 0,
-        "exports": 5,
+        "exports": 7,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 1,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -49374,12 +49399,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -49808,12 +49835,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -49999,12 +50028,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -50042,26 +50073,29 @@
       "surface": "worker",
       "domain": "infra_cloud_device",
       "language": "python",
-      "sha256": "8349454b9e2d288be6b45c7233608603f5b71e97bdcc4cb828a5e70c3eeeccec",
+      "sha256": "01b03c421a17c722833e349a821cde129346c2ccc9b2f473c1c21f991c259f0b",
       "metrics": {
-        "bytes": 5357,
-        "lines": 174,
+        "bytes": 5576,
+        "lines": 183,
         "imports": 0,
-        "exports": 1,
+        "exports": 3,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 1,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -50174,12 +50208,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave931-worker-safety-contracts.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

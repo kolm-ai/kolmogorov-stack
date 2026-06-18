@@ -43,9 +43,22 @@ Output schema (JSON):
 """
 
 import argparse
+import hashlib
 import json
 import os
 import sys
+
+
+def path_meta(file_path):
+    raw = str(file_path or "")
+    return {
+        "path_basename": os.path.basename(raw),
+        "path_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+    }
+
+
+def emit_error(code, **extra):
+    sys.stderr.write(json.dumps({"ok": False, "error": code, **extra}) + "\n")
 
 
 def main():
@@ -59,11 +72,7 @@ def main():
         with open(args.profile, "r", encoding="utf-8") as fh:
             profile = json.load(fh)
     except FileNotFoundError:
-        sys.stderr.write(json.dumps({
-            "ok": False,
-            "error": "profile_not_found",
-            "profile": args.profile,
-        }) + "\n")
+        emit_error("profile_not_found", **path_meta(args.profile))
         sys.exit(64)
     except json.JSONDecodeError as exc:
         sys.stderr.write(json.dumps({
@@ -158,11 +167,11 @@ def main():
             with open(args.output, "w", encoding="utf-8") as fh:
                 fh.write(encoded + "\n")
         except OSError as exc:
-            sys.stderr.write(json.dumps({
-                "ok": False,
-                "error": "output_write_failed",
-                "detail": str(exc),
-            }) + "\n")
+            emit_error(
+                "output_write_failed",
+                detail=exc.__class__.__name__,
+                **path_meta(args.output),
+            )
             sys.exit(73)
 
     sys.stdout.write(encoded + "\n")

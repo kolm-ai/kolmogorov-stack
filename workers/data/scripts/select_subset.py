@@ -60,6 +60,8 @@ DIM = 256
 DEFAULT_SEED = 0x6B6F6C6D  # = 1801677709 ("kolm")
 VALID_METHODS = ("k-center", "facility-location", "badge", "repr-filter")
 VERSION = "select-subset-v1"
+MAX_ROWS = 250_000
+MAX_LINE_CHARS = 1_000_000
 
 EXIT_OK = 0
 
@@ -472,29 +474,55 @@ def _isnum(x):
 
 # ── IO ────────────────────────────────────────────────────────────────────────
 
+def _path_meta(file_path):
+    raw = str(file_path or "")
+    return {
+        "path_basename": os.path.basename(raw),
+        "path_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+    }
+
+
+def _input_error(code, **extra):
+    return {"ok": False, "error": code, "version": VERSION, **extra}
+
+
 def read_pairs(path):
     rows = []
     if path:
         if not os.path.isfile(path):
-            return None
+            return None, _input_error("input_not_found", **_path_meta(path))
         fh = open(path, "r", encoding="utf-8")
         close = True
     else:
         fh = sys.stdin
         close = False
     try:
+        line_no = 0
         for line in fh:
+            line_no += 1
+            if len(line) > MAX_LINE_CHARS:
+                return None, _input_error(
+                    "jsonl_line_too_large",
+                    line=line_no,
+                    max_line_chars=MAX_LINE_CHARS,
+                )
             line = line.strip()
             if not line:
                 continue
             try:
                 rows.append(json.loads(line))
-            except Exception:  # deliberate: skip a single malformed line
-                continue
+            except Exception as e:  # deliberate: JS caller degrades cleanly
+                return None, _input_error(
+                    "malformed_jsonl",
+                    line=line_no,
+                    detail=str(e)[:240],
+                )
+            if len(rows) > MAX_ROWS:
+                return None, _input_error("too_many_rows", max_rows=MAX_ROWS)
     finally:
         if close:
             fh.close()
-    return rows
+    return rows, None
 
 
 def run(method, pairs, target_size, seed):
@@ -628,9 +656,9 @@ def main(argv=None):
     if args.self_test:
         return self_test()
 
-    pairs = read_pairs(args.pairs)
-    if pairs is None:
-        print(json.dumps({"ok": False, "error": "input_not_found", "pairs": args.pairs}))
+    pairs, load_error = read_pairs(args.pairs)
+    if load_error:
+        print(json.dumps(load_error))
         return EXIT_OK  # data error surfaced cleanly; JS degrades to repr-filter
 
     try:

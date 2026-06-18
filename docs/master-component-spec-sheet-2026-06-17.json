@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 95.3,
-    "frontier_product_score": 71.1,
+    "local_engineering_score": 95.9,
+    "frontier_product_score": 71.4,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 830,
     "atomic_deep_dive_complete": 830,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 769,
-    "direct_test_reference_pct": 92.7,
-    "components_without_direct_test_reference": 61,
+    "direct_test_referenced_components": 783,
+    "direct_test_reference_pct": 94.3,
+    "components_without_direct_test_reference": 47,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -9487,7 +9487,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave772b-audio-tokenize.test.js"
+          "tests/wave772b-audio-tokenize.test.js",
+          "tests/wave931-worker-safety-contracts.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -40045,7 +40046,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave773b-video-tokenize.test.js"
+          "tests/wave773b-video-tokenize.test.js",
+          "tests/wave931-worker-safety-contracts.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -40686,7 +40688,7 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "343c635876740ed19852f1e16a8c953dcac3e97ce24b271f30e0d0c5d09014b8"
       },
@@ -40696,7 +40698,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
         "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
@@ -40705,10 +40709,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/audio-tokenize/tokenize.mjs",
@@ -41285,7 +41287,8 @@
           "tests/red-team.test.js",
           "tests/wave658-forge-inspect-contract.test.js",
           "tests/wave809-structured-output.test.js",
-          "tests/wave921-autopilot-stats.test.js"
+          "tests/wave921-autopilot-stats.test.js",
+          "tests/wave931-worker-safety-contracts.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -41322,7 +41325,7 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "6aa1179d582cf9329a388074c6ba1634db9b54bf236d2304c6203ebcb9401261"
       },
@@ -41332,7 +41335,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
         "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
@@ -41341,10 +41346,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/constrained/scripts/constrained.py",
@@ -41384,7 +41387,8 @@
           "tests/red-team.test.js",
           "tests/wave658-forge-inspect-contract.test.js",
           "tests/wave809-structured-output.test.js",
-          "tests/wave921-autopilot-stats.test.js"
+          "tests/wave921-autopilot-stats.test.js",
+          "tests/wave931-worker-safety-contracts.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -41657,25 +41661,26 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 19362,
-          "lines": 471,
+          "bytes": 20333,
+          "lines": 507,
           "imports": 0,
-          "exports": 19,
+          "exports": 21,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 1,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
-        "priority_band": "normal",
-        "sha256": "afb2d5cea5505ff7f43a9511cb961ee50a00e67b02f4a216ebd4db68ef2d29ff"
+        "priority_score": 5,
+        "priority_band": "medium",
+        "sha256": "0ab70dcd5d1de612331c92ee56b1b2d3d9aa3ceab937de35573d62c6b310518d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -41683,7 +41688,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -41692,10 +41699,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "workers/data/scripts/select_subset.py",
@@ -41705,25 +41710,26 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 22389,
-          "lines": 659,
+          "bytes": 23300,
+          "lines": 687,
           "imports": 0,
-          "exports": 34,
+          "exports": 36,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 1,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
-        "priority_band": "normal",
-        "sha256": "f22140d2e809ff554b71df3759763ba5b237ed70c93208b9a3b3063b2fd7aaea"
+        "priority_score": 5,
+        "priority_band": "medium",
+        "sha256": "b513dcc3b0902127da11a194903f2d89777f61424e3dd49994446bfbbff5c6e8"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -41731,7 +41737,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -41740,10 +41748,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "workers/distill/catalog.mjs",
@@ -42040,7 +42046,7 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "2cf40f6496093dd0474ea2019067e7b593978899b4cf6fd20ab80602b6fcc53e"
       },
@@ -42050,7 +42056,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
         "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
@@ -42059,10 +42067,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/distill/scripts/cot_markers.json",
@@ -42088,7 +42094,7 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "9c35c424335a3dcc12c8a5b2c72c130e0fe0087edb95cf8fd2810767c72fa476"
       },
@@ -42098,7 +42104,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
         "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
@@ -42107,10 +42115,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/distill/scripts/dedup_pairs.py",
@@ -42522,8 +42528,8 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 4397,
-          "lines": 119,
+          "bytes": 4547,
+          "lines": 124,
           "imports": 0,
           "exports": 3,
           "routes": 0,
@@ -42538,9 +42544,9 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "98d540b63f570b188aa5efae1a26f46078ab5288836dc234ab6efd5b3677c6be"
+        "sha256": "74013f913fff3d314c5efdb7e4eab178be865b22e918ef064abfd81714fc1eec"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -42548,7 +42554,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
         "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
@@ -42557,10 +42565,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/distill/scripts/test_gkd_onpolicy.py",
@@ -43248,7 +43254,7 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "1c0796f4af54dce233c98d2a39fa92fd6c532cfb770e001b1921a41b1a44d6ef"
       },
@@ -43258,7 +43264,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache",
         "innovation_opportunity": "Close the semantic routing flywheel by recording outcomes, training route stats, and emitting runtime passports.",
@@ -43267,10 +43275,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep closed_loop_routing_outcome_learning_and_verified_cache current."
     },
     {
       "path": "workers/itkv/requirements.txt",
@@ -43335,25 +43341,26 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 10215,
-          "lines": 302,
+          "bytes": 10314,
+          "lines": 308,
           "imports": 0,
-          "exports": 5,
+          "exports": 7,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 1,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
-        "priority_band": "normal",
-        "sha256": "f8fc3b8a6346feef0ab29725b01f9bc4b70691f5320cd1473c1ba32abd712b5e"
+        "priority_score": 5,
+        "priority_band": "medium",
+        "sha256": "518afb5b8feefc1e5b4e1d90476259b94984c30d89e9620dae720e260207fa5f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -43361,7 +43368,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache",
         "innovation_opportunity": "Close the semantic routing flywheel by recording outcomes, training route stats, and emitting runtime passports.",
@@ -43370,10 +43379,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep closed_loop_routing_outcome_learning_and_verified_cache current."
     },
     {
       "path": "workers/itkv/scripts/kvpolicy.py",
@@ -44000,7 +44007,7 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "5b22b8c5007422cb1d89372b1c10cdc048ef369b33a998fbd3193f15701df048"
       },
@@ -44010,7 +44017,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
         "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
@@ -44019,10 +44028,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/quantize/requirements.txt",
@@ -44419,7 +44426,7 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "92c6d4bacfb4d97e9de818747c3b8f5f6a25a4eda8481b985f79fb31be35addd"
       },
@@ -44429,7 +44436,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
@@ -44438,10 +44447,8 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "workers/tokenizer-train/README.md",
@@ -44579,7 +44586,7 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "ddffe8fb988f7dca19b417f2f54a05df4169acdf6b0d56428afa7533610cd4fd"
       },
@@ -44589,7 +44596,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -44598,10 +44607,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "workers/tsac/scripts/tsac.py",
@@ -44611,25 +44618,26 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 5357,
-          "lines": 174,
+          "bytes": 5576,
+          "lines": 183,
           "imports": 0,
-          "exports": 1,
+          "exports": 3,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 1,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
-        "priority_band": "normal",
-        "sha256": "8349454b9e2d288be6b45c7233608603f5b71e97bdcc4cb828a5e70c3eeeccec"
+        "priority_score": 5,
+        "priority_band": "medium",
+        "sha256": "01b03c421a17c722833e349a821cde129346c2ccc9b2f473c1c21f991c259f0b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -44637,7 +44645,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -44646,10 +44656,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "workers/tsac/tsac.mjs",
@@ -44725,7 +44733,7 @@
           "distribution_or_worker_surface",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "4d3346d77a4427195650c4f2ad5c00134dd8aa1cea4bd2e5c1fe088b4aabf674"
       },
@@ -44735,7 +44743,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave931-worker-safety-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
         "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
@@ -44744,10 +44754,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/video-tokenize/tokenize.mjs",

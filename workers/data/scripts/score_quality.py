@@ -36,6 +36,7 @@ Exit codes: 0 ok (incl. graceful dep_missing / model-load fail) · 20 bad input.
 """
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -53,6 +54,8 @@ VERSION = "quality-v1"
 DEFAULT_SEED = 0x6B6F6C6D  # 1801677709 — shared kolm worker seed
 EXIT_OK = 0
 EXIT_NO_INPUT = 20
+MAX_ROWS = 250_000
+MAX_LINE_CHARS = 1_000_000
 
 # ── feature schema — MUST stay byte-for-byte aligned with the JS module ──────
 FEATURE_NAMES = [
@@ -279,17 +282,43 @@ def apply_threshold(scores, keep_fraction):
 
 
 # ── row IO ───────────────────────────────────────────────────────────────────
+def _path_meta(file_path):
+    raw = str(file_path or "")
+    return {
+        "path_basename": os.path.basename(raw),
+        "path_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+    }
+
+
+def _input_error(code, **extra):
+    return {"ok": False, "error": code, "version": VERSION, **extra}
+
+
 def load_rows(stream):
     rows = []
+    line_no = 0
     for line in stream:
+        line_no += 1
+        if len(line) > MAX_LINE_CHARS:
+            return None, _input_error(
+                "jsonl_line_too_large",
+                line=line_no,
+                max_line_chars=MAX_LINE_CHARS,
+            )
         line = line.strip()
         if not line:
             continue
         try:
             rows.append(json.loads(line))
-        except Exception:  # noqa: BLE001 — skip a single malformed line
-            continue
-    return rows
+        except Exception as e:  # noqa: BLE001
+            return None, _input_error(
+                "malformed_jsonl",
+                line=line_no,
+                detail=str(e)[:240],
+            )
+        if len(rows) > MAX_ROWS:
+            return None, _input_error("too_many_rows", max_rows=MAX_ROWS)
+    return rows, None
 
 
 def score_corpus(rows, model_path, keep_fraction):
@@ -432,17 +461,24 @@ def main():
     if args.pairs:
         if not os.path.isfile(args.pairs):
             log(f"[score_quality] input not found: {args.pairs}")
-            print(json.dumps({"ok": False, "error": "input_not_found",
-                              "pairs": args.pairs, "version": VERSION}))
+            print(json.dumps(_input_error(
+                "input_not_found",
+                **_path_meta(args.pairs),
+            )))
             return EXIT_NO_INPUT
         with open(args.pairs, "r", encoding="utf-8") as f:
-            rows = load_rows(f)
+            rows, load_error = load_rows(f)
     else:
-        rows = load_rows(sys.stdin)
+        rows, load_error = load_rows(sys.stdin)
+
+    if load_error:
+        log(f"[score_quality] bad input: {load_error.get('error')}")
+        print(json.dumps(load_error))
+        return EXIT_NO_INPUT
 
     if not rows:
         log("[score_quality] no rows to score")
-        print(json.dumps({"ok": False, "error": "input_empty", "version": VERSION}))
+        print(json.dumps(_input_error("input_empty")))
         return EXIT_NO_INPUT
 
     result = score_corpus(rows, args.model, args.keep_fraction)

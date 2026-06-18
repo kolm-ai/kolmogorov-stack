@@ -47,7 +47,9 @@ Exit codes:
 """
 
 import argparse
+import hashlib
 import json
+import os
 import sys
 
 
@@ -88,6 +90,18 @@ DEFAULT_PRECISION_BY_CLASS = {
 DEFAULT_SINK_ANCHOR = 4
 RETRIEVED_TIER_HIGH = 0.8
 RETRIEVED_TIER_MID = 0.5
+
+
+def path_meta(file_path):
+    raw = str(file_path or "")
+    return {
+        "path_basename": os.path.basename(raw),
+        "path_sha256": hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+    }
+
+
+def emit_error(code, **extra):
+    sys.stderr.write(json.dumps({"ok": False, "error": code, **extra}) + "\n")
 
 
 def is_integer(x):
@@ -204,16 +218,10 @@ def main(argv):
             if isinstance(prof, dict) and isinstance(prof.get("precision_by_class"), dict):
                 precision_by_class = prof["precision_by_class"]
         except Exception as e:
-            sys.stderr.write(
-                json.dumps(
-                    {
-                        "ok": False,
-                        "error": "profile_parse_failed",
-                        "detail": str(e),
-                        "path": args.profile,
-                    }
-                )
-                + "\n"
+            emit_error(
+                "profile_parse_failed",
+                detail=str(e)[:240],
+                **path_meta(args.profile),
             )
             return 64
 
@@ -261,14 +269,14 @@ def main(argv):
                 pos = tok["position"] if is_integer(tok.get("position")) else -1
                 out_rows.append({"position": pos, "class": cls, "precision_tier": tier})
     except FileNotFoundError as e:
-        sys.stderr.write(
-            json.dumps({"ok": False, "error": "tokens_file_not_found", "detail": str(e)}) + "\n"
+        emit_error(
+            "tokens_file_not_found",
+            detail=e.__class__.__name__,
+            **path_meta(args.tokens),
         )
         return 64
     except Exception as e:
-        sys.stderr.write(
-            json.dumps({"ok": False, "error": "io_failed", "detail": str(e)}) + "\n"
-        )
+        emit_error("io_failed", detail=e.__class__.__name__, **path_meta(args.tokens))
         return 64
 
     try:
@@ -276,9 +284,7 @@ def main(argv):
             for r in out_rows:
                 fh.write(json.dumps(r, separators=(",", ":"), sort_keys=True) + "\n")
     except Exception as e:
-        sys.stderr.write(
-            json.dumps({"ok": False, "error": "output_write_failed", "detail": str(e)}) + "\n"
-        )
+        emit_error("output_write_failed", detail=e.__class__.__name__, **path_meta(args.output))
         return 64
 
     # Honest envelope on success too -- one summary JSON to stdout.
