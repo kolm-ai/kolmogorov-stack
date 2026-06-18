@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 750,
-    "components_without_direct_test_reference": 79,
+    "test_referenced_components": 751,
+    "components_without_direct_test_reference": 78,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -2138,10 +2138,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "json",
-      "sha256": "4c25ac0220b16620ad697b1649f0d41fb2230a529e0786239b539618fa7ea953",
+      "sha256": "5edaab97122b3ac615f38e4e8b54a2d9df85f8e48646ed8b0c9e8b9abb032904",
       "metrics": {
-        "bytes": 1008,
-        "lines": 48,
+        "bytes": 1081,
+        "lines": 52,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -2152,11 +2152,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave925-langchain-package-manifest-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -32944,7 +32946,8 @@
         "tests/wave671-homebrew-formula-contract.test.js",
         "tests/wave678-sdk-kotlin-contract.test.js",
         "tests/wave679-sdk-rn-contract.test.js",
-        "tests/wave680-sdk-swift-contract.test.js"
+        "tests/wave680-sdk-swift-contract.test.js",
+        "tests/wave925-langchain-package-manifest-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
