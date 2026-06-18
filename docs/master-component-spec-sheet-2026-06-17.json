@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 94.3,
+    "local_engineering_score": 94.4,
     "frontier_product_score": 70.5,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 744,
-    "direct_test_reference_pct": 89.7,
-    "components_without_direct_test_reference": 85,
+    "direct_test_referenced_components": 745,
+    "direct_test_reference_pct": 89.9,
+    "components_without_direct_test_reference": 84,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -33655,8 +33655,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1470754,
-          "lines": 30844,
+          "bytes": 1471124,
+          "lines": 30849,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -33678,7 +33678,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "2ebc24161c8383a950d599c79a96afeeaa1670d6d50bdfcf37066fd17a442040"
+        "sha256": "c14d5cb1e55b311eceeae28b12c598f963ac0ce619f4342dc3a371c4669b44d3"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -40294,10 +40294,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 5035,
-          "lines": 154,
+          "bytes": 7424,
+          "lines": 222,
           "imports": 0,
-          "exports": 6,
+          "exports": 10,
           "routes": 2,
           "env_refs": 0,
           "fs_writes": 0,
@@ -40309,9 +40309,9 @@
         "risk_signals": [
           "http_route_surface"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "8eab3b485037259525e92f6f3fe5a7006dd49c5a82d7e2f970dca9f23a852580"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "340ccdb88450c55e9b9048d1b496351a8d1a2bdc9bb8661906f3651db0cc0ce8"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -40319,7 +40319,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave742-website-status-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
         "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
@@ -40328,10 +40330,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
     },
     {
       "path": "src/workflow-ir.js",

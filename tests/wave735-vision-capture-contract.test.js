@@ -49,7 +49,7 @@ test('W735 vision capture is wired into direct depth verification', () => {
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:video-capture && npm run verify:vision-capture && npm run verify:vlm-bakeoff && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:video-capture && npm run verify:vision-capture && npm run verify:vlm-bakeoff && npm run verify:website-status && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /VISION_CAPTURE_LIMITS/);
   assert.match(source, /_safeUrlForEnvelope/);

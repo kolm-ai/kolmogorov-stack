@@ -64,7 +64,7 @@ test('W733 video bakeoff is wired into direct depth verification', () => {
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:verticals && npm run verify:video-bakeoff && npm run verify:video-capture && npm run verify:vision-capture && npm run verify:vlm-bakeoff && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:verticals && npm run verify:video-bakeoff && npm run verify:video-capture && npm run verify:vision-capture && npm run verify:vlm-bakeoff && npm run verify:website-status && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /VIDEO_BAKEOFF_LIMITS/);
   assert.match(source, /_errorEnvelope/);

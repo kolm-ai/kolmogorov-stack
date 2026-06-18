@@ -24,7 +24,7 @@ import { mountAuthEmail } from './auth-email.js';
 import { sendWelcome, sendBillingActivated, sendBillingFailed, emailConfigured, sendEmail, tEmailSignup, tEmailCompileDone, tEmailUsageAlert, tEmailReportReady } from './email.js';
 import { compileJs, verify } from './verifier.js';
 import { LIBRARY_VERSION, libraryDescription } from './library.js';
-import { all, find, findOne, findByField, findByTenant, insert, update, remove, withTransaction, id as storeId, stats as storeStats } from './store.js';
+import { all, find, findOne, findByField, findByTenant, insert, update, remove, withTransaction, id as storeId, stats as storeStats, backendInfo as storeBackendInfo } from './store.js';
 // LM-7 (V1 launch 2026-05-26) - server-side product metrics. recordEvent is
 // fire-and-forget so a metrics outage NEVER takes down the calling request.
 // See src/metrics.js for the (date,tenant,plan_tier,kind,outcome) bucket
@@ -6398,6 +6398,15 @@ export function buildRouter() {
       uptime_s: Math.floor(process.uptime()),
     });
   });
+
+  // W742 - public website status routes with real receipt-store/signer probes.
+  // The response contract is privacy-safe: aggregate counts only, bounded scans,
+  // sanitized receipt ids, and no tenant/prompt/provider disclosure.
+  const __w609ReceiptStore = { all, find, findByTenant, insert, update, backendInfo: storeBackendInfo };
+  const __w609GetReceiptSigner = () => {
+    try { return __loadDefaultSigner(); } catch (_) { return null; }
+  };
+  __registerWebsiteStatusRoutes_w921(r, { store: __w609ReceiptStore, loadSigner: __w609GetReceiptSigner });
 
   // W384 - PUBLIC transparency-log read routes. Mounted BEFORE authMiddleware
   // so the read-only GET endpoints (size / entries / proof / checkpoints) stay
@@ -30031,20 +30040,16 @@ res.json({
   __registerRegRoutes_w834(r);
 
   // W921 - Account-UI no-code routes (client-error sink + automations CRUD/run/tick),
-  // Website status/trust strip (/v1/status/summary + /receipts), and Govern
-  // (receipt Merkle anchoring / SLSA provenance / transparency log / compliance export).
+  // and Govern (receipt Merkle anchoring / SLSA provenance / transparency log /
+  // compliance export). Website status is mounted before auth with the shared
+  // W609 receipt-store wrapper.
   // One-line modular mounts; each handler fences on req.tenant_record internally.
   __registerAccountUiRoutes_w921(r, { authMiddleware });
-  __registerWebsiteStatusRoutes_w921(r, { authMiddleware });
   __registerGovernRoutes_w921(r, { authMiddleware });
   // W609 - production-wire the W921 receipt modules to durable store.js,
   // the default Ed25519 signer, and the existing Merkle receipt batcher. The
   // modules still degrade gracefully if a signer/anchor cannot initialize, but
   // prod no longer falls back to process-local MCP receipt memory.
-  const __w609ReceiptStore = { all, find, findByTenant, insert, update };
-  const __w609GetReceiptSigner = () => {
-    try { return __loadDefaultSigner(); } catch (_) { return null; }
-  };
   const __w609McpAnchorBatcher = (() => {
     try {
       const intervalRaw = Number(process.env.KOLM_MCP_ANCHOR_INTERVAL_MS || process.env.KOLM_RECEIPT_ANCHOR_INTERVAL_MS || 60000);

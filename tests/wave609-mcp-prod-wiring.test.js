@@ -60,7 +60,7 @@ function makeRouterStub() {
 test('1. router mounts MCP and in-toto receipt routes with prod store/signer/anchor deps', () => {
   const src = fs.readFileSync(path.join(ROOT, 'src', 'router.js'), 'utf8');
   assert.match(src, /startBatcher as __startReceiptAnchorBatcher_w609/);
-  assert.match(src, /const __w609ReceiptStore = \{ all, find, findByTenant, insert, update \}/);
+  assert.match(src, /const __w609ReceiptStore = \{ all, find, findByTenant, insert, update, backendInfo: storeBackendInfo \}/);
   assert.match(src, /const __w609GetReceiptSigner = \(\) =>/);
   assert.match(src, /__startReceiptAnchorBatcher_w609\(\{/);
   assert.match(src, /update\('mcp_tool_receipts'/);

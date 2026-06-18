@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 744,
-    "components_without_direct_test_reference": 85,
+    "test_referenced_components": 745,
+    "components_without_direct_test_reference": 84,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -37579,10 +37579,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "2ebc24161c8383a950d599c79a96afeeaa1670d6d50bdfcf37066fd17a442040",
+      "sha256": "c14d5cb1e55b311eceeae28b12c598f963ac0ce619f4342dc3a371c4669b44d3",
       "metrics": {
-        "bytes": 1470754,
-        "lines": 30844,
+        "bytes": 1471124,
+        "lines": 30849,
         "imports": 535,
         "exports": 8,
         "routes": 810,
@@ -45356,12 +45356,12 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "8eab3b485037259525e92f6f3fe5a7006dd49c5a82d7e2f970dca9f23a852580",
+      "sha256": "340ccdb88450c55e9b9048d1b496351a8d1a2bdc9bb8661906f3651db0cc0ce8",
       "metrics": {
-        "bytes": 5035,
-        "lines": 154,
+        "bytes": 7424,
+        "lines": 222,
         "imports": 0,
-        "exports": 6,
+        "exports": 10,
         "routes": 2,
         "env_refs": 0,
         "fs_writes": 0,
@@ -45370,11 +45370,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave742-website-status-contract.test.js"
+      ],
       "risk_signals": [
         "http_route_surface"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
