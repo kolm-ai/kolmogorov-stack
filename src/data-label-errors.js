@@ -245,6 +245,17 @@ function _semanticEquivalence(a, b) {
   return Math.max(0, Math.min(1, s));
 }
 
+function _validEmbeddingMatrix(embeddings, n) {
+  if (!Array.isArray(embeddings) || embeddings.length !== n) return false;
+  let dim = 0;
+  for (const v of embeddings) {
+    if (!Array.isArray(v) || v.length === 0) return false;
+    if (dim === 0) dim = v.length;
+    if (v.length !== dim) return false;
+  }
+  return true;
+}
+
 // exact-ish match r_i: normalized whitespace+case equality.
 function _exactish(a, b) {
   const na = String(a || '').toLowerCase().replace(/\s+/g, ' ').trim();
@@ -403,6 +414,8 @@ export async function routeErrorsToReview({ flaggedPairs, tenant, namespace, met
  * @param {number} [args.k=5]
  * @param {string} [args.tenant]
  * @param {string} [args.namespace]
+ * @param {number[][]|null} [args.outputEmbeddings] precomputed output vectors.
+ * @param {string} [args.embeddingBackend='hashbag'] provenance label.
  * @param {(i:number,n:number)=>void} [args.onProgress]
  * @returns {Promise<object>} {ok, version, flagged, by_reason, off_diagonal_rate?, median_confidence?, backend, pairs, sample, note?}
  */
@@ -417,6 +430,8 @@ export async function detectLabelErrors({
   k = 5,
   tenant = 'tenant_local',
   namespace = 'default',
+  outputEmbeddings = null,
+  embeddingBackend = 'hashbag',
   onProgress = null,
 } = {}) {
   try {
@@ -430,6 +445,7 @@ export async function detectLabelErrors({
       flagged: 0,
       by_reason: {},
       backend: 'skipped',
+      embedding_backend: 'none',
       pairs: rows,
       sample: [],
     };
@@ -467,14 +483,18 @@ export async function detectLabelErrors({
       base.flagged = flaggedEntries.length;
       base.median_confidence = Number(gamma.toFixed(6));
       base.backend = 'clear-teacher';
+      base.embedding_backend = 'hashbag';
       base.flagged_entries = flaggedEntries;
       return base;
     }
 
     // ── offline Confident-Learning path (default) ────────────────────────────
     const { idxOf, count } = _clusterIndexMap(rows, clusterField);
-    const outEmbs = rows.map((p) => _embedText(_pairOutput(p)));
+    const hasProviderEmbeddings = _validEmbeddingMatrix(outputEmbeddings, n);
+    const outEmbs = hasProviderEmbeddings ? outputEmbeddings : rows.map((p) => _embedText(_pairOutput(p)));
+    const embBackend = hasProviderEmbeddings ? String(embeddingBackend || 'provider') : 'hashbag';
     const backend = (count > 1) ? 'cl-dense' : 'cl-ngram';
+    base.embedding_backend = embBackend;
 
     if (count <= 1) {
       // Only one class -> no off-diagonal possible. Report plainly.
@@ -508,6 +528,7 @@ export async function detectLabelErrors({
     base.flagged = flaggedEntries.length;
     base.off_diagonal_rate = cj.off_diagonal_rate;
     base.backend = backend;
+    base.embedding_backend = embBackend;
     base.flagged_entries = flaggedEntries;
     return base;
   } catch (e) {
@@ -543,6 +564,7 @@ export const __internals = {
   _centroidsFromClusters,
   _softmax,
   _semanticEquivalence,
+  _validEmbeddingMatrix,
   _exactish,
   _reflectionToScore,
   _median,

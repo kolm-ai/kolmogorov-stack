@@ -293,6 +293,17 @@ function _representativeInputs(embs, centroids, labels, texts, c, perCluster = 3
   return members.slice(0, perCluster).map((i) => texts[i]);
 }
 
+function _validEmbeddingMatrix(embeddings, n) {
+  if (!Array.isArray(embeddings) || embeddings.length !== n) return false;
+  let dim = 0;
+  for (const v of embeddings) {
+    if (!Array.isArray(v) || v.length === 0) return false;
+    if (dim === 0) dim = v.length;
+    if (v.length !== dim) return false;
+  }
+  return true;
+}
+
 // ── headline orchestrator ─────────────────────────────────────────────────────
 
 /**
@@ -304,9 +315,19 @@ function _representativeInputs(embs, centroids, labels, texts, c, perCluster = 3
  * @param {number} [args.seed=0x6b6f6c6d]
  * @param {(ctx:{idx,top_terms,representative_inputs})=>Promise<{label?:string,description?:string}>} [args.labeler]
  *        optional teacher labeler; absent => deterministic c-TF-IDF slug.
+ * @param {number[][]|null} [args.embeddings] precomputed provider vectors.
+ * @param {string} [args.embeddingBackend='hashbag'] provenance label.
  * @returns {Promise<object>} {ok, version, k, k_method, method, assigned, topics, coverage}
  */
-export async function clusterAndLabel({ pairs, n_clusters = null, top_n = 3, seed = 0x6b6f6c6d, labeler = null } = {}) {
+export async function clusterAndLabel({
+  pairs,
+  n_clusters = null,
+  top_n = 3,
+  seed = 0x6b6f6c6d,
+  labeler = null,
+  embeddings = null,
+  embeddingBackend = 'hashbag',
+} = {}) {
   try {
     const rows = Array.isArray(pairs) ? pairs : [];
     const n = rows.length;
@@ -316,7 +337,9 @@ export async function clusterAndLabel({ pairs, n_clusters = null, top_n = 3, see
     }
 
     const texts = rows.map((p) => _clusterText(p));
-    const embs = texts.map((t) => _embedText(t));
+    const providerEmbeddings = _validEmbeddingMatrix(embeddings, n);
+    const embs = providerEmbeddings ? embeddings : texts.map((t) => _embedText(t));
+    const backendLabel = providerEmbeddings ? String(embeddingBackend || 'provider') : 'hashbag';
 
     const { k, method: kMethod, silhouette } = chooseK(embs, n_clusters, 2, 50);
     const { labels, centroids } = kmeans(embs, k, { seed });
@@ -376,7 +399,8 @@ export async function clusterAndLabel({ pairs, n_clusters = null, top_n = 3, see
       ...base,
       k,
       k_method: kMethod,
-      method: 'kmeans:hashbag:' + labelMode,
+      method: 'kmeans:' + backendLabel + ':' + labelMode,
+      embedding_backend: backendLabel,
       silhouette: silhouette != null ? silhouette : null,
       assigned,
       topics,
@@ -394,6 +418,7 @@ export const __internals = {
   _sqDist,
   _unitMean,
   _representativeInputs,
+  _validEmbeddingMatrix,
   _STOP,
 };
 

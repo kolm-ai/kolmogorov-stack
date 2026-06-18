@@ -17,7 +17,7 @@
         "scoreCandidateLocal",
         "quality_filtered"
       ],
-      "line": 219,
+      "line": 220,
       "owner": "_runHeuristicQuality",
       "present": true,
       "stage": "quality_heuristic_fallback"
@@ -32,6 +32,17 @@
       "owner": "minhashPredup",
       "present": true,
       "stage": "minhash_predup"
+    },
+    {
+      "evidence": [
+        "embedBatchAsync(texts",
+        "embedding_provider",
+        "embeddingBackend: null"
+      ],
+      "line": 71,
+      "owner": "embedBatchAsync",
+      "present": true,
+      "stage": "embedding_provider_precompute"
     },
     {
       "evidence": [
@@ -50,18 +61,18 @@
         "timeout: 5 * 60 * 1000",
         "report.dedup = 'ok'"
       ],
-      "line": 345,
+      "line": 440,
       "owner": "_dedupViaPython",
       "present": true,
       "stage": "python_semantic_dedup"
     },
     {
       "evidence": [
-        "_embeddingNearDupFallback(work",
+        "_embeddingNearDupFallback(",
         "embedding_near_dup",
         "embedding-near-dup-js"
       ],
-      "line": 409,
+      "line": 504,
       "owner": "_embeddingNearDupFallback",
       "present": true,
       "stage": "embedding_near_dup_fallback"
@@ -72,7 +83,7 @@
         "report.topics",
         "cluster_method"
       ],
-      "line": 91,
+      "line": 92,
       "owner": "_clusterAndLabel",
       "present": true,
       "stage": "semantic_cluster_labels"
@@ -83,7 +94,7 @@
         "cluster_method = 'fallback:3gram'",
         "report.coverage"
       ],
-      "line": 232,
+      "line": 233,
       "owner": "_bucketKeyFor",
       "present": true,
       "stage": "fallback_cluster_buckets"
@@ -94,7 +105,7 @@
         "report.label_errors",
         "_routeErrorsToReview"
       ],
-      "line": 96,
+      "line": 97,
       "owner": "_detectLabelErrors",
       "present": true,
       "stage": "label_error_detection"
@@ -105,7 +116,7 @@
         "cot_flagged",
         "survivors.push(p)"
       ],
-      "line": 130,
+      "line": 131,
       "owner": "flagCot",
       "present": true,
       "stage": "cot_filter"
@@ -116,7 +127,7 @@
         "redactPii(out)",
         "pii_redacted"
       ],
-      "line": 137,
+      "line": 138,
       "owner": "redactPii",
       "present": true,
       "stage": "pii_redaction"
@@ -149,7 +160,7 @@
         "facility-location",
         "strategy: 'diversity-' + method"
       ],
-      "line": 90,
+      "line": 91,
       "owner": "_selectDiverse",
       "present": true,
       "stage": "diversity_select"
@@ -182,7 +193,7 @@
         "wrote = true",
         "write_error"
       ],
-      "line": 302,
+      "line": 397,
       "owner": "_writeJsonl",
       "present": true,
       "stage": "jsonl_materialization"
@@ -193,7 +204,7 @@
         "eventStore.appendEvent",
         "prompt_tokens: 0"
       ],
-      "line": 320,
+      "line": 415,
       "owner": "_persist",
       "present": true,
       "stage": "provenance_persist"
@@ -204,7 +215,7 @@
         "version: CURATE_VERSION",
         "n_removed"
       ],
-      "line": 522,
+      "line": 622,
       "owner": "curatePairs",
       "present": true,
       "stage": "public_envelope"
@@ -215,7 +226,7 @@
         "dedup: false",
         "target_size: 0"
       ],
-      "line": 1125,
+      "line": 1339,
       "owner": "curateDefault",
       "present": true,
       "stage": "curate_default_light_path"
@@ -230,49 +241,49 @@
     {
       "async": false,
       "kind": "const",
-      "line": 98,
+      "line": 99,
       "name": "CURATE_VERSION"
     },
     {
       "async": false,
       "kind": "const",
-      "line": 99,
+      "line": 100,
       "name": "EMBEDDING_NEAR_DUP_VERSION"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 130,
+      "line": 131,
       "name": "flagCot"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 145,
+      "line": 146,
       "name": "flagPii"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 150,
+      "line": 151,
       "name": "redactPii"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 186,
+      "line": 187,
       "name": "scoreCandidateLocal"
     },
     {
       "async": true,
       "kind": "function",
-      "line": 522,
+      "line": 622,
       "name": "curatePairs"
     },
     {
       "async": true,
       "kind": "function",
-      "line": 1148,
+      "line": 1362,
       "name": "curateDefault"
     }
   ],
@@ -281,139 +292,187 @@
     {
       "async": false,
       "exported": false,
-      "line": 79,
+      "line": 80,
       "name": "_dsirRealEnabled"
     },
     {
       "async": false,
       "exported": true,
-      "line": 130,
+      "line": 131,
       "name": "flagCot"
     },
     {
       "async": false,
       "exported": true,
-      "line": 145,
+      "line": 146,
       "name": "flagPii"
     },
     {
       "async": false,
       "exported": true,
-      "line": 150,
+      "line": 151,
       "name": "redactPii"
     },
     {
       "async": false,
       "exported": false,
-      "line": 173,
+      "line": 174,
       "name": "_wordsLower"
     },
     {
       "async": false,
       "exported": false,
-      "line": 177,
+      "line": 178,
       "name": "_tokenOverlapScore"
     },
     {
       "async": false,
       "exported": true,
-      "line": 186,
+      "line": 187,
       "name": "scoreCandidateLocal"
     },
     {
       "async": false,
       "exported": false,
-      "line": 219,
+      "line": 220,
       "name": "_runHeuristicQuality"
     },
     {
       "async": false,
       "exported": false,
-      "line": 232,
+      "line": 233,
       "name": "_bucketKeyFor"
     },
     {
       "async": false,
       "exported": false,
-      "line": 247,
+      "line": 248,
       "name": "_pairInput"
     },
     {
       "async": false,
       "exported": false,
-      "line": 254,
+      "line": 255,
       "name": "_pairOutput"
     },
     {
       "async": false,
       "exported": false,
-      "line": 262,
-      "name": "_appendBackend"
+      "line": 263,
+      "name": "_pairText"
     },
     {
       "async": false,
       "exported": false,
-      "line": 271,
-      "name": "_setPairOutput"
+      "line": 270,
+      "name": "_validEmbeddingMatrix"
     },
     {
       "async": false,
       "exported": false,
-      "line": 280,
-      "name": "_dataRoot"
+      "line": 281,
+      "name": "_embeddingOpts"
     },
     {
       "async": false,
       "exported": false,
-      "line": 284,
-      "name": "_nsDir"
-    },
-    {
-      "async": false,
-      "exported": false,
-      "line": 288,
-      "name": "_readJsonl"
+      "line": 294,
+      "name": "_shouldUseEmbeddingProvider"
     },
     {
       "async": false,
       "exported": false,
       "line": 302,
+      "name": "_embeddingBackendOf"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 307,
+      "name": "_embeddingReport"
+    },
+    {
+      "async": true,
+      "exported": false,
+      "line": 325,
+      "name": "_embedRowsForCurate"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 348,
+      "name": "_sliceEmbeddingResult"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 357,
+      "name": "_appendBackend"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 366,
+      "name": "_setPairOutput"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 375,
+      "name": "_dataRoot"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 379,
+      "name": "_nsDir"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 383,
+      "name": "_readJsonl"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 397,
       "name": "_writeJsonl"
     },
     {
       "async": true,
       "exported": false,
-      "line": 320,
+      "line": 415,
       "name": "_persist"
     },
     {
       "async": false,
       "exported": false,
-      "line": 345,
+      "line": 440,
       "name": "_dedupViaPython"
     },
     {
       "async": false,
       "exported": false,
-      "line": 409,
+      "line": 504,
       "name": "_embeddingNearDupFallback"
     },
     {
       "async": false,
       "exported": false,
-      "line": 515,
+      "line": 615,
       "name": "_findRepoRoot"
     },
     {
       "async": true,
       "exported": true,
-      "line": 522,
+      "line": 622,
       "name": "curatePairs"
     },
     {
       "async": true,
       "exported": true,
-      "line": 1148,
+      "line": 1362,
       "name": "curateDefault"
     }
   ],
@@ -437,8 +496,19 @@
     "dsir_buckets",
     "dsir_ngrams",
     "dsir_seed",
+    "embeddingAllowRemote",
+    "embeddingBackend",
+    "embeddingLearnedSemantic",
+    "embeddingModel",
     "embeddingNearDup",
     "embeddingNearDupThreshold",
+    "embeddingPrecompute",
+    "embeddingProvider",
+    "embeddingStrict",
+    "embeddingTimeoutMs",
+    "embeddingUrl",
+    "embeddingVectors",
+    "embeddingVectorsBackend",
     "epsilon",
     "errorAction",
     "errorMethod",
@@ -525,6 +595,7 @@
     "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
     "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
     "tests/wave637-data-curate-neardup-fallback.test.js",
+    "tests/wave954-learned-embedding-provider.test.js",
     "tests/wave947-data-curate-matrix.test.js"
   ],
   "safety_guards": {
@@ -533,6 +604,7 @@
     "curate_default_keeps_heavy_stages_off": true,
     "direct_evidence_covers_required_tests": true,
     "embedding_fallback_records_python_less_boundary": true,
+    "embedding_provider_is_optional_and_reported": true,
     "env_surface_is_small_and_named": true,
     "influence_refusal_does_not_fabricate_scores": true,
     "ingest_raw_pairs_path_is_single_authority": true,
@@ -558,9 +630,12 @@
     "src/minhash-dedup.js",
     "src/data-semdedup.js",
     "src/data-dsir.js",
+    "src/embedding.js",
     "src/data-select.js",
     "src/data-quality-classifier.js",
+    "src/data-cluster-label.js",
     "src/data-label-errors.js",
+    "workers/data/scripts/_embed.py",
     "tests/wave921-data-engine-modules.test.js",
     "tests/wave921-data-curate-modules.test.js",
     "tests/sota-capturedata.test.js",
@@ -568,22 +643,23 @@
     "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
     "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
     "tests/wave637-data-curate-neardup-fallback.test.js",
+    "tests/wave954-learned-embedding-provider.test.js",
     "tests/wave947-data-curate-matrix.test.js"
   ],
   "summary": {
-    "data_curate_bytes": 56418,
-    "data_curate_lines": 1226,
-    "direct_test_evidence_count": 44,
+    "data_curate_bytes": 67185,
+    "data_curate_lines": 1440,
+    "direct_test_evidence_count": 45,
     "env_ref_count": 3,
     "export_count": 8,
     "failed_safety_guards": 0,
-    "function_count": 23,
+    "function_count": 31,
     "missing_required_exports": 0,
     "missing_test_evidence": 0,
-    "option_count": 51,
-    "present_stage_count": 20,
-    "required_test_evidence_count": 8,
-    "stage_count": 20
+    "option_count": 62,
+    "present_stage_count": 21,
+    "required_test_evidence_count": 9,
+    "stage_count": 21
   },
   "test_evidence": [
     {
@@ -1151,7 +1227,7 @@
       "EMBEDDING_NEAR_DUP_VERSION_refs": 2,
       "curateDefault_refs": 2,
       "curatePairs_refs": 0,
-      "curation_workflow_refs": 31,
+      "curation_workflow_refs": 32,
       "flagCot_refs": 3,
       "flagPii_refs": 2,
       "path": "tests/wave947-data-curate-matrix.test.js",
@@ -1192,6 +1268,20 @@
       "CURATE_VERSION_refs": 0,
       "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
       "curateDefault_refs": 0,
+      "curatePairs_refs": 4,
+      "curation_workflow_refs": 20,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave954-learned-embedding-provider.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 4
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
       "curatePairs_refs": 0,
       "curation_workflow_refs": 4,
       "flagCot_refs": 0,
@@ -1203,5 +1293,5 @@
       "total_symbol_refs": 0
     }
   ],
-  "updated_at": "2026-06-18"
+  "updated_at": "2026-06-19"
 }

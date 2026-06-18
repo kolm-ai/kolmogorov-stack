@@ -68,6 +68,7 @@ import { valuePairsByInfluence } from './data-value-influence.js';
 import { valuePairsByShapley } from './data-shapley.js';
 import { selectByDSIR } from './data-dsir.js';
 import { selectInformativeSubset, __internals as _dataSelectInternals } from './data-select.js';
+import { embedBatchAsync, embeddingProviderProfile } from './embedding.js';
 
 // Genuine DSIR (src/data-dsir.js) is the DEFAULT 'dsir' SELECT path when a target
 // corpus is supplied. The v1 seeded-uniform calibration defect (multiplier 2^22 and
@@ -259,6 +260,100 @@ function _pairOutput(p) {
   return '';
 }
 
+function _pairText(p, key = 'pair') {
+  if (typeof p === 'string') return p;
+  if (key === 'input') return _pairInput(p);
+  if (key === 'output') return _pairOutput(p);
+  return (_pairInput(p) + '\n\n' + _pairOutput(p)).trim();
+}
+
+function _validEmbeddingMatrix(embeddings, n) {
+  if (!Array.isArray(embeddings) || embeddings.length !== n) return false;
+  let dim = 0;
+  for (const v of embeddings) {
+    if (!Array.isArray(v) || v.length === 0) return false;
+    if (dim === 0) dim = v.length;
+    if (v.length !== dim) return false;
+  }
+  return true;
+}
+
+function _embeddingOpts(o = {}) {
+  return {
+    backend: o.embeddingBackend || undefined,
+    provider: typeof o.embeddingProvider === 'function' ? o.embeddingProvider : undefined,
+    learned_semantic: o.embeddingLearnedSemantic === true,
+    url: o.embeddingUrl || undefined,
+    allowRemote: o.embeddingAllowRemote === true,
+    model: o.embeddingModel || undefined,
+    strict: o.embeddingStrict === true,
+    timeoutMs: Number.isFinite(Number(o.embeddingTimeoutMs)) ? Number(o.embeddingTimeoutMs) : undefined,
+  };
+}
+
+function _shouldUseEmbeddingProvider(o = {}) {
+  if (Array.isArray(o.embeddingVectors)) return true;
+  if (typeof o.embeddingProvider === 'function') return true;
+  if (o.embeddingPrecompute === true) return true;
+  const profile = embeddingProviderProfile(_embeddingOpts(o));
+  return profile.provider !== 'builtin-hashbag' || profile.backend_kind !== 'lexical_hash';
+}
+
+function _embeddingBackendOf(result) {
+  if (!result || !result.ok) return 'hashbag';
+  return result.backend_used || result.backend_requested || 'provider';
+}
+
+function _embeddingReport(result, profile, key) {
+  const base = {
+    version: result && result.version ? result.version : (profile && profile.version),
+    key,
+    backend_requested: result && result.backend_requested ? result.backend_requested : (profile && profile.backend_requested),
+    backend_used: result && result.backend_used ? result.backend_used : null,
+    backend_kind: result && result.backend_kind ? result.backend_kind : (profile && profile.backend_kind),
+    learned_semantic: Boolean(result && result.learned_semantic),
+    configured: result ? result.configured !== false : Boolean(profile && profile.configured),
+    fallback: result && result.fallback ? result.fallback : null,
+    dim: result && Number.isFinite(Number(result.dim)) ? Number(result.dim) : null,
+    n_texts: result && Number.isFinite(Number(result.n_texts)) ? Number(result.n_texts) : 0,
+    cache_scope: 'curate-run',
+  };
+  if (result && result.error) base.error = result.error;
+  return base;
+}
+
+async function _embedRowsForCurate(rows, o, key = 'pair') {
+  const n = Array.isArray(rows) ? rows.length : 0;
+  const opts = _embeddingOpts(o);
+  const profile = embeddingProviderProfile(opts);
+  if (key === 'pair' && _validEmbeddingMatrix(o.embeddingVectors, n)) {
+    return {
+      ok: true,
+      version: profile.version,
+      backend_requested: profile.backend_requested || 'provided-vectors',
+      backend_used: o.embeddingVectorsBackend || 'provided-vectors',
+      backend_kind: o.embeddingLearnedSemantic === true ? 'learned_semantic' : 'provider',
+      learned_semantic: o.embeddingLearnedSemantic === true,
+      configured: true,
+      fallback: null,
+      dim: n > 0 ? o.embeddingVectors[0].length : 0,
+      n_texts: n,
+      vectors: o.embeddingVectors,
+    };
+  }
+  const texts = (Array.isArray(rows) ? rows : []).map((p) => _pairText(p, key));
+  return await embedBatchAsync(texts, opts);
+}
+
+function _sliceEmbeddingResult(result, indices) {
+  if (!result || !Array.isArray(result.vectors) || !Array.isArray(indices)) return result;
+  return {
+    ...result,
+    vectors: indices.map((i) => result.vectors[i]).filter((v) => Array.isArray(v)),
+    n_texts: indices.length,
+  };
+}
+
 function _appendBackend(current, next) {
   const cur = String(current || 'none');
   const n = String(next || '');
@@ -406,7 +501,7 @@ function _dedupViaPython(pairs, namespace, threshold) {
   }
 }
 
-function _embeddingNearDupFallback(pairs, threshold) {
+function _embeddingNearDupFallback(pairs, threshold, embeddings = null, embeddingBackend = 'hashbag') {
   const rows = Array.isArray(pairs) ? pairs : [];
   const tauRaw = Number(threshold);
   const tau = Number.isFinite(tauRaw)
@@ -449,7 +544,8 @@ function _embeddingNearDupFallback(pairs, threshold) {
       };
     }
 
-    const embs = embedPairs(rows);
+    const hasProviderEmbeddings = _validEmbeddingMatrix(embeddings, rows.length);
+    const embs = hasProviderEmbeddings ? embeddings : embedPairs(rows);
     const kept = [];
     const keptIdx = [];
     const groups = [];
@@ -483,9 +579,13 @@ function _embeddingNearDupFallback(pairs, threshold) {
 
     return {
       kept,
+      kept_indices: keptIdx,
       report: {
         version: EMBEDDING_NEAR_DUP_VERSION,
-        backend_used: 'embedding-near-dup-js',
+        backend_used: hasProviderEmbeddings
+          ? ('embedding-near-dup-js:' + String(embeddingBackend || 'provider'))
+          : 'embedding-near-dup-js',
+        embedding_backend: hasProviderEmbeddings ? String(embeddingBackend || 'provider') : 'hashbag',
         threshold: tau,
         n_in: rows.length,
         n_kept: kept.length,
@@ -557,6 +657,21 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       //          the python-less path an explicit dedup tier instead of a no-op.
       embeddingNearDup: true,
       embeddingNearDupThreshold: 0.93,
+      // embeddingBackend: optional learned embedding provider for all semantic
+      // curation stages. Default stays local hash-bag via src/embedding.js; set
+      // to 'st' for the Python sentence-transformers worker, a registered
+      // provider id, or 'openai-compatible' with KOLM_EMBED_URL.
+      embeddingBackend: null,
+      embeddingProvider: null,
+      embeddingVectors: null,
+      embeddingVectorsBackend: null,
+      embeddingLearnedSemantic: false,
+      embeddingPrecompute: false,
+      embeddingUrl: null,
+      embeddingAllowRemote: false,
+      embeddingModel: null,
+      embeddingStrict: false,
+      embeddingTimeoutMs: null,
       // target_size: when set (>0), run an informative-subset SELECTION stage
       //          after the filter stages. >1 = absolute count, 0<x<=1 = fraction.
       target_size: 0,
@@ -638,6 +753,9 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       // embedding_near_dup: direct JS cosine fallback report when python dedup
       //   is skipped/unavailable (null unless that fallback boundary is hit).
       embedding_near_dup: null,
+      // embedding_provider: non-hash provider provenance when CURATE precomputes
+      // vectors once and reuses them across semantic stages.
+      embedding_provider: null,
       // selection: the SELECT-stage report block (null if no target_size).
       selection: null,
       // valuation: the OPT-IN targeted-valuation report (influence/shapley) that
@@ -652,6 +770,21 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       // label_errors: the Confident-Learning label-error report (null when off).
       label_errors: null,
     };
+
+    const useEmbeddingProvider = _shouldUseEmbeddingProvider(o);
+    const embeddingProfile = embeddingProviderProfile(_embeddingOpts(o));
+    let pairEmbeddingResult = null;
+
+    async function ensurePairEmbeddings(stage) {
+      if (!useEmbeddingProvider || work.length === 0) return null;
+      if (pairEmbeddingResult && _validEmbeddingMatrix(pairEmbeddingResult.vectors, work.length)) return pairEmbeddingResult;
+      pairEmbeddingResult = await _embedRowsForCurate(work, o, 'pair');
+      report.embedding_provider = Object.assign(
+        _embeddingReport(pairEmbeddingResult, embeddingProfile, 'pair'),
+        { first_used_by: stage },
+      );
+      return pairEmbeddingResult;
+    }
 
     // a. quality - drop low-scoring teacher outputs.
     //    DEFAULT: the learned per-pair quality CLASSIFIER
@@ -737,10 +870,13 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
     //     and records the reason via report.semdedup.backend_used.
     if (o.semdedup && work.length > 1) {
       try {
+        const semEmb = await ensurePairEmbeddings('semdedup_semantic');
         const sd = semDedup(work, {
           epsilon: Number.isFinite(Number(o.epsilon)) ? Number(o.epsilon) : 0.05,
           keep: o.semdedupKeep || 'low-density',
           embedder: typeof o.semdedupEmbedder === 'function' ? o.semdedupEmbedder : undefined,
+          embeddings: semEmb && _validEmbeddingMatrix(semEmb.vectors, work.length) ? semEmb.vectors : undefined,
+          embeddingBackend: semEmb ? _embeddingBackendOf(semEmb) : undefined,
           seed: Number.isFinite(Number(o.semdedupSeed)) ? Number(o.semdedupSeed) : undefined,
           k: Number.isFinite(Number(o.semdedupK)) ? Number(o.semdedupK) : undefined,
         });
@@ -753,6 +889,13 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           // report carries its result), chaining onto any prior minhash slot.
           const semBackend = sd.report.backend_used || 'semdedup-js';
           report.backend_used = _appendBackend(report.backend_used, semBackend);
+          if (pairEmbeddingResult && Array.isArray(sd.kept_indices)) {
+            pairEmbeddingResult = _sliceEmbeddingResult(pairEmbeddingResult, sd.kept_indices);
+            if (report.embedding_provider) {
+              report.embedding_provider.reused_by = Array.from(new Set([...(report.embedding_provider.reused_by || []), 'semdedup_semantic']));
+              report.embedding_provider.n_texts = pairEmbeddingResult.n_texts;
+            }
+          }
           work = sd.kept;
         }
       } catch (e) {
@@ -773,12 +916,25 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
       } else {
         report.dedup = ded.note; // 'skipped:<reason>'
         if (o.embeddingNearDup && work.length > 1) {
-          const near = _embeddingNearDupFallback(work, o.embeddingNearDupThreshold);
+          const nearEmb = await ensurePairEmbeddings('embedding_near_dup_fallback');
+          const near = _embeddingNearDupFallback(
+            work,
+            o.embeddingNearDupThreshold,
+            nearEmb && _validEmbeddingMatrix(nearEmb.vectors, work.length) ? nearEmb.vectors : null,
+            nearEmb ? _embeddingBackendOf(nearEmb) : 'hashbag',
+          );
           if (near && Array.isArray(near.kept) && near.report) {
             const nearRemoved = Math.max(0, work.length - near.kept.length);
             report.deduped += nearRemoved;
             report.embedding_near_dup = near.report;
             report.backend_used = _appendBackend(report.backend_used, near.report.backend_used);
+            if (pairEmbeddingResult && Array.isArray(near.kept_indices)) {
+              pairEmbeddingResult = _sliceEmbeddingResult(pairEmbeddingResult, near.kept_indices);
+              if (report.embedding_provider) {
+                report.embedding_provider.reused_by = Array.from(new Set([...(report.embedding_provider.reused_by || []), 'embedding_near_dup_fallback']));
+                report.embedding_provider.n_texts = pairEmbeddingResult.n_texts;
+              }
+            }
             work = near.kept;
           }
         }
@@ -795,10 +951,13 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
     if (o.cluster && o.semanticCluster) {
       let labeled = null;
       try {
+        const clusterEmb = await ensurePairEmbeddings('semantic_cluster_labels');
         labeled = await _clusterAndLabel({
           pairs: work,
           n_clusters: o.n_clusters || null,
           labeler: typeof o.cluster_labeler === 'function' ? o.cluster_labeler : null,
+          embeddings: clusterEmb && _validEmbeddingMatrix(clusterEmb.vectors, work.length) ? clusterEmb.vectors : null,
+          embeddingBackend: clusterEmb ? _embeddingBackendOf(clusterEmb) : 'hashbag',
         });
       } catch (e) {
         labeled = { ok: false, error: String((e && e.message) || e) };
@@ -812,8 +971,12 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
         report.clusters = Object.keys(report.coverage).length;
         report.topics = labeled.topics || [];
         report.cluster_method = labeled.method;
+        report.cluster_embedding_backend = labeled.embedding_backend || null;
         report.k_selected = labeled.k;
         report.k_method = labeled.k_method;
+        if (report.embedding_provider) {
+          report.embedding_provider.reused_by = Array.from(new Set([...(report.embedding_provider.reused_by || []), 'semantic_cluster_labels']));
+        }
       } else {
         // degrade to the 3-gram bucket path.
         const coverage = {};
@@ -840,6 +1003,20 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
     //     errorAction:'filter' drops the flagged set. Never throws.
     if (o.detectErrors && work.length > 0) {
       try {
+        const outputEmbeddingResult = useEmbeddingProvider
+          ? await _embedRowsForCurate(work, o, 'output')
+          : null;
+        if (outputEmbeddingResult) {
+          if (!report.embedding_provider) {
+            report.embedding_provider = Object.assign(
+              _embeddingReport(outputEmbeddingResult, embeddingProfile, 'output'),
+              { first_used_by: 'label_error_detection' },
+            );
+          } else {
+            report.embedding_provider.reused_by = Array.from(new Set([...(report.embedding_provider.reused_by || []), 'label_error_detection']));
+            report.embedding_provider.output = _embeddingReport(outputEmbeddingResult, embeddingProfile, 'output');
+          }
+        }
         const led = await _detectLabelErrors({
           pairs: work,
           clusterField: 'cluster_id',
@@ -850,12 +1027,16 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           reflect: typeof o.errorReflect === 'function' ? o.errorReflect : null,
           tenant: tenantId,
           namespace: ns,
+          outputEmbeddings: outputEmbeddingResult && _validEmbeddingMatrix(outputEmbeddingResult.vectors, work.length)
+            ? outputEmbeddingResult.vectors : null,
+          embeddingBackend: outputEmbeddingResult ? _embeddingBackendOf(outputEmbeddingResult) : 'hashbag',
         });
         if (led && led.ok) {
           report.label_errors = {
             flagged: led.flagged,
             by_reason: led.by_reason,
             backend: led.backend,
+            embedding_backend: led.embedding_backend,
             off_diagonal_rate: led.off_diagonal_rate,
             median_confidence: led.median_confidence,
             sample: led.sample,
@@ -979,12 +1160,21 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           }
         }
 
+        let selectionEmb = null;
+
         if (o.diversitySelect) {
+          selectionEmb = await ensurePairEmbeddings('diversity_select');
           // OPT-IN: embedding-native diversity algorithm (k-center / facility-
           // location / badge) from src/data-diversity-select.js.
           const method = ['k-center', 'facility-location', 'badge'].includes(o.select_method)
             ? o.select_method : 'k-center';
-          const sel = _selectDiverse({ items: work, target_size: targetSize, method });
+          const sel = _selectDiverse({
+            items: work,
+            target_size: targetSize,
+            method,
+            embeddings: selectionEmb && _validEmbeddingMatrix(selectionEmb.vectors, work.length) ? selectionEmb.vectors : null,
+            scores: valueScores,
+          });
           if (sel && sel.ok && Array.isArray(sel.kept)) {
             const beforeSel = work.length;
             work = sel.kept;
@@ -997,8 +1187,12 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
               coverage_radius: sel.coverage_radius,
               objective: sel.objective,
               basis: method,
+              embedding_backend: selectionEmb ? _embeddingBackendOf(selectionEmb) : 'hashbag',
               version: sel.version,
             };
+            if (report.embedding_provider) {
+              report.embedding_provider.reused_by = Array.from(new Set([...(report.embedding_provider.reused_by || []), 'diversity_select']));
+            }
           }
         } else if (
           (o.select_strategy === 'dsir' || o.select_strategy === 'dsir-real')
@@ -1040,6 +1234,7 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
             report.selection = { strategy: 'dsir', skipped: 'dsir_real:' + ((dres && dres.error) || 'unusable') };
           }
         } else {
+          selectionEmb = await ensurePairEmbeddings('dsir_lite_or_default_select');
           // 'dsir' here means the real module refused or was disabled (fall through);
           // 'dsir-lite' is the explicit centroid-cosine target proxy. Both feed the
           // target corpus into selectInformativeSubset; bare 'diversity' is self-coverage.
@@ -1050,8 +1245,23 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
           const selOpts = {
             diversity_tau: Number.isFinite(Number(o.diversity_tau)) ? Number(o.diversity_tau) : 0.9,
           };
+          if (selectionEmb && _validEmbeddingMatrix(selectionEmb.vectors, work.length)) {
+            selOpts.embeddings = selectionEmb.vectors;
+          }
           if (isTargeted && Array.isArray(o.target_items) && o.target_items.length) {
-            selOpts.target_items = o.target_items;
+            if (useEmbeddingProvider) {
+              const targetEmbeddingResult = await _embedRowsForCurate(o.target_items, o, 'pair');
+              if (targetEmbeddingResult && _validEmbeddingMatrix(targetEmbeddingResult.vectors, o.target_items.length)) {
+                selOpts.target_embeddings = targetEmbeddingResult.vectors;
+                if (report.embedding_provider) {
+                  report.embedding_provider.target = _embeddingReport(targetEmbeddingResult, embeddingProfile, 'target_pair');
+                }
+              } else {
+                selOpts.target_items = o.target_items;
+              }
+            } else {
+              selOpts.target_items = o.target_items;
+            }
           }
           // targeted valuation scores (influence/shapley) plug into the EXISTING
           // scores-capable selection seam; null leaves the pointwise default.
@@ -1073,8 +1283,12 @@ export async function curatePairs({ tenant, namespace, pairs, in_path, out_path,
               dropped: Math.max(0, beforeSel - work.length),
               coverage_radius: sel.coverage_radius,
               basis: sel.basis,
+              embedding_backend: selectionEmb ? _embeddingBackendOf(selectionEmb) : 'hashbag',
               version: sel.version,
             };
+            if (report.embedding_provider) {
+              report.embedding_provider.reused_by = Array.from(new Set([...(report.embedding_provider.reused_by || []), 'dsir_lite_or_default_select']));
+            }
           }
         }
       } catch (e) {

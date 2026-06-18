@@ -7,16 +7,16 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 ## How Close To Perfect
 
 - Local engineering perfection: **100/100**
-- Frontier/product perfection: **73.8/100**
+- Frontier/product perfection: **75/100**
 - Atomic components inventoried: **830**
 - Atomic deep dives complete: **100%**
 - Direct test referenced: **830/830 (100%)**
-- High-priority direct test referenced: **50/50 (100%)**
+- High-priority direct test referenced: **51/51 (100%)**
 - Local readiness proof coverage: **57/57 (100%)**
 - Claimable readiness closed locally: **49/57 (86%)**
 - Readiness proof surplus hill-climb: **104.3/110**
 - Language fit: **js_control_plane_with_python_rust_native_escape_hatches**
-- SOTA categories still carrying critical work: **9/16**
+- SOTA categories still carrying critical work: **8/16**
 - SOTA categories still carrying major work: **13/16**
 
 Interpretation: local code/spec discipline and readiness proof coverage are now complete, but claimable frontier/product perfection remains lower because partner adoption, package release, public benchmark data, certification, and SOTA category gaps are still external or frontier-open. Above-100 scoring is limited to local proof surplus and never upgrades an external gate into a shipped claim.
@@ -31,7 +31,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | kv-cache | runtime | sota_review_complete_major_frontier_work_open | at=8 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | speculative-decoding | runtime | sota_review_complete_critical_frontier_work_open | at=7 open=1/1/1 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | finetune-frameworks | training | sota_review_complete_major_frontier_work_open | at=10 open=0/1/4 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
-| synthetic-data-curation | data | sota_review_complete_critical_frontier_work_open | at=7 open=1/2/1 | 3 | npm run verify:stack-sota<br>npm run verify:redaction-benchmark |
+| synthetic-data-curation | data | sota_review_complete_major_frontier_work_open | at=8 open=0/3/1 | 3 | npm run verify:stack-sota<br>npm run verify:redaction-benchmark |
 | small-llm-students | model-registry | sota_review_complete_critical_frontier_work_open | at=6 open=1/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | ondevice-inference | cross-device | sota_review_complete_critical_frontier_work_open | at=5 open=1/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:platform |
 | llm-routing | gateway | sota_review_complete_major_frontier_work_open | at=7 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
@@ -56,7 +56,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | `cli/kolm-tui.mjs` | developer_distribution | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_tui_workbench_matrix_and_cli_distribution_contract. |
 | `src/bench-harness.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract. |
 | `src/binder.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_binder_contract_matrix_and_verifier_failure_taxonomy. |
-| `src/data-curate.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_data_curate_matrix_and_frontier_curation_contract. |
+| `src/data-curate.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/distill-pipeline.js` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract. |
 | `src/intent.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_intent_contract_matrix_and_routing_workflow_taxonomy. |
 | `src/otel.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_otel_matrix_and_privacy_safe_semconv_contract. |

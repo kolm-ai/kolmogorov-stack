@@ -8,7 +8,7 @@ const { pathToFileURL } = require('node:url');
 const ROOT = path.resolve(__dirname, '..');
 const OUT = path.join(ROOT, 'docs', 'internal', 'data-curate-matrix.json');
 const SCHEMA = 'kolm.data_curate_matrix.v1';
-const UPDATED_AT = '2026-06-18';
+const UPDATED_AT = '2026-06-19';
 
 const args = new Set(process.argv.slice(2));
 const CHECK = args.has('--check');
@@ -78,6 +78,7 @@ function requiredTestEvidence() {
     'tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js',
     'tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js',
     'tests/wave637-data-curate-neardup-fallback.test.js',
+    'tests/wave954-learned-embedding-provider.test.js',
     'tests/wave947-data-curate-matrix.test.js',
   ];
 }
@@ -98,9 +99,10 @@ function stageRows(src) {
     ['quality_learned_classifier', 'qualityClassifier', ['_scoreQualityLearned', '_applyQualityThreshold', 'report.quality']],
     ['quality_heuristic_fallback', '_runHeuristicQuality', ['_runHeuristicQuality', 'scoreCandidateLocal', 'quality_filtered']],
     ['minhash_predup', 'minhashPredup', ['minhashPredup(work', 'minhashThreshold', 'report.minhash']],
+    ['embedding_provider_precompute', 'embedBatchAsync', ['embedBatchAsync(texts', 'embedding_provider', 'embeddingBackend: null']],
     ['semdedup_semantic', 'semDedup', ['semDedup(work', 'semdedupKeep', 'report.semdedup']],
     ['python_semantic_dedup', '_dedupViaPython', ['spawnSync(py, args', 'timeout: 5 * 60 * 1000', "report.dedup = 'ok'"]],
-    ['embedding_near_dup_fallback', '_embeddingNearDupFallback', ['_embeddingNearDupFallback(work', 'embedding_near_dup', 'embedding-near-dup-js']],
+    ['embedding_near_dup_fallback', '_embeddingNearDupFallback', ['_embeddingNearDupFallback(', 'embedding_near_dup', 'embedding-near-dup-js']],
     ['semantic_cluster_labels', '_clusterAndLabel', ['_clusterAndLabel({', 'report.topics', 'cluster_method']],
     ['fallback_cluster_buckets', '_bucketKeyFor', ['_bucketKeyFor(p)', "cluster_method = 'fallback:3gram'", 'report.coverage']],
     ['label_error_detection', '_detectLabelErrors', ['_detectLabelErrors({', 'report.label_errors', '_routeErrorsToReview']],
@@ -136,7 +138,7 @@ function directTestEvidence() {
     const counts = {};
     for (const sym of symbols) counts[`${sym}_refs`] = (body.match(new RegExp(`\\b${sym}\\b`, 'g')) || []).length;
     const totalSymbolRefs = Object.values(counts).reduce((sum, n) => sum + n, 0);
-    const curationWorkflowRefs = (body.match(/\bcurate\b|\bcuration\b|\bminhash\b|\bsemdedup\b|\bdsir\b|\bqualityClassifier\b|\bsemanticCluster\b|\bdetectErrors\b|\bembedding_near_dup\b|\btarget_size\b/gi) || []).length;
+    const curationWorkflowRefs = (body.match(/\bcurate\b|\bcuration\b|\bminhash\b|\bsemdedup\b|\bdsir\b|\bqualityClassifier\b|\bsemanticCluster\b|\bdetectErrors\b|\bembedding_near_dup\b|\bembeddingBackend\b|\btarget_size\b/gi) || []).length;
     if (!sourceLock && !totalSymbolRefs && !curationWorkflowRefs) continue;
     rows.push({
       path: rel,
@@ -173,6 +175,7 @@ function safetyGuards(src, mod, exports, options, envRefs, stages, tests, requir
     python_tempdir_cleanup_is_best_effort: src.includes('fs.mkdtempSync') && src.includes('fs.rmSync(tmpDir, { recursive: true, force: true })'),
     quality_classifier_default_on_and_degrades: src.includes('qualityClassifier: true') && src.includes('degrade to the heuristic path') && src.includes('_runHeuristicQuality(work, o, report)'),
     minhash_and_semdedup_default_on: src.includes('minhash: true') && src.includes('semdedup: true') && src.includes('report.backend_used = _appendBackend(report.backend_used, semBackend)'),
+    embedding_provider_is_optional_and_reported: src.includes('embeddingBackend: null') && src.includes('embedBatchAsync(texts') && src.includes('report.embedding_provider'),
     embedding_fallback_records_python_less_boundary: src.includes('embeddingNearDup: true') && src.includes('report.embedding_near_dup = near.report') && src.includes('embedding-near-dup-js'),
     pii_redaction_preserves_pair_schema: src.includes('function _setPairOutput') && src.includes('redactPii(out)') && src.includes('if (typeof p.teacher_output ==='),
     cot_filter_drops_not_redacts_reasoning: src.includes('flagCot(_pairOutput(p))') && src.includes('report.cot_flagged += 1') && src.includes('else survivors.push(p)'),
@@ -236,9 +239,12 @@ async function buildMatrix() {
       'src/minhash-dedup.js',
       'src/data-semdedup.js',
       'src/data-dsir.js',
+      'src/embedding.js',
       'src/data-select.js',
       'src/data-quality-classifier.js',
+      'src/data-cluster-label.js',
       'src/data-label-errors.js',
+      'workers/data/scripts/_embed.py',
       ...requiredTests,
     ],
     summary,

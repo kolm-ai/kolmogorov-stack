@@ -266,6 +266,8 @@ function _kmeans(vectors, k, opts) {
  * @param {'pair'|'input'|'output'} [opts.key='pair']  which text to embed.
  * @param {(text:string)=>number[]} [opts.embedder]  injected embedder (real model);
  *        defaults to the local deterministic hash-bag embedder.
+ * @param {number[][]} [opts.embeddings] precomputed vectors for pairs.
+ * @param {string} [opts.embeddingBackend] provenance label for precomputed vectors.
  * @param {number} [opts.seed]           k-means seed (shared with minhash-dedup).
  * @param {number} [opts.maxIter=25]     Lloyd iterations.
  * @returns {{kept:object[], removed_groups:Array, dup_rate:number, epsilon:number, report:object}}
@@ -285,7 +287,9 @@ export function semDedup(pairs, opts = {}) {
   const key = (opts.key === 'input' || opts.key === 'output') ? opts.key : 'pair';
   const seed = (Number(opts.seed) >>> 0) || DEFAULT_SEED;
   const injected = typeof opts.embedder === 'function';
+  const precomputed = Array.isArray(opts.embeddings) && opts.embeddings.length === n;
   const embedFn = injected ? opts.embedder : _embedText;
+  const embeddingBackend = String(opts.embeddingBackend || '').trim();
 
   const baseReport = {
     n_in: n,
@@ -305,18 +309,18 @@ export function semDedup(pairs, opts = {}) {
   // Degenerate / disabled cases => recorded no-op (never throws).
   if (n === 0) {
     baseReport.backend_used = 'none:empty';
-    return { kept: [], removed_groups: [], dup_rate: 0, epsilon, report: baseReport };
+    return { kept: [], kept_indices: [], removed_groups: [], dup_rate: 0, epsilon, report: baseReport };
   }
   if (n === 1) {
     baseReport.backend_used = 'none:singleton';
     baseReport.n_clusters = 1;
-    return { kept: rows.slice(), removed_groups: [], dup_rate: 0, epsilon, report: baseReport };
+    return { kept: rows.slice(), kept_indices: [0], removed_groups: [], dup_rate: 0, epsilon, report: baseReport };
   }
   if (epsilon <= 0) {
     // Threshold == 1.0: only EXACT-cosine matches would prune; the paper's
     // contract treats epsilon=0 as "off". Record an explicit no-op.
     baseReport.backend_used = 'none:epsilon_zero';
-    return { kept: rows.slice(), removed_groups: [], dup_rate: 0, epsilon, report: baseReport };
+    return { kept: rows.slice(), kept_indices: Array.from({ length: n }, (_, i) => i), removed_groups: [], dup_rate: 0, epsilon, report: baseReport };
   }
 
   // 1. EMBED (degrades to a no-op if embedding ever fails).
@@ -324,11 +328,16 @@ export function semDedup(pairs, opts = {}) {
   try {
     vectors = new Array(n);
     for (let i = 0; i < n; i++) {
-      const text = _pairText(rows[i], key);
-      let v = embedFn(text);
+      let v;
+      if (precomputed) {
+        v = opts.embeddings[i];
+      } else {
+        const text = _pairText(rows[i], key);
+        v = embedFn(text);
+      }
       if (!Array.isArray(v) || v.length === 0) {
-        // an injected embedder can hand back junk; treat as a single zero vector
-        // sized to the rest so k-means stays well-formed.
+        // an injected/provider embedder can hand back junk; treat as a single
+        // zero vector sized to the rest so k-means stays well-formed.
         v = null;
       }
       vectors[i] = v;
@@ -348,7 +357,7 @@ export function semDedup(pairs, opts = {}) {
     }
   } catch (e) {
     baseReport.backend_used = 'none:embed_failed:' + String((e && e.message) || e);
-    return { kept: rows.slice(), removed_groups: [], dup_rate: 0, epsilon, report: baseReport };
+    return { kept: rows.slice(), kept_indices: Array.from({ length: n }, (_, i) => i), removed_groups: [], dup_rate: 0, epsilon, report: baseReport };
   }
 
   // 2. CLUSTER (deterministic k-means++). Degrades to a single cluster on failure.
@@ -468,7 +477,13 @@ export function semDedup(pairs, opts = {}) {
 
   // Assemble kept rows in ORIGINAL input order (determinism + stable downstream).
   const kept = [];
-  for (let i = 0; i < n; i++) if (!removedSet.has(i)) kept.push(rows[i]);
+  const kept_indices = [];
+  for (let i = 0; i < n; i++) {
+    if (!removedSet.has(i)) {
+      kept.push(rows[i]);
+      kept_indices.push(i);
+    }
+  }
 
   const nRemoved = removedSet.size;
   const dupRate = n > 0 ? Number((nRemoved / n).toFixed(6)) : 0;
@@ -483,11 +498,14 @@ export function semDedup(pairs, opts = {}) {
     n_removed: nRemoved,
     n_clusters: k,
     dup_rate: dupRate,
-    backend_used: injected ? 'semdedup-js:injected' : 'semdedup-js',
+    backend_used: precomputed
+      ? ('semdedup-js:' + (embeddingBackend || 'provider'))
+      : (injected ? 'semdedup-js:injected' : 'semdedup-js'),
+    embedding_backend: precomputed ? (embeddingBackend || 'provider') : (injected ? 'injected' : 'hashbag'),
     clusters: clusterReports,
   });
 
-  return { kept, removed_groups, dup_rate: dupRate, epsilon, report };
+  return { kept, kept_indices, removed_groups, dup_rate: dupRate, epsilon, report };
 }
 
 export default {

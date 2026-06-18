@@ -82,7 +82,7 @@ test('W947 generated matrix is current and all hard data curate gates are green'
   const m = matrix();
 
   assert.equal(m.schema, 'kolm.data_curate_matrix.v1');
-  assert.equal(m.updated_at, '2026-06-18');
+  assert.equal(m.updated_at, '2026-06-19');
   assert.equal(m.gates.ok, true, JSON.stringify(m.gates.failures, null, 2));
   assert.deepEqual(m.gates.failures, []);
   assert.deepEqual(m.gates.warnings, []);
@@ -90,8 +90,8 @@ test('W947 generated matrix is current and all hard data curate gates are green'
   assert.ok(m.summary.function_count >= 23);
   assert.ok(m.summary.option_count >= 51);
   assert.equal(m.summary.env_ref_count, 3);
-  assert.equal(m.summary.stage_count, 20);
-  assert.equal(m.summary.present_stage_count, 20);
+  assert.equal(m.summary.stage_count, 21);
+  assert.equal(m.summary.present_stage_count, 21);
   assert.equal(m.summary.missing_required_exports, 0);
   assert.equal(m.summary.failed_safety_guards, 0);
   assert.equal(m.summary.missing_test_evidence, 0);
@@ -105,11 +105,14 @@ test('W947 matrix captures curation stages, options, env knobs, and evidence', (
   assert.ok(m.sources.includes('src/data-curate.js'));
   assert.ok(m.sources.includes('src/minhash-dedup.js'));
   assert.ok(m.sources.includes('src/data-dsir.js'));
+  assert.ok(m.sources.includes('src/embedding.js'));
+  assert.ok(m.sources.includes('workers/data/scripts/_embed.py'));
 
   const stages = new Set(m.curation_stages.map((row) => row.stage));
   for (const stage of [
     'quality_learned_classifier',
     'minhash_predup',
+    'embedding_provider_precompute',
     'semdedup_semantic',
     'python_semantic_dedup',
     'embedding_near_dup_fallback',
@@ -129,7 +132,7 @@ test('W947 matrix captures curation stages, options, env knobs, and evidence', (
   }
 
   const options = new Set(m.options);
-  for (const option of ['qualityClassifier', 'minhash', 'semdedup', 'embeddingNearDup', 'semanticCluster', 'detectErrors', 'valueStrategy', 'shapleyVal', 'diversitySelect', 'select_strategy', 'target_items', 'target_size']) {
+  for (const option of ['qualityClassifier', 'minhash', 'semdedup', 'embeddingNearDup', 'embeddingBackend', 'semanticCluster', 'detectErrors', 'valueStrategy', 'shapleyVal', 'diversitySelect', 'select_strategy', 'target_items', 'target_size']) {
     assert.ok(options.has(option), `missing option ${option}`);
   }
   assert.deepEqual(m.env_refs, ['KOLM_DATA_DIR', 'KOLM_DSIR_DISABLE', 'KOLM_PYTHON']);

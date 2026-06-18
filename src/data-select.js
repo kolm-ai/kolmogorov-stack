@@ -93,9 +93,21 @@ function _resolveTarget(target, n) {
   return Math.min(n, Math.max(1, Math.round(t * n)));
 }
 
-// Embed every pair into the deterministic 256-d hash-bag space. Reused for all
-// JS diversity computations (no second embed, no network).
-function _embedPairs(pairs) {
+function _validEmbeddingMatrix(embeddings, n) {
+  if (!Array.isArray(embeddings) || embeddings.length !== n) return false;
+  let dim = 0;
+  for (const v of embeddings) {
+    if (!Array.isArray(v) || v.length === 0) return false;
+    if (dim === 0) dim = v.length;
+    if (v.length !== dim) return false;
+  }
+  return true;
+}
+
+// Embed every pair into the deterministic 256-d hash-bag space unless the
+// caller has already supplied a validated provider matrix.
+function _embedPairs(pairs, embeddings = null) {
+  if (_validEmbeddingMatrix(embeddings, Array.isArray(pairs) ? pairs.length : 0)) return embeddings;
   return pairs.map((p) => _embedText(_pairText(p)));
 }
 
@@ -125,7 +137,7 @@ function _localScore(p) {
  * @param {number} [tau=0.9]  similarity ceiling - higher tau = looser dedup
  * @returns {{selected_indices:number[], kept:object[], coverage_radius:number}}
  */
-export function reprFilterSelect(pairs, scores, B, tau = 0.9) {
+export function reprFilterSelect(pairs, scores, B, tau = 0.9, embeddings = null) {
   const rows = Array.isArray(pairs) ? pairs : [];
   const n = rows.length;
   const budget = Math.min(n, Math.max(0, Math.trunc(Number(B) || 0)));
@@ -134,7 +146,7 @@ export function reprFilterSelect(pairs, scores, B, tau = 0.9) {
     return { selected_indices: [], kept: [], coverage_radius: 0 };
   }
 
-  const embs = _embedPairs(rows);
+  const embs = _embedPairs(rows, embeddings);
   const sc = (Array.isArray(scores) && scores.length === n)
     ? scores.map((x) => (Number.isFinite(Number(x)) ? Number(x) : 0))
     : rows.map((p) => _localScore(p));
@@ -343,7 +355,7 @@ export async function selectDiverseSubset({
   try {
     // Pure-JS default path (and the universal fallback).
     if (requested === 'repr-filter') {
-      const r = reprFilterSelect(rows, scores, B, diversity_tau);
+      const r = reprFilterSelect(rows, scores, B, diversity_tau, embeddings);
       return _finish(base, rows, r.selected_indices, r.coverage_radius, 'js-repr-filter');
     }
 
@@ -353,12 +365,12 @@ export async function selectDiverseSubset({
       const idx = viaPy.selected_indices.filter((i) => Number.isInteger(i) && i >= 0 && i < n);
       const cov = viaPy.coverage_radius != null
         ? viaPy.coverage_radius
-        : _coverageRadius(_embedPairs(rows), idx);
+        : _coverageRadius(_embedPairs(rows, embeddings), idx);
       return _finish(base, rows, idx, cov, viaPy.backend_used);
     }
 
     // degrade: repr-filter in JS, truthful backend label.
-    const r = reprFilterSelect(rows, scores, B, diversity_tau);
+    const r = reprFilterSelect(rows, scores, B, diversity_tau, embeddings);
     const out = _finish(base, rows, r.selected_indices, r.coverage_radius, 'js-repr-filter-fallback');
     out.report.degrade_reason = viaPy.reason;
     return out;
@@ -460,7 +472,7 @@ export function selectInformativeSubset(items, target_n, opts = {}) {
 
   if (n === 0 || B === 0) return out([], 0, 'empty');
 
-  const embs = _embedPairs(rows);
+  const embs = _embedPairs(rows, opts.embeddings);
 
   // Build the target centroid for importance weighting.
   let targetCentroid = null;
@@ -555,7 +567,9 @@ export function selectDiverseBatch(items, B, opts = {}) {
     }
     return '';
   };
-  const embs = rows.map((it) => embedFn(textOf(it)));
+  const embs = _validEmbeddingMatrix(opts.embeddings, n)
+    ? opts.embeddings
+    : rows.map((it) => embedFn(textOf(it)));
 
   // k-center greedy gives the most-spread batch; repr-filter (default) is the
   // score-ordered diversity-gated walk. For a batch recommender, k-center's
@@ -595,6 +609,7 @@ export const __internals = {
   _coverageRadius,
   _kCenterGreedyJS,
   _embedPairs,
+  _validEmbeddingMatrix,
   _pairText,
 };
 
