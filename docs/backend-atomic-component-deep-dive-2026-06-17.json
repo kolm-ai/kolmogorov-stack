@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 745,
-    "components_without_direct_test_reference": 84,
+    "test_referenced_components": 746,
+    "components_without_direct_test_reference": 83,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -45594,25 +45594,34 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "3044de011569bdf3b14c16c1b2759d4c22be29a59a6ebff590b310edaa46ff7f",
+      "sha256": "616ff36c039757944556612c64453cab84d79e88cece60a13e35972829043bf5",
       "metrics": {
-        "bytes": 9958,
-        "lines": 236,
+        "bytes": 16291,
+        "lines": 408,
         "imports": 3,
-        "exports": 3,
+        "exports": 5,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 11,
+        "crypto_refs": 10,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave687-licensing-allowlist-contract.test.js",
+        "tests/wave715-savings-routes-contract.test.js",
+        "tests/wave730-scim-provisioning-contract.test.js",
+        "tests/wave731-trend-extract-contract.test.js",
+        "tests/wave732-verticals-contract.test.js",
+        "tests/wave733-video-bakeoff-contract.test.js",
+        "tests/wave734-video-capture-contract.test.js",
+        "tests/wave735-vision-capture-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
