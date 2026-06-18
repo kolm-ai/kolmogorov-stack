@@ -109,7 +109,7 @@ export const LAST_NAMES = Object.freeze(new Set([
   'Morales','Moran','Moreno','Morgan','Morris','Morrison','Morton','Moss','Moyer','Mullen',
   'Mullins','Munoz','Murillo','Murphy','Murray','Myers','Nash','Navarro','Neal','Nelson',
   'Newman','Newton','Ng','Nguyen','Nichols','Nicholson','Nielsen','Nixon','Nolan','Noble',
-  'Norman','Norris','Norton','Nunez','O’Brien','O’Connor','O’Donnell','Obrien','Ochoa','Odom',
+  'Norman','Norris','Norton','Nunez','O\'Brien','O\'Connor','O\'Donnell','Obrien','Ochoa','Odom',
   'Oliver','Olsen','Olson','Ortega','Ortiz','Osborne','Owen','Owens','Pace','Pacheco',
   'Padilla','Page','Palmer','Park','Parker','Parks','Parsons','Patel','Patterson','Patton',
   'Paul','Payne','Pearson','Peck','Pena','Pennington','Perez','Perkins','Perry','Peters',

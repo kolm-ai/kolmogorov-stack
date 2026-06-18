@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 830,
-    "test_referenced_components": 789,
-    "components_without_direct_test_reference": 41,
+    "test_referenced_components": 796,
+    "components_without_direct_test_reference": 34,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 419,
+      "cryptographic_or_proof_boundary": 420,
       "distribution_or_worker_surface": 170,
       "environment_configuration_boundary": 315,
       "execution_or_subprocess_boundary": 235,
@@ -10758,7 +10758,8 @@
         "tests/wave595-product-frontier-map.test.js",
         "tests/wave600-product-research-atlas.test.js",
         "tests/wave601-surface-readiness-smoke-contract.test.js",
-        "tests/wave665-router-boundary-contract.test.js"
+        "tests/wave665-router-boundary-contract.test.js",
+        "tests/wave933-capture-data-contracts.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -12058,10 +12059,10 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "154d1208d32545ddc33390b09ab85404bb22bbd086de684f0f07c7cd0f183ce0",
+      "sha256": "30e3c9e64e0af7e2c5ee75f7c13ed669b227858ffccd1033485a7ae2d790bd31",
       "metrics": {
-        "bytes": 10410,
-        "lines": 248,
+        "bytes": 11256,
+        "lines": 275,
         "imports": 0,
         "exports": 6,
         "routes": 0,
@@ -12072,9 +12073,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave933-capture-data-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -18014,10 +18017,10 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "a5abc06caff57eaf251a03b91eee80370119b1bb9e2979544e83d5216c07a3a3",
+      "sha256": "95054fb49e0543edbcfa3ae235681a8d46cf6d8309cc25cd3235a42ac3fe432f",
       "metrics": {
-        "bytes": 5386,
-        "lines": 131,
+        "bytes": 6671,
+        "lines": 172,
         "imports": 0,
         "exports": 5,
         "routes": 0,
@@ -18028,9 +18031,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave933-capture-data-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -18125,23 +18130,27 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "6deb7c6aac196911eb6362aa574d099e7ece91f757b149124d1a8d1f67fb0f79",
+      "sha256": "9fcbe840ab6e205523bbe21c78c061d13eb2cd2de533039aafb8c610fcec37ed",
       "metrics": {
-        "bytes": 19667,
-        "lines": 493,
-        "imports": 1,
+        "bytes": 20243,
+        "lines": 508,
+        "imports": 2,
         "exports": 9,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
-      "risk_signals": [],
-      "priority_score": 1,
+      "test_refs": [
+        "tests/wave933-capture-data-contracts.test.js"
+      ],
+      "risk_signals": [
+        "cryptographic_or_proof_boundary"
+      ],
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -18529,9 +18538,9 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "e3f54d89fffe532e6cec3beb84502b4ed4348ce4cf78874efc34590590760d43",
+      "sha256": "c1b70eaf01dde232df33f5dfb7804f53828a82722b751645935864df9406674f",
       "metrics": {
-        "bytes": 12084,
+        "bytes": 12081,
         "lines": 148,
         "imports": 0,
         "exports": 4,
@@ -18543,9 +18552,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave933-capture-data-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -36141,10 +36152,10 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "226e78695c4996a7e952ff2c7eca37042aa1dfca669ef41944e6b6c6b4cb4dc0",
+      "sha256": "2e9c23fbfe7d8ede7116ff1607844575e48b7f3d9d62e4eafdc0118421b58ccc",
       "metrics": {
-        "bytes": 15228,
-        "lines": 390,
+        "bytes": 16479,
+        "lines": 431,
         "imports": 0,
         "exports": 6,
         "routes": 0,
@@ -36155,11 +36166,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave933-capture-data-contracts.test.js"
+      ],
       "risk_signals": [
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -36270,7 +36283,8 @@
       },
       "test_refs": [
         "tests/rag-memory-analyzer.test.js",
-        "tests/wave192-rag-cli.test.js"
+        "tests/wave192-rag-cli.test.js",
+        "tests/wave933-capture-data-contracts.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -39166,10 +39180,10 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "63012965ec0c5e3e9f1f967d58dbdce090f3e880957f1b91bd804924d06c922c",
+      "sha256": "05b42f3374c6b7d36b103887eb6a8ef859c2a7fe496935c4358e4667ba806c78",
       "metrics": {
-        "bytes": 12233,
-        "lines": 281,
+        "bytes": 12608,
+        "lines": 285,
         "imports": 0,
         "exports": 8,
         "routes": 0,
@@ -39180,9 +39194,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave933-capture-data-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -43727,10 +43743,10 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "e0a95e580e030b36d0998295cf5ff66e6acbd18d4712500120322060db8a9180",
+      "sha256": "8ed78c340aa52556b0f72c985903edadb0a9c635b16c5a0260a270a9a2b47fa9",
       "metrics": {
-        "bytes": 13037,
-        "lines": 298,
+        "bytes": 13573,
+        "lines": 320,
         "imports": 0,
         "exports": 3,
         "routes": 0,
@@ -43741,9 +43757,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave933-capture-data-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

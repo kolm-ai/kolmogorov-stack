@@ -28,6 +28,8 @@ export const PROVENANCE_VERSION = 'prov-v1';
 // Fields that MUST be present (non-empty) for a pair's provenance to be
 // considered complete. Kept here so validate + record agree on the contract.
 const REQUIRED_PROVENANCE_FIELDS = ['source_type', 'ingested_at', 'source_ref'];
+const MAX_SOURCE_TYPE_CHARS = 64;
+const MAX_SOURCE_REF_CHARS = 2048;
 
 function _isNonEmpty(v) {
   if (v == null) return false;
@@ -37,6 +39,45 @@ function _isNonEmpty(v) {
 
 function _nowIso() {
   return new Date().toISOString();
+}
+
+function _cleanScalar(value, fallback, maxChars) {
+  const raw = value == null ? fallback : String(value);
+  const cleaned = raw
+    .replace(/[\x00-\x1f\x7f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxChars);
+  return cleaned || fallback;
+}
+
+function _cleanObjectKey(value) {
+  const cleaned = _cleanScalar(value, 'unknown', MAX_SOURCE_TYPE_CHARS);
+  if (cleaned === '__proto__' || cleaned === 'constructor' || cleaned === 'prototype') return 'unknown';
+  return cleaned;
+}
+
+function _cleanSourceRef(value) {
+  const cleaned = _cleanScalar(value, 'unknown', MAX_SOURCE_REF_CHARS);
+  try {
+    const url = new URL(cleaned);
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      url.username = '';
+      url.password = '';
+      url.search = '';
+      url.hash = '';
+      return url.toString().slice(0, MAX_SOURCE_REF_CHARS);
+    }
+  } catch {
+    // Not a URL; keep the bounded scalar form.
+  }
+  return cleaned;
+}
+
+function _cleanTimestamp(value) {
+  const raw = value == null ? '' : String(value);
+  const t = new Date(raw).getTime();
+  return Number.isFinite(t) ? new Date(t).toISOString() : _nowIso();
 }
 
 // Build (or complete) the provenance block for a single pair.
@@ -55,12 +96,12 @@ export function recordProvenance(pair, sourceMeta = {}) {
   const meta = (sourceMeta && typeof sourceMeta === 'object') ? sourceMeta : {};
   const existing = (p.provenance && typeof p.provenance === 'object') ? p.provenance : {};
 
-  const source_type = meta.source_type || p.source_type || existing.source_type || 'unknown';
+  const source_type = _cleanObjectKey(meta.source_type || p.source_type || existing.source_type || 'unknown');
   const source_ref = meta.source_ref != null ? meta.source_ref
     : (p.source_ref != null ? p.source_ref
       : (existing.source_ref != null ? existing.source_ref
         : (p.source != null ? p.source : 'unknown')));
-  const ingested_at = meta.ingested_at || p.ingested_at || existing.ingested_at || _nowIso();
+  const ingested_at = _cleanTimestamp(meta.ingested_at || p.ingested_at || existing.ingested_at || _nowIso());
 
   // `extra` merges any caller-supplied detail with whatever was already there,
   // sourceMeta taking precedence. Always an object so downstream readers never
@@ -72,7 +113,7 @@ export function recordProvenance(pair, sourceMeta = {}) {
 
   const provenance = {
     source_type,
-    source_ref: String(source_ref),
+    source_ref: _cleanSourceRef(source_ref),
     ingested_at,
     extra,
   };
@@ -80,7 +121,7 @@ export function recordProvenance(pair, sourceMeta = {}) {
   return {
     ...p,
     source_type,
-    source_ref: String(source_ref),
+    source_ref: _cleanSourceRef(source_ref),
     ingested_at,
     provenance,
   };
@@ -116,7 +157,7 @@ export function summarizeProvenance(pairs) {
     if (!p || typeof p !== 'object') continue;
     total++;
     const prov = (p.provenance && typeof p.provenance === 'object') ? p.provenance : {};
-    const st = p.source_type || prov.source_type || 'unknown';
+    const st = _cleanObjectKey(p.source_type || prov.source_type || 'unknown');
     by_source[st] = (by_source[st] || 0) + 1;
   }
   return { by_source, total };

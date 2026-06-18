@@ -46,6 +46,7 @@
 //   - getNamespaceDefaultRegion({tenant_id, namespace})
 //   - enforceRegionPolicy({tenant_id, capture, target_region})
 
+import crypto from 'node:crypto';
 import * as defaultEventStore from './event-store.js';
 
 export const DATA_RESIDENCY_VERSION = 'w769-v1';
@@ -138,11 +139,25 @@ export const DEFAULT_REGION = Object.freeze('GLOBAL');
 const RESIDENCY_PROVIDER = 'kolm_data_residency';
 const RESIDENCY_MODEL_TAG = 'capture-tag';
 const RESIDENCY_MODEL_NS_DEFAULT = 'namespace-default-region';
+const MAX_EVENT_ID_PART_CHARS = 96;
 
 // Internal - pick the event-store driver. opts.eventStore lets tests inject
 // a fresh module instance (useful when KOLM_DATA_DIR was just rerolled).
 function _eventStore(opts) {
   return (opts && opts.eventStore) || defaultEventStore;
+}
+
+function _safeEventIdPart(value) {
+  const raw = String(value || '');
+  const digest = crypto.createHash('sha256').update(raw).digest('hex').slice(0, 24);
+  const cleaned = raw
+    .replace(/[^A-Za-z0-9_.-]/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, MAX_EVENT_ID_PART_CHARS);
+  if (cleaned !== raw || raw.includes('..')) return 'h_' + digest;
+  if (cleaned) return cleaned;
+  return 'h_' + digest;
 }
 
 // ---------------------------------------------------------------------------
@@ -234,7 +249,7 @@ export async function tagCapture({
   // composite of (tenant, capture) so subsequent writes overwrite the
   // previous tag via the W411 last-write-wins dedupe.
   const ev = await es.appendEvent({
-    event_id: 'w769_tag_' + tenant_id + '_' + capture_id,
+    event_id: 'w769_tag_' + _safeEventIdPart(tenant_id) + '_' + _safeEventIdPart(capture_id),
     tenant_id,
     namespace: 'kolm.residency',
     provider: RESIDENCY_PROVIDER,
@@ -356,7 +371,7 @@ export async function configureNamespaceRegion({
   if (!v.ok) return { ...v, version: DATA_RESIDENCY_VERSION };
   const es = _eventStore({ eventStore });
   const ev = await es.appendEvent({
-    event_id: 'w769_nsdef_' + tenant_id + '_' + namespace,
+    event_id: 'w769_nsdef_' + _safeEventIdPart(tenant_id) + '_' + _safeEventIdPart(namespace),
     tenant_id,
     namespace: 'kolm.residency',
     provider: RESIDENCY_PROVIDER,

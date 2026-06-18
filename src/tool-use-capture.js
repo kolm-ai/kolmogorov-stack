@@ -48,6 +48,18 @@ const MAX_TOOL_ARGS_BYTES = 64 * 1024;
 // agent traces top out around 20 sequential calls; anything above 200 is
 // almost certainly a runaway loop the upstream model went into.
 const MAX_TOOL_CALLS_PER_RESPONSE = 200;
+const MAX_TOOL_NAME_CHARS = 128;
+const MAX_PATTERN_TOP_N = 100;
+
+function _cleanToolName(value) {
+  const cleaned = String(value || '')
+    .replace(/[\x00-\x1f\x7f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MAX_TOOL_NAME_CHARS);
+  if (cleaned === '__proto__' || cleaned === 'constructor' || cleaned === 'prototype') return '';
+  return cleaned;
+}
 
 // =============================================================================
 // parseToolCalls
@@ -102,9 +114,10 @@ export function parseToolCalls(response_body) {
     for (const item of body.content) {
       if (!item || typeof item !== 'object') continue;
       if (item.type !== 'tool_use') continue;
-      if (typeof item.name !== 'string' || !item.name) continue;
+      const name = _cleanToolName(item.name);
+      if (!name) continue;
       const args = _normaliseArgs(item.input);
-      const rec = { name: item.name, arguments: args.value };
+      const rec = { name, arguments: args.value };
       if (args.truncated) rec.truncated = true;
       if (args.raw_arguments != null) rec.raw_arguments = args.raw_arguments;
       if (typeof item.id === 'string' && item.id) rec.id = item.id;
@@ -125,9 +138,10 @@ export function parseToolCalls(response_body) {
           if (!tc || typeof tc !== 'object') continue;
           const fn = tc.function || tc;
           if (!fn || typeof fn !== 'object') continue;
-          if (typeof fn.name !== 'string' || !fn.name) continue;
+          const name = _cleanToolName(fn.name);
+          if (!name) continue;
           const args = _normaliseArgs(fn.arguments);
-          const rec = { name: fn.name, arguments: args.value };
+          const rec = { name, arguments: args.value };
           if (args.truncated) rec.truncated = true;
           if (args.raw_arguments != null) rec.raw_arguments = args.raw_arguments;
           if (typeof tc.id === 'string' && tc.id) rec.id = tc.id;
@@ -139,8 +153,10 @@ export function parseToolCalls(response_body) {
       // Legacy shape: message.function_call (single call).
       if (msg.function_call && typeof msg.function_call === 'object'
           && typeof msg.function_call.name === 'string' && msg.function_call.name) {
+        const name = _cleanToolName(msg.function_call.name);
+        if (!name) return EMPTY;
         const args = _normaliseArgs(msg.function_call.arguments);
-        const rec = { name: msg.function_call.name, arguments: args.value };
+        const rec = { name, arguments: args.value };
         if (args.truncated) rec.truncated = true;
         if (args.raw_arguments != null) rec.raw_arguments = args.raw_arguments;
         return { tool_calls: [rec], parse_source: 'openai' };
@@ -152,8 +168,10 @@ export function parseToolCalls(response_body) {
   // 3a) Top-level function_call (legacy custom adapters / Ollama).
   if (body.function_call && typeof body.function_call === 'object'
       && typeof body.function_call.name === 'string' && body.function_call.name) {
+    const name = _cleanToolName(body.function_call.name);
+    if (!name) return EMPTY;
     const args = _normaliseArgs(body.function_call.arguments);
-    const rec = { name: body.function_call.name, arguments: args.value };
+    const rec = { name, arguments: args.value };
     if (args.truncated) rec.truncated = true;
     if (args.raw_arguments != null) rec.raw_arguments = args.raw_arguments;
     return { tool_calls: [rec], parse_source: 'generic' };
@@ -165,9 +183,10 @@ export function parseToolCalls(response_body) {
       if (!tc || typeof tc !== 'object') continue;
       const fn = tc.function || tc;
       if (!fn || typeof fn !== 'object') continue;
-      if (typeof fn.name !== 'string' || !fn.name) continue;
+      const name = _cleanToolName(fn.name);
+      if (!name) continue;
       const args = _normaliseArgs(fn.arguments);
-      const rec = { name: fn.name, arguments: args.value };
+      const rec = { name, arguments: args.value };
       if (args.truncated) rec.truncated = true;
       if (args.raw_arguments != null) rec.raw_arguments = args.raw_arguments;
       if (typeof tc.id === 'string' && tc.id) rec.id = tc.id;
@@ -250,7 +269,9 @@ function _normaliseArgs(raw) {
  */
 export function extractToolPatterns(captures, options) {
   const opts = options || {};
-  const top_n = (typeof opts.top_n === 'number' && opts.top_n > 0) ? Math.floor(opts.top_n) : 20;
+  const top_n = (typeof opts.top_n === 'number' && opts.top_n > 0)
+    ? Math.min(MAX_PATTERN_TOP_N, Math.floor(opts.top_n))
+    : 20;
   const namespace = (typeof opts.namespace === 'string' && opts.namespace) ? opts.namespace : null;
 
   const arr = Array.isArray(captures) ? captures : [];
@@ -273,10 +294,11 @@ export function extractToolPatterns(captures, options) {
     const seen = new Set();
     for (const tc of tcs) {
       if (!tc || typeof tc !== 'object') continue;
-      if (typeof tc.name !== 'string' || !tc.name) continue;
-      if (seen.has(tc.name)) continue;
-      seen.add(tc.name);
-      counts.set(tc.name, (counts.get(tc.name) || 0) + 1);
+      const name = _cleanToolName(tc.name);
+      if (!name) continue;
+      if (seen.has(name)) continue;
+      seen.add(name);
+      counts.set(name, (counts.get(name) || 0) + 1);
     }
   }
 

@@ -49,6 +49,40 @@ const MAX_HEADER_BYTES = 256 * 1024;
 // Largest array length we will accept post-decode. Retrieval top-k rarely
 // exceeds 50; anything above 500 is almost certainly a misconfiguration.
 const MAX_RETRIEVED_ITEMS = 500;
+const MAX_SOURCE_CHARS = 2048;
+const MAX_RETRIEVED_TEXT_CHARS = 64 * 1024;
+
+function _cleanSource(value) {
+  const raw = String(value || '')
+    .replace(/[\x00-\x1f\x7f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MAX_SOURCE_CHARS);
+  if (!raw) return 'unknown';
+  try {
+    const url = new URL(raw);
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      url.username = '';
+      url.password = '';
+      url.search = '';
+      url.hash = '';
+      return url.toString().slice(0, MAX_SOURCE_CHARS);
+    }
+  } catch {
+    // Not a URL; keep scalar form.
+  }
+  return raw;
+}
+
+function _tagSafeSource(value) {
+  return _cleanSource(value).replace(/[<>"'=\s]/g, '_').slice(0, MAX_SOURCE_CHARS) || 'unknown';
+}
+
+function _cleanRetrievedText(value) {
+  return String(value || '')
+    .replace(/<\/RETRIEVED>/gi, '<\\/RETRIEVED>')
+    .slice(0, MAX_RETRIEVED_TEXT_CHARS);
+}
 
 // =============================================================================
 // parseRetrievedContextHeader
@@ -98,6 +132,14 @@ export function parseRetrievedContextHeader(req) {
       ok: false,
       error: 'invalid_header',
       hint: `kolm-retrieved-context exceeds ${MAX_HEADER_BYTES} bytes; reduce top-k or chunk size`,
+    };
+  }
+  const compact = raw.replace(/\s+/g, '');
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(compact) || compact.length % 4 === 1) {
+    return {
+      ok: false,
+      error: 'invalid_header',
+      hint: 'kolm-retrieved-context must be canonical base64 text',
     };
   }
   // base64 decode. Buffer.from with 'base64' is lenient (skips whitespace),
@@ -175,7 +217,7 @@ export function parseRetrievedContextHeader(req) {
     }
     const score = (item.score == null) ? null
       : (Number.isFinite(Number(item.score)) ? Number(item.score) : null);
-    retrieved.push({ source, text, score });
+    retrieved.push({ source: _cleanSource(source), text: _cleanRetrievedText(text), score });
   }
   return { ok: true, retrieved };
 }
@@ -229,14 +271,13 @@ export function formatCaptureForTraining(capture) {
     const source = (typeof item.source === 'string') ? item.source : 'unknown';
     const text = (typeof item.text === 'string') ? item.text : '';
     const score = (item.score == null || !Number.isFinite(Number(item.score))) ? null : Number(item.score);
-    // Escape angle brackets in the source URL so the tag opens cleanly.
-    const safeSource = source.replace(/[<>]/g, '');
+    const safeSource = _tagSafeSource(source);
     if (score == null) {
       parts.push(`<RETRIEVED source=${safeSource}>`);
     } else {
       parts.push(`<RETRIEVED source=${safeSource} score=${score.toFixed(2)}>`);
     }
-    parts.push(text);
+    parts.push(_cleanRetrievedText(text));
     parts.push('</RETRIEVED>');
   }
   parts.push('');
@@ -280,7 +321,7 @@ export function extractRetrievedFromResponse(response_text, response_meta) {
       if (typeof source === 'string' && typeof text === 'string') {
         const score = (c.score == null) ? null
           : (Number.isFinite(Number(c.score)) ? Number(c.score) : null);
-        out.push({ source, text, score });
+        out.push({ source: _cleanSource(source), text: _cleanRetrievedText(text), score });
       }
     }
     if (out.length > 0) return out;
@@ -307,7 +348,7 @@ export function extractRetrievedFromResponse(response_text, response_meta) {
         const scoreMatch = attrs.match(/score=["']([^"']+)["']/);
         const source = urlMatch ? urlMatch[1] : null;
         const score = (scoreMatch && Number.isFinite(Number(scoreMatch[1]))) ? Number(scoreMatch[1]) : null;
-        if (source && text) out.push({ source, text, score });
+        if (source && text) out.push({ source: _cleanSource(source), text: _cleanRetrievedText(text), score });
       }
     }
     if (out.length > 0) return out;

@@ -44,6 +44,7 @@ export const SEASONAL_VERSION = 'w748-v1';
 // Object.freeze pins length=4 and the value set so callers cannot mutate the
 // season vocabulary at runtime (W604 anti-brittleness).
 export const SEASONS = Object.freeze(['winter', 'spring', 'summer', 'fall']);
+const MAX_VARIANT_REASON_KEYS = 25;
 
 // SEASONAL_EVENTS - name -> [start_month, start_day, end_month, end_day] (1-indexed,
 // inclusive on both ends). Cross-year ranges (e.g. 'holiday' starts Dec 15
@@ -191,7 +192,7 @@ export function tagCaptureWithSeason(captureRow) {
 export function seasonalDistribution(captures) {
   const list = Array.isArray(captures) ? captures : [];
   const by_season = { winter: 0, spring: 0, summer: 0, fall: 0, _unknown: 0 };
-  const by_event = {};
+  const by_event = Object.create(null);
   for (const cap of list) {
     if (!cap || typeof cap !== 'object') continue;
     let s = (typeof cap.season === 'string' && cap.season.trim()) ? cap.season.trim() : null;
@@ -210,6 +211,7 @@ export function seasonalDistribution(captures) {
       evts = eventsActiveOn(cap.captured_at || cap.created_at);
     }
     for (const e of evts) {
+      if (!Object.prototype.hasOwnProperty.call(SEASONAL_EVENTS, e)) continue;
       by_event[e] = (by_event[e] || 0) + 1;
     }
   }
@@ -238,7 +240,7 @@ export function seasonalDistribution(captures) {
 export function recommendVariant(currentDate, namespace, capturesByVariant) {
   const d = _coerceDate(currentDate);
   const variants = (capturesByVariant && typeof capturesByVariant === 'object') ? capturesByVariant : {};
-  const variantKeys = Object.keys(variants);
+  const variantKeys = Object.keys(variants).filter((k) => typeof k === 'string' && k.length <= 128);
   if (!d) {
     return {
       recommended: null,
@@ -273,8 +275,10 @@ export function recommendVariant(currentDate, namespace, capturesByVariant) {
   const summary = activeEvents.length > 0
     ? `no_variant_for_active_events:[${activeEvents.join(',')}]_or_season:${season}`
     : `no_variant_for_season:${season}`;
+  const shownKeys = variantKeys.slice(0, MAX_VARIANT_REASON_KEYS);
+  const suffix = variantKeys.length > shownKeys.length ? `,+${variantKeys.length - shownKeys.length}_more` : '';
   return {
     recommended: null,
-    reason: summary + ` (registered_variants:[${variantKeys.join(',')}])`,
+    reason: summary + ` (registered_variants:[${shownKeys.join(',')}${suffix}])`,
   };
 }

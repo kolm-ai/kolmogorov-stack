@@ -30,6 +30,10 @@
 export const STALENESS_VERSION = 'w746-v1';
 
 const MS_PER_DAY = 86400000;
+const DEFAULT_BUCKETS = Object.freeze([1, 7, 30, 90, 365]);
+const MAX_BUCKETS = 32;
+const MAX_BUCKET_DAYS = 3650;
+const MAX_NAMESPACE_CHARS = 128;
 
 // Parse the captured_at field robustly. Captures may carry ISO strings
 // (canonical event-store rows) or epoch-millis numbers (legacy obs rows).
@@ -41,6 +45,33 @@ function _toMs(captured_at) {
   }
   const t = new Date(captured_at).getTime();
   return Number.isFinite(t) ? t : NaN;
+}
+
+function _normaliseBuckets(raw) {
+  const source = Array.isArray(raw) && raw.length > 0 ? raw : DEFAULT_BUCKETS;
+  const out = [];
+  const seen = new Set();
+  for (const value of source) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n <= 0) continue;
+    const days = Math.min(MAX_BUCKET_DAYS, Math.floor(n));
+    if (seen.has(days)) continue;
+    seen.add(days);
+    out.push(days);
+    if (out.length >= MAX_BUCKETS) break;
+  }
+  if (out.length === 0) return DEFAULT_BUCKETS.slice();
+  return out.sort((a, b) => a - b);
+}
+
+function _namespaceKey(value) {
+  const raw = value == null ? 'default' : String(value);
+  const cleaned = raw
+    .replace(/[\x00-\x1f\x7f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MAX_NAMESPACE_CHARS);
+  return cleaned || 'default';
 }
 
 // =============================================================================
@@ -106,11 +137,7 @@ export function weightCapturesByRecency(captures, opts = {}) {
 // =============================================================================
 export function freshnessDistribution(captures, opts = {}) {
   const now = opts.now != null ? opts.now : Date.now();
-  const buckets = Array.isArray(opts.buckets) && opts.buckets.length > 0
-    ? opts.buckets.slice()
-    : [1, 7, 30, 90, 365];
-  // Ensure ascending order so bucket iteration is well-defined.
-  buckets.sort((a, b) => a - b);
+  const buckets = _normaliseBuckets(opts.buckets);
   const counts = new Array(buckets.length + 1).fill(0); // last slot = overflow
   const list = Array.isArray(captures) ? captures : [];
   for (const cap of list) {
@@ -223,16 +250,16 @@ export function applyNamespaceTtl(captures, namespaceSettings, opts = {}) {
   // 'default' (matches src/router.js sanitizeNamespace fallback).
   const groups = new Map();
   for (const cap of list) {
-    const ns = (cap && (cap.namespace || cap.corpus_namespace)) || 'default';
+    const ns = _namespaceKey(cap && (cap.namespace || cap.corpus_namespace));
     if (!groups.has(ns)) groups.set(ns, []);
     groups.get(ns).push(cap);
   }
-  const by_namespace = {};
+  const by_namespace = Object.create(null);
   let kept_total = 0;
   let evicted_total = 0;
   const names = Array.from(groups.keys()).sort();
   for (const ns of names) {
-    const cfg = settings[ns] || {};
+    const cfg = Object.prototype.hasOwnProperty.call(settings, ns) ? settings[ns] || {} : {};
     const ttl_days = cfg.capture_ttl_days != null ? cfg.capture_ttl_days : null;
     const result = evictExpired(groups.get(ns), { ttl_days, now });
     by_namespace[ns] = {
