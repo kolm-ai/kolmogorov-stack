@@ -37,6 +37,12 @@
 //   _resetForTests()
 
 export const PROMETHEUS_EXPORTER_VERSION = 'w730-v1';
+export const PROMETHEUS_LIMITS = Object.freeze({
+  max_labelnames: 20,
+  max_label_value_chars: 1024,
+  max_help_chars: 2048,
+  max_buckets: 100,
+});
 
 // Default histogram buckets - sensible defaults for "acceptance rate"
 // (0..1 fraction) and HTTP latency (sub-millisecond → minute scale). When
@@ -194,22 +200,33 @@ export function registerMetric(spec) {
   if (type !== 'counter' && type !== 'gauge' && type !== 'histogram') {
     throw new Error(`registerMetric: type must be counter|gauge|histogram (got ${type})`);
   }
-  const help = (spec && typeof spec.help === 'string') ? spec.help : '';
+  const help = _safeHelp(spec && typeof spec.help === 'string' ? spec.help : '');
   const labelnames = Array.isArray(spec && spec.labelnames)
-    ? spec.labelnames.slice() : [];
+    ? spec.labelnames.slice(0, PROMETHEUS_LIMITS.max_labelnames) : [];
+  const seenLabels = new Set();
   for (const ln of labelnames) {
     if (!_isValidLabelName(ln)) {
       throw new Error(`registerMetric: invalid label name "${ln}" on metric "${name}"`);
     }
+    if (seenLabels.has(ln)) {
+      throw new Error(`registerMetric: duplicate label name "${ln}" on metric "${name}"`);
+    }
+    seenLabels.add(ln);
   }
   const buckets = (type === 'histogram')
-    ? (Array.isArray(spec && spec.buckets) ? spec.buckets.slice() : DEFAULT_HISTOGRAM_BUCKETS.slice())
+    ? _normalizeBuckets(Array.isArray(spec && spec.buckets) ? spec.buckets : DEFAULT_HISTOGRAM_BUCKETS)
     : null;
 
   const existing = _registry.get(name);
   if (existing) {
     if (existing.type !== type) {
       throw new Error(`registerMetric: "${name}" already registered as ${existing.type}, cannot re-register as ${type}`);
+    }
+    if (!_sameStringArray(existing.labelnames, labelnames)) {
+      throw new Error(`registerMetric: "${name}" already registered with different labelnames`);
+    }
+    if (type === 'histogram' && !_sameNumberArray(existing.buckets, buckets)) {
+      throw new Error(`registerMetric: "${name}" already registered with different buckets`);
     }
     // Idempotent - keep existing labelnames + buckets to preserve samples.
     return;
@@ -391,7 +408,7 @@ function _labelKey(labelnames, labels) {
   const parts = [];
   for (const ln of labelnames) {
     const v = (labels && labels[ln] !== undefined && labels[ln] !== null)
-      ? String(labels[ln]) : '';
+      ? _safeLabelValue(labels[ln]) : '';
     parts.push(`${ln}=${v}`);
   }
   return parts.join('\x00');
@@ -401,7 +418,7 @@ function _normalizeLabels(labelnames, labels) {
   const out = {};
   for (const ln of labelnames) {
     out[ln] = (labels && labels[ln] !== undefined && labels[ln] !== null)
-      ? String(labels[ln]) : '';
+      ? _safeLabelValue(labels[ln]) : '';
   }
   return out;
 }
@@ -429,13 +446,13 @@ function _renderNumber(n) {
 
 // HELP-line escaping: backslash and newline only (per Prometheus spec).
 function _escapeHelp(s) {
-  const str = String(s == null ? '' : s);
+  const str = _safeHelp(s);
   return str.replace(/\\/g, '\\\\').replace(/\n/g, '\\n');
 }
 
 // Label-value escaping: backslash, double-quote, newline.
 function _escapeLabelValue(s) {
-  const str = String(s == null ? '' : s);
+  const str = _safeLabelValue(s);
   return str
     .replace(/\\/g, '\\\\')
     .replace(/"/g, '\\"')
@@ -453,4 +470,47 @@ function _isValidMetricName(name) {
 // SHOULD avoid them).
 function _isValidLabelName(name) {
   return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name);
+}
+
+function _safeHelp(value) {
+  return String(value == null ? '' : value)
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
+    .slice(0, PROMETHEUS_LIMITS.max_help_chars);
+}
+
+function _safeLabelValue(value) {
+  return String(value == null ? '' : value)
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, ' ')
+    .slice(0, PROMETHEUS_LIMITS.max_label_value_chars);
+}
+
+function _normalizeBuckets(raw) {
+  const nums = [];
+  for (const item of raw) {
+    if (nums.length >= PROMETHEUS_LIMITS.max_buckets) break;
+    const n = Number(item);
+    if (!Number.isFinite(n) || n < 0) continue;
+    nums.push(n);
+  }
+  const unique = Array.from(new Set(nums)).sort((a, b) => a - b);
+  if (unique.length === 0) {
+    throw new Error('registerMetric: histogram requires at least one non-negative finite bucket');
+  }
+  return unique;
+}
+
+function _sameStringArray(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function _sameNumberArray(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (Number(a[i]) !== Number(b[i])) return false;
+  }
+  return true;
 }

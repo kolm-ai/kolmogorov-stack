@@ -50,6 +50,15 @@
 import * as defaultDataResidency from './data-residency.js';
 
 export const MULTI_REGION_VERSION = 'w780-v1';
+export const MULTI_REGION_LIMITS = Object.freeze({
+  max_gateway_url_chars: 2048,
+  max_gateways: 12,
+  max_tag_chars: 160,
+  max_namespace_chars: 128,
+  max_error_detail_chars: 240,
+  min_timeout_ms: 100,
+  max_timeout_ms: 10000,
+});
 
 // CANONICAL_REGIONS is the human-friendly short-name -> long-form mapping
 // used by the gateway map (the keys callers type into
@@ -101,6 +110,48 @@ function _dataResidency(opts) {
   return (opts && opts.dataResidency) || defaultDataResidency;
 }
 
+function _safeTag(value, fallback = null, maxChars = MULTI_REGION_LIMITS.max_tag_chars) {
+  const s = String(value == null ? '' : value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .trim()
+    .slice(0, maxChars);
+  if (!s || s === '__proto__' || s === 'constructor' || s === 'prototype') return fallback;
+  return s;
+}
+
+function _safeDetail(e) {
+  return String((e && e.message) || e || '')
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .slice(0, MULTI_REGION_LIMITS.max_error_detail_chars);
+}
+
+function _normalizeGatewayUrl(raw) {
+  const text = String(raw == null ? '' : raw).trim();
+  if (!text || text.length > MULTI_REGION_LIMITS.max_gateway_url_chars) return null;
+  let u;
+  try { u = new URL(text); } catch (_) { return null; }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+  if (u.username || u.password) return null;
+  u.search = '';
+  u.hash = '';
+  return u.toString().replace(/\/$/, '');
+}
+
+function _gatewayHealthUrl(base) {
+  const u = new URL(base);
+  const prefix = u.pathname && u.pathname !== '/' ? u.pathname.replace(/\/+$/g, '') : '';
+  u.pathname = `${prefix}/v1/health`.replace(/\/{2,}/g, '/');
+  u.search = '';
+  u.hash = '';
+  return u.toString();
+}
+
+function _safeTimeoutMs(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 4000;
+  return Math.max(MULTI_REGION_LIMITS.min_timeout_ms, Math.min(MULTI_REGION_LIMITS.max_timeout_ms, Math.trunc(n)));
+}
+
 // ---------------------------------------------------------------------------
 // getCurrentRegion(opts): reads $KOLM_REGION and returns the canonical
 // region code. Defaults to DEFAULT_REGION ('us-east-1') when unset.
@@ -150,11 +201,12 @@ export function getRegionGateways(opts) {
   }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
   const out = {};
-  for (const k of Object.keys(parsed)) {
+  for (const k of Object.keys(parsed).slice(0, MULTI_REGION_LIMITS.max_gateways)) {
     const v = parsed[k];
-    if (typeof v === 'string' && v.length > 0) {
-      out[k.toLowerCase()] = v;
-    }
+    const sn = _resolveShortName(k);
+    if (!sn) continue;
+    const normalized = _normalizeGatewayUrl(v);
+    if (normalized) out[sn] = normalized;
   }
   return out;
 }
@@ -198,7 +250,8 @@ export function routeRequest({
   prefer_region,
   opts,
 } = {}) {
-  if (!request_hash || typeof request_hash !== 'string') {
+  const safeRequestHash = _safeTag(request_hash, null);
+  if (!safeRequestHash) {
     return {
       ok: false,
       error: 'request_hash_required',
@@ -207,7 +260,7 @@ export function routeRequest({
     };
   }
   const gateways = getRegionGateways(opts);
-  const available_regions = Object.keys(gateways);
+  const available_regions = Object.keys(gateways).sort();
   if (available_regions.length === 0) {
     return {
       ok: false,
@@ -220,23 +273,25 @@ export function routeRequest({
   if (residency_requirement) {
     const sn = _resolveShortName(residency_requirement);
     if (!sn || !gateways[sn]) {
+      const requirement = _safeTag(residency_requirement, 'unknown');
       return {
         ok: false,
         error: 'no_gateway_for_residency_requirement',
-        requirement: residency_requirement,
+        requirement,
         available_regions,
-        hint: 'configure $KOLM_REGION_GATEWAY_URLS to include a "' + (sn || residency_requirement) + '" entry, or drop the residency_requirement',
+        hint: 'configure $KOLM_REGION_GATEWAY_URLS to include a "' + (sn || requirement) + '" entry, or drop the residency_requirement',
         version: MULTI_REGION_VERSION,
       };
     }
+    const requirement = _safeTag(residency_requirement, sn);
     return {
       ok: true,
       region: sn,
       canonical: CANONICAL_REGIONS[sn] ? CANONICAL_REGIONS[sn].canonical : sn,
       gateway_url: gateways[sn],
       reason: 'residency_requirement',
-      requirement: residency_requirement,
-      request_hash,
+      requirement,
+      request_hash: safeRequestHash,
       version: MULTI_REGION_VERSION,
     };
   }
@@ -250,7 +305,7 @@ export function routeRequest({
         canonical: CANONICAL_REGIONS[sn] ? CANONICAL_REGIONS[sn].canonical : sn,
         gateway_url: gateways[sn],
         reason: 'prefer_region',
-        request_hash,
+        request_hash: safeRequestHash,
         version: MULTI_REGION_VERSION,
       };
     }
@@ -266,7 +321,7 @@ export function routeRequest({
       canonical: CANONICAL_REGIONS[sn] ? CANONICAL_REGIONS[sn].canonical : sn,
       gateway_url: gateways[sn],
       reason: 'current_region',
-      request_hash,
+      request_hash: safeRequestHash,
       version: MULTI_REGION_VERSION,
     };
   }
@@ -280,7 +335,7 @@ export function routeRequest({
     canonical: CANONICAL_REGIONS[firstSn] ? CANONICAL_REGIONS[firstSn].canonical : firstSn,
     gateway_url: gateways[firstSn],
     reason: 'first_configured_gateway',
-    request_hash,
+    request_hash: safeRequestHash,
     version: MULTI_REGION_VERSION,
   };
 }
@@ -309,12 +364,13 @@ export async function getRegionForCapture({ tenant, namespace, opts } = {}) {
     };
   }
   const dr = _dataResidency(opts);
+  const safeNamespace = namespace == null ? null : _safeTag(namespace, null, MULTI_REGION_LIMITS.max_namespace_chars);
   // (1) namespace default
-  if (namespace) {
+  if (safeNamespace) {
     try {
       const nsRegion = await dr.getNamespaceDefaultRegion({
         tenant_id: tenant.id,
-        namespace,
+        namespace: safeNamespace,
       });
       if (nsRegion && nsRegion !== dr.DEFAULT_REGION) {
         const sn = _w769LongToShort(nsRegion);
@@ -323,8 +379,8 @@ export async function getRegionForCapture({ tenant, namespace, opts } = {}) {
           region: sn || _w769LongToShort(dr.DEFAULT_REGION) || 'us',
           w769_region: nsRegion,
           reason: 'w769_namespace_default',
-          tenant_id: tenant.id,
-          namespace,
+          tenant_id: _safeTag(tenant.id, null),
+          namespace: safeNamespace,
           version: MULTI_REGION_VERSION,
         };
       }
@@ -345,7 +401,7 @@ export async function getRegionForCapture({ tenant, namespace, opts } = {}) {
         region: sn || 'us',
         w769_region: inferred,
         reason: 'w769_tenant_inference',
-        tenant_id: tenant.id,
+        tenant_id: _safeTag(tenant.id, null),
         version: MULTI_REGION_VERSION,
       };
     }
@@ -358,7 +414,7 @@ export async function getRegionForCapture({ tenant, namespace, opts } = {}) {
     region: sn,
     canonical: current,
     reason: 'w769_global_uses_current_region',
-    tenant_id: tenant.id,
+    tenant_id: _safeTag(tenant.id, null),
     version: MULTI_REGION_VERSION,
   };
 }
@@ -387,7 +443,7 @@ function _w769LongToShort(w769) {
 export async function testFailover({ tenant, namespace, opts } = {}) {
   void tenant; void namespace;
   const gateways = getRegionGateways(opts);
-  const regions = Object.keys(gateways);
+  const regions = Object.keys(gateways).sort();
   if (regions.length === 0) {
     return {
       ok: false,
@@ -405,7 +461,7 @@ export async function testFailover({ tenant, namespace, opts } = {}) {
       version: MULTI_REGION_VERSION,
     };
   }
-  const timeout_ms = (opts && Number.isInteger(opts.timeout_ms)) ? opts.timeout_ms : 4000;
+  const timeout_ms = _safeTimeoutMs(opts && opts.timeout_ms);
   const results = await Promise.all(regions.map(async (sn) => {
     const url = gateways[sn];
     const started = Date.now();
@@ -414,7 +470,7 @@ export async function testFailover({ tenant, namespace, opts } = {}) {
       const t = setTimeout(() => ac.abort(), timeout_ms);
       // /v1/health is the standard liveness path; we never POST to a
       // failover probe because POST has side effects.
-      const probeUrl = url.replace(/\/$/, '') + '/v1/health';
+      const probeUrl = _gatewayHealthUrl(url);
       let resp;
       try {
         resp = await fetchFn(probeUrl, { method: 'GET', signal: ac.signal });
@@ -438,7 +494,7 @@ export async function testFailover({ tenant, namespace, opts } = {}) {
         canonical: CANONICAL_REGIONS[sn] ? CANONICAL_REGIONS[sn].canonical : sn,
         url,
         reachable: false,
-        error: String((e && e.message) || e),
+        error: _safeDetail(e),
         latency_ms,
       };
     }

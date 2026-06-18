@@ -49,6 +49,11 @@
 //    third-party auditor can grep + diff.
 
 export const CARBON_VERSION = 'w786-v1';
+export const CARBON_LIMITS = Object.freeze({
+  max_gpu_hours: 1000000,
+  max_tokens: 10000000000,
+  max_label_chars: 120,
+});
 
 // =====================================================================
 // PUBLIC TDP MAP (watts at sustained training load, single card)
@@ -160,6 +165,11 @@ function _round(v, places) {
   return Math.round(Number(v) * p) / p;
 }
 
+function _safeLabel(value) {
+  if (value == null) return null;
+  return String(value).replace(/[\u0000-\u001F\u007F]/g, ' ').trim().slice(0, CARBON_LIMITS.max_label_chars) || null;
+}
+
 function _normalizeRegion(region) {
   if (region == null || region === '') return 'global-avg';
   const r = String(region).trim().toLowerCase();
@@ -225,12 +235,12 @@ export function estimateRunCo2(opts) {
     : 0.75;
   const gpu_hours = Number(o.gpu_hours);
 
-  if (!Number.isFinite(gpu_hours) || gpu_hours < 0) {
+  if (!Number.isFinite(gpu_hours) || gpu_hours < 0 || gpu_hours > CARBON_LIMITS.max_gpu_hours) {
     return {
       ok: false,
       version: CARBON_VERSION,
       error: 'invalid_gpu_hours',
-      hint: 'gpu_hours must be a non-negative finite number',
+      hint: `gpu_hours must be a non-negative finite number <= ${CARBON_LIMITS.max_gpu_hours}`,
       methodology: 'public-research-estimate',
       methodology_version: CARBON_VERSION,
       honest_caveat: 'estimate_not_measured',
@@ -253,10 +263,10 @@ export function estimateRunCo2(opts) {
   return {
     ok: true,
     version: CARBON_VERSION,
-    gpu: gpuKey || (o.gpu != null ? String(o.gpu) : null),
+    gpu: gpuKey || _safeLabel(o.gpu),
     gpu_known: gpuKey != null,
     gpu_tdp_w: tdp_w,
-    region: regionKey || (o.region != null ? String(o.region) : null),
+    region: regionKey || _safeLabel(o.region),
     region_known: regionKey != null,
     grid_factor,
     gpu_hours,
@@ -320,12 +330,12 @@ export function estimateFrontierCallCo2(opts) {
       error_bar_pct: 30,
     };
   }
-  if (!Number.isFinite(tokens) || tokens < 0) {
+  if (!Number.isFinite(tokens) || tokens < 0 || tokens > CARBON_LIMITS.max_tokens) {
     return {
       ok: false,
       version: CARBON_VERSION,
       error: 'invalid_tokens',
-      hint: 'tokens must be a non-negative finite number',
+      hint: `tokens must be a non-negative finite number <= ${CARBON_LIMITS.max_tokens}`,
       methodology: 'public-research-estimate',
       methodology_version: CARBON_VERSION,
       honest_caveat: 'estimate_not_measured',
@@ -444,8 +454,8 @@ export function badgeFor(artifact) {
       version: CARBON_VERSION,
       co2_kg_estimate: null,
       kwh: null,
-      gpu: gpu || null,
-      region: region || null,
+      gpu: _safeLabel(gpu),
+      region: _safeLabel(region),
       gpu_hours: null,
       estimate_quality: 'unknown_inputs',
       methodology: 'public-research-estimate',
@@ -463,8 +473,8 @@ export function badgeFor(artifact) {
       version: CARBON_VERSION,
       co2_kg_estimate: null,
       kwh: null,
-      gpu: gpu || null,
-      region: region || null,
+      gpu: _safeLabel(gpu),
+      region: _safeLabel(region),
       gpu_hours,
       estimate_quality: 'invalid_inputs',
       methodology: 'public-research-estimate',
@@ -501,3 +511,14 @@ export function badgeFor(artifact) {
     error_bar_pct: 30,
   };
 }
+
+export default {
+  CARBON_VERSION,
+  CARBON_LIMITS,
+  gpuTdpWatts,
+  gridCarbonKgPerKwh,
+  estimateRunCo2,
+  estimateFrontierCallCo2,
+  savingsReport,
+  badgeFor,
+};

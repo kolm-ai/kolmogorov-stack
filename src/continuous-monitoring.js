@@ -31,6 +31,10 @@
 import * as defaultEventStore from './event-store.js';
 
 export const MONITORING_VERSION = 'w767-v1';
+export const MONITORING_LIMITS = Object.freeze({
+  max_signal_rows: 5000,
+});
+const MONITORING_STATUSES = Object.freeze(['green', 'yellow', 'red', 'unknown']);
 
 // ---------------------------------------------------------------------------
 // TSC → signal mapping.
@@ -229,11 +233,12 @@ const _DEFAULT_PROVIDERS = {
     const es = ctx.eventStore;
     if (!es || typeof es.listEvents !== 'function') return { ok: false };
     try {
-      const sinceISO = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const nowMs = ctx && Number.isFinite(Number(ctx.now_ms)) ? Number(ctx.now_ms) : Date.now();
+      const sinceISO = new Date(nowMs - 24 * 60 * 60 * 1000).toISOString();
       const rows = await es.listEvents({
         tenant_id: ctx.tenant_id,
         since: sinceISO,
-        limit: 0,
+        limit: MONITORING_LIMITS.max_signal_rows,
         order: 'desc',
       });
       // Defense in depth - re-filter by tenant_id.
@@ -280,6 +285,7 @@ export async function snapshot(tenant_id, opts = {}) {
   const es = opts.eventStore || defaultEventStore;
   const providers = opts.signalProviders || {};
   const now = opts.now ? new Date(opts.now) : new Date();
+  const nowMs = Number.isFinite(now.getTime()) ? now.getTime() : Date.now();
 
   const controls = [];
   let green_count = 0;
@@ -305,6 +311,7 @@ export async function snapshot(tenant_id, opts = {}) {
           signal: ctrl.signal,
           source: ctrl.source,
           eventStore: es,
+          now_ms: nowMs,
         };
         const r = await provider(ctx);
         if (r && r.ok && r.value != null && Number.isFinite(Number(r.value))) {
@@ -312,7 +319,7 @@ export async function snapshot(tenant_id, opts = {}) {
           // Allow the provider to OVERRIDE status explicitly. If it does
           // not, grade with the threshold rule. We still NEVER let a
           // provider return null+green - _grade(null,...) returns 'unknown'.
-          status = (typeof r.status === 'string') ? r.status : _grade(
+          status = (typeof r.status === 'string' && MONITORING_STATUSES.includes(r.status)) ? r.status : _grade(
             current_value,
             ctrl.target_threshold,
             ctrl.threshold_direction,
@@ -351,7 +358,7 @@ export async function snapshot(tenant_id, opts = {}) {
     ok: true,
     version: MONITORING_VERSION,
     tenant_id,
-    generated_at: now.toISOString(),
+    generated_at: new Date(nowMs).toISOString(),
     controls,
     summary: {
       total: MONITORING_CONTROLS.length,

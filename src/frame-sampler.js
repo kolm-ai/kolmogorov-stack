@@ -63,6 +63,14 @@ const DEFAULT_MAX_FRAMES = 64;
 // emit 2.5M sampling indices. 1024 covers a 17-minute clip at 1fps with
 // room to spare; trainers that genuinely need more should chunk.
 const HARD_FRAME_CAP = 1024;
+const MAX_DURATION_S = 24 * 60 * 60;
+const MAX_FPS_TARGET = 120;
+
+function _normalizeFrameCap(max_frames) {
+  const cap = Number(max_frames);
+  if (!Number.isFinite(cap) || cap <= 0) return null;
+  return Math.max(1, Math.min(HARD_FRAME_CAP, Math.trunc(cap)));
+}
 
 // =============================================================================
 // estimateExtractedFrames - pure estimator. Trainer dry-run consults this so
@@ -79,9 +87,9 @@ const HARD_FRAME_CAP = 1024;
 export function estimateExtractedFrames(duration_s, strategy, fps_target, max_frames) {
   const dur = Number(duration_s);
   const fps = Number(fps_target);
-  const cap = Number(max_frames);
+  const cap = _normalizeFrameCap(max_frames);
   if (!Number.isFinite(dur) || dur <= 0) return 0;
-  if (!Number.isFinite(fps) || fps <= 0) return 0;
+  if (!Number.isFinite(fps) || fps <= 0 || fps > MAX_FPS_TARGET) return 0;
 
   // Per-strategy density multiplier. uniform = 1.0 baseline. keyframe is
   // sparser (encoders emit fewer I-frames than fps would suggest). scene
@@ -95,7 +103,7 @@ export function estimateExtractedFrames(duration_s, strategy, fps_target, max_fr
   let raw = Math.ceil(dur * fps * densityMult);
   if (raw < 1) raw = 1;
   let final = raw;
-  if (Number.isFinite(cap) && cap > 0 && final > cap) final = cap;
+  if (cap != null && final > cap) final = cap;
   if (final > HARD_FRAME_CAP) final = HARD_FRAME_CAP;
   return final;
 }
@@ -131,11 +139,11 @@ export function buildSamplingSpec({
 } = {}) {
   // Duration validation - zero / negative / NaN / Infinity all invalid.
   const dur = Number(video_duration_s);
-  if (!Number.isFinite(dur) || dur <= 0) {
+  if (!Number.isFinite(dur) || dur <= 0 || dur > MAX_DURATION_S) {
     return {
       ok: false,
       error: 'bad_duration',
-      hint: `video_duration_s must be a finite positive number; got ${JSON.stringify(video_duration_s)}`,
+      hint: `video_duration_s must be a finite positive number <= ${MAX_DURATION_S}; got ${JSON.stringify(video_duration_s)}`,
       version: FRAME_SAMPLER_VERSION,
     };
   }
@@ -153,18 +161,18 @@ export function buildSamplingSpec({
 
   // fps_target validation - must be positive finite.
   const fps = Number(fps_target);
-  if (!Number.isFinite(fps) || fps <= 0) {
+  if (!Number.isFinite(fps) || fps <= 0 || fps > MAX_FPS_TARGET) {
     return {
       ok: false,
       error: 'bad_fps_target',
-      hint: `fps_target must be a finite positive number; got ${JSON.stringify(fps_target)}`,
+      hint: `fps_target must be a finite positive number <= ${MAX_FPS_TARGET}; got ${JSON.stringify(fps_target)}`,
       version: FRAME_SAMPLER_VERSION,
     };
   }
 
   // max_frames validation - when present, must be positive integer.
-  const cap = Number(max_frames);
-  if (!Number.isFinite(cap) || cap <= 0) {
+  const cap = _normalizeFrameCap(max_frames);
+  if (cap == null) {
     return {
       ok: false,
       error: 'bad_max_frames',

@@ -29,6 +29,11 @@
 //   - langStats(rows)
 
 export const LANG_DETECT_VERSION = 'w760-v1';
+export const LANG_DETECT_LIMITS = Object.freeze({
+  max_text_chars: 20000,
+  max_segments: 512,
+  max_rows: 50000,
+});
 
 // 22 most-common languages for compiled-model use. Keep tight - every
 // language we add slows the detector and grows the install. ISO 639-1.
@@ -101,6 +106,18 @@ const STOPWORDS = Object.freeze({
 
 const MIN_CONFIDENCE_DEFAULT = 0.4;
 
+function _clamp01(v, fallback) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return fallback;
+  if (n < 0) return 0;
+  if (n > 1) return 1;
+  return n;
+}
+
+function _capText(text) {
+  return String(text).slice(0, LANG_DETECT_LIMITS.max_text_chars);
+}
+
 // =============================================================================
 // detectLang
 //
@@ -114,13 +131,13 @@ const MIN_CONFIDENCE_DEFAULT = 0.4;
 
 export function detectLang(text, opts) {
   const o = opts || {};
-  const minConf = Number.isFinite(o.min_confidence) ? o.min_confidence : MIN_CONFIDENCE_DEFAULT;
+  const minConf = _clamp01(o.min_confidence, MIN_CONFIDENCE_DEFAULT);
 
   if (typeof text !== 'string' || text.length === 0) {
     return { lang: null, confidence: 0, kind: 'mixed', fallback: true };
   }
   // Trim - leading/trailing whitespace shouldn't count toward total chars.
-  const trimmed = text.trim();
+  const trimmed = _capText(text).trim();
   if (trimmed.length === 0) {
     return { lang: null, confidence: 0, kind: 'mixed', fallback: true };
   }
@@ -222,31 +239,32 @@ export function detectLang(text, opts) {
 
 export function detectLangSegments(text) {
   if (typeof text !== 'string' || text.length === 0) return [];
+  const capped = _capText(text);
   const segs = [];
   // Split on whitespace / punctuation boundaries first; classify each
   // chunk via detectLang.
   const re = /[\s.,;:!?]+/g;
   let last = 0;
   let m;
-  while ((m = re.exec(text)) !== null) {
+  while (segs.length < LANG_DETECT_LIMITS.max_segments && (m = re.exec(capped)) !== null) {
     if (m.index > last) {
-      const piece = text.slice(last, m.index);
+      const piece = capped.slice(last, m.index);
       const d = detectLang(piece);
       segs.push({ text: piece, lang: d.lang, span: [last, m.index] });
     }
     last = m.index + m[0].length;
   }
-  if (last < text.length) {
-    const piece = text.slice(last);
+  if (segs.length < LANG_DETECT_LIMITS.max_segments && last < capped.length) {
+    const piece = capped.slice(last);
     const d = detectLang(piece);
-    segs.push({ text: piece, lang: d.lang, span: [last, text.length] });
+    segs.push({ text: piece, lang: d.lang, span: [last, capped.length] });
   }
   // Coalesce adjacent same-lang segments for compactness.
   const coalesced = [];
   for (const s of segs) {
     const tail = coalesced[coalesced.length - 1];
     if (tail && tail.lang === s.lang) {
-      tail.text = text.slice(tail.span[0], s.span[1]);
+      tail.text = capped.slice(tail.span[0], s.span[1]);
       tail.span[1] = s.span[1];
     } else {
       coalesced.push({ text: s.text, lang: s.lang, span: s.span.slice() });
@@ -270,7 +288,8 @@ export function langStats(rows) {
   const byLang = {};
   let mixedCount = 0;
   let unknownCount = 0;
-  const arr = Array.isArray(rows) ? rows : [];
+  const inputTotal = Array.isArray(rows) ? rows.length : 0;
+  const arr = Array.isArray(rows) ? rows.slice(0, LANG_DETECT_LIMITS.max_rows) : [];
   for (const r of arr) {
     if (!r || typeof r !== 'object') { unknownCount += 1; continue; }
     const text = r.input || r.prompt || r.output || r.response || '';
@@ -294,6 +313,7 @@ export function langStats(rows) {
     mixed_count: mixedCount,
     unknown_count: unknownCount,
     total: arr.length,
+    input_total: inputTotal,
     dominant_lang: dominant,
     version: LANG_DETECT_VERSION,
   };
@@ -310,6 +330,7 @@ function _round4(x) {
 
 export default {
   LANG_DETECT_VERSION,
+  LANG_DETECT_LIMITS,
   SUPPORTED_LANGS,
   detectLang,
   detectLangSegments,

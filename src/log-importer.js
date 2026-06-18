@@ -22,6 +22,10 @@
 const DEFAULT_MAX_BYTES = 16 * 1024 * 1024; // 16 MiB - a very large agent export, far under anything that strains the store
 const FETCH_TIMEOUT_MS = 15000;
 const MAX_HEADERS = 30;
+const MAX_HEADER_VALUE_BYTES = 8192;
+const MAX_ERROR_DETAIL_CHARS = 240;
+const MAX_URL_CHARS = 2048;
+const HEADER_NAME_RE = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
 
 // Hop-by-hop / identity headers a caller must never be able to set on our
 // outbound fetch (they would either break the request or let a caller spoof the
@@ -34,6 +38,12 @@ const HEADER_DENYLIST = new Set([
 
 function _result(ok, extra) { return { ok, ...extra }; }
 
+function _safeDetail(value) {
+  return String(value == null ? '' : value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .slice(0, MAX_ERROR_DETAIL_CHARS);
+}
+
 // Pass through a caller-supplied header map, but: only string keys/values, drop
 // the denylist, and cap the count so a hostile body cannot blow up the request.
 function _safeHeaders(headers) {
@@ -44,10 +54,12 @@ function _safeHeaders(headers) {
     if (n >= MAX_HEADERS) break;
     if (typeof k !== 'string' || v == null) continue;
     const key = k.trim().toLowerCase();
+    if (!HEADER_NAME_RE.test(key)) continue;
     if (!key || HEADER_DENYLIST.has(key)) continue;
     const val = String(v);
-    if (val.length > 8192) continue;
-    out[k] = val;
+    if (/[\u0000-\u001F\u007F]/.test(val)) continue;
+    if (Buffer.byteLength(val, 'utf8') > MAX_HEADER_VALUE_BYTES) continue;
+    out[key] = val;
     n++;
   }
   return out;
@@ -78,15 +90,23 @@ function _isPrivateHost(hostnameRaw) {
 }
 
 function _validateUrl(raw) {
+  const text = String(raw == null ? '' : raw).trim();
+  if (!text || text.length > MAX_URL_CHARS) {
+    return _result(false, { reason: 'invalid_url', detail: 'url is missing or too large' });
+  }
   let u;
-  try { u = new URL(String(raw)); }
+  try { u = new URL(text); }
   catch { return _result(false, { reason: 'invalid_url', detail: 'url is not a valid absolute URL' }); }
   if (u.protocol !== 'http:' && u.protocol !== 'https:') {
     return _result(false, { reason: 'invalid_url', detail: 'url must be http(s)' });
   }
+  if (u.username || u.password) {
+    return _result(false, { reason: 'invalid_url', detail: 'url must not include embedded credentials' });
+  }
   if (process.env.KOLM_IMPORT_ALLOW_PRIVATE !== '1' && _isPrivateHost(u.hostname)) {
     return _result(false, { reason: 'blocked_url', detail: 'url resolves to a private/loopback host; point it at a reachable log endpoint' });
   }
+  u.hash = '';
   return _result(true, { url: u });
 }
 
@@ -94,7 +114,9 @@ function _validateUrl(raw) {
 // byte cap. Returns { ok:true, source, payload, bytes } where payload is fed to
 // the route's _toJsonl, or { ok:false, reason, detail }. NEVER throws.
 export async function importAgentLogs({ source, url, headers, logs, maxBytes, fetchImpl } = {}) {
-  const cap = Number.isFinite(maxBytes) && maxBytes > 0 ? Math.floor(maxBytes) : DEFAULT_MAX_BYTES;
+  const cap = Number.isFinite(Number(maxBytes)) && Number(maxBytes) > 0
+    ? Math.max(1, Math.min(DEFAULT_MAX_BYTES, Math.floor(Number(maxBytes))))
+    : DEFAULT_MAX_BYTES;
   try {
     const src = String(source || (url ? 'url' : 'inline')).toLowerCase();
 
@@ -125,7 +147,7 @@ export async function importAgentLogs({ source, url, headers, logs, maxBytes, fe
       } catch (e) {
         clearTimeout(timer);
         const aborted = e && (e.name === 'AbortError' || e.code === 'ABORT_ERR');
-        return _result(false, { reason: aborted ? 'fetch_timeout' : 'fetch_failed', detail: aborted ? `remote did not respond within ${FETCH_TIMEOUT_MS}ms` : (e && e.message) });
+        return _result(false, { reason: aborted ? 'fetch_timeout' : 'fetch_failed', detail: aborted ? `remote did not respond within ${FETCH_TIMEOUT_MS}ms` : _safeDetail(e && e.message) });
       }
       clearTimeout(timer);
       if (!resp || !resp.ok) {
@@ -139,7 +161,7 @@ export async function importAgentLogs({ source, url, headers, logs, maxBytes, fe
       }
       let text;
       try { text = await resp.text(); }
-      catch (e) { return _result(false, { reason: 'read_failed', detail: e && e.message }); }
+      catch (e) { return _result(false, { reason: 'read_failed', detail: _safeDetail(e && e.message) }); }
       const bytes = Buffer.byteLength(text, 'utf8');
       if (bytes > cap) return _result(false, { reason: 'too_large', detail: `fetched ${bytes} bytes exceeds the cap ${cap}`, bytes });
       if (bytes === 0) return _result(false, { reason: 'no_logs', detail: 'the url returned an empty body' });
@@ -149,7 +171,7 @@ export async function importAgentLogs({ source, url, headers, logs, maxBytes, fe
     return _result(false, { reason: 'invalid_source', detail: 'source must be "url" or "inline"' });
   } catch (e) {
     // Belt-and-suspenders: this module must never throw across the route boundary.
-    return _result(false, { reason: 'import_error', detail: e && e.message });
+    return _result(false, { reason: 'import_error', detail: _safeDetail(e && e.message) });
   }
 }
 

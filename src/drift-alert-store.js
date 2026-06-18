@@ -28,6 +28,8 @@ export const DRIFT_SKETCHES_TABLE = 'drift_sketches';
 export const DRIFT_WEBHOOKS_TABLE = 'drift_webhooks';
 
 export const DRIFT_KINDS = Object.freeze(['training', 'production']);
+const MAX_NAMESPACE_CHARS = 128;
+const MAX_WEBHOOK_URL_CHARS = 2048;
 
 function _now() {
   return new Date().toISOString();
@@ -38,7 +40,22 @@ function _validKind(k) {
 }
 
 function _safeNamespace(ns) {
-  return String(ns == null ? 'default' : ns).slice(0, 128);
+  const s = String(ns == null ? 'default' : ns)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .trim()
+    .slice(0, MAX_NAMESPACE_CHARS);
+  if (!s || s === '__proto__' || s === 'constructor' || s === 'prototype') return 'default';
+  return s;
+}
+
+function _normalizeWebhookUrl(raw) {
+  if (typeof raw !== 'string' || raw.trim().length === 0 || raw.length > MAX_WEBHOOK_URL_CHARS) return null;
+  let u;
+  try { u = new URL(raw.trim()); } catch (_) { return null; }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+  if (u.username || u.password) return null;
+  u.hash = '';
+  return u.toString();
 }
 
 // ---------------------------------------------------------------------------
@@ -156,7 +173,8 @@ export function registerWebhook({
     e.code = 'missing_tenant_id';
     throw e;
   }
-  if (typeof webhook_url !== 'string' || !/^https?:\/\//.test(webhook_url)) {
+  const normalizedUrl = _normalizeWebhookUrl(webhook_url);
+  if (!normalizedUrl) {
     const e = new Error('drift_alert_store: webhook_url must be an absolute http(s) URL');
     e.code = 'invalid_webhook_url';
     throw e;
@@ -169,7 +187,7 @@ export function registerWebhook({
     r
     && (r.tenant === tenant_id || r.tenant_id === tenant_id)
     && r.namespace === ns
-    && r.webhook_url === webhook_url
+    && r.webhook_url === normalizedUrl
   );
   if (Array.isArray(existing) && existing.length > 0) {
     update(DRIFT_WEBHOOKS_TABLE,
@@ -182,7 +200,7 @@ export function registerWebhook({
     tenant: tenant_id,
     tenant_id,
     namespace: ns,
-    webhook_url,
+    webhook_url: normalizedUrl,
     jsd_threshold: thr,
     created_at: _now(),
     updated_at: _now(),

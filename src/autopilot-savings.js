@@ -63,6 +63,7 @@ export const AUTOPILOT_SAVINGS_VERSION = 'w775-v1';
 const DEFAULT_WINDOW_DAYS = 30;
 const MAX_WINDOW_DAYS = 365;
 const MIN_WINDOW_DAYS = 1;
+const MAX_ROUTING_ROWS = 50000;
 
 function _num(v, fallback = 0) {
   const n = Number(v);
@@ -84,6 +85,13 @@ function _clampWindowDays(input) {
   if (n < MIN_WINDOW_DAYS) return { value: MIN_WINDOW_DAYS, clamped_from: String(n) };
   if (n > MAX_WINDOW_DAYS) return { value: MAX_WINDOW_DAYS, clamped_from: String(n) };
   return { value: Math.trunc(n), clamped_from: null };
+}
+
+function _safeNamespace(value) {
+  if (value == null || value === '') return null;
+  const s = String(value).replace(/[\u0000-\u001F\u007F]/g, ' ').trim().slice(0, 128);
+  if (!s || s === '__proto__' || s === 'constructor' || s === 'prototype') return null;
+  return s;
 }
 
 /**
@@ -126,7 +134,7 @@ export async function computeSavings(opts = {}) {
       version: AUTOPILOT_SAVINGS_VERSION,
     };
   }
-  const namespace = opts && opts.namespace ? String(opts.namespace).slice(0, 128) : null;
+  const namespace = _safeNamespace(opts && opts.namespace);
   const clamp = _clampWindowDays(opts && opts.window_days != null ? opts.window_days : DEFAULT_WINDOW_DAYS);
   const window_days = clamp.value;
 
@@ -142,6 +150,7 @@ export async function computeSavings(opts = {}) {
     rows = [];
   }
   if (!Array.isArray(rows)) rows = [];
+  rows = rows.slice(0, MAX_ROUTING_ROWS);
 
   // Tenant fence - defense in depth.
   rows = rows.filter(r => r && (r.tenant === tenant_id || r.tenant_id === tenant_id));
@@ -159,12 +168,12 @@ export async function computeSavings(opts = {}) {
 
   for (const r of rows) {
     if (!r) continue;
-    const route = ROUTES.includes(r.route) ? r.route : 'student';
+    const route = ROUTES.includes(r.route) ? r.route : 'unknown';
     const studentCost = Math.max(0, _num(r.student_cost_micro_usd, 0));
     const teacherCost = Math.max(0, _num(r.teacher_cost_micro_usd, 0));
 
     // Savings: teacher cost AVOIDED on non-teacher routes.
-    const savedThisRow = (route === 'teacher') ? 0 : teacherCost;
+    const savedThisRow = (route === 'student' || route === 'mixed') ? teacherCost : 0;
     totalSaved += savedThisRow;
     baseline += (studentCost + teacherCost);
 
@@ -175,13 +184,13 @@ export async function computeSavings(opts = {}) {
         day,
         saved_micro_usd: 0,
         baseline_micro_usd: 0,
-        routes: { student: 0, teacher: 0, mixed: 0 },
+        routes: { student: 0, teacher: 0, mixed: 0, unknown: 0 },
       };
       byDay.set(day, acc);
     }
     acc.saved_micro_usd += savedThisRow;
     acc.baseline_micro_usd += (studentCost + teacherCost);
-    acc.routes[route] += 1;
+    acc.routes[route] = (acc.routes[route] || 0) + 1;
   }
 
   // Sort ascending by day so the dashboard sparkline reads left-to-right.

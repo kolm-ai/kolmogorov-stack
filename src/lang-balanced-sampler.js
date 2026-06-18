@@ -32,6 +32,11 @@
 //   - assessLanguageCoverage({captures, target_langs, lang_detect})
 
 export const LANG_BALANCED_VERSION = 'w774-v1';
+export const LANG_BALANCED_LIMITS = Object.freeze({
+  max_capture_rows: 50000,
+  max_target_langs: 64,
+  max_sample_id_chars: 160,
+});
 
 // Four balance strategies. Each one re-weights the per-language target
 // share differently. Frozen so callers cannot mutate the contract.
@@ -67,6 +72,34 @@ export const DEFAULT_TARGET_LANGS = Object.freeze([
   'pt', 'ru', 'ar', 'hi', 'ko', 'it',
 ]);
 
+function _safeLang(raw) {
+  const lang = String(raw == null ? '' : raw).trim().toLowerCase();
+  return /^[a-z]{2}$/.test(lang) ? lang : null;
+}
+
+function _safeTargetLangs(raw) {
+  const src = (Array.isArray(raw) && raw.length > 0) ? raw : DEFAULT_TARGET_LANGS;
+  const out = [];
+  const seen = new Set();
+  for (const item of src) {
+    if (out.length >= LANG_BALANCED_LIMITS.max_target_langs) break;
+    const lang = _safeLang(item);
+    if (!lang || seen.has(lang)) continue;
+    seen.add(lang);
+    out.push(lang);
+  }
+  return out.length > 0 ? out : DEFAULT_TARGET_LANGS.slice();
+}
+
+function _safeSampleId(value, fallback) {
+  const s = String(value == null ? fallback : value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .trim()
+    .slice(0, LANG_BALANCED_LIMITS.max_sample_id_chars);
+  if (!s || s === '__proto__' || s === 'constructor' || s === 'prototype') return String(fallback);
+  return s;
+}
+
 // =============================================================================
 // sampleBalanced
 //
@@ -96,11 +129,9 @@ export const DEFAULT_TARGET_LANGS = Object.freeze([
 
 export async function sampleBalanced(opts) {
   const o = opts || {};
-  const captures = Array.isArray(o.captures) ? o.captures : [];
+  const captures = Array.isArray(o.captures) ? o.captures.slice(0, LANG_BALANCED_LIMITS.max_capture_rows) : [];
   const strategy = BALANCE_STRATEGIES.includes(o.strategy) ? o.strategy : 'uniform';
-  const targetLangs = (Array.isArray(o.target_langs) && o.target_langs.length > 0)
-    ? o.target_langs.slice()
-    : DEFAULT_TARGET_LANGS.slice();
+  const targetLangs = _safeTargetLangs(o.target_langs);
   const maxN = Number.isFinite(o.max_n) && o.max_n > 0
     ? Math.max(1, Math.min(100000, Math.trunc(o.max_n)))
     : 100;
@@ -127,7 +158,7 @@ export async function sampleBalanced(opts) {
     const text = cap.input || cap.prompt || cap.output || cap.response || '';
     if (typeof text !== 'string' || text.length === 0) continue;
     const d = detectFn(text) || {};
-    const lang = d.lang;
+    const lang = _safeLang(d.lang);
     if (!lang || d.fallback) continue;
     trafficByLang[lang] = (trafficByLang[lang] || 0) + 1;
     if (!targetLangs.includes(lang)) continue;
@@ -196,7 +227,7 @@ export async function sampleBalanced(opts) {
     if (take <= 0) continue;
     for (let i = 0; i < take; i++) {
       const cap = pool[i];
-      const cid = cap.cid || cap.event_id || ('cap_' + selectedCids.length);
+      const cid = _safeSampleId(cap.cid || cap.event_id, 'cap_' + selectedCids.length);
       selectedCids.push(cid);
     }
     byLangOut[lang] = take;
@@ -248,10 +279,8 @@ export async function sampleBalanced(opts) {
 
 export async function assessLanguageCoverage(opts) {
   const o = opts || {};
-  const captures = Array.isArray(o.captures) ? o.captures : [];
-  const targetLangs = (Array.isArray(o.target_langs) && o.target_langs.length > 0)
-    ? o.target_langs.slice()
-    : DEFAULT_TARGET_LANGS.slice();
+  const captures = Array.isArray(o.captures) ? o.captures.slice(0, LANG_BALANCED_LIMITS.max_capture_rows) : [];
+  const targetLangs = _safeTargetLangs(o.target_langs);
 
   const detectFn = await _resolveDetect(o.lang_detect);
 
@@ -261,8 +290,9 @@ export async function assessLanguageCoverage(opts) {
     const text = cap.input || cap.prompt || cap.output || cap.response || '';
     if (typeof text !== 'string' || text.length === 0) continue;
     const d = detectFn(text) || {};
-    if (!d.lang || d.fallback) continue;
-    byLang[d.lang] = (byLang[d.lang] || 0) + 1;
+    const lang = _safeLang(d.lang);
+    if (!lang || d.fallback) continue;
+    byLang[lang] = (byLang[lang] || 0) + 1;
   }
 
   const presentLangs = [];
@@ -306,6 +336,7 @@ async function _resolveDetect(injected) {
 
 export default {
   LANG_BALANCED_VERSION,
+  LANG_BALANCED_LIMITS,
   BALANCE_STRATEGIES,
   DEFAULT_TARGET_LANGS,
   sampleBalanced,

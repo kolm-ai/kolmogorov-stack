@@ -27,9 +27,13 @@
 
 import http from 'node:http';
 import https from 'node:https';
+import crypto from 'node:crypto';
 import { URL } from 'node:url';
 
 export const GATEWAY_MODE_VERSION = 'w742-v1';
+const MAX_LOCAL_BASE_URL_CHARS = 2048;
+const MAX_ERROR_DETAIL_CHARS = 240;
+const MAX_ERROR_BODY_BYTES = 4096;
 
 // Frozen so callers cannot mutate by accident.
 export const GATEWAY_MODES = Object.freeze([
@@ -83,17 +87,19 @@ export async function localOllamaCall({
   if (typeof model !== 'string' || model.length === 0) {
     return { ok: false, error: 'missing_model', hint: 'pass model:"<ollama-model-tag>" (e.g. qwen2.5:7b)' };
   }
+  const base = _normalizeLocalBaseUrl(base_url);
+  if (!base.ok) return base;
   const body = JSON.stringify({ model, messages, stream: false });
   let raw;
   try {
-    raw = await _httpPostJson(`${base_url.replace(/\/$/, '')}/api/chat`, body, 5000);
+    raw = await _httpPostJson(_joinUrlPath(base.url, '/api/chat'), body, 5000);
   } catch (e) {
     if (e && (e.code === 'ECONNREFUSED' || e.code === 'ECONNRESET')) {
       return {
         ok: false,
         error: 'ollama_not_reachable',
         hint: "start ollama with 'ollama serve'",
-        detail: String(e.message || e),
+        detail: _safeErrorDetail(e),
         version: GATEWAY_MODE_VERSION,
       };
     }
@@ -101,7 +107,7 @@ export async function localOllamaCall({
       ok: false,
       error: 'ollama_request_failed',
       hint: 'check that base_url is correct and ollama is running',
-      detail: String(e && e.message || e),
+      detail: _safeErrorDetail(e),
       version: GATEWAY_MODE_VERSION,
     };
   }
@@ -111,8 +117,10 @@ export async function localOllamaCall({
     return {
       ok: false,
       error: 'ollama_response_unparseable',
-      detail: String(e.message || e),
-      raw_body: raw.body && raw.body.slice(0, 400),
+      detail: _safeErrorDetail(e),
+      raw_body_sha256: _sha256(raw.body || ''),
+      raw_body_bytes: Number.isFinite(Number(raw.body_bytes)) ? Number(raw.body_bytes) : Buffer.byteLength(String(raw.body || ''), 'utf8'),
+      raw_body_truncated: raw.body_truncated === true,
       version: GATEWAY_MODE_VERSION,
     };
   }
@@ -147,17 +155,19 @@ export async function localVllmCall({
   if (typeof model !== 'string' || model.length === 0) {
     return { ok: false, error: 'missing_model', hint: 'pass model:"<vllm-served-model-name>"' };
   }
+  const base = _normalizeLocalBaseUrl(base_url);
+  if (!base.ok) return base;
   const body = JSON.stringify({ model, messages, stream: false });
   let raw;
   try {
-    raw = await _httpPostJson(`${base_url.replace(/\/$/, '')}/v1/chat/completions`, body, 5000);
+    raw = await _httpPostJson(_joinUrlPath(base.url, '/v1/chat/completions'), body, 5000);
   } catch (e) {
     if (e && (e.code === 'ECONNREFUSED' || e.code === 'ECONNRESET')) {
       return {
         ok: false,
         error: 'vllm_not_reachable',
         hint: "start vllm with 'python -m vllm.entrypoints.openai.api_server --model <name>'",
-        detail: String(e.message || e),
+        detail: _safeErrorDetail(e),
         version: GATEWAY_MODE_VERSION,
       };
     }
@@ -165,7 +175,7 @@ export async function localVllmCall({
       ok: false,
       error: 'vllm_request_failed',
       hint: 'check that base_url is correct and vllm is running',
-      detail: String(e && e.message || e),
+      detail: _safeErrorDetail(e),
       version: GATEWAY_MODE_VERSION,
     };
   }
@@ -175,8 +185,10 @@ export async function localVllmCall({
     return {
       ok: false,
       error: 'vllm_response_unparseable',
-      detail: String(e.message || e),
-      raw_body: raw.body && raw.body.slice(0, 400),
+      detail: _safeErrorDetail(e),
+      raw_body_sha256: _sha256(raw.body || ''),
+      raw_body_bytes: Number.isFinite(Number(raw.body_bytes)) ? Number(raw.body_bytes) : Buffer.byteLength(String(raw.body || ''), 'utf8'),
+      raw_body_truncated: raw.body_truncated === true,
       version: GATEWAY_MODE_VERSION,
     };
   }
@@ -354,6 +366,10 @@ function _httpPostJson(urlStr, body, timeoutMs) {
     let url;
     try { url = new URL(urlStr); }
     catch (e) { reject(e); return; }
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      reject(Object.assign(new Error('unsupported protocol'), { code: 'EUNSUPPORTEDPROTOCOL' }));
+      return;
+    }
     const lib = url.protocol === 'https:' ? https : http;
     const req = lib.request({
       method: 'POST',
@@ -367,10 +383,22 @@ function _httpPostJson(urlStr, body, timeoutMs) {
       timeout: timeoutMs,
     }, (res) => {
       const chunks = [];
-      res.on('data', (c) => chunks.push(c));
+      let bytes = 0;
+      let stored = 0;
+      res.on('data', (c) => {
+        bytes += c.length;
+        if (stored < MAX_ERROR_BODY_BYTES) {
+          const remaining = MAX_ERROR_BODY_BYTES - stored;
+          const piece = c.length > remaining ? c.subarray(0, remaining) : c;
+          chunks.push(piece);
+          stored += piece.length;
+        }
+      });
       res.on('end', () => resolve({
         status: res.statusCode,
         body: Buffer.concat(chunks).toString('utf8'),
+        body_bytes: bytes,
+        body_truncated: bytes > MAX_ERROR_BODY_BYTES,
       }));
     });
     req.on('error', reject);
@@ -384,9 +412,9 @@ function _httpPostJson(urlStr, body, timeoutMs) {
 
 function _probeOne(urlStr, timeoutMs) {
   return new Promise((resolve) => {
-    let url;
-    try { url = new URL(urlStr); }
-    catch (_) { resolve(false); return; }
+    const normalized = _normalizeLocalBaseUrl(urlStr);
+    if (!normalized.ok) { resolve(false); return; }
+    const url = new URL(normalized.url);
     const lib = url.protocol === 'https:' ? https : http;
     const req = lib.request({
       method: 'HEAD',
@@ -403,4 +431,41 @@ function _probeOne(urlStr, timeoutMs) {
     req.on('timeout', () => { req.destroy(); resolve(false); });
     req.end();
   });
+}
+
+function _normalizeLocalBaseUrl(raw) {
+  const text = String(raw || '').trim();
+  if (!text || text.length > MAX_LOCAL_BASE_URL_CHARS) {
+    return { ok: false, error: 'invalid_base_url', reason: 'missing_or_too_large', version: GATEWAY_MODE_VERSION };
+  }
+  let u;
+  try { u = new URL(text); } catch (_) {
+    return { ok: false, error: 'invalid_base_url', reason: 'parse_failed', version: GATEWAY_MODE_VERSION };
+  }
+  if (u.protocol !== 'http:' && u.protocol !== 'https:') {
+    return { ok: false, error: 'invalid_base_url', reason: 'unsupported_scheme', version: GATEWAY_MODE_VERSION };
+  }
+  if (u.username || u.password) {
+    return { ok: false, error: 'invalid_base_url', reason: 'embedded_credentials', version: GATEWAY_MODE_VERSION };
+  }
+  u.search = '';
+  u.hash = '';
+  return { ok: true, url: u.toString().replace(/\/$/, '') };
+}
+
+function _joinUrlPath(base, suffix) {
+  const u = new URL(base);
+  const prefix = u.pathname && u.pathname !== '/' ? u.pathname.replace(/\/+$/g, '') : '';
+  u.pathname = `${prefix}${suffix}`.replace(/\/{2,}/g, '/');
+  u.search = '';
+  u.hash = '';
+  return u.toString();
+}
+
+function _safeErrorDetail(e) {
+  return String((e && e.message) || e || '').replace(/[\u0000-\u001F\u007F]/g, ' ').slice(0, MAX_ERROR_DETAIL_CHARS);
+}
+
+function _sha256(value) {
+  return crypto.createHash('sha256').update(String(value || '')).digest('hex');
 }

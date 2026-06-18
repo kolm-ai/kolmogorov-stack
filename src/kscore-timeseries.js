@@ -22,13 +22,74 @@
 import * as path from 'node:path';
 import * as os from 'node:os';
 import * as fs from 'node:fs';
+import crypto from 'node:crypto';
 import * as eventStore from './event-store.js';
 import { computeKScoreV2 } from './kscore.js';
 
 export const KSCORE_SERIES_VERSION = 'kts-v1';
+export const KSCORE_SERIES_LIMITS = Object.freeze({
+  max_points: 5000,
+  max_read_limit: 5000,
+  max_backfill_runs: 10000,
+  max_eval_json_bytes: 2 * 1024 * 1024,
+  max_eval_candidates: 50,
+  max_id_chars: 160,
+  max_namespace_chars: 128,
+  max_path_chars: 4096,
+  max_window_days: 3650,
+});
 
 const PROVIDER = 'kolm_kscore_series';
 const DEFAULT_TENANT = 'tenant_local';
+
+function _safeText(value, fallback, maxChars) {
+  const s = String(value == null ? '' : value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .trim()
+    .slice(0, maxChars);
+  if (!s || s === '__proto__' || s === 'constructor' || s === 'prototype') return fallback;
+  return s;
+}
+
+function _safeNamespace(value) {
+  return _safeText(value == null || value === '' ? 'default' : value, 'default', KSCORE_SERIES_LIMITS.max_namespace_chars);
+}
+
+function _safeOptionalId(value) {
+  if (value == null) return null;
+  return _safeText(value, null, KSCORE_SERIES_LIMITS.max_id_chars);
+}
+
+function _safeTimestamp(value) {
+  if (typeof value === 'string' && value.trim()) {
+    const ms = Date.parse(value);
+    if (Number.isFinite(ms)) return new Date(ms).toISOString();
+  }
+  return new Date().toISOString();
+}
+
+function _safeLimit(value, fallback = KSCORE_SERIES_LIMITS.max_read_limit) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return fallback;
+  return Math.max(1, Math.min(KSCORE_SERIES_LIMITS.max_read_limit, Math.trunc(n)));
+}
+
+function _safeWindowDays(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.max(1, Math.min(KSCORE_SERIES_LIMITS.max_window_days, Math.trunc(n)));
+}
+
+function _errorDigest(e) {
+  const s = String((e && e.message) || e || '');
+  return crypto.createHash('sha256').update(s).digest('hex');
+}
+
+function _safeDetail(e) {
+  return String((e && e.message) || e || '')
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .slice(0, 240);
+}
 
 // --------------------------------------------------------------------------
 // Persistence helpers (best-effort; copied pattern from the event-store spec).
@@ -37,23 +98,31 @@ const DEFAULT_TENANT = 'tenant_local';
 async function _persist({ tenant, namespace, workflow, payload }) {
   try {
     const ev = await eventStore.appendEvent({
-      tenant_id: tenant, namespace: namespace || 'default',
+      tenant_id: tenant, namespace: _safeNamespace(namespace),
       provider: PROVIDER, vendor: 'kolm', model: 'kscore-timeseries/v1',
       workflow_id: workflow, status: 'ok',
       prompt_tokens: 0, completion_tokens: 0,
       feedback: JSON.stringify(payload || {}),
     });
     return { persisted: true, event_id: ev && ev.event_id };
-  } catch (e) { return { persisted: false, error: String((e && e.message) || e) }; }
+  } catch (e) {
+    return {
+      persisted: false,
+      error: 'append_event_failed',
+      detail: _safeDetail(e),
+      error_sha256: _errorDigest(e),
+    };
+  }
 }
 
 async function _readAll({ tenant, namespace, workflow, limit = 5000 }) {
   try {
+    const safeLimit = _safeLimit(limit);
     const rows = await eventStore.listEvents({
-      tenant_id: tenant, namespace: namespace || 'default',
-      provider: PROVIDER, workflow_id: workflow, limit, order: 'desc',
+      tenant_id: tenant, namespace: _safeNamespace(namespace),
+      provider: PROVIDER, workflow_id: workflow, limit: safeLimit, order: 'desc',
     });
-    return (rows || []).filter(r => r && r.tenant_id === tenant);
+    return (Array.isArray(rows) ? rows : []).slice(0, safeLimit).filter(r => r && r.tenant_id === tenant);
   } catch { return []; }
 }
 
@@ -74,17 +143,17 @@ function _parsePayload(row) {
 // kscore must be a finite number - anything else returns ok:false.
 export async function recordKScore({ tenant, namespace, kscore, artifact_id, run_id, ts } = {}) {
   try {
-    const t = tenant || DEFAULT_TENANT;
+    const t = _safeText(tenant || DEFAULT_TENANT, DEFAULT_TENANT, KSCORE_SERIES_LIMITS.max_id_chars);
     const score = Number(kscore);
     if (!Number.isFinite(score)) {
       return { ok: false, error: 'invalid_kscore', version: KSCORE_SERIES_VERSION };
     }
-    const when = (typeof ts === 'string' && ts) ? ts : new Date().toISOString();
+    const when = _safeTimestamp(ts);
     const payload = {
       ts: when,
       kscore: score,
-      artifact_id: artifact_id == null ? null : String(artifact_id),
-      run_id: run_id == null ? null : String(run_id),
+      artifact_id: _safeOptionalId(artifact_id),
+      run_id: _safeOptionalId(run_id),
     };
     const res = await _persist({ tenant: t, namespace, workflow: 'kscore:point', payload });
     return {
@@ -92,9 +161,10 @@ export async function recordKScore({ tenant, namespace, kscore, artifact_id, run
       version: KSCORE_SERIES_VERSION,
       event_id: res.persisted ? res.event_id : null,
       persisted: res.persisted === true,
+      persist_error: res.persisted ? null : (res.error || 'persist_failed'),
     };
   } catch (e) {
-    return { ok: false, error: String((e && e.message) || e), version: KSCORE_SERIES_VERSION };
+    return { ok: false, error: 'record_failed', detail: _safeDetail(e), error_sha256: _errorDigest(e), version: KSCORE_SERIES_VERSION };
   }
 }
 
@@ -103,27 +173,26 @@ export async function recordKScore({ tenant, namespace, kscore, artifact_id, run
 // dropped from the result.
 export async function getKScoreSeries({ tenant, namespace, window_days } = {}) {
   try {
-    const t = tenant || DEFAULT_TENANT;
-    const rows = await _readAll({ tenant: t, namespace, workflow: 'kscore:point' });
+    const t = _safeText(tenant || DEFAULT_TENANT, DEFAULT_TENANT, KSCORE_SERIES_LIMITS.max_id_chars);
+    const rows = await _readAll({ tenant: t, namespace, workflow: 'kscore:point', limit: KSCORE_SERIES_LIMITS.max_read_limit });
     let points = [];
     for (const row of rows) {
       const p = _parsePayload(row);
       if (!p) continue;
       const score = Number(p.kscore);
       if (!Number.isFinite(score)) continue;
-      const when = (typeof p.ts === 'string' && p.ts)
-        ? p.ts
-        : (row.created_at || new Date().toISOString());
+      const when = _safeTimestamp((typeof p.ts === 'string' && p.ts) ? p.ts : row.created_at);
       points.push({
         ts: when,
         kscore: score,
-        artifact_id: p.artifact_id == null ? null : p.artifact_id,
-        run_id: p.run_id == null ? null : p.run_id,
+        artifact_id: _safeOptionalId(p.artifact_id),
+        run_id: _safeOptionalId(p.run_id),
       });
     }
 
-    if (window_days != null && Number.isFinite(Number(window_days))) {
-      const cutoff = Date.now() - Number(window_days) * 24 * 60 * 60 * 1000;
+    const safeWindow = _safeWindowDays(window_days);
+    if (safeWindow != null) {
+      const cutoff = Date.now() - safeWindow * 24 * 60 * 60 * 1000;
       points = points.filter(p => {
         const ms = new Date(p.ts).getTime();
         return Number.isFinite(ms) ? ms >= cutoff : true;
@@ -135,10 +204,13 @@ export async function getKScoreSeries({ tenant, namespace, window_days } = {}) {
       const tb = new Date(b.ts).getTime();
       return (Number.isFinite(ta) ? ta : 0) - (Number.isFinite(tb) ? tb : 0);
     });
+    if (points.length > KSCORE_SERIES_LIMITS.max_points) {
+      points = points.slice(points.length - KSCORE_SERIES_LIMITS.max_points);
+    }
 
     return { ok: true, version: KSCORE_SERIES_VERSION, points, n: points.length };
   } catch (e) {
-    return { ok: false, error: String((e && e.message) || e), version: KSCORE_SERIES_VERSION };
+    return { ok: false, error: 'read_failed', detail: _safeDetail(e), error_sha256: _errorDigest(e), version: KSCORE_SERIES_VERSION };
   }
 }
 
@@ -169,7 +241,7 @@ function _findRunEval(runDir) {
     const studentDir = path.join(runDir, 'student');
     let candidates = [];
     if (fs.existsSync(studentDir) && fs.statSync(studentDir).isDirectory()) {
-      const entries = fs.readdirSync(studentDir);
+      const entries = fs.readdirSync(studentDir).slice(0, KSCORE_SERIES_LIMITS.max_eval_candidates);
       const globbed = entries
         .filter(name => /^eval-.*\.json$/i.test(name))
         .sort()
@@ -178,8 +250,10 @@ function _findRunEval(runDir) {
       const plain = path.join(studentDir, 'eval.json');
       if (fs.existsSync(plain)) candidates.push(plain);
     }
-    for (const file of candidates) {
+    for (const file of candidates.slice(0, KSCORE_SERIES_LIMITS.max_eval_candidates)) {
       try {
+        const st = fs.statSync(file);
+        if (!st.isFile() || st.size > KSCORE_SERIES_LIMITS.max_eval_json_bytes) continue;
         const raw = fs.readFileSync(file, 'utf8');
         const json = JSON.parse(raw);
         if (json && typeof json === 'object') return json;
@@ -195,7 +269,10 @@ function _findRunEval(runDir) {
 // double-counts a run).
 export async function backfillKScoreSeries({ tenant, namespace, runs_dir } = {}) {
   try {
-    const t = tenant || DEFAULT_TENANT;
+    const t = _safeText(tenant || DEFAULT_TENANT, DEFAULT_TENANT, KSCORE_SERIES_LIMITS.max_id_chars);
+    if (typeof runs_dir === 'string' && runs_dir.length > KSCORE_SERIES_LIMITS.max_path_chars) {
+      return { ok: false, error: 'runs_dir_too_large', version: KSCORE_SERIES_VERSION };
+    }
     const dir = (typeof runs_dir === 'string' && runs_dir)
       ? runs_dir
       : path.join(os.homedir(), '.kolm', 'distill-runs');
@@ -216,6 +293,7 @@ export async function backfillKScoreSeries({ tenant, namespace, runs_dir } = {})
     try {
       if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
         subdirs = fs.readdirSync(dir)
+          .slice(0, KSCORE_SERIES_LIMITS.max_backfill_runs)
           .map(name => ({ name, full: path.join(dir, name) }))
           .filter(e => {
             try { return fs.statSync(e.full).isDirectory(); } catch { return false; }
@@ -225,7 +303,8 @@ export async function backfillKScoreSeries({ tenant, namespace, runs_dir } = {})
 
     for (const sub of subdirs) {
       scanned += 1;
-      const run_id = sub.name;
+      const run_id = _safeOptionalId(sub.name);
+      if (!run_id) { skipped += 1; continue; }
       if (seen.has(run_id)) { skipped += 1; continue; }
       const json = _findRunEval(sub.full);
       if (!json) continue;
@@ -244,7 +323,7 @@ export async function backfillKScoreSeries({ tenant, namespace, runs_dir } = {})
 
     return { ok: true, version: KSCORE_SERIES_VERSION, recorded, skipped, scanned };
   } catch (e) {
-    return { ok: false, error: String((e && e.message) || e), version: KSCORE_SERIES_VERSION };
+    return { ok: false, error: 'backfill_failed', detail: _safeDetail(e), error_sha256: _errorDigest(e), version: KSCORE_SERIES_VERSION };
   }
 }
 

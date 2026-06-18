@@ -48,6 +48,20 @@ const KL_MIN_EXCLUSIVE = 0;
 const KL_MAX_INCLUSIVE = 10;
 const FBL_MIN_EXCLUSIVE = 0;
 const FBL_MAX_INCLUSIVE = 1;
+const MAX_NAMESPACE_CHARS = 128;
+
+function _safeNamespace(ns) {
+  const s = String(ns == null ? '' : ns)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .trim()
+    .slice(0, MAX_NAMESPACE_CHARS);
+  if (!s || s === '__proto__' || s === 'constructor' || s === 'prototype') return null;
+  return s;
+}
+
+function _safeDetail(e) {
+  return String((e && e.message) || e || '').replace(/[\u0000-\u001F\u007F]/g, ' ').slice(0, 240);
+}
 
 // =============================================================================
 // validateConfig({kl_threshold, fallback_rate_lift, auto_remediate_drift})
@@ -150,7 +164,8 @@ export async function setNamespaceConfig({
       version: DRIFT_CONFIG_VERSION,
     };
   }
-  if (!namespace || typeof namespace !== 'string') {
+  const ns = _safeNamespace(namespace);
+  if (!ns) {
     return {
       ok: false,
       error: 'namespace_required',
@@ -182,7 +197,7 @@ export async function setNamespaceConfig({
       return {
         ok: false,
         error: 'event_store_unavailable',
-        detail: String((e && e.message) || e),
+        detail: _safeDetail(e),
         version: DRIFT_CONFIG_VERSION,
       };
     }
@@ -191,7 +206,7 @@ export async function setNamespaceConfig({
   try {
     ev = await eventStore.appendEvent({
       tenant_id: String(tenant_id),
-      namespace: String(namespace),
+      namespace: ns,
       provider: DRIFT_CONFIG_PROVIDER,
       status: 'ok',
       source_type: 'real',
@@ -206,7 +221,7 @@ export async function setNamespaceConfig({
     return {
       ok: false,
       error: 'append_event_failed',
-      detail: String((e && e.message) || e),
+      detail: _safeDetail(e),
       version: DRIFT_CONFIG_VERSION,
     };
   }
@@ -215,7 +230,7 @@ export async function setNamespaceConfig({
     ok: true,
     version: DRIFT_CONFIG_VERSION,
     tenant_id,
-    namespace,
+    namespace: ns,
     config: merged,
     persisted_event_id: (ev && ev.event_id) || null,
     persisted_at: (ev && ev.created_at) || null,
@@ -247,7 +262,8 @@ export async function getNamespaceConfig({
       version: DRIFT_CONFIG_VERSION,
     };
   }
-  if (!namespace || typeof namespace !== 'string') {
+  const ns = _safeNamespace(namespace);
+  if (!ns) {
     return {
       ok: false,
       error: 'namespace_required',
@@ -263,7 +279,7 @@ export async function getNamespaceConfig({
     const rawRows = opts.storeMod.all('events') || [];
     const tenantRows = rawRows.filter((r) =>
       r && r.tenant_id === tenant_id
-        && r.namespace === namespace
+        && r.namespace === ns
         && r.provider === DRIFT_CONFIG_PROVIDER
     );
     // Most-recent first by created_at if present.
@@ -281,7 +297,7 @@ export async function getNamespaceConfig({
           ok: true,
           version: DRIFT_CONFIG_VERSION,
           tenant_id,
-          namespace,
+          namespace: ns,
           config: { ...DRIFT_CONFIG_DEFAULTS, ...parsed },
           source: 'override',
         };
@@ -291,7 +307,7 @@ export async function getNamespaceConfig({
       ok: true,
       version: DRIFT_CONFIG_VERSION,
       tenant_id,
-      namespace,
+      namespace: ns,
       config: { ...DRIFT_CONFIG_DEFAULTS },
       source: 'default',
     };
@@ -312,7 +328,7 @@ export async function getNamespaceConfig({
         ok: true,
         version: DRIFT_CONFIG_VERSION,
         tenant_id,
-        namespace,
+        namespace: ns,
         config: { ...DRIFT_CONFIG_DEFAULTS },
         source: 'default_event_store_unavailable',
       };
@@ -322,7 +338,7 @@ export async function getNamespaceConfig({
   try {
     rows = await eventStore.listEvents({
       tenant_id,
-      namespace,
+      namespace: ns,
       provider: DRIFT_CONFIG_PROVIDER,
       limit: 50,
       order: 'desc',
@@ -332,21 +348,21 @@ export async function getNamespaceConfig({
       ok: true,
       version: DRIFT_CONFIG_VERSION,
       tenant_id,
-      namespace,
+      namespace: ns,
       config: { ...DRIFT_CONFIG_DEFAULTS },
       source: 'default_list_events_failed',
     };
   }
   for (const row of rows) {
     if (!row || row.tenant_id !== tenant_id) continue; // defense-in-depth
-    if (row.namespace !== namespace) continue;
+    if (row.namespace !== ns) continue;
     const parsed = _parseConfigRow(row);
     if (parsed) {
       return {
         ok: true,
         version: DRIFT_CONFIG_VERSION,
         tenant_id,
-        namespace,
+        namespace: ns,
         config: { ...DRIFT_CONFIG_DEFAULTS, ...parsed },
         source: 'override',
       };
@@ -356,7 +372,7 @@ export async function getNamespaceConfig({
     ok: true,
     version: DRIFT_CONFIG_VERSION,
     tenant_id,
-    namespace,
+    namespace: ns,
     config: { ...DRIFT_CONFIG_DEFAULTS },
     source: 'default',
   };
@@ -373,6 +389,8 @@ function _parseConfigRow(row) {
   if (typeof cfg.kl_threshold === 'number') out.kl_threshold = cfg.kl_threshold;
   if (typeof cfg.fallback_rate_lift === 'number') out.fallback_rate_lift = cfg.fallback_rate_lift;
   if (typeof cfg.auto_remediate_drift === 'boolean') out.auto_remediate_drift = cfg.auto_remediate_drift;
+  const validated = validateConfig(out);
+  if (!validated.ok) return null;
   return out;
 }
 

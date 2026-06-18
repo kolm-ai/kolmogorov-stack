@@ -32,11 +32,40 @@ import { DEFAULT_REGION, REGIONS } from './data-residency.js';
 import * as defaultEventStore from './event-store.js';
 
 export const REGION_SAMPLER_VERSION = 'w769-v1';
+export const REGION_SAMPLER_LIMITS = Object.freeze({
+  max_scan_rows: 50000,
+  max_sample_rows: 10000,
+  max_namespace_chars: 128,
+  max_id_chars: 160,
+});
 
 // Internal - pick the event-store driver. opts.eventStore lets tests inject
 // a fresh module instance (useful when KOLM_DATA_DIR was just rerolled).
 function _eventStore(opts) {
   return (opts && opts.eventStore) || defaultEventStore;
+}
+
+function _safeNamespace(value) {
+  const s = String(value == null ? '' : value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .trim()
+    .slice(0, REGION_SAMPLER_LIMITS.max_namespace_chars);
+  if (!s || s === '__proto__' || s === 'constructor' || s === 'prototype') return null;
+  return s;
+}
+
+function _safeId(value) {
+  const s = String(value == null ? '' : value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .trim()
+    .slice(0, REGION_SAMPLER_LIMITS.max_id_chars);
+  if (!s || s === '__proto__' || s === 'constructor' || s === 'prototype') return null;
+  return s;
+}
+
+function _validRegionTag(value) {
+  if (!value || typeof value !== 'string') return null;
+  return Object.prototype.hasOwnProperty.call(REGIONS, value) ? value : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -75,7 +104,7 @@ export function filterCapturesByRegion(captures, target_region) {
   const out = [];
   for (const c of captures) {
     if (!c || typeof c !== 'object') continue;
-    const tag = c.region || null;
+    const tag = _validRegionTag(c.region);
     if (target_region === 'GLOBAL') {
       // GLOBAL target accepts every capture (tagged or untagged).
       out.push(c);
@@ -142,18 +171,40 @@ export async function sampleForDistillation({
       version: REGION_SAMPLER_VERSION,
     };
   }
-  const limit = Math.max(1, Math.min(10000, Math.trunc(Number(max_n)) || 100));
+  const tenant = _safeId(tenant_id);
+  if (!tenant) {
+    return {
+      ok: false,
+      error: 'tenant_id_required',
+      version: REGION_SAMPLER_VERSION,
+    };
+  }
+  const ns = namespace == null ? null : _safeNamespace(namespace);
+  if (namespace != null && !ns) {
+    return {
+      ok: false,
+      error: 'bad_namespace',
+      version: REGION_SAMPLER_VERSION,
+    };
+  }
+  const limit = Math.max(1, Math.min(REGION_SAMPLER_LIMITS.max_sample_rows, Math.trunc(Number(max_n)) || 100));
 
   const es = _eventStore({ eventStore });
 
   // Pull candidate captures from this tenant + (optionally) namespace. We
   // exclude the residency-tag rows themselves by skipping namespace
   // 'kolm.residency' below.
-  const captureQuery = { tenant_id, limit: 0 };
-  if (namespace) captureQuery.namespace = namespace;
-  const allRows = await es.listEvents(captureQuery);
+  const captureQuery = { tenant_id: tenant, limit: REGION_SAMPLER_LIMITS.max_scan_rows };
+  if (ns) captureQuery.namespace = ns;
+  let allRows = [];
+  try {
+    allRows = await es.listEvents(captureQuery);
+  } catch (_) {
+    allRows = [];
+  }
+  allRows = (Array.isArray(allRows) ? allRows : []).slice(0, REGION_SAMPLER_LIMITS.max_scan_rows);
   // W411 defense-in-depth tenant fence.
-  const tenantRows = allRows.filter((r) => r && r.tenant_id === tenant_id);
+  const tenantRows = allRows.filter((r) => r && r.tenant_id === tenant);
   const candidateCaptures = tenantRows.filter((r) =>
     r && r.namespace !== 'kolm.residency'
       && r.provider !== 'kolm_data_residency'
@@ -162,22 +213,29 @@ export async function sampleForDistillation({
   // Pull residency tags for this tenant + (optionally) the same namespace
   // scope. We index by request_hash (which is the capture_id pointer the
   // tagCapture writer used).
-  const tagRows = await es.listEvents({
-    tenant_id,
-    namespace: 'kolm.residency',
-    provider: 'kolm_data_residency',
-    limit: 0,
-  });
-  const tenantTags = tagRows.filter((r) => r && r.tenant_id === tenant_id);
+  let tagRows = [];
+  try {
+    tagRows = await es.listEvents({
+      tenant_id: tenant,
+      namespace: 'kolm.residency',
+      provider: 'kolm_data_residency',
+      limit: REGION_SAMPLER_LIMITS.max_scan_rows,
+    });
+  } catch (_) {
+    tagRows = [];
+  }
+  tagRows = (Array.isArray(tagRows) ? tagRows : []).slice(0, REGION_SAMPLER_LIMITS.max_scan_rows);
+  const tenantTags = tagRows.filter((r) => r && r.tenant_id === tenant);
   const tagByCapture = new Map();
   for (const t of tenantTags) {
     if (!t || t.model !== 'capture-tag') continue;
-    const cid = t.request_hash;
-    if (!cid) continue;
+    const cid = _safeId(t.request_hash);
+    const tag = _validRegionTag(t.response_redacted);
+    if (!cid || !tag) continue;
     // listEvents returns newest-first - first write wins so we keep
     // the latest tag.
     if (!tagByCapture.has(cid)) {
-      tagByCapture.set(cid, t.response_redacted);
+      tagByCapture.set(cid, tag);
     }
   }
 
@@ -186,12 +244,12 @@ export async function sampleForDistillation({
   // filterCapturesByRegion fail-closed rule will exclude unless
   // target_region===GLOBAL.
   const joined = candidateCaptures.map((c) => ({
-    capture_id: c.event_id,
-    namespace: c.namespace,
+    capture_id: _safeId(c.event_id),
+    namespace: _safeNamespace(c.namespace) || 'default',
     created_at: c.created_at,
-    region: tagByCapture.get(c.event_id) || null,
-    tenant_id: c.tenant_id,
-  }));
+    region: tagByCapture.get(_safeId(c.event_id)) || null,
+    tenant_id: tenant,
+  })).filter((c) => c.capture_id);
 
   const filtered = filterCapturesByRegion(joined, target_region);
 
