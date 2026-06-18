@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 709,
-    "components_without_direct_test_reference": 120,
+    "test_referenced_components": 710,
+    "components_without_direct_test_reference": 119,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -33397,12 +33397,12 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "3bb8b1113d39e82f4c11870cadfa2da4c039d26a91edf600357146ff8f218b30",
+      "sha256": "b127b8fdc58af348bd8d4f49c5b11050cb49c5994535bfdfec3f3fcb4db5c058",
       "metrics": {
-        "bytes": 15522,
-        "lines": 441,
+        "bytes": 23408,
+        "lines": 668,
         "imports": 2,
-        "exports": 3,
+        "exports": 4,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -33411,12 +33411,14 @@
         "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave690-pipeline-runner-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
