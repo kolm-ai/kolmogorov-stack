@@ -2,7 +2,7 @@
 //
 // A BYOC deployment runs a .kolm artifact on infrastructure the customer
 // controls - Fly Machines, AWS Nitro Enclaves, GCP Confidential VMs, Azure
-// Confidential Compute, or a generic Docker host they own. kolm.ai never
+// Confidential Compute, confidential GPU variants, or a generic Docker host they own. kolm.ai never
 // touches the runtime; we issue a signed deploy manifest + a deploy script,
 // and the customer's CI runs `fly deploy` (or equivalent) themselves.
 //
@@ -23,13 +23,15 @@ import {
   verifyProvenComputeReceipt,
 } from './proven-compute-receipt.js';
 
-const TARGETS = ['fly', 'aws-nitro', 'gcp-cvm', 'azure-cvm', 'docker'];
+const TARGETS = ['fly', 'aws-nitro', 'gcp-cvm', 'gcp-cvm-gpu', 'azure-cvm', 'azure-cvm-gpu', 'docker'];
 
 // Map a BYOC deploy target to the attestation parser target. `fly` has no
 // hardware attestation (Fly Machines is a plain Linux VM), so we route it
 // through the docker software-measurement path.
 function attestationTargetFor(deployTarget) {
   if (deployTarget === 'fly') return 'docker';
+  if (deployTarget === 'gcp-cvm-gpu') return 'gcp-cvm';
+  if (deployTarget === 'azure-cvm-gpu') return 'azure-cvm';
   return deployTarget;
 }
 
@@ -301,7 +303,9 @@ function deployScriptFor(target, manifest) {
     case 'fly':       return flyDeployScript(manifest);
     case 'aws-nitro': return nitroDeployScript(manifest);
     case 'gcp-cvm':   return gcpCvmDeployScript(manifest);
+    case 'gcp-cvm-gpu': return gcpCvmGpuDeployScript(manifest);
     case 'azure-cvm': return azureCvmDeployScript(manifest);
+    case 'azure-cvm-gpu': return azureCvmGpuDeployScript(manifest);
     case 'docker':    return dockerDeployScript(manifest);
     default: return '# unsupported target';
   }
@@ -433,6 +437,160 @@ echo "Enclave running. Use socat to forward 8080 ↔ vsock://16:8080 for incomin
 `;
 }
 
+function indentBlock(text, spaces = 4) {
+  const pad = ' '.repeat(spaces);
+  return String(text || '').split('\n').map(line => pad + line).join('\n');
+}
+
+function gpuNrasBootScript(m, deployTarget) {
+  return `#!/bin/bash
+set -euo pipefail
+export DEBIAN_FRONTEND=noninteractive
+export KOLM_ENROLL_TOKEN="${m.enroll_token}"
+export KOLM_ARTIFACT_URL="https://kolm.ai/v1/artifacts/${m.artifact_id}/download"
+export KOLM_DEPLOY_TARGET="${deployTarget}"
+export KOLM_REPORT_URL="\${KOLM_REPORT_URL:-https://kolm.ai/v1/byoc/attestation}"
+
+apt-get update
+apt-get install -y curl ca-certificates python3
+
+mkdir -p /opt/kolm
+curl -fSL -o /opt/kolm/artifact.kolm "$KOLM_ARTIFACT_URL"
+export KOLM_ARTIFACT_SHA="$(sha256sum /opt/kolm/artifact.kolm | cut -d' ' -f1)"
+
+# If input/output digests are supplied, derive the exact W968/W969 nonce
+# binding. Otherwise use artifact hash as a boot-attestation nonce only.
+if [ -n "\${KOLM_BYOC_INPUT_DIGEST:-}" ] && [ -n "\${KOLM_BYOC_OUTPUT_DIGEST:-}" ]; then
+  KOLM_DERIVED_NONCE="$(python3 -c "import hashlib, os; print(hashlib.sha256(bytes.fromhex(os.environ['KOLM_BYOC_INPUT_DIGEST']) + bytes.fromhex(os.environ['KOLM_BYOC_OUTPUT_DIGEST'])).hexdigest())" 2>/dev/null || true)"
+  export KOLM_DERIVED_NONCE
+fi
+if [ -z "\${KOLM_NRAS_NONCE:-}" ]; then
+  export KOLM_NRAS_NONCE="\${KOLM_DERIVED_NONCE:-$KOLM_ARTIFACT_SHA}"
+fi
+
+if command -v nvidia-smi >/dev/null 2>&1; then
+  nvidia-smi -q -x >/opt/kolm/nvidia-smi.xml 2>/dev/null || true
+  nvidia-smi --query-gpu=uuid,driver_version,vbios_version --format=csv,noheader,nounits \\
+    | head -n 1 >/opt/kolm/gpu.csv 2>/dev/null || true
+fi
+
+collect_nras_report() {
+  if [ -n "\${KOLM_NRAS_REPORT_FILE:-}" ] && [ -s "$KOLM_NRAS_REPORT_FILE" ]; then
+    cat "$KOLM_NRAS_REPORT_FILE"; return 0
+  fi
+  if command -v nvidia-attestation >/dev/null 2>&1; then
+    nvidia-attestation --nonce "$KOLM_NRAS_NONCE" --format json 2>/dev/null && return 0
+    nvidia-attestation report --nonce "$KOLM_NRAS_NONCE" --format json 2>/dev/null && return 0
+  fi
+  if command -v nvtrust >/dev/null 2>&1; then
+    nvtrust attestation --nonce "$KOLM_NRAS_NONCE" --format json 2>/dev/null && return 0
+    nvtrust attest --nonce "$KOLM_NRAS_NONCE" --format json 2>/dev/null && return 0
+  fi
+  return 0
+}
+
+collect_nras_report >/opt/kolm/nras-attestation.raw || true
+PUB="$(curl -fsS ifconfig.me 2>/dev/null || curl -fsS ipify.org 2>/dev/null || true)"
+export KOLM_PUBLIC_URL="\${KOLM_PUBLIC_URL:-http://$PUB}"
+
+python3 - <<'PY' >/tmp/kolm-byoc-attestation.json
+import json
+import os
+import re
+
+def read_text(path):
+    try:
+        with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+            return f.read().strip()
+    except Exception:
+        return ''
+
+def first(*values):
+    for v in values:
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    return ''
+
+def extract(obj, *names):
+    if not isinstance(obj, dict):
+        return ''
+    for name in names:
+        v = obj.get(name)
+        if v:
+            return v
+    return ''
+
+def split_pem_bundle(text):
+    if not text:
+        return []
+    blocks = []
+    cur = []
+    for line in text.splitlines():
+        if 'BEGIN CERTIFICATE' in line:
+            cur = [line]
+        elif cur:
+            cur.append(line)
+            if 'END CERTIFICATE' in line:
+                blocks.append('\\n'.join(cur))
+                cur = []
+    return blocks
+
+raw = read_text('/opt/kolm/nras-attestation.raw')
+try:
+    parsed = json.loads(raw) if raw else {}
+except Exception:
+    parsed = {}
+
+gpu_csv = [x.strip() for x in read_text('/opt/kolm/gpu.csv').split(',')]
+gpu_id = first(os.environ.get('KOLM_NRAS_GPU_ID'), extract(parsed, 'gpu_id', 'gpu_uuid', 'uuid'), gpu_csv[0] if len(gpu_csv) > 0 else '', 'unknown-gpu')
+driver = first(os.environ.get('KOLM_NRAS_DRIVER_VERSION'), extract(parsed, 'driver_version'), gpu_csv[1] if len(gpu_csv) > 1 else '', 'unknown-driver')
+vbios = first(os.environ.get('KOLM_NRAS_VBIOS_VERSION'), extract(parsed, 'vbios_version'), gpu_csv[2] if len(gpu_csv) > 2 else '', 'unknown-vbios')
+token = extract(parsed, 'attestation_report', 'eat', 'eat_token', 'jwt', 'token', 'report')
+if not isinstance(token, str):
+    token = ''
+token = first(token, raw)
+nonce = first(os.environ.get('KOLM_NRAS_NONCE'), extract(parsed, 'eat_nonce', 'nonce'))
+
+cert_chain = []
+parsed_chain = extract(parsed, 'cert_chain', 'x5c')
+if isinstance(parsed_chain, list):
+    cert_chain.extend([str(x) for x in parsed_chain if str(x).strip()])
+elif isinstance(parsed_chain, str):
+    cert_chain.extend(split_pem_bundle(parsed_chain))
+cert_chain.extend(split_pem_bundle(os.environ.get('KOLM_NRAS_CERT_CHAIN_PEM', '')))
+cert_chain.extend(split_pem_bundle(read_text(os.environ.get('KOLM_NRAS_CERT_CHAIN_FILE', ''))))
+
+payload = {
+    'enroll_token': os.environ['KOLM_ENROLL_TOKEN'],
+    'public_url': os.environ.get('KOLM_PUBLIC_URL') or '',
+    'measurement': 'sha256:' + os.environ['KOLM_ARTIFACT_SHA'],
+    'target': os.environ['KOLM_DEPLOY_TARGET'],
+    'artifact_hash': os.environ['KOLM_ARTIFACT_SHA'],
+    'runtime_target': os.environ['KOLM_DEPLOY_TARGET'],
+    'gpu_attestation': {
+        'gpu_id': gpu_id,
+        'driver_version': driver,
+        'vbios_version': vbios,
+        'attestation_report': token,
+        'cert_chain': cert_chain,
+        'nonce': nonce,
+    },
+}
+if re.fullmatch(r'[0-9a-fA-F]{64}', os.environ.get('KOLM_BYOC_INPUT_DIGEST', '') or ''):
+    payload['input_digest'] = os.environ['KOLM_BYOC_INPUT_DIGEST'].lower()
+if re.fullmatch(r'[0-9a-fA-F]{64}', os.environ.get('KOLM_BYOC_OUTPUT_DIGEST', '') or ''):
+    payload['output_digest'] = os.environ['KOLM_BYOC_OUTPUT_DIGEST'].lower()
+if (os.environ.get('KOLM_REQUIRE_PROVEN_COMPUTE', '') or '').lower() in ('1', 'true', 'yes'):
+    payload['require_proven_compute'] = True
+print(json.dumps(payload, separators=(',', ':')))
+PY
+
+curl -fsS -X POST "$KOLM_REPORT_URL" \\
+  -H 'content-type: application/json' \\
+  --data-binary @/tmp/kolm-byoc-attestation.json || true
+`;
+}
+
 function gcpCvmDeployScript(m) {
   return `#!/usr/bin/env bash
 # kolm BYOC deploy - GCP Confidential VM
@@ -473,6 +631,51 @@ gcloud compute firewall-rules create kolm-byoc-allow-80 --project "$PROJECT" \\
   --allow tcp:80 --target-tags http-server 2>/dev/null || true
 
 echo "Confidential VM \\\"$NAME\\\" created in $ZONE. Boot will POST attestation to kolm.ai."
+`;
+}
+
+function gcpCvmGpuDeployScript(m) {
+  return `#!/usr/bin/env bash
+# kolm BYOC deploy - GCP Confidential VM with NVIDIA Confidential Computing GPU
+# deploy_id: ${m.deploy_id}
+# artifact: ${m.artifact_id}
+#
+# Defaults follow Google Cloud's current Confidential VM GPU docs:
+#   a3-highgpu-1g + TDX + SPOT + ubuntu-2204-lts for NVIDIA H100.
+# Operators can override MACHINE_TYPE/CONFIDENTIAL_COMPUTE_TYPE/IMAGE_FAMILY
+# for G4 SEV preview targets.
+set -euo pipefail
+if ! command -v gcloud >/dev/null 2>&1; then echo "gcloud CLI required"; exit 2; fi
+
+PROJECT="\${PROJECT:?set PROJECT=<gcp-project-id>}"
+NAME="${m.name}"
+ZONE="\${ZONE:-us-central1-a}"
+MACHINE_TYPE="\${MACHINE_TYPE:-a3-highgpu-1g}"
+CONFIDENTIAL_COMPUTE_TYPE="\${CONFIDENTIAL_COMPUTE_TYPE:-TDX}"
+PROVISIONING_MODEL="\${PROVISIONING_MODEL:-SPOT}"
+IMAGE_PROJECT="\${IMAGE_PROJECT:-ubuntu-os-cloud}"
+IMAGE_FAMILY="\${IMAGE_FAMILY:-ubuntu-2204-lts}"
+
+cat > startup.sh <<'EOF_STARTUP'
+${gpuNrasBootScript(m, 'gcp-cvm-gpu')}
+EOF_STARTUP
+
+gcloud compute instances create "$NAME" \\
+  --project "$PROJECT" --zone "$ZONE" \\
+  --provisioning-model="$PROVISIONING_MODEL" \\
+  --confidential-compute-type="$CONFIDENTIAL_COMPUTE_TYPE" \\
+  --machine-type="$MACHINE_TYPE" \\
+  --maintenance-policy=TERMINATE \\
+  --image-project="$IMAGE_PROJECT" --image-family="$IMAGE_FAMILY" \\
+  --boot-disk-size=200G \\
+  --metadata-from-file=startup-script=startup.sh \\
+  --shielded-secure-boot \\
+  --tags http-server
+
+gcloud compute firewall-rules create kolm-byoc-allow-80 --project "$PROJECT" \\
+  --allow tcp:80 --target-tags http-server 2>/dev/null || true
+
+echo "Confidential GPU VM \\\"$NAME\\\" created in $ZONE. Boot will capture NVIDIA GPU evidence and POST to kolm.ai."
 `;
 }
 
@@ -521,6 +724,47 @@ az vm create -g "$RG" -n "$NAME" -l "$LOC" \\
   --admin-username kolmadmin --generate-ssh-keys
 
 echo "Confidential VM \\\"$NAME\\\" created in $RG/$LOC. Boot will POST attestation to kolm.ai."
+`;
+}
+
+function azureCvmGpuDeployScript(m) {
+  return `#!/usr/bin/env bash
+# kolm BYOC deploy - Azure Confidential VM with NVIDIA H100 Confidential GPU
+# deploy_id: ${m.deploy_id}
+# artifact: ${m.artifact_id}
+#
+# Azure documents the NCCadsH100v5-series as AMD SEV-SNP + NVIDIA H100 CVM
+# with Confidential GPU. Check regional quota with: az vm list-skus --all.
+set -euo pipefail
+if ! command -v az >/dev/null 2>&1; then echo "az CLI required"; exit 2; fi
+
+RG="\${RG:?set RG=<resource-group>}"
+NAME="${m.name}"
+LOC="\${LOC:-eastus}"
+SIZE="\${AZURE_CONFIDENTIAL_GPU_SIZE:-Standard_NCC40ads_H100_v5}"
+
+cat > cloud-init.yaml <<'EOF'
+#cloud-config
+write_files:
+- path: /opt/kolm/boot.sh
+  permissions: '0755'
+  content: |
+${indentBlock(gpuNrasBootScript(m, 'azure-cvm-gpu'), 4)}
+runcmd:
+- /opt/kolm/boot.sh
+EOF
+
+az vm create -g "$RG" -n "$NAME" -l "$LOC" \\
+  --image Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest \\
+  --size "$SIZE" \\
+  --security-type ConfidentialVM \\
+  --enable-secure-boot true \\
+  --enable-vtpm true \\
+  --os-disk-security-encryption-type VMGuestStateOnly \\
+  --custom-data cloud-init.yaml \\
+  --admin-username kolmadmin --generate-ssh-keys
+
+echo "Confidential GPU VM \\\"$NAME\\\" created in $RG/$LOC. Boot will capture NVIDIA GPU evidence and POST to kolm.ai."
 `;
 }
 

@@ -105,7 +105,7 @@ export const REPORT_SHAPES = Object.freeze({
     required: ['gpu_id', 'driver_version', 'vbios_version', 'attestation_report', 'cert_chain', 'nonce'],
     types: {
       gpu_id: 'string', driver_version: 'string', vbios_version: 'string',
-      attestation_report: 'base64-or-hex', cert_chain: 'cert-array',
+      attestation_report: 'nras-token', cert_chain: 'cert-array',
       nonce: 'base64-or-hex',
     },
   },
@@ -146,6 +146,12 @@ function checkType(val, typespec) {
     case 'hex128': return typeof val === 'string' && /^[0-9a-fA-F]{128}$/.test(val);
     case 'base64-or-hex':
       return typeof val === 'string' && (/^[A-Za-z0-9+/=]+$/.test(val) || /^[0-9a-fA-F]+$/.test(val));
+    case 'nras-token':
+      return typeof val === 'string' && (
+        /^[A-Za-z0-9+/=]+$/.test(val) ||
+        /^[0-9a-fA-F]+$/.test(val) ||
+        /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(val)
+      );
     case 'pcr-map':
       return val && typeof val === 'object' && !Array.isArray(val) && Object.keys(val).length > 0;
     case 'cert-array':

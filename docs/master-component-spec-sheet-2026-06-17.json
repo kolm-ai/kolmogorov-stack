@@ -42,8 +42,8 @@
     "direct_test_referenced_components": 969,
     "direct_test_reference_pct": 100,
     "components_without_direct_test_reference": 0,
-    "high_priority_components": 65,
-    "high_priority_direct_test_referenced": 65,
+    "high_priority_components": 66,
+    "high_priority_direct_test_referenced": 66,
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 3,
@@ -305,7 +305,7 @@
       "id": "verifiable-inference",
       "stack_area": "trust",
       "status": "sota_review_complete_critical_frontier_work_open",
-      "already_at_frontier_count": 10,
+      "already_at_frontier_count": 11,
       "improvement_count": 2,
       "critical_gaps": 1,
       "major_gaps": 1,
@@ -338,9 +338,9 @@
       "stack_area": "enterprise",
       "status": "sota_review_complete_major_frontier_work_open",
       "already_at_frontier_count": 8,
-      "improvement_count": 3,
+      "improvement_count": 2,
       "critical_gaps": 0,
-      "major_gaps": 2,
+      "major_gaps": 1,
       "minor_gaps": 1,
       "required_components": 4,
       "suggested_verification": [
@@ -6815,12 +6815,6 @@
             "relation": "sampled"
           },
           {
-            "id": "ondevice-inference",
-            "stack_area": "cross-device",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
             "id": "verifiable-inference",
             "stack_area": "trust",
             "status": "sota_review_complete_critical_frontier_work_open",
@@ -6830,12 +6824,6 @@
             "id": "model-signing-standards",
             "stack_area": "trust",
             "status": "sota_review_complete_external_or_release_gate_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "compile-api-to-model-competitors",
-            "stack_area": "compiler-platform",
-            "status": "sota_review_complete_critical_frontier_work_open",
             "relation": "sampled"
           }
         ],
@@ -10576,6 +10564,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/byoc-gpu-attestation.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js"
         ],
         "category_links": [],
@@ -10624,6 +10613,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/byoc-gpu-attestation.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js"
         ],
         "category_links": [],
@@ -19762,27 +19752,28 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 22281,
-          "lines": 563,
+          "bytes": 31616,
+          "lines": 807,
           "imports": 9,
           "exports": 9,
           "routes": 0,
-          "env_refs": 0,
-          "fs_writes": 5,
+          "env_refs": 19,
+          "fs_writes": 6,
           "subprocess_refs": 1,
           "network_refs": 1,
-          "crypto_refs": 15,
+          "crypto_refs": 18,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
           "execution_or_subprocess_boundary",
           "network_or_provider_boundary",
           "stateful_storage_boundary"
         ],
-        "priority_score": 6,
-        "priority_band": "medium",
-        "sha256": "8d66166a20b7218126cf6ea765343bfe0472a426e13be17e71f64422713c3561"
+        "priority_score": 7,
+        "priority_band": "high",
+        "sha256": "3b3fc1bdeaece2ef76d16b24c9c363a462e84bd372e65a46377d7c970dacd382"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -19795,10 +19786,22 @@
         ],
         "category_links": [
           {
+            "id": "ondevice-inference",
+            "stack_area": "cross-device",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
             "id": "confidential-compute",
             "stack_area": "enterprise",
             "status": "sota_review_complete_major_frontier_work_open",
             "relation": "required"
+          },
+          {
+            "id": "compile-api-to-model-competitors",
+            "stack_area": "compiler-platform",
+            "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "sampled"
           }
         ],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
@@ -23522,8 +23525,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 19377,
-          "lines": 477,
+          "bytes": 19596,
+          "lines": 483,
           "imports": 1,
           "exports": 20,
           "routes": 0,
@@ -23539,7 +23542,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "05da6bd3e41aa2fe198f3ddc65640ebfd34de59e97b4ff7548c88e9864bdd0ee"
+        "sha256": "0c4e63408097deea898ffe28ec033bfa84d2e61d718cdd17529c19c383fa12bc"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

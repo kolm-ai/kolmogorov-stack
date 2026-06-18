@@ -74,6 +74,18 @@ test('BYOC GPU #1 — verifyGpuAttestation: valid NRAS report -> shape_ok, verif
     'report_hash must be a sha256 hex string');
 });
 
+test('BYOC GPU #2b - verifyGpuAttestation accepts compact NRAS EAT/JWT token shape', async () => {
+  freshEnv();
+  const byoc = await import('../src/byoc.js');
+  const report = {
+    ...validNrasReport(),
+    attestation_report: 'eyJhbGciOiJSUzI1NiJ9.eyJlYXRfbm9uY2UiOiJhYiJ9.c2lnbmF0dXJl',
+  };
+  const gpu = await byoc.verifyGpuAttestation(report);
+  assert.equal(gpu.shape_ok, true, JSON.stringify(gpu));
+  assert.equal(gpu.verified, false);
+});
+
 test('BYOC GPU #2 — verifyGpuAttestation: malformed report -> shape_ok:false, verified:false', async () => {
   freshEnv();
   const byoc = await import('../src/byoc.js');
@@ -344,4 +356,35 @@ test('BYOC GPU #11 - require_proven_compute fails closed without artifact identi
   } finally {
     cc.clearAttestationVerifier('nras');
   }
+});
+
+test('BYOC GPU #12 - explicit confidential GPU targets generate NRAS collector scripts', async () => {
+  freshEnv();
+  const byoc = await import('../src/byoc.js');
+  assert.ok(byoc.TARGETS.includes('gcp-cvm-gpu'));
+  assert.ok(byoc.TARGETS.includes('azure-cvm-gpu'));
+
+  const gcp = byoc.createDeployment({
+    tenantId: 't1', tenantName: 'Acme', target: 'gcp-cvm-gpu', artifactId: 'art-gpu',
+  });
+  assert.equal(gcp.manifest.target, 'gcp-cvm-gpu');
+  assert.match(gcp.deploy_script, /a3-highgpu-1g/);
+  assert.match(gcp.deploy_script, /--confidential-compute-type="\$CONFIDENTIAL_COMPUTE_TYPE"/);
+  assert.match(gcp.deploy_script, /nvidia-smi/);
+  assert.match(gcp.deploy_script, /nvidia-attestation/);
+  assert.match(gcp.deploy_script, /gpu_attestation/);
+  assert.match(gcp.deploy_script, /artifact_hash/);
+  assert.match(gcp.deploy_script, /KOLM_BYOC_INPUT_DIGEST/);
+  assert.match(gcp.deploy_script, /KOLM_REQUIRE_PROVEN_COMPUTE/);
+
+  const azure = byoc.createDeployment({
+    tenantId: 't1', tenantName: 'Acme', target: 'azure-cvm-gpu', artifactId: 'art-gpu',
+  });
+  assert.equal(azure.manifest.target, 'azure-cvm-gpu');
+  assert.match(azure.deploy_script, /NCCadsH100v5/);
+  assert.match(azure.deploy_script, /AZURE_CONFIDENTIAL_GPU_SIZE/);
+  assert.match(azure.deploy_script, /nvidia-smi/);
+  assert.match(azure.deploy_script, /KOLM_NRAS_CERT_CHAIN_FILE/);
+  assert.match(azure.deploy_script, /gpu_attestation/);
+  assert.match(azure.deploy_script, /artifact_hash/);
 });

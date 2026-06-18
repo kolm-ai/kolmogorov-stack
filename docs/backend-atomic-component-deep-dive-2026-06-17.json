@@ -42,7 +42,7 @@
     "component_count": 969,
     "test_referenced_components": 969,
     "components_without_direct_test_reference": 0,
-    "high_priority_components": 65,
+    "high_priority_components": 66,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -69,7 +69,7 @@
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 474,
       "distribution_or_worker_surface": 306,
-      "environment_configuration_boundary": 367,
+      "environment_configuration_boundary": 368,
       "execution_or_subprocess_boundary": 313,
       "http_route_surface": 41,
       "large_component_contract_risk": 45,
@@ -9943,6 +9943,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/byoc-gpu-attestation.test.js",
         "tests/wave555-user-completion-cloud-optimizer.test.js"
       ],
       "risk_signals": [
@@ -10002,6 +10003,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/byoc-gpu-attestation.test.js",
         "tests/wave555-user-completion-cloud-optimizer.test.js"
       ],
       "risk_signals": [
@@ -20753,18 +20755,18 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "8d66166a20b7218126cf6ea765343bfe0472a426e13be17e71f64422713c3561",
+      "sha256": "3b3fc1bdeaece2ef76d16b24c9c363a462e84bd372e65a46377d7c970dacd382",
       "metrics": {
-        "bytes": 22281,
-        "lines": 563,
+        "bytes": 31616,
+        "lines": 807,
         "imports": 9,
         "exports": 9,
         "routes": 0,
-        "env_refs": 0,
-        "fs_writes": 5,
+        "env_refs": 19,
+        "fs_writes": 6,
         "subprocess_refs": 1,
         "network_refs": 1,
-        "crypto_refs": 15,
+        "crypto_refs": 18,
         "markers": 0
       },
       "test_refs": [
@@ -20772,11 +20774,12 @@
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
         "network_or_provider_boundary",
         "stateful_storage_boundary"
       ],
-      "priority_score": 6,
+      "priority_score": 7,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -25148,10 +25151,10 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "05da6bd3e41aa2fe198f3ddc65640ebfd34de59e97b4ff7548c88e9864bdd0ee",
+      "sha256": "0c4e63408097deea898ffe28ec033bfa84d2e61d718cdd17529c19c383fa12bc",
       "metrics": {
-        "bytes": 19377,
-        "lines": 477,
+        "bytes": 19596,
+        "lines": 483,
         "imports": 1,
         "exports": 20,
         "routes": 0,

@@ -4148,6 +4148,22 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "src/byoc.js",
+            "domain": "infra_cloud_device",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/byoc-gpu-attestation.test.js"
+            ],
+            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
+          },
+          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -4241,21 +4257,6 @@
             ],
             "test_refs": [
               "tests/wave648-compile-server-contract.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "apps/trainer/backends/lambda_runner.py",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 6,
-            "risk_signals": [
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "http_route_surface"
-            ],
-            "test_refs": [
-              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
@@ -5361,7 +5362,7 @@
         "line": 641,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 10,
+        "already_at_frontier_count": 11,
         "improvement_count": 2,
         "gaps": {
           "critical": 1,
@@ -5873,10 +5874,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 676
+        "line": 679
       },
       "local_sota_review": {
-        "line": 676,
+        "line": 679,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6383,17 +6384,17 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 722
+        "line": 725
       },
       "local_sota_review": {
-        "line": 722,
+        "line": 725,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
-        "improvement_count": 3,
+        "improvement_count": 2,
         "gaps": {
           "critical": 0,
-          "major": 2,
+          "major": 1,
           "minor": 1
         }
       },
@@ -6421,9 +6422,10 @@
           {
             "path": "src/byoc.js",
             "domain": "infra_cloud_device",
-            "priority_score": 6,
+            "priority_score": 7,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
               "network_or_provider_boundary",
               "stateful_storage_boundary"
@@ -6861,10 +6863,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 775
+        "line": 778
       },
       "local_sota_review": {
-        "line": 775,
+        "line": 778,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -7342,10 +7344,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 824
+        "line": 827
       },
       "local_sota_review": {
-        "line": 824,
+        "line": 827,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,
@@ -7592,6 +7594,22 @@
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           },
           {
+            "path": "src/byoc.js",
+            "domain": "infra_cloud_device",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/byoc-gpu-attestation.test.js"
+            ],
+            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
+          },
+          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -7685,21 +7703,6 @@
             ],
             "test_refs": [
               "tests/wave648-compile-server-contract.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "apps/trainer/backends/lambda_runner.py",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 6,
-            "risk_signals": [
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "http_route_surface"
-            ],
-            "test_refs": [
-              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
