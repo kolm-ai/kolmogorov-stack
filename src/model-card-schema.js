@@ -30,11 +30,34 @@
 //     mapping silently.
 
 export const MODEL_CARD_SCHEMA_VERSION = 'w768-v1';
+export const MODEL_CARD_SCHEMA_LIMITS = Object.freeze({
+  max_platform_chars: 80,
+  max_card_sections: 64,
+  max_unmapped_sections: 64,
+});
+
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+function _deepFreeze(obj) {
+  if (!obj || typeof obj !== 'object' || Object.isFrozen(obj)) return obj;
+  for (const value of Object.values(obj)) _deepFreeze(value);
+  return Object.freeze(obj);
+}
+
+function _safeKey(v, max = MODEL_CARD_SCHEMA_LIMITS.max_platform_chars) {
+  const s = String(v == null ? '' : v)
+    .replace(/[\u0000-\u001f\u007f]+/g, ' ')
+    .trim()
+    .toLowerCase()
+    .slice(0, max);
+  if (!s || UNSAFE_KEYS.has(s)) return null;
+  return s.replace(/[^a-z0-9_.-]+/g, '_');
+}
 
 // JSON Schema draft-07 describing the HF Model Card v0.3 shape we emit.
 // We expose this so governance integrations can validate cards before
 // ingestion, and so callers building cards manually can confirm shape.
-export const MODEL_CARD_JSON_SCHEMA = Object.freeze({
+export const MODEL_CARD_JSON_SCHEMA = _deepFreeze({
   $schema: 'http://json-schema.org/draft-07/schema#',
   $id: 'https://kolm.ai/schemas/model-card/w768-v1.json',
   title: 'kolm Model Card (HF v0.3)',
@@ -261,8 +284,8 @@ export const MODEL_CARD_JSON_SCHEMA = Object.freeze({
 //     we use a clearly namespaced 'custom.*' placeholder. An integrator
 //     wiring a tenant maps these to actual table columns at integration time.
 // =============================================================================
-export const GOVERNANCE_PLATFORM_MAPPINGS = Object.freeze({
-  onetrust: Object.freeze({
+export const GOVERNANCE_PLATFORM_MAPPINGS = _deepFreeze({
+  onetrust: {
     model_details:               'aiInventory.modelMetadata',
     intended_use:                'aiInventory.purposeOfProcessing',
     factors:                     'aiInventory.modelFactors',
@@ -273,8 +296,8 @@ export const GOVERNANCE_PLATFORM_MAPPINGS = Object.freeze({
     ethical_considerations:      'aiInventory.ethicalRiskAssessment',
     caveats_and_recommendations: 'aiInventory.modelLimitations',
     environmental_impact:        'aiInventory.environmentalImpact',
-  }),
-  servicenow_ai_governance: Object.freeze({
+  },
+  servicenow_ai_governance: {
     model_details:               'sn_aigov_inventory.model_metadata',
     intended_use:                'sn_aigov_inventory.intended_use',
     factors:                     'sn_aigov_inventory.relevant_factors',
@@ -285,8 +308,8 @@ export const GOVERNANCE_PLATFORM_MAPPINGS = Object.freeze({
     ethical_considerations:      'sn_aigov_risk.ethical_considerations',
     caveats_and_recommendations: 'sn_aigov_risk.model_limitations',
     environmental_impact:        'sn_aigov_inventory.environmental_impact',
-  }),
-  ibm_openpages: Object.freeze({
+  },
+  ibm_openpages: {
     model_details:               'OPModel.ModelOverview',
     intended_use:                'OPModel.IntendedUse',
     factors:                     'OPModel.ModelFactors',
@@ -297,7 +320,7 @@ export const GOVERNANCE_PLATFORM_MAPPINGS = Object.freeze({
     ethical_considerations:      'OPModel.EthicalConsiderations',
     caveats_and_recommendations: 'OPModel.CaveatsAndRecommendations',
     environmental_impact:        'OPModel.EnvironmentalImpact',
-  }),
+  },
 });
 
 export const SUPPORTED_GOVERNANCE_PLATFORMS = Object.freeze(
@@ -327,7 +350,10 @@ export function mapCardToGovernancePlatform(card, platform) {
       version: MODEL_CARD_SCHEMA_VERSION,
     };
   }
-  const mapping = GOVERNANCE_PLATFORM_MAPPINGS[platform];
+  const platformKey = _safeKey(platform);
+  const mapping = platformKey && Object.prototype.hasOwnProperty.call(GOVERNANCE_PLATFORM_MAPPINGS, platformKey)
+    ? GOVERNANCE_PLATFORM_MAPPINGS[platformKey]
+    : null;
   if (!mapping) {
     return {
       ok: false,
@@ -338,19 +364,21 @@ export function mapCardToGovernancePlatform(card, platform) {
     };
   }
   const src = (card && typeof card === 'object') ? card : {};
-  const mapped = {};
+  const mapped = Object.create(null);
   const unmapped = [];
-  for (const [kolmField, value] of Object.entries(src)) {
-    const platformField = mapping[kolmField];
+  for (const [rawKolmField, value] of Object.entries(src).slice(0, MODEL_CARD_SCHEMA_LIMITS.max_card_sections)) {
+    const kolmField = _safeKey(rawKolmField, 120);
+    if (!kolmField) continue;
+    const platformField = Object.prototype.hasOwnProperty.call(mapping, kolmField) ? mapping[kolmField] : null;
     if (typeof platformField === 'string' && platformField) {
       mapped[platformField] = value;
-    } else {
+    } else if (unmapped.length < MODEL_CARD_SCHEMA_LIMITS.max_unmapped_sections) {
       unmapped.push(kolmField);
     }
   }
   return {
     ok: true,
-    platform,
+    platform: platformKey,
     version: MODEL_CARD_SCHEMA_VERSION,
     mapped,
     mapping_used: mapping,
@@ -361,6 +389,7 @@ export function mapCardToGovernancePlatform(card, platform) {
 // Default export for the rare consumer that wants the whole module by name.
 export default {
   MODEL_CARD_SCHEMA_VERSION,
+  MODEL_CARD_SCHEMA_LIMITS,
   MODEL_CARD_JSON_SCHEMA,
   GOVERNANCE_PLATFORM_MAPPINGS,
   SUPPORTED_GOVERNANCE_PLATFORMS,

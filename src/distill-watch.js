@@ -26,11 +26,58 @@
 // no-account path; pointing a run at Weights & Biases is a separate opt-in knob.
 
 import http from 'node:http';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
 export const DISTILL_WATCH_VERSION = 'tw-v1';
+export const DISTILL_WATCH_LIMITS = Object.freeze({
+  max_progress_bytes: 4 * 1024 * 1024,
+  max_lines: 5000,
+  max_run_id_chars: 160,
+  max_error_detail_chars: 240,
+  loopback_hosts: Object.freeze(['127.0.0.1', 'localhost', '::1']),
+});
+
+const UNSAFE_OBJECT_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+function _safeText(v, max = DISTILL_WATCH_LIMITS.max_run_id_chars) {
+  const s = String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]+/g, ' ').trim();
+  return s.length > max ? s.slice(0, max) : s;
+}
+
+function _safeError(e) {
+  return _safeText((e && e.message) ? e.message : e, DISTILL_WATCH_LIMITS.max_error_detail_chars);
+}
+
+function _hash(v) {
+  return crypto.createHash('sha256').update(String(v == null ? '' : v)).digest('hex');
+}
+
+function _safeRunId(runId) {
+  if (runId == null || runId === '') return '';
+  const s = _safeText(runId, DISTILL_WATCH_LIMITS.max_run_id_chars);
+  if (!s || s === '.' || s === '..' || UNSAFE_OBJECT_KEYS.has(s)) return null;
+  if (!/^[A-Za-z0-9_.-]+$/.test(s)) return null;
+  return s;
+}
+
+function _isUnder(baseDir, target) {
+  const base = path.resolve(baseDir);
+  const dest = path.resolve(target);
+  const rel = path.relative(base, dest);
+  return rel === '' || (!!rel && !rel.startsWith('..') && !path.isAbsolute(rel));
+}
+
+function _pathLabel(absPath) {
+  return _safeText(path.basename(String(absPath || '')), DISTILL_WATCH_LIMITS.max_run_id_chars) || 'run';
+}
+
+function _isLoopbackHost(host) {
+  const h = _safeText(host || '127.0.0.1', 64).toLowerCase();
+  return DISTILL_WATCH_LIMITS.loopback_hosts.includes(h);
+}
 
 // --- path resolution (mirrors src/distill-pipeline.js so we read the same dir)
 function _home() { return process.env.HOME || process.env.USERPROFILE || os.homedir(); }
@@ -40,12 +87,43 @@ function _kolmDir() {
 // Resolve a run directory. opts.runDir / opts.baseDir let callers (and the
 // smoke) point at a temp dir without touching the real ~/.kolm tree.
 function _resolveRunDir(runId, opts = {}) {
-  if (opts.runDir) return path.resolve(opts.runDir);
   const base = opts.baseDir ? path.resolve(opts.baseDir) : path.join(_kolmDir(), 'distill-runs');
-  return path.join(base, String(runId == null ? '' : runId));
+  if (opts.runDir) {
+    const runDir = path.resolve(String(opts.runDir));
+    if (opts.baseDir && !_isUnder(base, runDir)) {
+      return { ok: false, error: 'run_dir_outside_base' };
+    }
+    return { ok: true, runDir, runId: _safeRunId(runId) || _pathLabel(runDir) };
+  }
+  const safeRunId = _safeRunId(runId);
+  if (safeRunId == null) return { ok: false, error: 'invalid_run_id' };
+  const runDir = path.resolve(base, safeRunId);
+  if (!_isUnder(base, runDir)) return { ok: false, error: 'run_dir_outside_base' };
+  return { ok: true, runDir, runId: safeRunId || null };
 }
 
 function _num(v) { return typeof v === 'number' && Number.isFinite(v) ? v : null; }
+
+function _readBoundedUtf8(filePath) {
+  let stat = null;
+  try { stat = fs.statSync(filePath); } catch (e) { return { raw: '', truncated: false, error: _safeError(e) }; }
+  if (!stat || !stat.isFile()) return { raw: '', truncated: false, error: 'not_file' };
+  const max = DISTILL_WATCH_LIMITS.max_progress_bytes;
+  if (stat.size <= max) {
+    try { return { raw: fs.readFileSync(filePath, 'utf8'), truncated: false }; }
+    catch (e) { return { raw: '', truncated: false, error: _safeError(e) }; }
+  }
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const buf = Buffer.alloc(max);
+    fs.readSync(fd, buf, 0, max, stat.size - max);
+    return { raw: buf.toString('utf8'), truncated: true, bytes: stat.size };
+  } catch (e) {
+    return { raw: '', truncated: true, bytes: stat.size, error: _safeError(e) };
+  } finally {
+    try { fs.closeSync(fd); } catch { /* deliberate: cleanup */ }
+  }
+}
 
 // --- progress parsing -------------------------------------------------------
 //
@@ -55,16 +133,26 @@ function _num(v) { return typeof v === 'number' && Number.isFinite(v) ? v : null
 // should degrade, not error.
 export function readProgress(runId, opts = {}) {
   try {
-    const runDir = _resolveRunDir(runId, opts);
+    const resolved = _resolveRunDir(runId, opts);
+    if (!resolved.ok) {
+      return {
+        ok: false,
+        error: resolved.error,
+        version: DISTILL_WATCH_VERSION,
+      };
+    }
+    const runDir = resolved.runDir;
     const progPath = path.join(runDir, 'progress.jsonl');
     const exists = fs.existsSync(progPath);
 
     const base = {
       ok: true,
       version: DISTILL_WATCH_VERSION,
-      run_id: runId == null ? null : String(runId),
-      run_dir: runDir,
+      run_id: resolved.runId,
+      run_dir: _pathLabel(runDir),
+      run_dir_sha256: _hash(runDir),
       exists,
+      progress_truncated: false,
       points: [],
       latest: null,
       summary: {
@@ -82,8 +170,12 @@ export function readProgress(runId, opts = {}) {
 
     if (!exists) return base;
 
-    let raw = '';
-    try { raw = fs.readFileSync(progPath, 'utf8'); } catch { /* deliberate: cleanup */ }
+    const read = _readBoundedUtf8(progPath);
+    let lines = String(read.raw || '').split('\n');
+    if (read.truncated && lines.length) lines = lines.slice(1);
+    if (lines.length > DISTILL_WATCH_LIMITS.max_lines) lines = lines.slice(-DISTILL_WATCH_LIMITS.max_lines);
+    base.progress_truncated = !!read.truncated;
+    if (read.error) base.read_warning = read.error;
 
     const points = [];
     const costs = [];
@@ -94,7 +186,7 @@ export function readProgress(runId, opts = {}) {
     let totalTokens = 0;
     let sawTokens = false;
 
-    for (const line of raw.split('\n')) {
+    for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
       let obj = null;
@@ -115,6 +207,7 @@ export function readProgress(runId, opts = {}) {
         total_steps: _num(obj.total_steps),
       };
       points.push(pt);
+      if (points.length >= DISTILL_WATCH_LIMITS.max_lines) break;
 
       if (pt.cost_usd != null) costs.push(pt.cost_usd);
       if (pt.cot_flags != null) cots.push(pt.cot_flags);
@@ -196,7 +289,7 @@ export function readProgress(runId, opts = {}) {
 
     return base;
   } catch (e) {
-    return { ok: false, error: e && e.message ? e.message : String(e) };
+    return { ok: false, error: 'distill_watch_failed', detail: _safeError(e), version: DISTILL_WATCH_VERSION };
   }
 }
 
@@ -442,6 +535,14 @@ export function renderDashboardHtml(progress) {
 // resolves when the socket is fully released.
 export function startWatchServer({ runId, port = 7787, host = '127.0.0.1', ...opts } = {}) {
   try {
+    const safeHost = _safeText(host || '127.0.0.1', 64) || '127.0.0.1';
+    if (!_isLoopbackHost(safeHost) && opts.allow_non_loopback !== true) {
+      return { ok: false, error: 'non_loopback_host_rejected', version: DISTILL_WATCH_VERSION };
+    }
+    const safePort = Number(port);
+    if (!Number.isInteger(safePort) || safePort < 0 || safePort > 65535) {
+      return { ok: false, error: 'invalid_port', version: DISTILL_WATCH_VERSION };
+    }
     const server = http.createServer((req, res) => {
       // Only GET is meaningful here; everything else is a 405.
       const url = (req.url || '/').split('?')[0];
@@ -487,10 +588,10 @@ export function startWatchServer({ runId, port = 7787, host = '127.0.0.1', ...op
     const handle = {
       ok: true,
       version: DISTILL_WATCH_VERSION,
-      url: `http://${host}:${port}/`,
-      port,
-      host,
-      run_id: runId == null ? null : String(runId),
+      url: `http://${safeHost}:${safePort}/`,
+      port: safePort,
+      host: safeHost,
+      run_id: _safeRunId(runId) || null,
       server,
       close,
       ready: null,
@@ -502,7 +603,7 @@ export function startWatchServer({ runId, port = 7787, host = '127.0.0.1', ...op
           const a = server.address();
           if (a && typeof a === 'object' && a.port) {
             handle.port = a.port;
-            handle.url = `http://${host}:${a.port}/`;
+            handle.url = `http://${safeHost}:${a.port}/`;
           }
         } catch { /* deliberate: cleanup */ }
         resolve(handle);
@@ -516,11 +617,11 @@ export function startWatchServer({ runId, port = 7787, host = '127.0.0.1', ...op
 
     // Surface listen errors to any 'error' listener the caller attaches; the
     // synchronous setup above is what the try/catch guards.
-    server.listen(port, host);
+    server.listen(safePort, safeHost);
 
     return handle;
   } catch (e) {
-    return { ok: false, error: e && e.message ? e.message : String(e) };
+    return { ok: false, error: 'watch_server_failed', detail: _safeError(e), version: DISTILL_WATCH_VERSION };
   }
 }
 

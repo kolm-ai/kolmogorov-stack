@@ -13,11 +13,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
-const PYTHON = process.env.PYTHON || 'python';
+const BUNDLED_PYTHON = path.join(
+  os.homedir(),
+  '.cache',
+  'codex-runtimes',
+  'codex-primary-runtime',
+  'dependencies',
+  'python',
+  'python.exe',
+);
+const PYTHON = process.env.KOLM_PYTHON
+  || process.env.PYTHON
+  || (fs.existsSync(BUNDLED_PYTHON) ? BUNDLED_PYTHON : 'python');
 
 const ADAPTERS = [
   {

@@ -46,7 +46,8 @@ test('W616 master component spec sheet keeps perfection distance explicit', () =
   assert.ok(sheet.perfection_model.frontier_product_score >= 60);
   assert.ok(sheet.perfection_model.frontier_product_score < 100);
   assert.ok(sheet.summary.categories_with_critical_frontier_work_open > 0);
-  assert.ok(sheet.summary.components_without_direct_test_reference > 0);
+  assert.equal(sheet.summary.components_without_direct_test_reference, 0);
+  assert.equal(sheet.summary.direct_test_reference_pct, 100);
   assert.ok(sheet.top_component_gaps.length > 0);
 
   const md = fs.readFileSync(SHEET_MD, 'utf8');

@@ -46,12 +46,72 @@
 //                                n_escalated_to_teacher})
 
 export const TOOL_RUNTIME_VERSION = 'w735-v1';
+export const TOOL_RUNTIME_LIMITS = Object.freeze({
+  max_tool_name_chars: 128,
+  max_required_fields: 50,
+  max_error_detail_chars: 240,
+  max_argument_json_bytes: 256 * 1024,
+  max_sample_size: 10_000_000,
+});
 
 // Statistical floor for the W735-4 90% acceptance claim. Below this
 // sample size, the local_handling_rate is reported as `null` - 
 // extrapolating from <100 captures is dishonest. This number is the
 // "honest measurement" backstop the spec calls for.
 const ACCEPTANCE_MIN_SAMPLE = 100;
+const UNSAFE_TOOL_NAMES = new Set(['__proto__', 'constructor', 'prototype']);
+
+function _safeDetail(v) {
+  const s = String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]+/g, ' ').trim();
+  return s.length > TOOL_RUNTIME_LIMITS.max_error_detail_chars
+    ? s.slice(0, TOOL_RUNTIME_LIMITS.max_error_detail_chars)
+    : s;
+}
+
+function _safeToolName(v) {
+  if (typeof v !== 'string') return null;
+  const name = v.trim().slice(0, TOOL_RUNTIME_LIMITS.max_tool_name_chars);
+  if (!name || UNSAFE_TOOL_NAMES.has(name)) return null;
+  return /^[A-Za-z_][A-Za-z0-9_-]*$/.test(name) ? name : null;
+}
+
+function _isPlainObject(v) {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return false;
+  const proto = Object.getPrototypeOf(v);
+  return proto === Object.prototype || proto === null;
+}
+
+function _safeRequiredFields(required) {
+  if (!Array.isArray(required)) return [];
+  const out = [];
+  for (const field of required) {
+    const key = _safeToolName(field);
+    if (key && !out.includes(key)) out.push(key);
+    if (out.length >= TOOL_RUNTIME_LIMITS.max_required_fields) break;
+  }
+  return out;
+}
+
+function _safeArguments(args) {
+  if (args == null) return { ok: true, value: {} };
+  if (!_isPlainObject(args)) return { ok: false, error: 'tool_call.arguments must be a plain object' };
+  let json = '';
+  try {
+    json = JSON.stringify(args, (_k, v) => (typeof v === 'bigint' ? v.toString() : v));
+  } catch {
+    return { ok: false, error: 'tool_call.arguments must be JSON-serializable' };
+  }
+  if (Buffer.byteLength(json, 'utf8') > TOOL_RUNTIME_LIMITS.max_argument_json_bytes) {
+    return { ok: false, error: 'tool_call.arguments too large' };
+  }
+  return { ok: true, value: JSON.parse(json) };
+}
+
+function _capCount(v, max = TOOL_RUNTIME_LIMITS.max_sample_size) {
+  const n = Math.floor(Number(v) || 0);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return Math.min(n, max);
+}
 
 // =============================================================================
 // registerTool
@@ -76,16 +136,20 @@ export function registerTool(tool_registry, tool) {
   if (!tool_registry || typeof tool_registry.set !== 'function' || typeof tool_registry.has !== 'function') {
     throw new TypeError('tool_registry must be a Map (or Map-like with .set and .has)');
   }
-  if (!tool || typeof tool !== 'object') throw new TypeError('tool must be a plain object');
-  if (typeof tool.name !== 'string' || !tool.name) throw new TypeError('tool.name must be a non-empty string');
+  if (!_isPlainObject(tool)) throw new TypeError('tool must be a plain object');
+  const name = _safeToolName(tool.name);
+  if (!name) throw new TypeError('tool.name must be a safe non-empty string');
   if (typeof tool.handler !== 'function') throw new TypeError('tool.handler must be a function');
-  if (tool.auth_schema != null && (typeof tool.auth_schema !== 'object' || Array.isArray(tool.auth_schema))) {
+  if (tool.auth_schema != null && !_isPlainObject(tool.auth_schema)) {
     throw new TypeError('tool.auth_schema must be a plain object when present');
   }
-  tool_registry.set(tool.name, {
-    name: tool.name,
+  const auth_schema = tool.auth_schema
+    ? { ...tool.auth_schema, required: _safeRequiredFields(tool.auth_schema.required) }
+    : null;
+  tool_registry.set(name, {
+    name,
     handler: tool.handler,
-    auth_schema: tool.auth_schema || null,
+    auth_schema,
   });
   return tool_registry;
 }
@@ -127,6 +191,22 @@ export async function executeToolCall(opts) {
       detail: 'tool_call must be {name: string, arguments?: object}',
     };
   }
+  const toolName = _safeToolName(tool_call.name);
+  if (!toolName) {
+    return {
+      ok: false,
+      error: 'invalid_tool_call',
+      detail: 'tool_call.name must be a safe tool identifier',
+    };
+  }
+  const args = _safeArguments(tool_call.arguments);
+  if (!args.ok) {
+    return {
+      ok: false,
+      error: 'invalid_tool_call',
+      detail: args.error,
+    };
+  }
   if (!tool_registry
       || (typeof tool_registry.get !== 'function' && typeof tool_registry.has !== 'function')) {
     return {
@@ -136,23 +216,23 @@ export async function executeToolCall(opts) {
     };
   }
   const hasTool = typeof tool_registry.has === 'function'
-    ? tool_registry.has(tool_call.name)
-    : (typeof tool_registry.get === 'function' && tool_registry.get(tool_call.name) != null);
+    ? tool_registry.has(toolName)
+    : (typeof tool_registry.get === 'function' && tool_registry.get(toolName) != null);
   if (!hasTool) {
     return {
       ok: false,
       error: 'tool_not_found',
-      detail: `tool "${tool_call.name}" not registered in this tenant's tool_registry`,
+      detail: `tool "${toolName}" not registered in this tenant's tool_registry`,
     };
   }
   const tool = typeof tool_registry.get === 'function'
-    ? tool_registry.get(tool_call.name)
+    ? tool_registry.get(toolName)
     : null;
   if (!tool || typeof tool.handler !== 'function') {
     return {
       ok: false,
       error: 'tool_not_found',
-      detail: `tool "${tool_call.name}" entry has no handler function`,
+      detail: `tool "${toolName}" entry has no handler function`,
     };
   }
 
@@ -161,7 +241,8 @@ export async function executeToolCall(opts) {
   // runs (cheaper to debug at this boundary than inside the handler).
   if (tool.auth_schema && Array.isArray(tool.auth_schema.required)) {
     const ctx = auth_context || {};
-    const missing = tool.auth_schema.required.filter((k) => !(k in ctx) || ctx[k] == null || ctx[k] === '');
+    const required = _safeRequiredFields(tool.auth_schema.required);
+    const missing = required.filter((k) => !(k in ctx) || ctx[k] == null || ctx[k] === '');
     if (missing.length > 0) {
       return {
         ok: false,
@@ -176,16 +257,16 @@ export async function executeToolCall(opts) {
   // gets a complete record of what failed.
   try {
     const result = await tool.handler({
-      arguments: (tool_call.arguments && typeof tool_call.arguments === 'object') ? tool_call.arguments : {},
+      arguments: args.value,
       auth_context: auth_context || {},
-      tool_call,
+      tool_call: { ...tool_call, name: toolName, arguments: args.value },
     });
     return { ok: true, result };
   } catch (e) {
     return {
       ok: false,
       error: 'tool_threw',
-      detail: (e && e.message) ? e.message : String(e),
+      detail: _safeDetail((e && e.message) ? e.message : String(e)),
     };
   }
 }
@@ -228,10 +309,14 @@ export function accumulateAcceptanceMetrics(opts) {
   const o = opts || {};
   const captures = Array.isArray(o.captures) ? o.captures : [];
   const sampleSize = (typeof o.sample_size === 'number' && o.sample_size > 0)
-    ? Math.floor(o.sample_size)
-    : captures.length;
-  const handledLocally = Math.max(0, Math.floor(Number(o.n_handled_locally) || 0));
-  const escalated = Math.max(0, Math.floor(Number(o.n_escalated_to_teacher) || 0));
+    ? _capCount(o.sample_size)
+    : _capCount(captures.length);
+  let handledLocally = _capCount(o.n_handled_locally);
+  let escalated = _capCount(o.n_escalated_to_teacher);
+  if (sampleSize > 0) {
+    handledLocally = Math.min(handledLocally, sampleSize);
+    escalated = Math.min(escalated, Math.max(0, sampleSize - handledLocally));
+  }
 
   const out = {
     sample_size: sampleSize,

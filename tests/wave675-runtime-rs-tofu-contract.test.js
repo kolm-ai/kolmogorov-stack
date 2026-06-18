@@ -18,9 +18,13 @@ function read(rel) {
 }
 
 function runCargo(args) {
-  return spawnSync('cargo', args, {
+  return spawnSync('cargo', ['--offline', ...args], {
     cwd: ROOT,
-    env: { ...process.env, CARGO_TARGET_DIR: path.join(os.tmpdir(), 'kolm-runtime-rs-target') },
+    env: {
+      ...process.env,
+      CARGO_NET_OFFLINE: 'true',
+      CARGO_TARGET_DIR: path.join(os.tmpdir(), 'kolm-runtime-rs-target'),
+    },
     encoding: 'utf8',
     timeout: 120000,
   });

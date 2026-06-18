@@ -29,8 +29,18 @@
 // the regex+threshold family pattern (never an explicit hard-coded array).
 
 import fs from 'node:fs';
+import path from 'node:path';
 
 export const MODEL_CARD_VERSION = 'w768-v1';
+export const MODEL_CARD_LIMITS = Object.freeze({
+  max_manifest_bytes: 1024 * 1024,
+  max_text_chars: 2000,
+  max_list_items: 50,
+  max_object_keys: 100,
+  max_key_chars: 96,
+  max_render_chars: 256 * 1024,
+  max_compute_hours: 10_000_000,
+});
 
 // HF Model Card v0.3 canonical section order. NEVER reorder without bumping
 // the version stamp - byte-stability matters for downstream tools that diff
@@ -72,6 +82,7 @@ const GPU_CLASS_KW = Object.freeze({
 // substitute an empty string or list - an auditor must be able to grep for
 // 'not_yet_disclosed' and see every gap in the card.
 const HONEST_NOT_DISCLOSED = 'not_yet_disclosed';
+const UNSAFE_OBJECT_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
 // =============================================================================
 // Internal helpers
@@ -81,19 +92,54 @@ function _get(obj, ...keys) {
   let cur = obj;
   for (const k of keys) {
     if (!cur || typeof cur !== 'object') return null;
-    if (!(k in cur)) return null;
+    if (!Object.prototype.hasOwnProperty.call(cur, k)) return null;
     cur = cur[k];
   }
   return cur == null ? null : cur;
 }
 
+function _safeText(v, max = MODEL_CARD_LIMITS.max_text_chars) {
+  const s = String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]+/g, ' ').trim();
+  return s.length > max ? s.slice(0, max) : s;
+}
+
+function _safeKey(v) {
+  const raw = _safeText(v, MODEL_CARD_LIMITS.max_key_chars)
+    .replace(/[^A-Za-z0-9_.-]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  if (!raw) return 'field';
+  return UNSAFE_OBJECT_KEYS.has(raw) ? `${raw}_field` : raw;
+}
+
+function _safeValue(v, depth = 0) {
+  if (v == null) return null;
+  if (typeof v === 'string') return _safeText(v);
+  if (typeof v === 'number') return Number.isFinite(v) ? v : HONEST_NOT_DISCLOSED;
+  if (typeof v === 'boolean') return v;
+  if (Array.isArray(v)) {
+    return v.slice(0, MODEL_CARD_LIMITS.max_list_items).map((x) => _safeValue(x, depth + 1));
+  }
+  if (typeof v === 'object') {
+    if (depth >= 4) return _safeText(JSON.stringify(v).slice(0, MODEL_CARD_LIMITS.max_text_chars));
+    const out = {};
+    for (const [k, val] of Object.entries(v).slice(0, MODEL_CARD_LIMITS.max_object_keys)) {
+      out[_safeKey(k)] = _safeValue(val, depth + 1);
+    }
+    return out;
+  }
+  return _safeText(v);
+}
+
 function _strOrDisclose(v) {
-  if (typeof v === 'string' && v.trim().length > 0) return v;
+  if (typeof v === 'string' && v.trim().length > 0) return _safeText(v);
   return HONEST_NOT_DISCLOSED;
 }
 
 function _listOrDisclose(v) {
-  if (Array.isArray(v) && v.length > 0) return v;
+  if (Array.isArray(v) && v.length > 0) {
+    const out = v.slice(0, MODEL_CARD_LIMITS.max_list_items).map((x) => _safeValue(x));
+    return out.length ? out : HONEST_NOT_DISCLOSED;
+  }
   return HONEST_NOT_DISCLOSED;
 }
 
@@ -101,6 +147,14 @@ function _gpuClassKw(gpuClass) {
   if (typeof gpuClass !== 'string') return null;
   const norm = gpuClass.trim().toLowerCase().replace(/_/g, '-');
   return GPU_CLASS_KW[norm] || null;
+}
+
+function _finiteBoundedNumber(v, max) {
+  return typeof v === 'number' && Number.isFinite(v) && v > 0 && v <= max;
+}
+
+function _yamlScalar(v) {
+  return JSON.stringify(_safeText(v, MODEL_CARD_LIMITS.max_text_chars));
 }
 
 // =============================================================================
@@ -127,10 +181,10 @@ export function estimateEnvironmentalImpact(manifest) {
   const gpuClass = _get(manifest, 'gpu_class')
     || _get(manifest, 'training', 'gpu_class');
 
-  if (typeof computeHours !== 'number' || !(computeHours > 0)) {
+  if (!_finiteBoundedNumber(computeHours, MODEL_CARD_LIMITS.max_compute_hours)) {
     return {
       compute_hours: HONEST_NOT_DISCLOSED,
-      gpu_class: typeof gpuClass === 'string' ? gpuClass : HONEST_NOT_DISCLOSED,
+      gpu_class: typeof gpuClass === 'string' ? _safeText(gpuClass) : HONEST_NOT_DISCLOSED,
       estimated_co2_kg: HONEST_NOT_DISCLOSED,
       methodology: 'static_grid_average_w768_v1',
       honest_caveat: 'estimate_not_measured',
@@ -141,7 +195,7 @@ export function estimateEnvironmentalImpact(manifest) {
   if (kw == null) {
     return {
       compute_hours: computeHours,
-      gpu_class: typeof gpuClass === 'string' ? gpuClass : HONEST_NOT_DISCLOSED,
+      gpu_class: typeof gpuClass === 'string' ? _safeText(gpuClass) : HONEST_NOT_DISCLOSED,
       estimated_co2_kg: HONEST_NOT_DISCLOSED,
       methodology: 'static_grid_average_w768_v1',
       honest_caveat: 'estimate_not_measured',
@@ -152,7 +206,7 @@ export function estimateEnvironmentalImpact(manifest) {
   const co2_kg = Math.round(computeHours * kw * GLOBAL_GRID_CO2_KG_PER_KWH * 10000) / 10000;
   return {
     compute_hours: computeHours,
-    gpu_class: gpuClass,
+    gpu_class: _safeText(gpuClass),
     gpu_class_kw: kw,
     grid_co2_kg_per_kwh: GLOBAL_GRID_CO2_KG_PER_KWH,
     estimated_co2_kg: co2_kg,
@@ -223,7 +277,7 @@ export function buildModelCard(manifest, opts) {
     decision_thresholds: _strOrDisclose(_get(m, 'metrics', 'decision_thresholds')),
     variation_approaches: _strOrDisclose(_get(m, 'metrics', 'variation_approaches')),
     values: (rawMetrics && typeof rawMetrics === 'object' && !Array.isArray(rawMetrics))
-      ? rawMetrics : HONEST_NOT_DISCLOSED,
+      ? _safeValue(rawMetrics) : HONEST_NOT_DISCLOSED,
   };
 
   // 5. evaluation_data
@@ -248,14 +302,19 @@ export function buildModelCard(manifest, opts) {
       _get(m, 'training_data', 'capture_count')
         || _get(m, 'training', 'capture_count')
         || HONEST_NOT_DISCLOSED
-    ),
+    ) === HONEST_NOT_DISCLOSED
+      ? HONEST_NOT_DISCLOSED
+      : _safeValue(_get(m, 'training_data', 'capture_count') || _get(m, 'training', 'capture_count')),
   };
 
   // 7. quantitative_analyses
   const quantitative_analyses = {
-    unitary_results: _get(m, 'quantitative_analyses', 'unitary_results') || HONEST_NOT_DISCLOSED,
+    unitary_results: _get(m, 'quantitative_analyses', 'unitary_results')
+      ? _safeValue(_get(m, 'quantitative_analyses', 'unitary_results'))
+      : HONEST_NOT_DISCLOSED,
     intersectional_results: _get(m, 'quantitative_analyses', 'intersectional_results')
-      || HONEST_NOT_DISCLOSED,
+      ? _safeValue(_get(m, 'quantitative_analyses', 'intersectional_results'))
+      : HONEST_NOT_DISCLOSED,
   };
 
   // 8. ethical_considerations
@@ -329,13 +388,35 @@ export function buildModelCardFromManifestPath(manifestPath, opts) {
       version: MODEL_CARD_VERSION,
     };
   }
+  const resolved = path.resolve(manifestPath);
+  if (resolved.length > 4096 || resolved.includes('\0')) {
+    return {
+      ok: false,
+      error: 'invalid_manifest_path',
+      version: MODEL_CARD_VERSION,
+    };
+  }
   let raw;
-  try { raw = fs.readFileSync(manifestPath, 'utf8'); }
+  try {
+    const stat = fs.statSync(resolved);
+    if (!stat.isFile()) {
+      return { ok: false, error: 'manifest_not_file', version: MODEL_CARD_VERSION };
+    }
+    if (stat.size > MODEL_CARD_LIMITS.max_manifest_bytes) {
+      return {
+        ok: false,
+        error: 'manifest_too_large',
+        max_bytes: MODEL_CARD_LIMITS.max_manifest_bytes,
+        version: MODEL_CARD_VERSION,
+      };
+    }
+    raw = fs.readFileSync(resolved, 'utf8');
+  }
   catch (e) {
     return {
       ok: false,
       error: 'manifest_read_failed',
-      detail: e && e.message,
+      detail: _safeText(e && e.code ? e.code : 'read_failed', 80),
       version: MODEL_CARD_VERSION,
     };
   }
@@ -345,7 +426,7 @@ export function buildModelCardFromManifestPath(manifestPath, opts) {
     return {
       ok: false,
       error: 'manifest_parse_failed',
-      detail: e && e.message,
+      detail: _safeText(e && e.message ? e.message : 'parse_failed', 160),
       version: MODEL_CARD_VERSION,
     };
   }
@@ -358,7 +439,7 @@ export function buildModelCardFromManifestPath(manifestPath, opts) {
 // Pure JS renderer. Returns a string starting with "# Model Card".
 // =============================================================================
 function _humanLabel(key) {
-  return key.replace(/_/g, ' ')
+  return _safeKey(key).replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
@@ -366,22 +447,24 @@ function _renderValue(value, depth) {
   const indent = '  '.repeat(depth);
   if (Array.isArray(value)) {
     if (value.length === 0) return `${indent}- ${HONEST_NOT_DISCLOSED}`;
-    return value.map((v) => `${indent}- ${typeof v === 'object' ? JSON.stringify(v) : v}`).join('\n');
+    return value.slice(0, MODEL_CARD_LIMITS.max_list_items)
+      .map((v) => `${indent}- ${typeof v === 'object' ? _safeText(JSON.stringify(_safeValue(v))) : _safeText(v)}`)
+      .join('\n');
   }
   if (value && typeof value === 'object') {
     const lines = [];
-    for (const [k, v] of Object.entries(value)) {
+    for (const [k, v] of Object.entries(value).slice(0, MODEL_CARD_LIMITS.max_object_keys)) {
       const label = _humanLabel(k);
       if (Array.isArray(v) || (v && typeof v === 'object')) {
         lines.push(`${indent}- **${label}:**`);
         lines.push(_renderValue(v, depth + 1));
       } else {
-        lines.push(`${indent}- **${label}:** ${v}`);
+        lines.push(`${indent}- **${label}:** ${_safeText(v)}`);
       }
     }
     return lines.join('\n');
   }
-  return `${indent}${value}`;
+  return `${indent}${_safeText(value)}`;
 }
 
 export function formatAsMarkdown(card) {
@@ -404,7 +487,10 @@ export function formatAsMarkdown(card) {
     }
     out.push('');
   }
-  return out.join('\n');
+  const rendered = out.join('\n');
+  return rendered.length > MODEL_CARD_LIMITS.max_render_chars
+    ? rendered.slice(0, MODEL_CARD_LIMITS.max_render_chars) + '\n\n[truncated]\n'
+    : rendered;
 }
 
 // =============================================================================
@@ -421,13 +507,13 @@ export function formatAsHuggingFace(card) {
   const languages = md.languages;
   if (Array.isArray(languages) && languages.length > 0) {
     lines.push('language:');
-    for (const lang of languages) lines.push(`  - ${lang}`);
+    for (const lang of languages.slice(0, MODEL_CARD_LIMITS.max_list_items)) lines.push(`  - ${_yamlScalar(lang)}`);
   }
   const lic = md.license;
-  lines.push(`license: ${(typeof lic === 'string' && lic !== HONEST_NOT_DISCLOSED) ? lic : 'other'}`);
+  lines.push(`license: ${(typeof lic === 'string' && lic !== HONEST_NOT_DISCLOSED) ? _yamlScalar(lic) : 'other'}`);
   const baseModel = md.base_model;
   if (typeof baseModel === 'string' && baseModel !== HONEST_NOT_DISCLOSED) {
-    lines.push(`base_model: ${baseModel}`);
+    lines.push(`base_model: ${_yamlScalar(baseModel)}`);
   }
   lines.push('tags:');
   lines.push('  - kolm');
@@ -436,7 +522,7 @@ export function formatAsHuggingFace(card) {
   const name = md.name;
   if (typeof name === 'string' && name !== HONEST_NOT_DISCLOSED) {
     lines.push('model-index:');
-    lines.push(`  - name: ${name}`);
+    lines.push(`  - name: ${_yamlScalar(name)}`);
   }
   lines.push('---');
   lines.push('');
@@ -446,6 +532,7 @@ export function formatAsHuggingFace(card) {
 // Default export for the rare consumer that wants the whole module by name.
 export default {
   MODEL_CARD_VERSION,
+  MODEL_CARD_LIMITS,
   MODEL_CARD_SECTIONS,
   MODEL_CARD_FORMATS,
   buildModelCard,

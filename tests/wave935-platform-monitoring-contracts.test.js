@@ -485,7 +485,7 @@ test('W935 platform-monitoring verifier is wired into depth after provider compl
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:data-curation && npm run verify:capture-data-contracts && npm run verify:provider-compliance-contracts && npm run verify:platform-monitoring-contracts && npm run verify:benchmark-evidence/,
+    /verify:data-curation && npm run verify:capture-data-contracts && npm run verify:provider-compliance-contracts && npm run verify:platform-monitoring-contracts && npm run verify:training-runtime-governance-contracts && npm run verify:benchmark-evidence/,
   );
 
   for (const rel of [

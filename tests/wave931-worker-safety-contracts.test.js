@@ -64,8 +64,19 @@ function parseJsonTail(text) {
 }
 
 function findPython() {
+  const bundledPython = path.join(
+    os.homedir(),
+    '.cache',
+    'codex-runtimes',
+    'codex-primary-runtime',
+    'dependencies',
+    'python',
+    'python.exe',
+  );
   const candidates = [
     process.env.KOLM_PYTHON,
+    process.env.PYTHON,
+    fs.existsSync(bundledPython) ? bundledPython : null,
     process.platform === 'win32' ? 'python' : 'python3',
     'python3',
     'python',

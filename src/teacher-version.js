@@ -27,6 +27,11 @@
 //   - groupByTeacherVersion(captures)
 
 export const TEACHER_VERSION_TAG_VERSION = 'w746-v1';
+export const TEACHER_VERSION_LIMITS = Object.freeze({
+  max_provider_chars: 80,
+  max_version_chars: 160,
+  max_group_rows: 50000,
+});
 
 // Documented per-provider defaults. When neither the provider-specific env nor
 // the generic KOLM_DISTILL_TEACHER env is set, we fall back to the model the
@@ -42,10 +47,27 @@ const PROVIDER_DEFAULTS = Object.freeze({
 });
 
 const FALLBACK = 'unknown_teacher_v0';
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
 function _normProvider(p) {
   if (p == null) return '';
-  return String(p).trim().toLowerCase();
+  const s = String(p)
+    .replace(/[\u0000-\u001f\u007f]+/g, ' ')
+    .trim()
+    .toLowerCase()
+    .slice(0, TEACHER_VERSION_LIMITS.max_provider_chars)
+    .replace(/[^a-z0-9_-]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  return !s || UNSAFE_KEYS.has(s) ? '' : s;
+}
+
+function _safeVersion(v) {
+  const s = String(v == null ? '' : v)
+    .replace(/[\u0000-\u001f\u007f]+/g, ' ')
+    .trim()
+    .slice(0, TEACHER_VERSION_LIMITS.max_version_chars);
+  if (!s || UNSAFE_KEYS.has(s)) return FALLBACK;
+  return s.replace(/[^\w:./@+-]+/g, '_');
 }
 
 // =============================================================================
@@ -68,17 +90,17 @@ export function currentTeacherVersion(provider) {
     const envKey = 'KOLM_TEACHER_VERSION_' + p.toUpperCase().replace(/-/g, '_');
     const envVal = process.env[envKey];
     if (envVal && typeof envVal === 'string' && envVal.trim()) {
-      return envVal.trim();
+      return _safeVersion(envVal);
     }
   }
   // 2. Generic env (existing repo env from MEMORY.md trap).
   const generic = process.env.KOLM_DISTILL_TEACHER;
   if (generic && typeof generic === 'string' && generic.trim()) {
-    return generic.trim();
+    return _safeVersion(generic);
   }
   // 3. Per-provider default.
   if (p && Object.prototype.hasOwnProperty.call(PROVIDER_DEFAULTS, p)) {
-    return PROVIDER_DEFAULTS[p];
+    return _safeVersion(PROVIDER_DEFAULTS[p]);
   }
   // 4. Honest fallback - we have no idea who answered, but still queryable.
   return FALLBACK;
@@ -105,6 +127,7 @@ export function tagCaptureWithTeacherVersion(captureRow) {
   // somehow got persisted with teacher_version='' gets re-tagged.
   if (typeof captureRow.teacher_version === 'string' && captureRow.teacher_version.trim()) {
     // Backfill teacher_provider if missing but version exists (cosmetic).
+    captureRow.teacher_version = _safeVersion(captureRow.teacher_version);
     if (captureRow.teacher_provider == null) {
       captureRow.teacher_provider = _normProvider(captureRow.provider) || '';
     }
@@ -124,11 +147,11 @@ export function tagCaptureWithTeacherVersion(captureRow) {
 // rows were captured BEFORE the W746 tagging was enabled.
 // =============================================================================
 export function groupByTeacherVersion(captures) {
-  const out = {};
+  const out = Object.create(null);
   if (!Array.isArray(captures)) return out;
-  for (const cap of captures) {
+  for (const cap of captures.slice(0, TEACHER_VERSION_LIMITS.max_group_rows)) {
     const v = (cap && typeof cap.teacher_version === 'string' && cap.teacher_version.trim())
-      ? cap.teacher_version.trim()
+      ? _safeVersion(cap.teacher_version)
       : FALLBACK;
     out[v] = (out[v] || 0) + 1;
   }

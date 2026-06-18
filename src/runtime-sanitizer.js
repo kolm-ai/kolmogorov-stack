@@ -27,9 +27,17 @@
 // safety alignment. That wiring is done by the OPERATOR, never by
 // this module (DI seam).
 
+import crypto from 'node:crypto';
 import { classifyPromptAdversarial } from './adversarial-prompts.js';
 
 export const SANITIZER_VERSION = 'w762-v1';
+export const RUNTIME_SANITIZER_LIMITS = Object.freeze({
+  max_input_chars: 20000,
+  max_error_chars: 240,
+  max_evidence_items: 25,
+  max_pattern_chars: 240,
+  max_category_chars: 80,
+});
 
 export const SANITIZE_POLICIES = Object.freeze([
   'block',
@@ -39,6 +47,53 @@ export const SANITIZE_POLICIES = Object.freeze([
 ]);
 
 export const DEFAULT_POLICY = 'fallback_to_teacher';
+
+function _hash(v) {
+  return crypto.createHash('sha256').update(String(v == null ? '' : v)).digest('hex');
+}
+
+function _safeText(v, max = RUNTIME_SANITIZER_LIMITS.max_input_chars) {
+  const s = String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]+/g, ' ').trim();
+  return s.length > max ? s.slice(0, max) : s;
+}
+
+function _safeError(e) {
+  return _safeText((e && e.message) ? e.message : e, RUNTIME_SANITIZER_LIMITS.max_error_chars);
+}
+
+function _sanitizeClassification(classification, textLength) {
+  const c = classification && typeof classification === 'object' ? classification : {};
+  const evidence = Array.isArray(c.evidence)
+    ? c.evidence.slice(0, RUNTIME_SANITIZER_LIMITS.max_evidence_items).map((e) => {
+        const ev = e && typeof e === 'object' ? e : {};
+        const span = Array.isArray(ev.span) && ev.span.length === 2
+          ? [
+              Math.max(0, Math.min(textLength, Math.trunc(Number(ev.span[0]) || 0))),
+              Math.max(0, Math.min(textLength, Math.trunc(Number(ev.span[1]) || 0))),
+            ]
+          : null;
+        return {
+          pattern: _safeText(ev.pattern || '', RUNTIME_SANITIZER_LIMITS.max_pattern_chars),
+          span,
+          category: _safeText(ev.category || 'unknown', RUNTIME_SANITIZER_LIMITS.max_category_chars),
+        };
+      })
+    : [];
+  const categories = Array.isArray(c.categories_matched)
+    ? c.categories_matched.slice(0, RUNTIME_SANITIZER_LIMITS.max_evidence_items)
+        .map((x) => _safeText(x, RUNTIME_SANITIZER_LIMITS.max_category_chars))
+        .filter(Boolean)
+    : [];
+  return {
+    ...c,
+    ok: c.ok !== false,
+    is_adversarial: c.is_adversarial === true,
+    categories_matched: categories,
+    confidence: Number.isFinite(Number(c.confidence)) ? Math.max(0, Math.min(1, Number(c.confidence))) : 0,
+    evidence,
+    classifier_error: c.classifier_error ? _safeError(c.classifier_error) : undefined,
+  };
+}
 
 // Replace each matched span in `text` with `[REDACTED]`. Spans may
 // overlap because multiple patterns can hit the same region - 
@@ -85,7 +140,10 @@ export async function sanitizeInput({
   fallback_handler = null,
 } = {}) {
   // Defensive input normalization.
-  const inputText = typeof text === 'string' ? text : (text == null ? '' : String(text));
+  const rawInputText = typeof text === 'string' ? text : (text == null ? '' : String(text));
+  const inputText = _safeText(rawInputText, RUNTIME_SANITIZER_LIMITS.max_input_chars);
+  const inputTruncated = rawInputText.length > inputText.length;
+  const inputSha256 = _hash(rawInputText);
 
   // Validate policy. Unknown policies are NOT silently coerced - we
   // return an honest envelope so the operator notices the typo.
@@ -111,9 +169,10 @@ export async function sanitizeInput({
       categories_matched: [],
       confidence: 0,
       evidence: [],
-      classifier_error: String(e && e.message || e),
+      classifier_error: _safeError(e),
     };
   }
+  classification = _sanitizeClassification(classification, inputText.length);
 
   // Benign input: passthrough regardless of policy.
   if (!classification.is_adversarial) {
@@ -121,6 +180,8 @@ export async function sanitizeInput({
       ok: true,
       action: 'allow',
       original: inputText,
+      original_sha256: inputSha256,
+      input_truncated: inputTruncated,
       sanitized: inputText,
       classification,
       fallback_invoked: false,
@@ -136,6 +197,8 @@ export async function sanitizeInput({
         ok: true,
         action: 'block',
         original: inputText,
+        original_sha256: inputSha256,
+        input_truncated: inputTruncated,
         sanitized: null,
         classification,
         fallback_invoked: false,
@@ -149,6 +212,8 @@ export async function sanitizeInput({
         ok: true,
         action: 'redact',
         original: inputText,
+        original_sha256: inputSha256,
+        input_truncated: inputTruncated,
         sanitized: redacted,
         classification,
         fallback_invoked: false,
@@ -175,12 +240,14 @@ export async function sanitizeInput({
           classification,
         });
       } catch (e) {
-        fallbackError = String(e && e.message || e);
+        fallbackError = _safeError(e);
       }
       return {
         ok: fallbackError == null,
         action: 'fallback_to_teacher',
         original: inputText,
+        original_sha256: inputSha256,
+        input_truncated: inputTruncated,
         sanitized: inputText,
         classification,
         fallback_invoked: true,
@@ -196,6 +263,8 @@ export async function sanitizeInput({
         ok: true,
         action: 'passthrough',
         original: inputText,
+        original_sha256: inputSha256,
+        input_truncated: inputTruncated,
         sanitized: inputText,
         classification,
         fallback_invoked: false,
@@ -251,7 +320,8 @@ export function wrapForRuntime(handler, opts = {}) {
         sanitizer_action: env.action,
         sanitizer: env,
         forwarded: true,
-        handler_error: String(e && e.message || e),
+        handler_error: _safeError(e),
+        handler_error_sha256: _hash((e && e.message) ? e.message : e),
       };
     }
     return {
@@ -266,6 +336,7 @@ export function wrapForRuntime(handler, opts = {}) {
 
 export default {
   SANITIZER_VERSION,
+  RUNTIME_SANITIZER_LIMITS,
   SANITIZE_POLICIES,
   DEFAULT_POLICY,
   sanitizeInput,

@@ -29,11 +29,68 @@
 //   - runXlangBakeoff({tenant_id, namespace, artifact_a, artifact_b, opts})
 
 export const XLANG_BAKEOFF_VERSION = 'w774-v1';
+export const XLANG_BAKEOFF_LIMITS = Object.freeze({
+  max_captures: 5000,
+  max_per_lang: 500,
+  max_artifact_ref_chars: 240,
+  max_namespace_chars: 128,
+  max_langs: 64,
+  max_text_chars: 20000,
+  list_events_limit: 5000,
+});
 
 // Minimum distinct languages in the capture pool to call this a
 // MULTILINGUAL bakeoff. With <2 languages the comparison degenerates
 // to a pooled bakeoff (use src/bakeoff.js instead).
 const MIN_DISTINCT_LANGS = 2;
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+function _safeText(v, max = XLANG_BAKEOFF_LIMITS.max_text_chars) {
+  const s = String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]+/g, ' ').trim();
+  return s.length > max ? s.slice(0, max) : s;
+}
+
+function _safeId(v, max = 160) {
+  const raw = _safeText(v, max);
+  if (!raw || UNSAFE_KEYS.has(raw)) return null;
+  const s = raw
+    .replace(/[^\w:.-]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  if (!s || UNSAFE_KEYS.has(s)) return null;
+  return s;
+}
+
+function _safeNamespace(v) {
+  return _safeId(v, XLANG_BAKEOFF_LIMITS.max_namespace_chars) || 'default';
+}
+
+function _safeLang(v) {
+  const raw = _safeText(v, 16).toLowerCase();
+  if (!raw || UNSAFE_KEYS.has(raw)) return null;
+  const s = raw.replace(/[^a-z-]+/g, '');
+  if (!s || UNSAFE_KEYS.has(s) || s.length < 2 || s.length > 12) return null;
+  return s;
+}
+
+function _artifactRef(v) {
+  const s = _safeText(v, XLANG_BAKEOFF_LIMITS.max_artifact_ref_chars);
+  if (!s) return null;
+  const file = s.split(/[\\/]/).filter(Boolean).pop() || s;
+  return _safeText(file, XLANG_BAKEOFF_LIMITS.max_artifact_ref_chars);
+}
+
+function _safeCapture(cap) {
+  const c = cap && typeof cap === 'object' ? cap : {};
+  return {
+    ...c,
+    prompt_redacted: _safeText(c.prompt_redacted || ''),
+    prompt: _safeText(c.prompt || ''),
+    input: _safeText(c.input || ''),
+    response_redacted: _safeText(c.response_redacted || ''),
+    response: _safeText(c.response || ''),
+    output: _safeText(c.output || ''),
+  };
+}
 
 // =============================================================================
 // runXlangBakeoff
@@ -74,16 +131,16 @@ const MIN_DISTINCT_LANGS = 2;
 
 export async function runXlangBakeoff(args) {
   const a = args || {};
-  const tenant_id = a.tenant_id;
-  const namespace = (typeof a.namespace === 'string' && a.namespace.length > 0)
-    ? a.namespace.slice(0, 128)
-    : 'default';
+  const tenant_id = _safeId(a.tenant_id);
+  const namespace = _safeNamespace(a.namespace);
   const artifact_a = a.artifact_a;
   const artifact_b = a.artifact_b;
+  const artifact_a_ref = _artifactRef(artifact_a);
+  const artifact_b_ref = _artifactRef(artifact_b);
   const opts = a.opts || {};
 
   // W411 defense-in-depth - tenant_id mandatory.
-  if (!tenant_id || typeof tenant_id !== 'string') {
+  if (!tenant_id || typeof a.tenant_id !== 'string') {
     return {
       ok: false,
       error: 'tenant_id_required',
@@ -91,8 +148,8 @@ export async function runXlangBakeoff(args) {
       version: XLANG_BAKEOFF_VERSION,
     };
   }
-  if (!artifact_a || typeof artifact_a !== 'string' ||
-      !artifact_b || typeof artifact_b !== 'string') {
+  if (!artifact_a_ref || !artifact_b_ref || typeof artifact_a !== 'string' ||
+      typeof artifact_b !== 'string') {
     return {
       ok: false,
       error: 'artifact_paths_required',
@@ -121,12 +178,14 @@ export async function runXlangBakeoff(args) {
     captures = await storeMod.listEvents({
       tenant_id,
       namespace,
-      limit: 5000,
+      limit: XLANG_BAKEOFF_LIMITS.list_events_limit,
       order: 'desc',
     });
   } catch (_) { captures = []; }
   // W411 defense-in-depth - re-filter.
-  captures = (captures || []).filter((rr) => rr && rr.tenant_id === tenant_id);
+  captures = (captures || [])
+    .filter((rr) => rr && _safeId(rr.tenant_id) === tenant_id)
+    .slice(0, XLANG_BAKEOFF_LIMITS.max_captures);
 
   if (captures.length === 0) {
     return {
@@ -144,10 +203,11 @@ export async function runXlangBakeoff(args) {
     const text = cap.prompt_redacted || cap.prompt || cap.input || '';
     if (typeof text !== 'string' || text.length === 0) continue;
     const d = lang_detect(text) || {};
-    const lang = d.lang;
+    const lang = _safeLang(d.lang);
     if (!lang || d.fallback) continue;
     if (!byLangCaps.has(lang)) byLangCaps.set(lang, []);
-    byLangCaps.get(lang).push(cap);
+    if (byLangCaps.get(lang).length < XLANG_BAKEOFF_LIMITS.max_per_lang) byLangCaps.get(lang).push(_safeCapture(cap));
+    if (byLangCaps.size >= XLANG_BAKEOFF_LIMITS.max_langs) break;
   }
 
   // HONESTY: require at least 2 distinct detected languages - otherwise
@@ -158,14 +218,14 @@ export async function runXlangBakeoff(args) {
       error: 'no_multilingual_captures',
       hint: 'need >=' + MIN_DISTINCT_LANGS + ' distinct detected languages in this namespace; ' +
             'use src/bakeoff.js for single-language bakeoffs',
-      detected_langs: Array.from(byLangCaps.keys()),
+      detected_langs: Array.from(byLangCaps.keys()).sort(),
       version: XLANG_BAKEOFF_VERSION,
     };
   }
 
   // Per-language head-to-head. For every capture we run both artifacts +
   // judge both outputs; the higher score wins (ties on equal scores).
-  const byLangOut = {};
+  const byLangOut = Object.create(null);
   let totalWinsA = 0;
   let totalWinsB = 0;
   let totalTies = 0;
@@ -185,14 +245,16 @@ export async function runXlangBakeoff(args) {
       if (!ranA || !ranB) continue;
       let jA, jB;
       try {
-        jA = await judge({ input, expected, actual: ranA.output, lang });
-        jB = await judge({ input, expected, actual: ranB.output, lang });
+        jA = await judge({ input, expected, actual: _safeText(ranA.output), lang });
+        jB = await judge({ input, expected, actual: _safeText(ranB.output), lang });
       } catch (_) { continue; }
       if (!jA || !jB || !Number.isFinite(jA.score) || !Number.isFinite(jB.score)) continue;
-      scoresA.push(jA.score);
-      scoresB.push(jB.score);
-      if (jA.score > jB.score) winsA += 1;
-      else if (jB.score > jA.score) winsB += 1;
+      const scoreA = Math.max(0, Math.min(1, Number(jA.score)));
+      const scoreB = Math.max(0, Math.min(1, Number(jB.score)));
+      scoresA.push(scoreA);
+      scoresB.push(scoreB);
+      if (scoreA > scoreB) winsA += 1;
+      else if (scoreB > scoreA) winsB += 1;
       else ties += 1;
     }
     const n = scoresA.length;
@@ -237,8 +299,8 @@ export async function runXlangBakeoff(args) {
     version: XLANG_BAKEOFF_VERSION,
     tenant_id,
     namespace,
-    artifact_a,
-    artifact_b,
+    artifact_a: artifact_a_ref,
+    artifact_b: artifact_b_ref,
     by_lang: byLangOut,
     overall_winner: overallWinner,
     overall_wins_a: totalWinsA,
@@ -267,5 +329,6 @@ function _round4(x) {
 
 export default {
   XLANG_BAKEOFF_VERSION,
+  XLANG_BAKEOFF_LIMITS,
   runXlangBakeoff,
 };

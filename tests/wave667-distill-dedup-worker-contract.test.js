@@ -12,7 +12,18 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
-const PYTHON = process.env.KOLM_PYTHON || process.env.PYTHON || 'python';
+const BUNDLED_PYTHON = path.join(
+  os.homedir(),
+  '.cache',
+  'codex-runtimes',
+  'codex-primary-runtime',
+  'dependencies',
+  'python',
+  'python.exe',
+);
+const PYTHON = process.env.KOLM_PYTHON
+  || process.env.PYTHON
+  || (fs.existsSync(BUNDLED_PYTHON) ? BUNDLED_PYTHON : 'python');
 const SCRIPT = path.resolve('workers/distill/scripts/dedup_pairs.py');
 
 function tempDir(t) {

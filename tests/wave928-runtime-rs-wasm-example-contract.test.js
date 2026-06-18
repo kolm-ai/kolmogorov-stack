@@ -31,9 +31,14 @@ function readJson(rel) {
 }
 
 function run(command, args, timeout = 180000) {
-  return spawnSync(command, args, {
+  const finalArgs = command === 'cargo' ? ['--offline', ...args] : args;
+  return spawnSync(command, finalArgs, {
     cwd: ROOT,
-    env: { ...process.env, CARGO_TARGET_DIR: path.join(os.tmpdir(), 'kolm-runtime-rs-target') },
+    env: {
+      ...process.env,
+      CARGO_NET_OFFLINE: command === 'cargo' ? 'true' : process.env.CARGO_NET_OFFLINE,
+      CARGO_TARGET_DIR: path.join(os.tmpdir(), 'kolm-runtime-rs-target'),
+    },
     encoding: 'utf8',
     timeout,
   });

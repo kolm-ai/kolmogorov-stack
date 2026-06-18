@@ -6,11 +6,24 @@
 
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
+const BUNDLED_PYTHON = path.join(
+  os.homedir(),
+  '.cache',
+  'codex-runtimes',
+  'codex-primary-runtime',
+  'dependencies',
+  'python',
+  'python.exe',
+);
+const PYTHON = process.env.KOLM_PYTHON
+  || process.env.PYTHON
+  || (fs.existsSync(BUNDLED_PYTHON) ? BUNDLED_PYTHON : 'python');
 
 function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');
@@ -21,13 +34,12 @@ function readJson(rel) {
 }
 
 function runPython(script) {
-  const py = process.env.PYTHON || 'python';
-  const res = spawnSync(py, ['-c', script], {
+  const res = spawnSync(PYTHON, ['-c', script], {
     cwd: ROOT,
     env: { ...process.env, KOLM_REPO: ROOT },
     encoding: 'utf8',
   });
-  return { ...res, command: py };
+  return { ...res, command: PYTHON };
 }
 
 test('W754 Python ONNX text runtime is wired into direct depth verification', () => {

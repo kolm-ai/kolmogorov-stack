@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
@@ -121,6 +122,20 @@ function tokeniseCommand(command) {
 function normalizeExecutable(command) {
   if (command === 'node') return process.execPath;
   if (command === 'powershell') return findPowerShellCommand() || 'powershell';
+  if (command === 'python' || command === 'python3') {
+    const bundledPython = path.join(
+      os.homedir(),
+      '.cache',
+      'codex-runtimes',
+      'codex-primary-runtime',
+      'dependencies',
+      'python',
+      'python.exe',
+    );
+    return process.env.KOLM_PYTHON
+      || process.env.PYTHON
+      || (fs.existsSync(bundledPython) ? bundledPython : command);
+  }
   return command;
 }
 
@@ -132,11 +147,14 @@ function localCheckCwd(root, target, check) {
 function classifySkipped(result, command) {
   const output = `${result.error ? String(result.error.message || result.error) : ''}\n${result.stdout || ''}\n${result.stderr || ''}`;
   if (result.error && result.error.code === 'ENOENT') return 'tool_unavailable';
+  if (result.error && result.error.code === 'EPERM') return 'host_application_control_blocked';
+  if (/spawnSync\s+\S+\s+EPERM/i.test(output)) return 'host_application_control_blocked';
+  if (/tool unavailable|spawnSync\s+\S+\s+ENOENT/i.test(output)) return 'tool_unavailable';
   if (/not recognized as an internal or external command/i.test(output)) {
     if (/\b(tsc|gradle|cargo|swift|brew|winget|sh)\b/i.test(output)) return 'toolchain_unavailable';
     return 'command_unavailable';
   }
-  if (/No module named build/i.test(output)) return 'python_build_module_unavailable';
+  if (/No module named build|build\.__main__|cannot be directly executed/i.test(output)) return 'python_build_module_unavailable';
   if (/Cannot find module|MODULE_NOT_FOUND/i.test(output)) return 'package_dependency_uninstalled';
   if (/Application Control policy has blocked this file|os error 4551/i.test(output)) return 'host_application_control_blocked';
   if (/Could not connect to server|failed to download from|Updating crates\.io index|crates\.io/i.test(output)) return 'network_unavailable_for_dependency_resolution';
@@ -155,6 +173,9 @@ function runLocalCheck(root, target, check, options = {}) {
     executable = process.env.ComSpec || 'cmd.exe';
     childArgs = ['/d', '/s', '/c', 'npm.cmd', ...tokens.slice(1)];
   }
+  if (tokens[0] === 'cargo') {
+    childArgs = ['--offline', ...childArgs];
+  }
   const cwd = localCheckCwd(root, target, check);
   const npmCache = path.join(root, '.tmp', `package-release-npm-cache-${process.pid}`);
   fs.mkdirSync(npmCache, { recursive: true });
@@ -164,6 +185,7 @@ function runLocalCheck(root, target, check, options = {}) {
     npm_config_loglevel: process.env.npm_config_loglevel || 'warn',
     KOLM_INSTALL_DIR: '__kolm_dry_run_install__',
     KOLM_BIN_DIR: '__kolm_dry_run_bin__',
+    CARGO_NET_OFFLINE: tokens[0] === 'cargo' ? 'true' : process.env.CARGO_NET_OFFLINE,
   };
   const result = spawnSync(executable, childArgs, {
     cwd,

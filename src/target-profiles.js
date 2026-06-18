@@ -11,7 +11,34 @@
 // The shape mirrors src/device-capabilities.js#profileFor so a downstream
 // compile call can drop the row straight into manifest.target_device.
 
-export const TARGET_PROFILES = Object.freeze({
+export const TARGET_PROFILE_LIMITS = Object.freeze({
+  max_profile_name_chars: 96,
+});
+
+const UNSAFE_PROFILE_NAMES = new Set(['__proto__', 'constructor', 'prototype']);
+
+function _deepFreeze(obj) {
+  if (!obj || typeof obj !== 'object' || Object.isFrozen(obj)) return obj;
+  for (const value of Object.values(obj)) _deepFreeze(value);
+  return Object.freeze(obj);
+}
+
+function _safeProfileName(profileName) {
+  const key = String(profileName == null ? '' : profileName)
+    .replace(/[\u0000-\u001f\u007f]+/g, ' ')
+    .trim()
+    .toLowerCase()
+    .slice(0, TARGET_PROFILE_LIMITS.max_profile_name_chars);
+  if (!key || UNSAFE_PROFILE_NAMES.has(key)) return null;
+  if (!/^[a-z0-9_.-]+$/.test(key)) return null;
+  return key;
+}
+
+function _cloneProfile(profile) {
+  return profile && typeof profile === 'object' ? Object.freeze({ ...profile }) : null;
+}
+
+export const TARGET_PROFILES = _deepFreeze({
   // ===== NVIDIA Jetson family =====
   'jetson-orin-nano': {
     name: 'jetson-orin-nano',
@@ -253,12 +280,13 @@ export const TARGET_PROFILE_NAMES = Object.freeze(Object.keys(TARGET_PROFILES));
 
 export function lookup(profileName) {
   if (!profileName) return null;
-  const key = String(profileName).toLowerCase().trim();
-  return TARGET_PROFILES[key] || null;
+  const key = _safeProfileName(profileName);
+  if (!key || !Object.prototype.hasOwnProperty.call(TARGET_PROFILES, key)) return null;
+  return _cloneProfile(TARGET_PROFILES[key]);
 }
 
 export function list() {
-  return TARGET_PROFILE_NAMES.map(n => TARGET_PROFILES[n]);
+  return TARGET_PROFILE_NAMES.map(n => _cloneProfile(TARGET_PROFILES[n]));
 }
 
 // Render the lookup table as a fixed-column text block for the CLI. Mirrors
@@ -297,6 +325,7 @@ export function asJson() {
 }
 
 export default {
+  TARGET_PROFILE_LIMITS,
   TARGET_PROFILES,
   TARGET_PROFILE_NAMES,
   lookup,

@@ -46,11 +46,48 @@ export const VERSION = 'w807-v1';
 
 // Hard default; superseded by opts → env → tenant-config in that order.
 export const DEFAULT_MAX_SPLICE_DELAY_MS = 8_000;
+export const TEACHER_SPLICE_LIMITS = Object.freeze({
+  max_budget_ms: 60_000,
+  max_tokens_so_far: 8192,
+  max_token_chars: 2000,
+  max_prompt_chars: 20000,
+  max_teacher_text_chars: 20000,
+  max_teacher_tokens: 8192,
+  max_id_chars: 160,
+  max_error_chars: 120,
+});
 
 // In-memory per-tenant override registry. Production callers may set this
 // at startup; tests use it to inject a per-test budget without env-var
 // churn. Persisted overrides belong in src/settings.js (orchestrator-owned).
 const TENANT_BUDGETS = new Map();
+const UNSAFE_IDS = new Set(['__proto__', 'constructor', 'prototype']);
+
+function _safeText(v, max) {
+  const s = String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]+/g, ' ').trim();
+  return s.length > max ? s.slice(0, max) : s;
+}
+
+function _safeId(v, fallback = null) {
+  const raw = _safeText(v == null ? '' : v, TEACHER_SPLICE_LIMITS.max_id_chars);
+  if (!raw || UNSAFE_IDS.has(raw)) return fallback;
+  const s = raw
+    .replace(/[^\w:.-]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  if (!s || UNSAFE_IDS.has(s)) return fallback;
+  return s;
+}
+
+function _safeErrorCode(v) {
+  const s = _safeId(v, 'teacher_unreachable');
+  return s && s.length <= TEACHER_SPLICE_LIMITS.max_error_chars ? s : 'teacher_unreachable';
+}
+
+function _clampBudget(v) {
+  const n = Math.trunc(Number(v));
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return Math.min(n, TEACHER_SPLICE_LIMITS.max_budget_ms);
+}
 
 /**
  * Set a per-tenant splice-latency budget (ms). Pass null to clear.
@@ -58,10 +95,11 @@ const TENANT_BUDGETS = new Map();
  * @param {number|null} budgetMs
  */
 export function setMaxSpliceDelayMs(tenant_id, budgetMs) {
-  if (!tenant_id) return;
-  if (budgetMs == null) { TENANT_BUDGETS.delete(tenant_id); return; }
-  const n = Number(budgetMs);
-  if (Number.isFinite(n) && n > 0) TENANT_BUDGETS.set(tenant_id, Math.trunc(n));
+  const tenant = _safeId(tenant_id);
+  if (!tenant) return;
+  if (budgetMs == null) { TENANT_BUDGETS.delete(tenant); return; }
+  const n = _clampBudget(budgetMs);
+  if (n != null) TENANT_BUDGETS.set(tenant, n);
 }
 
 /**
@@ -76,12 +114,12 @@ export function setMaxSpliceDelayMs(tenant_id, budgetMs) {
  * @returns {number} budget in ms
  */
 export function getMaxSpliceDelayMs(tenant_id, explicit_override) {
-  if (Number.isFinite(Number(explicit_override)) && Number(explicit_override) > 0) {
-    return Math.trunc(Number(explicit_override));
-  }
-  const env = Number(process.env.KOLM_MAX_SPLICE_DELAY_MS);
-  if (Number.isFinite(env) && env > 0) return Math.trunc(env);
-  if (tenant_id && TENANT_BUDGETS.has(tenant_id)) return TENANT_BUDGETS.get(tenant_id);
+  const explicit = _clampBudget(explicit_override);
+  if (explicit != null) return explicit;
+  const env = _clampBudget(process.env.KOLM_MAX_SPLICE_DELAY_MS);
+  if (env != null) return env;
+  const tenant = _safeId(tenant_id);
+  if (tenant && TENANT_BUDGETS.has(tenant)) return TENANT_BUDGETS.get(tenant);
   return DEFAULT_MAX_SPLICE_DELAY_MS;
 }
 
@@ -95,11 +133,7 @@ function withTimeout(promise, ms, code) {
       const err = new Error('splice timeout ' + ms + 'ms');
       err.code = code || 'splice_timeout';
       reject(err);
-    }, ms).unref ? setTimeout(() => {
-      const err = new Error('splice timeout ' + ms + 'ms');
-      err.code = code || 'splice_timeout';
-      reject(err);
-    }, ms) : null;
+    }, ms);
     // node's setTimeout returns a Timeout object - .unref() exists in node
     // but not in browser. Guard so this file stays bundleable.
     try { timer && timer.unref && timer.unref(); } catch (_) {} // deliberate: cleanup
@@ -111,8 +145,9 @@ function withTimeout(promise, ms, code) {
 
 function _coerceTokens(t) {
   if (t == null) return [];
-  if (Array.isArray(t)) return t.slice();
-  if (typeof t === 'string') return [t];
+  if (Array.isArray(t)) return t.slice(0, TEACHER_SPLICE_LIMITS.max_tokens_so_far)
+    .map((x) => _safeText(x, TEACHER_SPLICE_LIMITS.max_token_chars));
+  if (typeof t === 'string') return [_safeText(t, TEACHER_SPLICE_LIMITS.max_token_chars)];
   return [];
 }
 
@@ -141,15 +176,15 @@ function _now() { return Date.now(); }
  */
 export async function spliceToTeacher(opts = {}) {
   const tokensSoFar = _coerceTokens(opts.tokens_so_far);
-  const prompt = String(opts.prompt || '');
-  const teacher_id = opts.teacher_id || 'default';
-  const tenant_id = opts.tenant_id || null;
+  const prompt = _safeText(opts.prompt || '', TEACHER_SPLICE_LIMITS.max_prompt_chars);
+  const teacher_id = _safeId(opts.teacher_id, 'default');
+  const tenant_id = _safeId(opts.tenant_id, null);
   const threshold_used = Number.isFinite(Number(opts.threshold_used)) ? Number(opts.threshold_used) : null;
-  const threshold_profile = opts.threshold_profile || null;
+  const threshold_profile = _safeId(opts.threshold_profile, null);
   const budget = getMaxSpliceDelayMs(tenant_id, opts.budget_ms);
   const startedAt = _now();
   const at_token = tokensSoFar.length;
-  const reason = opts.reason || 'entropy_window_exceeded';
+  const reason = _safeId(opts.reason, 'entropy_window_exceeded');
 
   const baseEnvelope = {
     local_tokens: tokensSoFar.length,
@@ -216,7 +251,7 @@ export async function spliceToTeacher(opts = {}) {
   const latency = _now() - startedAt;
 
   if (teacherError) {
-    const errCode = teacherError.code || 'teacher_unreachable';
+    const errCode = _safeErrorCode(teacherError.code || 'teacher_unreachable');
     // Per W807-5, emit a warning event into the event-store so operators see
     // the budget-exceeded count on the confidence dashboard. Failure to
     // write the warning is non-fatal - the splice envelope is authoritative.
@@ -225,7 +260,7 @@ export async function spliceToTeacher(opts = {}) {
         const es = await import('./event-store.js');
         await es.appendEvent({
           tenant_id,
-          namespace: opts.namespace || 'default',
+          namespace: _safeId(opts.namespace, 'default'),
           provider: 'kolm-confidence-router',
           vendor: 'kolm',
           model: 'router/splice',
@@ -272,14 +307,14 @@ export async function spliceToTeacher(opts = {}) {
   }
 
   const teacherTokens = Number.isFinite(Number(teacherResult.completion_tokens))
-    ? Math.max(0, Math.trunc(Number(teacherResult.completion_tokens)))
+    ? Math.min(TEACHER_SPLICE_LIMITS.max_teacher_tokens, Math.max(0, Math.trunc(Number(teacherResult.completion_tokens))))
     : (Array.isArray(teacherResult.tokens)
-      ? teacherResult.tokens.length
+      ? Math.min(TEACHER_SPLICE_LIMITS.max_teacher_tokens, teacherResult.tokens.length)
       : (typeof teacherResult.text === 'string'
         // Cheap token estimate: char_count / 4. Real tokenization happens
         // in the orchestrator; this fallback only matters when the teacher
         // adapter omits completion_tokens.
-        ? Math.max(1, Math.ceil(teacherResult.text.length / 4))
+        ? Math.min(TEACHER_SPLICE_LIMITS.max_teacher_tokens, Math.max(1, Math.ceil(teacherResult.text.length / 4)))
         : 0));
 
   const totalTokens = tokensSoFar.length + teacherTokens;
@@ -297,8 +332,13 @@ export async function spliceToTeacher(opts = {}) {
       teacher_id,
     }],
     teacher_payload: {
-      text: typeof teacherResult.text === 'string' ? teacherResult.text : null,
-      tokens: Array.isArray(teacherResult.tokens) ? teacherResult.tokens : null,
+      text: typeof teacherResult.text === 'string'
+        ? _safeText(teacherResult.text, TEACHER_SPLICE_LIMITS.max_teacher_text_chars)
+        : null,
+      tokens: Array.isArray(teacherResult.tokens)
+        ? teacherResult.tokens.slice(0, TEACHER_SPLICE_LIMITS.max_teacher_tokens)
+            .map((x) => _safeText(x, TEACHER_SPLICE_LIMITS.max_token_chars))
+        : null,
     },
     fallback_failed: false,
   };
@@ -315,6 +355,7 @@ export function _resetTenantBudgetsForTests() {
 export default {
   VERSION,
   DEFAULT_MAX_SPLICE_DELAY_MS,
+  TEACHER_SPLICE_LIMITS,
   spliceToTeacher,
   getMaxSpliceDelayMs,
   setMaxSpliceDelayMs,

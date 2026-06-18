@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 830,
-    "test_referenced_components": 819,
-    "components_without_direct_test_reference": 11,
+    "test_referenced_components": 830,
+    "components_without_direct_test_reference": 0,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 424,
+      "cryptographic_or_proof_boundary": 428,
       "distribution_or_worker_surface": 170,
       "environment_configuration_boundary": 315,
       "execution_or_subprocess_boundary": 235,
@@ -21086,26 +21086,29 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "6dedbc558775483f440d85229568f60955fbc38aa932828562562d248d5e2d86",
+      "sha256": "42d490eefda8a24cab1ecc47eb20b0cc85dfba6ac10e4d122ab661721af725f0",
       "metrics": {
-        "bytes": 23627,
-        "lines": 529,
-        "imports": 4,
-        "exports": 4,
+        "bytes": 27720,
+        "lines": 630,
+        "imports": 5,
+        "exports": 5,
         "routes": 0,
         "env_refs": 4,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 4,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -30171,23 +30174,27 @@
       "surface": "core-backend",
       "domain": "runtime_serving_routing",
       "language": "javascript",
-      "sha256": "14710bd682967f3f6971b750549a613d55ddf6799428a6aec2a986f86f40a287",
+      "sha256": "52826fe8fab835aa6ff0147da943ac32cd165a8fe87a0f5381e77cd3a21dedaa",
       "metrics": {
-        "bytes": 12514,
-        "lines": 305,
-        "imports": 0,
-        "exports": 4,
+        "bytes": 14451,
+        "lines": 357,
+        "imports": 1,
+        "exports": 5,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
-      "risk_signals": [],
-      "priority_score": 1,
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
+      "risk_signals": [
+        "cryptographic_or_proof_boundary"
+      ],
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -30828,12 +30835,12 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "ed932a0dfd7512f369a239acb37543e3ed2e9be5de2a5f91c0c30e8e249e74e7",
+      "sha256": "da1b001b8b7aba5a44b9470197bec5200c97379519059020652d79c27779956c",
       "metrics": {
-        "bytes": 16683,
-        "lines": 457,
-        "imports": 1,
-        "exports": 9,
+        "bytes": 20120,
+        "lines": 544,
+        "imports": 2,
+        "exports": 10,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -30842,9 +30849,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -30882,12 +30891,12 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "261ef9370cd94f6339d26e78596c4aab271d87e0613c8ddd6caaeb9aba27eb4d",
+      "sha256": "ab538e243f1cf00a28452fa5e21755f2dc6affa516ce9d6bdab313a0e783ed92",
       "metrics": {
-        "bytes": 13218,
-        "lines": 369,
+        "bytes": 14367,
+        "lines": 398,
         "imports": 0,
-        "exports": 6,
+        "exports": 7,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -30896,9 +30905,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -38642,23 +38653,27 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "9ce16952edcf83bd1aa220dca506be7b95839740a3a39f3df1ce1f9006e8cfdc",
+      "sha256": "567c154ee1a28d82584e4dac82a6487662fb9a0d076d67f8a692e7525740318c",
       "metrics": {
-        "bytes": 8629,
-        "lines": 274,
-        "imports": 2,
-        "exports": 6,
+        "bytes": 11494,
+        "lines": 345,
+        "imports": 3,
+        "exports": 7,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
-      "risk_signals": [],
-      "priority_score": 1,
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
+      "risk_signals": [
+        "cryptographic_or_proof_boundary"
+      ],
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -42619,12 +42634,12 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "c38a4b0a148211d60d2e887fdde40c206f5d2a50c8bb8e86e8878ab96038b473",
+      "sha256": "e091355daf38256d78f719e92f90e6aa3d1ae3c3fa076c3fbcfd02f4bb1b35c1",
       "metrics": {
-        "bytes": 9540,
-        "lines": 307,
+        "bytes": 10516,
+        "lines": 336,
         "imports": 0,
-        "exports": 7,
+        "exports": 8,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -42633,9 +42648,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -42852,12 +42869,12 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "7576c37a5df6f713daca695b91d31ae31f0ce2a0c701b2d7e88640aa5fe03297",
+      "sha256": "56ef92c7d097f0c575f4b11c9dfd85fc6027100f9b8e16c60bf5356909a2cc73",
       "metrics": {
-        "bytes": 11553,
-        "lines": 323,
+        "bytes": 13162,
+        "lines": 364,
         "imports": 2,
-        "exports": 7,
+        "exports": 8,
         "routes": 0,
         "env_refs": 1,
         "fs_writes": 0,
@@ -42866,11 +42883,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -42908,12 +42927,12 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "a5f949e14613f8c3acfc9ec8bc6506a2b02eca5587b2a553ea555d76fa7c8ca8",
+      "sha256": "32492664ad9f9ac7a1966d3dfefa4a821d16545e717e6a7d8117cb71fa175f7f",
       "metrics": {
-        "bytes": 6142,
-        "lines": 137,
+        "bytes": 7021,
+        "lines": 160,
         "imports": 0,
-        "exports": 4,
+        "exports": 5,
         "routes": 0,
         "env_refs": 2,
         "fs_writes": 0,
@@ -42922,11 +42941,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -43691,12 +43712,12 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "947b075bae8f2fc67cf63373babf2e2324c860f98feb12f173f843739e69dced",
+      "sha256": "0002fcc834322c7450d7585f1c1a1776ccca84107136ba32c5648f4d5c32b3fd",
       "metrics": {
-        "bytes": 11957,
-        "lines": 287,
+        "bytes": 14626,
+        "lines": 372,
         "imports": 0,
-        "exports": 4,
+        "exports": 5,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -43705,9 +43726,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -43745,25 +43768,28 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "fe0dabb334b36dcc827d0dd7d6176e8cf81226b86fadc2b3e1ee422b80c4bc2f",
+      "sha256": "665e9a6444ebd3856719162c9abc6a37754525100c96950e365dce6be0dab953",
       "metrics": {
-        "bytes": 9631,
-        "lines": 223,
-        "imports": 0,
-        "exports": 2,
+        "bytes": 13403,
+        "lines": 324,
+        "imports": 1,
+        "exports": 3,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -45763,12 +45789,12 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "5a477851b8a567b113cf1e12b6d42dfdb3741b24865a34b2e7dfc740740466f2",
+      "sha256": "acc938fdf5727cb3ef30eb20ae2610b650fb68b0e9594b3232e5093f9b92b584",
       "metrics": {
-        "bytes": 9861,
-        "lines": 272,
+        "bytes": 12141,
+        "lines": 335,
         "imports": 2,
-        "exports": 3,
+        "exports": 4,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -45777,9 +45803,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave936-training-runtime-governance-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

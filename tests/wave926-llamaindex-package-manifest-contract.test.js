@@ -62,12 +62,23 @@ function findNpmCommand() {
   return process.platform === 'win32' ? 'npm.cmd' : 'npm';
 }
 
+function npmEnv() {
+  const cache = path.join(ROOT, '.tmp', `w926-npm-cache-${process.pid}`);
+  fs.mkdirSync(cache, { recursive: true });
+  return {
+    ...process.env,
+    npm_config_cache: cache,
+    npm_config_loglevel: process.env.npm_config_loglevel || 'warn',
+  };
+}
+
 function runNpm(args, cwd) {
   if (process.env.npm_execpath) {
     return spawnSync(process.execPath, [process.env.npm_execpath, ...args], {
       cwd,
       encoding: 'utf8',
       timeout: 30000,
+      env: npmEnv(),
     });
   }
   const npmCli = findNpmCli();
@@ -76,12 +87,14 @@ function runNpm(args, cwd) {
       cwd,
       encoding: 'utf8',
       timeout: 30000,
+      env: npmEnv(),
     });
   }
   return spawnSync(findNpmCommand(), args, {
     cwd,
     encoding: 'utf8',
     timeout: 30000,
+    env: npmEnv(),
   });
 }
 
