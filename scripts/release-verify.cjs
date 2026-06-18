@@ -12,7 +12,7 @@
 // Gates, in order:
 //   1.  npm run lint:refs                (static-ref + href integrity + product-surface
 //                                         catalog vs api-routes.json contract)
-//   2.  control-files                    (W855/W937-W950: internal JSONs in docs/internal/
+//   2.  control-files                    (W855/W937-W951: internal JSONs in docs/internal/
 //                                         parse + match expected schema strings +
 //                                         carry non-empty required arrays)
 //   3.  openapi-sync                     (W490: public/openapi.json covers every
@@ -287,6 +287,7 @@ async function gateControlFiles() {
     { file: 'docs/internal/artifact-matrix.json', schema: 'kolm.artifact_matrix.v1', requiredArrays: ['artifact_phases', 'artifact_hash_slots', 'test_evidence'] },
     { file: 'docs/internal/tui-workbench-matrix.json', schema: 'kolm.tui_workbench_matrix.v1', requiredArrays: ['workbench_commands', 'zip_reader_phases', 'test_evidence'] },
     { file: 'docs/internal/bench-harness-matrix.json', schema: 'kolm.bench_harness_matrix.v1', requiredArrays: ['benchmark_suites', 'transport_targets', 'test_evidence'] },
+    { file: 'docs/internal/otel-matrix.json', schema: 'kolm.otel_matrix.v1', requiredArrays: ['otel_phases', 'privacy_controls', 'test_evidence'] },
     { file: 'docs/internal/codebase-file-ledger.json', schema: 'kolm.codebase_file_ledger.v1', requiredArrays: ['paths'] },
     { file: 'docs/internal/design-cascade-ledger.json',schema: 'kolm.design_cascade_ledger.v1',requiredArrays: ['files'] },
     { file: 'docs/internal/product-media-proof.json',  schema: 'kolm.product_media_proof.v1',  requiredArrays: ['pages'] },

@@ -35,6 +35,8 @@ const TUI_WORKBENCH_MATRIX = path.join(ROOT, 'docs', 'internal', 'tui-workbench-
 const TUI_WORKBENCH_MATRIX_TEST = path.join(ROOT, 'tests', 'wave949-tui-workbench-matrix.test.js');
 const BENCH_HARNESS_MATRIX = path.join(ROOT, 'docs', 'internal', 'bench-harness-matrix.json');
 const BENCH_HARNESS_MATRIX_TEST = path.join(ROOT, 'tests', 'wave950-bench-harness-matrix.test.js');
+const OTEL_MATRIX = path.join(ROOT, 'docs', 'internal', 'otel-matrix.json');
+const OTEL_MATRIX_TEST = path.join(ROOT, 'tests', 'wave951-otel-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
@@ -49,6 +51,7 @@ let dataCurateMatrixGreen = null;
 let artifactMatrixGreen = null;
 let tuiWorkbenchMatrixGreen = null;
 let benchHarnessMatrixGreen = null;
+let otelMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -558,6 +561,43 @@ function benchHarnessMatrixOk() {
   return benchHarnessMatrixGreen;
 }
 
+function otelMatrixOk() {
+  if (otelMatrixGreen != null) return otelMatrixGreen;
+  try {
+    if (!fs.existsSync(OTEL_MATRIX) || !fs.existsSync(OTEL_MATRIX_TEST)) {
+      otelMatrixGreen = false;
+      return otelMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(OTEL_MATRIX, 'utf8'));
+    otelMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.otel_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.w733_attr_count >= 12
+      && matrix.summary.w733_span_name_count === 4
+      && matrix.summary.genai_attr_count >= 21
+      && matrix.summary.genai_metric_count === 3
+      && matrix.summary.token_bucket_count === 14
+      && matrix.summary.duration_bucket_count === 14
+      && matrix.summary.ttft_bucket_count === 16
+      && matrix.summary.phase_count === 20
+      && matrix.summary.present_phase_count === 20
+      && matrix.summary.privacy_control_count === 16
+      && matrix.summary.present_privacy_control_count === 16
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/otel.js')
+    );
+  } catch {
+    otelMatrixGreen = false;
+  }
+  return otelMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -718,6 +758,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'src/artifact.js' && artifactMatrixOk()) return 'maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract';
   if (rel === 'cli/kolm-tui.mjs' && tuiWorkbenchMatrixOk()) return 'maintain_generated_tui_workbench_matrix_and_cli_distribution_contract';
   if (rel === 'src/bench-harness.js' && benchHarnessMatrixOk()) return 'maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract';
+  if (rel === 'src/otel.js' && otelMatrixOk()) return 'maintain_generated_otel_matrix_and_privacy_safe_semconv_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -772,7 +813,7 @@ function commandsFor(domain) {
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
     infra_cloud_device: ['npm run verify:platform', 'npm run verify:package-release'],
     developer_distribution: ['npm run verify:cli-command-matrix', 'npm run verify:tui-workbench-matrix', 'npm run verify:package-release'],
-    platform_support: ['npm run verify:daemon-connector-matrix', 'npm run verify:binder-contract-matrix', 'npm run verify:intent-contract-matrix', 'npm run verify:codegraph'],
+    platform_support: ['npm run verify:daemon-connector-matrix', 'npm run verify:binder-contract-matrix', 'npm run verify:intent-contract-matrix', 'npm run verify:otel-matrix', 'npm run verify:codegraph'],
   };
   return map[domain] || ['npm run verify:codegraph'];
 }

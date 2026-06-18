@@ -53,6 +53,23 @@ const STATE = {
   maxQueueBytes: 1 << 20,  // 1 MB cap; oldest are dropped
 };
 
+const OTEL_LIMITS = Object.freeze({
+  max_attr_key_chars: 128,
+  max_attr_value_chars: 512,
+  max_attrs_per_record: 64,
+  max_events_per_span: 16,
+  max_resource_attrs: 32,
+  max_header_count: 16,
+  max_header_key_chars: 128,
+  max_header_value_chars: 2048,
+  max_metric_name_chars: 160,
+  max_span_name_chars: 160,
+  export_timeout_ms: 8000,
+});
+
+const OTEL_SECRET_VALUE_RE = /\b(?:Bearer\s+[A-Za-z0-9._~+/-]{12,}|ks_[a-z0-9_]{12,}|sk-[a-z0-9_-]{12,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{20,})\b/gi;
+const OTEL_SECRET_PAIR_RE = /\b(?:api[_-]?key|key|token|authorization|access[_-]?token|password|secret)=([^&\s]+)/gi;
+
 function init(opts) {
   opts = opts || {};
   const enabled = (opts.enabled !== undefined) ? !!opts.enabled
@@ -77,11 +94,11 @@ function init(opts) {
 function parseHeaders(raw) {
   if (!raw) return {};
   const out = {};
-  String(raw).split(',').forEach((pair) => {
+  String(raw).split(',').slice(0, OTEL_LIMITS.max_header_count).forEach((pair) => {
     const i = pair.indexOf('=');
     if (i < 0) return;
-    const k = pair.slice(0, i).trim();
-    const v = pair.slice(i + 1).trim();
+    const k = cleanHeaderPart(pair.slice(0, i), OTEL_LIMITS.max_header_key_chars);
+    const v = cleanHeaderPart(pair.slice(i + 1), OTEL_LIMITS.max_header_value_chars);
     if (k) out[k] = v;
   });
   return out;
@@ -93,25 +110,31 @@ function buildResource(serviceName) {
     kv('telemetry.sdk.language', 'nodejs'),
     kv('telemetry.sdk.name', 'kolm-otel'),
     kv('telemetry.sdk.version', '1.0'),
-  ];
+  ].filter(Boolean);
   const extra = process.env.OTEL_RESOURCE_ATTRIBUTES || '';
-  extra.split(',').forEach((pair) => {
+  extra.split(',').slice(0, OTEL_LIMITS.max_resource_attrs).forEach((pair) => {
     const i = pair.indexOf('=');
     if (i < 0) return;
     const k = pair.slice(0, i).trim();
     const v = pair.slice(i + 1).trim();
-    if (k && k !== 'service.name') attrs.push(kv(k, v));
+    if (k && k !== 'service.name') {
+      const row = kv(k, v);
+      if (row) attrs.push(row);
+    }
   });
   return { attributes: attrs };
 }
 
 function kv(key, value) {
+  const safeKey = cleanAttrKey(key);
+  if (!safeKey || value === undefined || value === null) return null;
   let v;
-  if (typeof value === 'number' && Number.isInteger(value)) v = { intValue: String(value) };
-  else if (typeof value === 'number') v = { doubleValue: value };
+  if (typeof value === 'number' && Number.isInteger(value)) v = Number.isFinite(value) ? { intValue: String(value) } : null;
+  else if (typeof value === 'number') v = Number.isFinite(value) ? { doubleValue: value } : null;
   else if (typeof value === 'boolean') v = { boolValue: value };
-  else v = { stringValue: String(value) };
-  return { key, value: v };
+  else v = { stringValue: cleanAttrValue(value) };
+  if (!v) return null;
+  return { key: safeKey, value: v };
 }
 
 function makeId(bytes) {
@@ -124,7 +147,7 @@ function startSpan(name, attrs, parent) {
   const parentSpanId = parent && parent.spanId ? parent.spanId : undefined;
   return {
     traceId, spanId, parentSpanId,
-    name,
+    name: cleanSpanName(name),
     startTimeUnixNano: nowNs(),
     endTimeUnixNano: null,
     attributes: attrsToKv(attrs),
@@ -136,7 +159,10 @@ function startSpan(name, attrs, parent) {
 function attrsToKv(attrs) {
   if (!attrs) return [];
   const out = [];
-  for (const k of Object.keys(attrs)) out.push(kv(k, attrs[k]));
+  for (const k of Object.keys(attrs).slice(0, OTEL_LIMITS.max_attrs_per_record)) {
+    const row = kv(k, attrs[k]);
+    if (row) out.push(row);
+  }
   return out;
 }
 
@@ -148,17 +174,17 @@ function endSpan(span, opts) {
   if (!span || !STATE.enabled) return;
   span.endTimeUnixNano = nowNs();
   if (opts && opts.attrs) span.attributes.push(...attrsToKv(opts.attrs));
-  if (opts && opts.events) {
-    for (const ev of opts.events) {
+  if (opts && Array.isArray(opts.events)) {
+    for (const ev of opts.events.slice(0, OTEL_LIMITS.max_events_per_span)) {
       span.events.push({
         timeUnixNano: ev.t || nowNs(),
-        name: ev.name,
+        name: cleanSpanName(ev.name),
         attributes: attrsToKv(ev.attrs || {}),
       });
     }
   }
   const status = opts && opts.status;
-  if (status === 'error') span.status = { code: 2, message: (opts.message || '').slice(0, 256) };
+  if (status === 'error') span.status = { code: 2, message: cleanAttrValue(opts.message || '', 256) };
   else if (status === 'ok') span.status = { code: 1 };
   STATE.spanQueue.push(span);
   trimQueue();
@@ -166,8 +192,10 @@ function endSpan(span, opts) {
 
 function metric(name, value, attrs) {
   if (!STATE.enabled) return;
+  const safeName = cleanMetricName(name);
+  if (!safeName) return;
   STATE.metricQueue.push({
-    name,
+    name: safeName,
     description: '',
     unit: '',
     gauge: {
@@ -183,8 +211,10 @@ function metric(name, value, attrs) {
 
 function counter(name, increment, attrs) {
   if (!STATE.enabled) return;
+  const safeName = cleanMetricName(name);
+  if (!safeName) return;
   STATE.metricQueue.push({
-    name,
+    name: safeName,
     description: '',
     unit: '',
     sum: {
@@ -227,7 +257,7 @@ async function flush() {
     if (process.env.KOLM_OTEL_DEBUG) {
       // Failure should not bring down the host process; log once at debug.
        
-      console.warn('[kolm.otel] export failed:', err && err.message);
+      console.warn('[kolm.otel] export failed:', cleanAttrValue(err && err.message, 200));
     }
   }
 }
@@ -291,11 +321,11 @@ function postJson(path, body) {
       res.on('data', (c) => chunks.push(c));
       res.on('end', () => {
         if (res.statusCode >= 200 && res.statusCode < 300) return resolve();
-        reject(new Error(`OTLP ${path} -> ${res.statusCode}: ${Buffer.concat(chunks).toString('utf8').slice(0, 200)}`));
+        reject(new Error(`OTLP ${path} -> ${res.statusCode}: ${cleanAttrValue(Buffer.concat(chunks).toString('utf8'), 200)}`));
       });
     });
     req.on('error', reject);
-    req.setTimeout(8000, () => req.destroy(new Error('OTLP timeout')));
+    req.setTimeout(OTEL_LIMITS.export_timeout_ms, () => req.destroy(new Error('OTLP timeout')));
     req.write(data);
     req.end();
   });
@@ -315,7 +345,7 @@ function expressMiddleware() {
     if (!STATE.enabled) return next();
     const span = startSpan(`HTTP ${req.method} ${routePattern(req)}`, {
       'http.method': req.method,
-      'http.target': req.originalUrl || req.url,
+      'http.target': redactHttpTarget(req.originalUrl || req.url),
       'http.route': routePattern(req),
       'http.user_agent': req.get && req.get('user-agent') || '',
     });
@@ -331,11 +361,48 @@ function expressMiddleware() {
 }
 
 function routePattern(req) {
-  return (req.route && req.route.path)
+  const raw = (req.route && req.route.path)
     || (req.baseUrl && req.path && (req.baseUrl + req.path))
     || req.path
     || req.url
     || '';
+  return cleanRoutePath(raw);
+}
+
+function cleanHeaderPart(value, maxChars) {
+  return String(value || '').trim().replace(/[\r\n]/g, '').slice(0, maxChars);
+}
+
+function cleanAttrKey(key) {
+  const s = String(key || '').trim().replace(/[\r\n\t]/g, '.').slice(0, OTEL_LIMITS.max_attr_key_chars);
+  return s || null;
+}
+
+function cleanAttrValue(value, maxChars = OTEL_LIMITS.max_attr_value_chars) {
+  return redactOtelText(value).replace(/[\r\n\t]+/g, ' ').slice(0, maxChars);
+}
+
+function cleanSpanName(name) {
+  return cleanAttrValue(name || 'kolm.unknown', OTEL_LIMITS.max_span_name_chars) || 'kolm.unknown';
+}
+
+function cleanMetricName(name) {
+  const s = cleanAttrValue(name || '', OTEL_LIMITS.max_metric_name_chars).replace(/\s+/g, '_');
+  return s || null;
+}
+
+function cleanRoutePath(raw) {
+  return cleanAttrValue(String(raw || '').split('?')[0], OTEL_LIMITS.max_attr_value_chars);
+}
+
+function redactHttpTarget(raw) {
+  return cleanAttrValue(raw || '', OTEL_LIMITS.max_attr_value_chars);
+}
+
+function redactOtelText(value) {
+  return String(value === undefined || value === null ? '' : value)
+    .replace(OTEL_SECRET_PAIR_RE, (m) => `${m.split('=')[0]}=[redacted-secret]`)
+    .replace(OTEL_SECRET_VALUE_RE, '[redacted-secret]');
 }
 
 // =============================================================================
@@ -485,7 +552,10 @@ function setRoutingAttributes(span, block) {
   }
   // Native kolm-otel span shape from startSpan() - attributes is a kv array.
   if (Array.isArray(span.attributes)) {
-    for (const k of Object.keys(out)) span.attributes.push(kv(k, out[k]));
+    for (const k of Object.keys(out)) {
+      const row = kv(k, out[k]);
+      if (row) span.attributes.push(row);
+    }
     return true;
   }
   // @opentelemetry/api Span shape - setAttribute(key, value).
@@ -547,9 +617,8 @@ function createInferenceSpans(parentSpan, timings) {
       status: { code: 1 },
       events: [],
     };
-    if (STATE.enabled) {
-      STATE.spanQueue.push(child);
-    }
+    child.attributes = [kv('kolm.inference.phase_ms', seg.ms)].filter(Boolean);
+    if (STATE.enabled) STATE.spanQueue.push(child);
     emitted.push(child);
     offsetMs += Math.max(0, seg.ms);
   }
@@ -772,10 +841,10 @@ function _genAiActive() {
 }
 
 function _scalarAnyValue(value) {
-  if (typeof value === 'number' && Number.isInteger(value)) return { intValue: String(value) };
-  if (typeof value === 'number') return { doubleValue: value };
+  if (typeof value === 'number' && Number.isInteger(value) && Number.isFinite(value)) return { intValue: String(value) };
+  if (typeof value === 'number' && Number.isFinite(value)) return { doubleValue: value };
   if (typeof value === 'boolean') return { boolValue: value };
-  return { stringValue: String(value) };
+  return { stringValue: cleanAttrValue(value) };
 }
 
 // Append a gen_ai.* attribute to a kolm-native span (kv-array) OR an
@@ -788,12 +857,18 @@ function _setSpanAttr(span, key, value) {
     if (Array.isArray(value)) {
       span.attributes.push({ key, value: { arrayValue: { values: value.map((v) => _scalarAnyValue(v)) } } });
     } else {
-      span.attributes.push(kv(key, value));
+      const row = kv(key, value);
+      if (row) span.attributes.push(row);
     }
     return;
   }
   if (typeof span.setAttribute === 'function') {
-    try { span.setAttribute(key, value); } catch (_e) { /* ignore one bad attr */ }
+    const safeKey = cleanAttrKey(key);
+    if (!safeKey) return;
+    const safeValue = Array.isArray(value)
+      ? value.map((v) => typeof v === 'number' || typeof v === 'boolean' ? v : cleanAttrValue(v)).slice(0, OTEL_LIMITS.max_attrs_per_record)
+      : (typeof value === 'number' || typeof value === 'boolean' ? value : cleanAttrValue(value));
+    try { span.setAttribute(safeKey, safeValue); } catch (_e) { /* ignore one bad attr */ }
   }
 }
 
@@ -812,7 +887,7 @@ function startGenAiSpan({ operation = 'chat', provider, requestModel, maxTokens,
     const tracer = _getRegisteredTracer();
     if (tracer && typeof tracer.startSpan === 'function') {
       // SpanKind.CLIENT === 3 in @opentelemetry/api.
-      span = tracer.startSpan(name, { kind: 3 });
+      span = tracer.startSpan(cleanSpanName(name), { kind: 3 });
     } else {
       span = startSpan(name, {}, parent);
       span.kind = 3; // CLIENT - honored by tracesPayload.
@@ -916,9 +991,11 @@ function finishGenAiSpan(span, {
 // explicitBounds + bucketCounts + count + sum. Hard no-op when inactive.
 function histogram(name, value, { unit = '', bounds = [], attrs = {}, description = '' } = {}) {
   if (!STATE.enabled) return;
+  const safeName = cleanMetricName(name);
+  if (!safeName) return;
   const v = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(v)) return;
-  const explicitBounds = Array.isArray(bounds) ? bounds.map((b) => Number(b)) : [];
+  const explicitBounds = Array.isArray(bounds) ? bounds.map((b) => Number(b)).filter((b) => Number.isFinite(b)).slice(0, 64) : [];
   // bucketCounts length MUST be explicitBounds.length + 1 (OTLP histogram
   // contract: N boundaries => N+1 buckets including the +Inf overflow bucket).
   const bucketCounts = new Array(explicitBounds.length + 1).fill(0);
@@ -928,8 +1005,8 @@ function histogram(name, value, { unit = '', bounds = [], attrs = {}, descriptio
   }
   if (!placed) bucketCounts[bucketCounts.length - 1] = 1; // +Inf overflow bucket
   STATE.metricQueue.push({
-    name,
-    description: description || '',
+    name: safeName,
+    description: cleanAttrValue(description || ''),
     unit: unit || '',
     histogram: {
       aggregationTemporality: 2, // CUMULATIVE
@@ -1020,6 +1097,7 @@ export {
   shutdown,
   isEnabled,
   expressMiddleware,
+  OTEL_LIMITS,
   // W733 - semantic conventions surface.
   OTEL_W733_VERSION,
   KOLM_OTEL_ATTRS,
