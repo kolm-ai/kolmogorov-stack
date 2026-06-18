@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 711,
-    "components_without_direct_test_reference": 118,
+    "test_referenced_components": 712,
+    "components_without_direct_test_reference": 117,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 403,
+      "cryptographic_or_proof_boundary": 404,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 313,
       "execution_or_subprocess_boundary": 233,
@@ -704,27 +704,30 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "f072f6ace753c47ca9ab2cd36bdb383462d37491497ec4d7645cc09d65dbf202",
+      "sha256": "1703671f865bcee289432c1d0eea0cabfbcca37567dc898321201612f710bc3f",
       "metrics": {
-        "bytes": 10448,
-        "lines": 249,
-        "imports": 0,
-        "exports": 1,
+        "bytes": 13585,
+        "lines": 348,
+        "imports": 1,
+        "exports": 4,
         "routes": 0,
         "env_refs": 1,
         "fs_writes": 0,
         "subprocess_refs": 0,
-        "network_refs": 4,
-        "crypto_refs": 0,
+        "network_refs": 1,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave692-teacher-chat-api-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "http_route_surface",
         "network_or_provider_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 6,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -749,7 +752,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
       "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
       "suggested_verification": [
         "npm run lint:refs",

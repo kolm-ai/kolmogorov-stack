@@ -475,6 +475,21 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "api/teacher-chat.js",
+            "domain": "api_surface",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "http_route_surface",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave692-teacher-chat-api-contract.test.js"
+            ],
+            "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
+          },
+          {
             "path": "src/benchmark-compare.js",
             "domain": "capture_data_eval",
             "priority_score": 6,
@@ -518,21 +533,6 @@
             ],
             "test_refs": [
               "tests/wave782-approval-queue.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "src/kolm-meta-trainer.js",
-            "domain": "training_model_optimization",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave832-kolm-meta.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
@@ -6987,6 +6987,21 @@
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
           {
+            "path": "api/teacher-chat.js",
+            "domain": "api_surface",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "http_route_surface",
+              "network_or_provider_boundary"
+            ],
+            "test_refs": [
+              "tests/wave692-teacher-chat-api-contract.test.js"
+            ],
+            "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
+          },
+          {
             "path": "src/benchmark-compare.js",
             "domain": "capture_data_eval",
             "priority_score": 6,
@@ -6999,22 +7014,6 @@
             "test_refs": [
               "tests/wave144-bench-compare.test.js",
               "tests/wave144-predibase-demo.test.js"
-            ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
-          },
-          {
-            "path": "src/data-select.js",
-            "domain": "capture_data_eval",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/wave921-data-curate-modules.test.js"
             ],
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           }
