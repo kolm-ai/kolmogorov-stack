@@ -2241,6 +2241,7 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
+              "tests/wave710-meta-routes-contract.test.js",
               "tests/wave832-kolm-meta.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
@@ -3188,6 +3189,7 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
+              "tests/wave710-meta-routes-contract.test.js",
               "tests/wave832-kolm-meta.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
@@ -4532,6 +4534,20 @@
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
           },
           {
+            "path": "src/meta-routes.js",
+            "domain": "api_surface",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "http_route_surface"
+            ],
+            "test_refs": [
+              "tests/wave710-meta-routes-contract.test.js"
+            ],
+            "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
+          },
+          {
             "path": "src/benchmark-compare.js",
             "domain": "capture_data_eval",
             "priority_score": 6,
@@ -4563,22 +4579,6 @@
               "tests/sota-persistence.test.js"
             ],
             "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
-          },
-          {
-            "path": "src/data-select.js",
-            "domain": "capture_data_eval",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/wave921-data-curate-modules.test.js"
-            ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           }
         ],
         "count": 336,
@@ -6940,6 +6940,20 @@
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
           },
           {
+            "path": "src/meta-routes.js",
+            "domain": "api_surface",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "http_route_surface"
+            ],
+            "test_refs": [
+              "tests/wave710-meta-routes-contract.test.js"
+            ],
+            "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
+          },
+          {
             "path": "src/privacy-membrane.js",
             "domain": "trust_security_compliance",
             "priority_score": 7,
@@ -7002,21 +7016,6 @@
               "tests/wave692-teacher-chat-api-contract.test.js"
             ],
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
-          },
-          {
-            "path": "src/audit-retention.js",
-            "domain": "trust_security_compliance",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave696-audit-retention-contract.test.js"
-            ],
-            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           }
         ],
         "count": 180,

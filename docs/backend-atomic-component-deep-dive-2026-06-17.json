@@ -39,9 +39,9 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 731,
-    "components_without_direct_test_reference": 98,
-    "high_priority_components": 49,
+    "test_referenced_components": 732,
+    "components_without_direct_test_reference": 97,
+    "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -66,9 +66,9 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 411,
+      "cryptographic_or_proof_boundary": 412,
       "distribution_or_worker_surface": 169,
-      "environment_configuration_boundary": 314,
+      "environment_configuration_boundary": 315,
       "execution_or_subprocess_boundary": 233,
       "http_route_surface": 36,
       "large_component_contract_risk": 37,
@@ -27163,6 +27163,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave710-meta-routes-contract.test.js",
         "tests/wave832-kolm-meta.test.js"
       ],
       "risk_signals": [
@@ -30265,25 +30266,29 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "9228b3986bd5af8593c2adeeb869882911544787efc68479a31446af022dfeee",
+      "sha256": "8f38c5f9b58e3979ad0af470ed3356eec0a5ebbae923c82571dd4dbac7c6669d",
       "metrics": {
-        "bytes": 4091,
-        "lines": 119,
-        "imports": 1,
-        "exports": 2,
+        "bytes": 8821,
+        "lines": 279,
+        "imports": 3,
+        "exports": 7,
         "routes": 3,
-        "env_refs": 0,
+        "env_refs": 3,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave710-meta-routes-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
         "http_route_surface"
       ],
-      "priority_score": 4,
+      "priority_score": 7,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

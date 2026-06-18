@@ -35,11 +35,11 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 731,
-    "direct_test_reference_pct": 88.2,
-    "components_without_direct_test_reference": 98,
-    "high_priority_components": 49,
-    "high_priority_direct_test_referenced": 49,
+    "direct_test_referenced_components": 732,
+    "direct_test_reference_pct": 88.3,
+    "components_without_direct_test_reference": 97,
+    "high_priority_components": 50,
+    "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 10,
@@ -9754,12 +9754,6 @@
             "stack_area": "trust",
             "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
-          },
-          {
-            "id": "agent-security-eval",
-            "stack_area": "enterprise",
-            "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
           }
         ],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
@@ -17123,12 +17117,6 @@
             "id": "synthetic-data-curation",
             "stack_area": "data",
             "status": "sota_review_complete_critical_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "llm-routing",
-            "stack_area": "gateway",
-            "status": "sota_review_complete_major_frontier_work_open",
             "relation": "sampled"
           }
         ],
@@ -24838,6 +24826,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave710-meta-routes-contract.test.js",
           "tests/wave832-kolm-meta.test.js"
         ],
         "category_links": [
@@ -27491,24 +27480,26 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 4091,
-          "lines": 119,
-          "imports": 1,
-          "exports": 2,
+          "bytes": 8821,
+          "lines": 279,
+          "imports": 3,
+          "exports": 7,
           "routes": 3,
-          "env_refs": 0,
+          "env_refs": 3,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
           "http_route_surface"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "9228b3986bd5af8593c2adeeb869882911544787efc68479a31446af022dfeee"
+        "priority_score": 7,
+        "priority_band": "high",
+        "sha256": "8f38c5f9b58e3979ad0af470ed3356eec0a5ebbae923c82571dd4dbac7c6669d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -27516,8 +27507,23 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [],
+        "direct_test_refs": [
+          "tests/wave710-meta-routes-contract.test.js"
+        ],
+        "category_links": [
+          {
+            "id": "llm-routing",
+            "stack_area": "gateway",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "agent-security-eval",
+            "stack_area": "enterprise",
+            "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
         "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
         "suggested_verification": [
@@ -27526,9 +27532,9 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing"
+        "linked_frontier_work_open"
       ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
     },
     {
       "path": "src/metrics.js",
