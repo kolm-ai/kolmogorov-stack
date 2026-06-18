@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 720,
-    "components_without_direct_test_reference": 109,
+    "test_referenced_components": 721,
+    "components_without_direct_test_reference": 108,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -21323,25 +21323,29 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "35df054e75d43f354fea4cb47bf0446bbc22b2e93ee827f6fd1056602934402a",
+      "sha256": "79b7be1dda2822dac58e9938d02ea9867296c6cc1903b8a624398e93d651cf0b",
       "metrics": {
-        "bytes": 12042,
-        "lines": 329,
+        "bytes": 14012,
+        "lines": 440,
         "imports": 4,
-        "exports": 5,
+        "exports": 10,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 4,
+        "crypto_refs": 7,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave684-drift-alert-contract.test.js",
+        "tests/wave685-eval-humaneval-contract.test.js",
+        "tests/wave699-drift-alert-w813-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -21394,7 +21398,8 @@
       },
       "test_refs": [
         "tests/wave684-drift-alert-contract.test.js",
-        "tests/wave685-eval-humaneval-contract.test.js"
+        "tests/wave685-eval-humaneval-contract.test.js",
+        "tests/wave699-drift-alert-w813-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -32013,6 +32018,7 @@
       "test_refs": [
         "tests/agent-audit-report-ready-notify.test.js",
         "tests/wave258-audit-fixes.test.js",
+        "tests/wave699-drift-alert-w813-contract.test.js",
         "tests/wave910-notifications.test.js"
       ],
       "risk_signals": [

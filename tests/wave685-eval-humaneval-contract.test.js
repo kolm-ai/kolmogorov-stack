@@ -69,7 +69,7 @@ test('W685 HumanEval source pins frontier evidence, bounds, and depth wiring', (
   assert.equal(pkg.scripts['verify:eval-humaneval'], 'node --test --test-concurrency=1 tests/wave685-eval-humaneval-contract.test.js');
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:drift-alert && node --test --test-concurrency=1 tests\/wave409u-federated-foundation\.test\.js tests\/wave585-federated-robust-aggregation\.test\.js tests\/wave538-federated-route-docs\.test\.js && npm run verify:eval-humaneval && npm run verify:homebrew-formula/,
+    /verify:drift-alert && npm run verify:drift-alert-w813 && node --test --test-concurrency=1 tests\/wave409u-federated-foundation\.test\.js tests\/wave585-federated-robust-aggregation\.test\.js tests\/wave538-federated-route-docs\.test\.js && npm run verify:eval-humaneval && npm run verify:homebrew-formula/,
   );
 });
 

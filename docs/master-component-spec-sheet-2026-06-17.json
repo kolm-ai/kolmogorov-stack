@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 93.3,
+    "local_engineering_score": 93.4,
     "frontier_product_score": 69.9,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 720,
-    "direct_test_reference_pct": 86.9,
-    "components_without_direct_test_reference": 109,
+    "direct_test_referenced_components": 721,
+    "direct_test_reference_pct": 87,
+    "components_without_direct_test_reference": 108,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -19943,24 +19943,24 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 12042,
-          "lines": 329,
+          "bytes": 14012,
+          "lines": 440,
           "imports": 4,
-          "exports": 5,
+          "exports": 10,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 4,
+          "crypto_refs": 7,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "35df054e75d43f354fea4cb47bf0446bbc22b2e93ee827f6fd1056602934402a"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "79b7be1dda2822dac58e9938d02ea9867296c6cc1903b8a624398e93d651cf0b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -19968,7 +19968,11 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave684-drift-alert-contract.test.js",
+          "tests/wave685-eval-humaneval-contract.test.js",
+          "tests/wave699-drift-alert-w813-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -19976,10 +19980,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/drift-alert.js",
@@ -20017,7 +20019,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave684-drift-alert-contract.test.js",
-          "tests/wave685-eval-humaneval-contract.test.js"
+          "tests/wave685-eval-humaneval-contract.test.js",
+          "tests/wave699-drift-alert-w813-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -29060,6 +29063,7 @@
         "direct_test_refs": [
           "tests/agent-audit-report-ready-notify.test.js",
           "tests/wave258-audit-fixes.test.js",
+          "tests/wave699-drift-alert-w813-contract.test.js",
           "tests/wave910-notifications.test.js"
         ],
         "category_links": [],

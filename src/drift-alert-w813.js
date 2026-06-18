@@ -1,119 +1,181 @@
-// W813 - Drift alert wrapper.
+// W699 - W813 drift alert wrapper.
 //
-// W813-3 spec: webhook + email alerts via the existing src/notifications.js
-// (W215). New `drift_detected` event type. This module is the W813 alert
-// envelope around the W215 notifications surface.
+// W813-3 spec: webhook + email alerts via the existing notification surface.
+// This module is the W813 alert envelope around drift_detected events.
 //
 // FILENAME NOTE: The W813 wave spec listed this as `src/drift-alert.js`. That
-// path was already taken by W747 (distribution-shift live alerter) which is
-// imported by /v1/drift-alert/* routes in router.js. To avoid clobbering W747
-// (which would break those routes), we ship the W813 alert under
-// `src/drift-alert-w813.js`. Functional contract is unchanged.
+// path was already taken by W747 (distribution-shift live alerter), so the
+// embedding-distribution W813 alert wrapper lives here.
 //
-// Atomic guarantees pinned by tests/wave813-drift-detection.test.js:
-//
-//   - DRIFT_ALERT_VERSION = 'w813-v1'
-//   - emitDriftAlert lazy-imports src/notifications.js with try/catch fallback
-//     so a missing notifications.js NEVER crashes the call. Returns honest
-//     {notification_attempted, notification_sent, notification_error} fields
-//     in every envelope.
-//   - emitDriftAlert event_type === 'drift_detected'
-//   - emitDriftAlert is tenant-fenced (W411 invariant) - the persisted alert
-//     row carries tenant_id and listRecentAlerts filters per-row.
-//
-// HONESTY INVARIANTS (NEVER violate):
-//   - emitDriftAlert NEVER silent-fail. Explicit notification_attempted +
-//     notification_sent + notification_error fields every time. If
-//     notifications.js throws, we capture the error string and continue.
-//   - alert_id is always assigned (crypto.randomUUID) even if notification
-//     dispatch fails.
-//   - listRecentAlerts uses defense-in-depth: lists events via event-store
-//     THEN per-row tenant_id re-check (W411 law).
+// HONESTY INVARIANTS:
+//   - emitDriftAlert never silent-fails. Notification and persistence outcomes
+//     are explicit in every successful envelope.
+//   - Drift notifications use the unified W910 notifications.notify surface
+//     when it is available, with event_type === drift_detected.
+//   - tenant_id and namespace are bounded before notification or persistence.
+//   - listRecentAlerts tenant-fences twice: event-store query plus per-row
+//     re-check, and it sanitizes persisted JSON before returning it.
 
 import crypto from 'node:crypto';
 
 export const DRIFT_ALERT_VERSION = 'w813-v1';
+export const DRIFT_ALERT_CONTRACT_VERSION = 'w699-v1';
 
 // The event_type stamp on every drift alert. W813-3 spec contract.
 export const DRIFT_EVENT_TYPE = 'drift_detected';
 
-// Provider tag used when persisting drift-alert rows via the event-store. A
-// distinct provider keeps the alert ledger queryable independent of other
-// kolm_drift_* providers (kolm_drift_config, etc.).
-const DRIFT_ALERT_PROVIDER = 'kolm_drift_alert';
+export const MAX_DRIFT_ALERT_ID_BYTES = 256;
+export const MAX_DRIFT_ALERT_TEXT_CHARS = 1000;
+export const MAX_RECENT_ALERT_LIMIT = 500;
 
-// =============================================================================
-// emitDriftAlert({tenant_id, namespace, drift_result, opts}) - fire alert.
-//
-// drift_result is the envelope returned by compareDistributions() (or any
-// shape carrying {drift_detected, severity, kl_divergence, suggested_action_text}).
-//
-// opts.notifications_sender - DI seam for tests. If provided, called as
-//   await sender({tenant_id, namespace, drift_result, payload})
-// and the return is recorded under notification_sent. When omitted, we
-// lazy-import src/notifications.js and use publicConfig() / setPreferences /
-// fireThresholdAlert as best-effort dispatch hooks. Missing module yields
-// notification_attempted:true + notification_sent:false + notification_error.
-//
-// opts.eventStore - DI seam for the persistence layer (defaults to
-// src/event-store.js dynamic import). Always tries to persist the alert row
-// so listRecentAlerts can read it back. Persistence failure is recorded
-// under persisted:false; the envelope still returns ok:true with alert_id.
-//
-// Tenant-fenced: tenant_id is required + stamped on every persisted row.
-// =============================================================================
-export async function emitDriftAlert({
-  tenant_id = null,
-  namespace = null,
-  drift_result = null,
-  opts = {},
+// Provider tag used when persisting drift-alert rows via the event-store.
+export const DRIFT_ALERT_PROVIDER = 'kolm_drift_alert';
+
+const CONTROL_RE = /[\u0000-\u001f\u007f]/;
+const HEX64_RE = /^[a-f0-9]{64}$/;
+const SEVERITIES = new Set(['none', 'minor', 'moderate', 'severe', 'unknown']);
+
+function _byteLen(s) {
+  return Buffer.byteLength(String(s), 'utf8');
+}
+
+function _fail(error, hint) {
+  return {
+    ok: false,
+    error,
+    ...(hint ? { hint } : {}),
+    version: DRIFT_ALERT_VERSION,
+    contract_version: DRIFT_ALERT_CONTRACT_VERSION,
+  };
+}
+
+function _normalizeId(value, field, {
+  required = true,
+  defaultValue = null,
+  maxBytes = MAX_DRIFT_ALERT_ID_BYTES,
 } = {}) {
-  if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_id_required',
-      hint: 'pass tenant_id (string). Drift alerts are tenant-scoped.',
-      version: DRIFT_ALERT_VERSION,
-    };
+  if (value == null || value === '') {
+    if (!required) return { ok: true, value: defaultValue };
+    return { ok: false, error: field + '_required' };
   }
-  if (!drift_result || typeof drift_result !== 'object') {
-    return {
-      ok: false,
-      error: 'drift_result_required',
-      hint: 'pass drift_result envelope from compareDistributions()',
-      version: DRIFT_ALERT_VERSION,
-    };
+  if (typeof value !== 'string') {
+    return { ok: false, error: field + '_required' };
   }
-  const ns = (namespace && typeof namespace === 'string') ? namespace : 'default';
-  const alert_id = 'da_' + crypto.randomUUID();
+  const s = value.trim();
+  if (!s) {
+    if (!required) return { ok: true, value: defaultValue };
+    return { ok: false, error: field + '_required' };
+  }
+  if (CONTROL_RE.test(s)) return { ok: false, error: field + '_invalid' };
+  if (_byteLen(s) > maxBytes) return { ok: false, error: field + '_too_large' };
+  return { ok: true, value: s };
+}
 
-  const payload = {
+function _cleanText(value, maxChars = MAX_DRIFT_ALERT_TEXT_CHARS) {
+  if (value == null) return '';
+  const s = String(value).replace(CONTROL_RE, ' ').replace(/\s+/g, ' ').trim();
+  return s.length > maxChars ? s.slice(0, maxChars) : s;
+}
+
+function _safeSeverity(value) {
+  const s = _cleanText(value, 32).toLowerCase();
+  return SEVERITIES.has(s) ? s : 'unknown';
+}
+
+function _finiteOrNull(value) {
+  if (value == null || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function _canonicalize(value) {
+  if (Array.isArray(value)) return value.map((v) => _canonicalize(v));
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const k of Object.keys(value).sort()) out[k] = _canonicalize(value[k]);
+    return out;
+  }
+  return value;
+}
+
+function _sha256Hex(value) {
+  return crypto
+    .createHash('sha256')
+    .update(JSON.stringify(_canonicalize(value)))
+    .digest('hex');
+}
+
+function _withPayloadHash(payload) {
+  const out = { ...payload };
+  delete out.payload_sha256;
+  return { ...out, payload_sha256: _sha256Hex(out) };
+}
+
+function _resolveNowIso(opts) {
+  if (opts && typeof opts.now_iso === 'string' && !CONTROL_RE.test(opts.now_iso)) {
+    const t = Date.parse(opts.now_iso);
+    if (Number.isFinite(t)) return new Date(t).toISOString();
+  }
+  return new Date().toISOString();
+}
+
+function _resolveAlertId(opts) {
+  let uuid = null;
+  if (opts && typeof opts.randomUUID === 'function') {
+    try { uuid = opts.randomUUID(); } catch { uuid = null; }
+  }
+  if (!uuid) uuid = crypto.randomUUID();
+  const safe = _cleanText(uuid, 96).replace(/[^a-zA-Z0-9_-]/g, '');
+  return 'da_' + (safe || crypto.randomUUID());
+}
+
+function _buildPayload({
+  alert_id,
+  tenant_id,
+  namespace,
+  drift_result,
+  created_at,
+}) {
+  const p = {
     alert_id,
     event_type: DRIFT_EVENT_TYPE,
     tenant_id,
-    namespace: ns,
-    drift_detected: !!drift_result.drift_detected,
-    severity: drift_result.severity || 'unknown',
-    kl_divergence: typeof drift_result.kl_divergence === 'number' ? drift_result.kl_divergence : null,
-    kl_threshold: typeof drift_result.kl_threshold === 'number' ? drift_result.kl_threshold : null,
-    fallback_rate_delta: typeof drift_result.fallback_rate_delta === 'number' ? drift_result.fallback_rate_delta : null,
-    suggested_action_text: typeof drift_result.suggested_action_text === 'string' ? drift_result.suggested_action_text : '',
-    created_at: new Date().toISOString(),
+    namespace,
+    drift_detected: drift_result && drift_result.drift_detected === true,
+    severity: _safeSeverity(drift_result && drift_result.severity),
+    kl_divergence: _finiteOrNull(drift_result && drift_result.kl_divergence),
+    kl_threshold: _finiteOrNull(drift_result && drift_result.kl_threshold),
+    fallback_rate_delta: _finiteOrNull(drift_result && drift_result.fallback_rate_delta),
+    suggested_action_text: _cleanText(drift_result && drift_result.suggested_action_text),
+    created_at,
     version: DRIFT_ALERT_VERSION,
+    contract_version: DRIFT_ALERT_CONTRACT_VERSION,
   };
+  return _withPayloadHash(p);
+}
 
-  // ---------------------------------------------------------------------------
-  // Notification dispatch (best-effort).
-  //
-  // Three paths:
-  //   1. opts.notifications_sender provided -> call directly (test seam).
-  //   2. Lazy-import src/notifications.js -> use as W215 hook.
-  //   3. Both unavailable -> notification_attempted:true, notification_sent:false,
-  //      notification_error documenting the miss.
-  //
-  // We NEVER let a dispatch failure crash the call. The alert envelope still
-  // gets persisted + returned with an honest notification_* triple.
-  // ---------------------------------------------------------------------------
+function _notificationPayload(payload) {
+  const out = { ...payload };
+  // notifications.notify already carries the tenant argument. Keep the channel
+  // payload focused on the drift event and its digest.
+  delete out.tenant_id;
+  return out;
+}
+
+function _notificationResultToSent(result) {
+  const sent = Number(result && result.sent);
+  const succeeded = Number(result && result.succeeded);
+  return Number.isFinite(succeeded) ? succeeded > 0 : !!(result && (result.sent === true || result.ok === true));
+}
+
+function _notificationErrorFor(result) {
+  if (result && result.reason === 'event_disabled') return 'notification_event_disabled';
+  const sent = Number(result && result.sent);
+  if (Number.isFinite(sent) && sent === 0) return 'notification_channels_not_configured';
+  return 'notification_delivery_failed';
+}
+
+async function _dispatchNotification({ tenant_id, namespace, drift_result, payload, opts }) {
   let notification_attempted = false;
   let notification_sent = false;
   let notification_error = null;
@@ -126,52 +188,110 @@ export async function emitDriftAlert({
   if (sender) {
     notification_attempted = true;
     try {
-      notification_result = await sender({ tenant_id, namespace: ns, drift_result, payload });
+      notification_result = await sender({ tenant_id, namespace, drift_result, payload });
       notification_sent = !!(notification_result && (notification_result === true || notification_result.ok === true || notification_result.sent === true));
+      if (!notification_sent) notification_error = _notificationErrorFor(notification_result);
     } catch (e) {
       notification_error = String((e && e.message) || e);
     }
-  } else {
-    notification_attempted = true;
-    let notifMod;
+    return { notification_attempted, notification_sent, notification_error, notification_result };
+  }
+
+  notification_attempted = true;
+  let notifMod = opts && opts.notificationsModule;
+  if (!notifMod) {
     try {
       notifMod = await import('./notifications.js');
     } catch (e) {
       notifMod = null;
       notification_error = 'notifications_module_unavailable: ' + String((e && e.message) || e);
     }
-    if (notifMod) {
-      try {
-        // Best-effort: use publicConfig() to confirm the module is wired.
-        // The W215 fireThresholdAlert primitive expects {tenant, namespace,
-        // count, threshold, baseUrl}; drift alerts use a different shape
-        // so we do NOT invoke it directly here - instead the dispatch is
-        // limited to confirming the surface exists. In a real production
-        // wiring, a follow-up wave would map drift_result -> push/email
-        // payloads. For W813 we record notification_sent:false honestly
-        // until that wiring lands rather than silently claim success.
-        if (typeof notifMod.publicConfig === 'function') {
-          const cfg = notifMod.publicConfig();
-          notification_result = {
-            webpush_configured: !!cfg.webpush_configured,
-            email_configured: !!cfg.email_configured,
-            dispatch_hook: 'pending_w813_followup_wire',
-          };
-          // Honest: surface is wired but we have not actually sent yet.
-          notification_sent = false;
-          notification_error = 'notifications_module_present_but_w813_dispatch_not_yet_wired';
-        } else {
-          notification_error = 'notifications_module_missing_publicConfig';
-        }
-      } catch (e) {
-        notification_error = String((e && e.message) || e);
+  }
+
+  if (notifMod && typeof notifMod.notify === 'function') {
+    try {
+      notification_result = await notifMod.notify(
+        tenant_id,
+        DRIFT_EVENT_TYPE,
+        _notificationPayload(payload),
+      );
+      notification_sent = _notificationResultToSent(notification_result);
+      if (!notification_sent) notification_error = _notificationErrorFor(notification_result);
+    } catch (e) {
+      notification_error = String((e && e.message) || e);
+    }
+  } else if (notifMod) {
+    try {
+      if (typeof notifMod.publicConfig === 'function') {
+        const cfg = notifMod.publicConfig();
+        notification_result = {
+          webpush_configured: !!cfg.webpush_configured,
+          email_configured: !!cfg.email_configured,
+          dispatch_hook: 'notify_missing',
+        };
+        notification_error = 'notifications_module_missing_notify';
+      } else {
+        notification_error = 'notifications_module_missing_notify';
       }
+    } catch (e) {
+      notification_error = String((e && e.message) || e);
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Persistence (best-effort) - write the alert row to the event store.
-  // ---------------------------------------------------------------------------
+  return { notification_attempted, notification_sent, notification_error, notification_result };
+}
+
+function _sanitizeStoredPayload(parsed, row) {
+  if (!parsed || typeof parsed !== 'object') return null;
+  if (parsed.event_type && parsed.event_type !== DRIFT_EVENT_TYPE) return null;
+  const createdAt = typeof parsed.created_at === 'string' && !CONTROL_RE.test(parsed.created_at)
+    ? parsed.created_at
+    : row.created_at || null;
+  const alertId = _cleanText(parsed.alert_id || row.event_id || '', 160) || null;
+  return _buildPayload({
+    alert_id: alertId,
+    tenant_id: row.tenant_id,
+    namespace: row.namespace || 'default',
+    drift_result: parsed,
+    created_at: createdAt,
+  });
+}
+
+// emitDriftAlert({tenant_id, namespace, drift_result, opts}) - fire alert.
+export async function emitDriftAlert({
+  tenant_id = null,
+  namespace = null,
+  drift_result = null,
+  opts = {},
+} = {}) {
+  const tenant = _normalizeId(tenant_id, 'tenant_id');
+  if (!tenant.ok) {
+    return _fail(tenant.error, 'pass tenant_id (string). Drift alerts are tenant-scoped.');
+  }
+  const ns = _normalizeId(namespace, 'namespace', { required: false, defaultValue: 'default' });
+  if (!ns.ok) return _fail(ns.error, 'namespace must be a bounded string when provided.');
+
+  if (!drift_result || typeof drift_result !== 'object' || Array.isArray(drift_result)) {
+    return _fail('drift_result_required', 'pass drift_result envelope from compareDistributions()');
+  }
+
+  const alert_id = _resolveAlertId(opts);
+  const payload = _buildPayload({
+    alert_id,
+    tenant_id: tenant.value,
+    namespace: ns.value,
+    drift_result,
+    created_at: _resolveNowIso(opts),
+  });
+
+  const notification = await _dispatchNotification({
+    tenant_id: tenant.value,
+    namespace: ns.value,
+    drift_result,
+    payload,
+    opts,
+  });
+
   let persisted = false;
   let persisted_event_id = null;
   let persist_error = null;
@@ -189,10 +309,10 @@ export async function emitDriftAlert({
   if (eventStore && typeof eventStore.appendEvent === 'function') {
     try {
       const ev = await eventStore.appendEvent({
-        tenant_id: String(tenant_id),
-        namespace: String(ns),
+        tenant_id: tenant.value,
+        namespace: ns.value,
         provider: DRIFT_ALERT_PROVIDER,
-        status: drift_result.drift_detected ? 'drift' : 'ok',
+        status: payload.drift_detected ? 'drift' : 'ok',
         source_type: 'real',
         feedback: JSON.stringify(payload),
       });
@@ -201,51 +321,44 @@ export async function emitDriftAlert({
     } catch (e) {
       persist_error = String((e && e.message) || e);
     }
+  } else if (!persist_error) {
+    persist_error = 'event_store_missing_appendEvent';
   }
 
   return {
     ok: true,
     version: DRIFT_ALERT_VERSION,
+    contract_version: DRIFT_ALERT_CONTRACT_VERSION,
     alert_id,
     event_type: DRIFT_EVENT_TYPE,
-    tenant_id,
-    namespace: ns,
+    tenant_id: tenant.value,
+    namespace: ns.value,
     payload,
-    notification_attempted,
-    notification_sent,
-    notification_error,
-    notification_result,
+    payload_sha256: payload.payload_sha256,
+    ...notification,
     persisted,
     persisted_event_id,
     persist_error,
   };
 }
 
-// =============================================================================
 // listRecentAlerts({tenant_id, namespace, limit, opts}) - tenant-fenced read.
-//
-// Returns ranked list of past drift_detected alerts most-recent first.
-//
-// W411 defense-in-depth: listEvents tenant_id filter AND per-row tenant_id
-// re-check after the read. Never trusts the index alone.
-// =============================================================================
 export async function listRecentAlerts({
   tenant_id = null,
   namespace = null,
   limit = 50,
   opts = {},
 } = {}) {
-  if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_id_required',
-      hint: 'pass tenant_id (string). Drift alerts are tenant-scoped.',
-      version: DRIFT_ALERT_VERSION,
-    };
+  const tenant = _normalizeId(tenant_id, 'tenant_id');
+  if (!tenant.ok) {
+    return _fail(tenant.error, 'pass tenant_id (string). Drift alerts are tenant-scoped.');
   }
+  const ns = _normalizeId(namespace, 'namespace', { required: false, defaultValue: null });
+  if (!ns.ok) return _fail(ns.error, 'namespace must be a bounded string when provided.');
+
   let cap = Number(limit);
   if (!Number.isFinite(cap) || cap < 1) cap = 50;
-  if (cap > 500) cap = 500;
+  cap = Math.min(MAX_RECENT_ALERT_LIMIT, Math.trunc(cap));
 
   let eventStore = opts && opts.eventStore;
   if (!eventStore) {
@@ -257,23 +370,20 @@ export async function listRecentAlerts({
         error: 'event_store_unavailable',
         detail: String((e && e.message) || e),
         version: DRIFT_ALERT_VERSION,
+        contract_version: DRIFT_ALERT_CONTRACT_VERSION,
       };
     }
   }
   if (typeof eventStore.listEvents !== 'function') {
-    return {
-      ok: false,
-      error: 'event_store_missing_listEvents',
-      version: DRIFT_ALERT_VERSION,
-    };
+    return _fail('event_store_missing_listEvents');
   }
 
   let rows = [];
   try {
     rows = await eventStore.listEvents({
-      tenant_id,
+      tenant_id: tenant.value,
       provider: DRIFT_ALERT_PROVIDER,
-      limit: cap * 4, // overfetch then defense-in-depth filter + slice
+      limit: cap * 4,
       order: 'desc',
     }) || [];
   } catch (e) {
@@ -282,22 +392,20 @@ export async function listRecentAlerts({
       error: 'list_events_failed',
       detail: String((e && e.message) || e),
       version: DRIFT_ALERT_VERSION,
+      contract_version: DRIFT_ALERT_CONTRACT_VERSION,
     };
   }
 
-  // W411 defense-in-depth per-row tenant fence even after the index query.
-  const fenced = rows.filter((r) => r && r.tenant_id === tenant_id);
-
-  // Optional namespace filter (after fence, never instead of).
-  const nsFiltered = namespace
-    ? fenced.filter((r) => r && r.namespace === namespace)
+  const fenced = rows.filter((r) => r && r.tenant_id === tenant.value);
+  const nsFiltered = ns.value
+    ? fenced.filter((r) => r && r.namespace === ns.value)
     : fenced;
 
   const alerts = [];
   for (const row of nsFiltered.slice(0, cap)) {
     let parsed = null;
     if (row.feedback) {
-      try { parsed = JSON.parse(row.feedback); } catch {} // deliberate: cleanup
+      try { parsed = JSON.parse(row.feedback); } catch { parsed = null; }
     }
     alerts.push({
       event_id: row.event_id || null,
@@ -305,15 +413,16 @@ export async function listRecentAlerts({
       namespace: row.namespace || 'default',
       created_at: row.created_at || null,
       status: row.status || null,
-      payload: parsed,
+      payload: _sanitizeStoredPayload(parsed, row),
     });
   }
 
   return {
     ok: true,
     version: DRIFT_ALERT_VERSION,
-    tenant_id,
-    namespace: namespace || null,
+    contract_version: DRIFT_ALERT_CONTRACT_VERSION,
+    tenant_id: tenant.value,
+    namespace: ns.value || null,
     alerts,
     count: alerts.length,
     limit: cap,
@@ -322,7 +431,9 @@ export async function listRecentAlerts({
 
 export default {
   DRIFT_ALERT_VERSION,
+  DRIFT_ALERT_CONTRACT_VERSION,
   DRIFT_EVENT_TYPE,
+  DRIFT_ALERT_PROVIDER,
   emitDriftAlert,
   listRecentAlerts,
 };
