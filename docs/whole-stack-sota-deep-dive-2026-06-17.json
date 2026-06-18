@@ -1768,6 +1768,21 @@
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {
+            "path": "workers/itkv/itkv.mjs",
+            "domain": "runtime_serving_routing",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/wave706-itkv-worker-shell-contract.test.js"
+            ],
+            "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache"
+          },
+          {
             "path": "workers/runtime-build/build.mjs",
             "domain": "compile_artifact_runtime",
             "priority_score": 6,
@@ -1827,22 +1842,6 @@
               "tests/wave195-quantize-worker.test.js"
             ],
             "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache"
-          },
-          {
-            "path": "src/artifact-lifecycle.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 5,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/r2-artifact-lifecycle.test.js",
-              "tests/wrapper-r-enrich.test.js",
-              "tests/wrapper-r1-r8.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
         ],
         "count": 134,
@@ -4984,6 +4983,21 @@
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
           {
+            "path": "workers/itkv/itkv.mjs",
+            "domain": "runtime_serving_routing",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/wave706-itkv-worker-shell-contract.test.js"
+            ],
+            "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache"
+          },
+          {
             "path": "workers/multimodal-redact-audio/redact-audio.mjs",
             "domain": "trust_security_compliance",
             "priority_score": 6,
@@ -5027,22 +5041,6 @@
               "tests/wave670-tdx-attestation-contract.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
-          },
-          {
-            "path": "packages/browser-extension/README.md",
-            "domain": "developer_distribution",
-            "priority_score": 5,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/path-to-100-w2-truth-in-labeling.test.js",
-              "tests/r4-deploy-generators.test.js",
-              "tests/research-docs.test.js"
-            ],
-            "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           }
         ],
         "count": 164,

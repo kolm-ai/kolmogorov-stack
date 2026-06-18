@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 727,
-    "components_without_direct_test_reference": 102,
+    "test_referenced_components": 728,
+    "components_without_direct_test_reference": 101,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 408,
+      "cryptographic_or_proof_boundary": 409,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 314,
       "execution_or_subprocess_boundary": 233,
@@ -48195,27 +48195,30 @@
       "surface": "worker",
       "domain": "runtime_serving_routing",
       "language": "javascript",
-      "sha256": "8987b9b616889a622c8b92d30a68ecbecf21ad7da4ccdacf6e826c4fb14589a1",
+      "sha256": "093d458d9afc581072463ff8eb87153975ef6fceefd066416e714f6a0c4d436a",
       "metrics": {
-        "bytes": 8946,
-        "lines": 320,
-        "imports": 6,
+        "bytes": 13216,
+        "lines": 457,
+        "imports": 7,
         "exports": 0,
         "routes": 0,
-        "env_refs": 4,
+        "env_refs": 6,
         "fs_writes": 0,
         "subprocess_refs": 4,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave706-itkv-worker-shell-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 6,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -48240,7 +48243,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache",
       "innovation_opportunity": "Close the semantic routing flywheel by recording outcomes, training route stats, and emitting runtime passports.",
       "suggested_verification": [
         "npm run verify:codegraph",
