@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 734,
-    "components_without_direct_test_reference": 95,
+    "test_referenced_components": 735,
+    "components_without_direct_test_reference": 94,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -19589,7 +19589,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave649-device-daemon-contract.test.js"
+        "tests/wave649-device-daemon-contract.test.js",
+        "tests/wave713-pipeline-yaml-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -33511,7 +33512,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave690-pipeline-runner-contract.test.js"
+        "tests/wave690-pipeline-runner-contract.test.js",
+        "tests/wave713-pipeline-yaml-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -33674,12 +33676,12 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "b06ba99949ba3af030792541fa71c9d431dfdc7e7dc52837df2a0ed925a8a274",
+      "sha256": "2df4bdcd6796124a3b9e92fe6320693d9a1e1d3c7a4d99065926b26d8d9cc2d3",
       "metrics": {
-        "bytes": 10794,
-        "lines": 254,
+        "bytes": 17145,
+        "lines": 443,
         "imports": 1,
-        "exports": 5,
+        "exports": 7,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -33688,11 +33690,14 @@
         "crypto_refs": 4,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave690-pipeline-runner-contract.test.js",
+        "tests/wave713-pipeline-yaml-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

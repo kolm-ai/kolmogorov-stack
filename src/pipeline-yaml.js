@@ -54,6 +54,15 @@
 import { parseKolmYaml } from './kolm-yaml.js';
 
 export const PIPELINE_YAML_VERSION = 'w738-v1';
+export const PIPELINE_YAML_CONTRACT_VERSION = 'w713-v1';
+export const PIPELINE_YAML_LIMITS = Object.freeze({
+  max_yaml_chars: 64_000,
+  max_name_chars: 128,
+  max_routes: 128,
+  max_route_label_chars: 128,
+  max_cid_chars: 256,
+  max_teacher_id_chars: 160,
+});
 
 // Loose cid shape - accepts the two cid flavours kolm currently emits:
 //   * IPFS-style "bafk..." or "bafy..." (base32-ish identifiers)
@@ -63,9 +72,169 @@ export const PIPELINE_YAML_VERSION = 'w738-v1';
 // each layer pick its own cid encoding; the load-bearing check is "looks
 // like a content-address, not an empty string or a file path".
 const CID_RE = /^(?:baf[a-z0-9]{4,}|sha256-[0-9a-f]{32,}|[0-9a-f]{32,})$/i;
+const SAFE_NAME_RE = /^[A-Za-z0-9][A-Za-z0-9_.: -]{0,127}$/;
+const SAFE_ROUTE_LABEL_RE = /^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$/;
+const SAFE_TEACHER_ID_RE = /^[A-Za-z0-9][A-Za-z0-9_.:+-]{0,159}$/;
+const RESERVED_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
+const TOP_LEVEL_KEYS = new Set(['version', 'name', 'classifier', 'routes']);
+const CLASSIFIER_KEYS = new Set(['artifact_cid', 'version']);
+const ROUTE_TARGET_KEYS = new Set(['artifact_cid', 'teacher']);
+const UNSAFE_PATHS = Symbol('pipeline_yaml_unsafe_paths');
+
+function _isMapping(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function _hasSafePrototype(value) {
+  if (!_isMapping(value)) return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
+function _ownKeys(value) {
+  return _isMapping(value) ? Object.keys(value) : [];
+}
+
+function _isReservedKey(key) {
+  return RESERVED_KEYS.has(String(key));
+}
+
+function _normaliseCid(value) {
+  if (typeof value !== 'string') return null;
+  const s = value.trim().toLowerCase();
+  if (s.length < 8 || s.length > PIPELINE_YAML_LIMITS.max_cid_chars) return null;
+  return CID_RE.test(s) ? s : null;
+}
+
+function _normaliseCidIfValid(value) {
+  return _normaliseCid(value) || value;
+}
+
+function _normaliseTeacherIfString(value) {
+  return typeof value === 'string' ? value.trim() : value;
+}
 
 function _isLikelyCid(s) {
-  return typeof s === 'string' && s.length >= 8 && CID_RE.test(s.trim());
+  return _normaliseCid(s) !== null;
+}
+
+function _attachUnsafePaths(out, unsafePaths) {
+  Object.defineProperty(out, UNSAFE_PATHS, {
+    value: unsafePaths,
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  });
+}
+
+function _unsafePaths(parsed) {
+  return _isMapping(parsed) && Array.isArray(parsed[UNSAFE_PATHS]) ? parsed[UNSAFE_PATHS] : [];
+}
+
+function _recordUnsafeMapping(value, path, unsafePaths) {
+  if (_isMapping(value) && !_hasSafePrototype(value)) unsafePaths.push(path);
+}
+
+function _copyUnknownTopLevel(parsed, out, unsafePaths) {
+  for (const key of _ownKeys(parsed)) {
+    if (TOP_LEVEL_KEYS.has(key)) continue;
+    if (_isReservedKey(key)) {
+      unsafePaths.push(key);
+      continue;
+    }
+    out[key] = parsed[key];
+  }
+}
+
+function _normaliseClassifier(raw, unsafePaths) {
+  if (!_isMapping(raw)) return null;
+  _recordUnsafeMapping(raw, 'classifier', unsafePaths);
+  const out = {};
+  for (const key of _ownKeys(raw)) {
+    if (_isReservedKey(key)) unsafePaths.push(`classifier.${key}`);
+    out[key] = key === 'artifact_cid' ? _normaliseCidIfValid(raw[key]) : raw[key];
+  }
+  if (!Object.prototype.hasOwnProperty.call(out, 'artifact_cid')) out.artifact_cid = null;
+  if (!Object.prototype.hasOwnProperty.call(out, 'version')) out.version = null;
+  return out;
+}
+
+function _normaliseRouteTarget(raw, path, unsafePaths) {
+  if (!_isMapping(raw)) return raw;
+  _recordUnsafeMapping(raw, path, unsafePaths);
+  const out = {};
+  for (const key of _ownKeys(raw)) {
+    if (_isReservedKey(key)) unsafePaths.push(`${path}.${key}`);
+    if (key === 'artifact_cid') out[key] = _normaliseCidIfValid(raw[key]);
+    else if (key === 'teacher') out[key] = _normaliseTeacherIfString(raw[key]);
+    else out[key] = raw[key];
+  }
+  return out;
+}
+
+function _normaliseRoutes(raw, unsafePaths) {
+  if (!_isMapping(raw)) return null;
+  _recordUnsafeMapping(raw, 'routes', unsafePaths);
+  const out = Object.create(null);
+  for (const label of _ownKeys(raw)) {
+    if (_isReservedKey(label)) unsafePaths.push(`routes.${label}`);
+    out[label] = _normaliseRouteTarget(raw[label], `routes.${label}`, unsafePaths);
+  }
+  return out;
+}
+
+function _validateUnknownKeys(errors, obj, allowed, basePath) {
+  for (const key of _ownKeys(obj)) {
+    if (_isReservedKey(key)) {
+      _push(errors, basePath ? `${basePath}.${key}` : key, 'reserved_key');
+      continue;
+    }
+    if (!allowed.has(key)) {
+      _push(errors, basePath ? `${basePath}.${key}` : key, 'unknown_key');
+    }
+  }
+}
+
+function _validateCid(errors, path, value) {
+  if (typeof value !== 'string') {
+    _push(errors, path, 'must_be_string');
+    return;
+  }
+  const trimmed = value.trim();
+  if (trimmed.length > PIPELINE_YAML_LIMITS.max_cid_chars) {
+    _push(errors, path, 'too_long');
+  } else if (!_isLikelyCid(value)) {
+    _push(errors, path, 'must_look_like_cid');
+  }
+}
+
+function _validateRouteLabel(errors, label) {
+  const path = `routes.${label}`;
+  if (_isReservedKey(label)) {
+    _push(errors, path, 'reserved_key');
+    return;
+  }
+  if (label.length > PIPELINE_YAML_LIMITS.max_route_label_chars) {
+    _push(errors, path, 'label_too_long');
+    return;
+  }
+  if (!SAFE_ROUTE_LABEL_RE.test(label)) {
+    _push(errors, path, 'label_must_match_safe_pattern');
+  }
+}
+
+function _validateTeacher(errors, path, value) {
+  if (typeof value !== 'string') {
+    _push(errors, path, 'must_be_string');
+    return;
+  }
+  if (value.length === 0) {
+    _push(errors, path, 'must_be_non_empty_string');
+  } else if (value.length > PIPELINE_YAML_LIMITS.max_teacher_id_chars) {
+    _push(errors, path, 'too_long');
+  } else if (!SAFE_TEACHER_ID_RE.test(value)) {
+    _push(errors, path, 'must_match_safe_teacher_id');
+  }
 }
 
 // =============================================================================
@@ -84,6 +253,13 @@ export function parsePipelineYaml(yamlText) {
     err.line = 0;
     throw err;
   }
+  if (yamlText.length > PIPELINE_YAML_LIMITS.max_yaml_chars) {
+    const err = new Error('pipeline yaml exceeds max size');
+    err.code = 'pipeline_yaml_too_large';
+    err.line = 0;
+    err.max_chars = PIPELINE_YAML_LIMITS.max_yaml_chars;
+    throw err;
+  }
   // The W732 parser throws snake_case .code errors on malformed input; we
   // let them propagate unchanged so the CLI / route handlers can switch on
   // the same codes ('yaml_parse_failed', 'inconsistent_indent', etc).
@@ -96,20 +272,19 @@ export function parsePipelineYaml(yamlText) {
   }
   // Surface shape: ensure version/name/classifier/routes are present (or
   // null) so validatePipelineYaml can give an honest "required" error for
-  // each missing field instead of crashing on a property access.
+  // each missing field instead of crashing on a property access. Unknown keys
+  // are preserved so validatePipelineYaml can reject them explicitly instead
+  // of silently dropping operator intent.
+  const unsafePaths = [];
+  _recordUnsafeMapping(parsed, '', unsafePaths);
   const out = {
     version: parsed.version != null ? parsed.version : null,
     name: parsed.name != null ? parsed.name : null,
-    classifier: (parsed.classifier && typeof parsed.classifier === 'object' && !Array.isArray(parsed.classifier))
-      ? {
-          artifact_cid: parsed.classifier.artifact_cid != null ? parsed.classifier.artifact_cid : null,
-          version: parsed.classifier.version != null ? parsed.classifier.version : null,
-        }
-      : null,
-    routes: (parsed.routes && typeof parsed.routes === 'object' && !Array.isArray(parsed.routes))
-      ? parsed.routes
-      : null,
+    classifier: _normaliseClassifier(parsed.classifier, unsafePaths),
+    routes: _normaliseRoutes(parsed.routes, unsafePaths),
   };
+  _copyUnknownTopLevel(parsed, out, unsafePaths);
+  _attachUnsafePaths(out, unsafePaths);
   return out;
 }
 
@@ -127,6 +302,10 @@ export function validatePipelineYaml(parsed) {
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
     return { ok: false, errors: [{ path: '', error: 'root_must_be_mapping' }] };
   }
+  for (const path of _unsafePaths(parsed)) {
+    _push(errors, path, 'unsafe_mapping_prototype');
+  }
+  _validateUnknownKeys(errors, parsed, TOP_LEVEL_KEYS, '');
   // version: required, must equal PIPELINE_YAML_VERSION.
   if (parsed.version == null) {
     _push(errors, 'version', 'required');
@@ -141,6 +320,10 @@ export function validatePipelineYaml(parsed) {
     _push(errors, 'name', 'required');
   } else if (typeof parsed.name !== 'string' || parsed.name.length === 0) {
     _push(errors, 'name', 'must_be_non_empty_string');
+  } else if (parsed.name.length > PIPELINE_YAML_LIMITS.max_name_chars) {
+    _push(errors, 'name', 'too_long');
+  } else if (!SAFE_NAME_RE.test(parsed.name)) {
+    _push(errors, 'name', 'must_match_safe_name');
   }
   // classifier: required mapping with at minimum a real-looking artifact_cid.
   if (parsed.classifier == null) {
@@ -148,15 +331,17 @@ export function validatePipelineYaml(parsed) {
   } else if (typeof parsed.classifier !== 'object' || Array.isArray(parsed.classifier)) {
     _push(errors, 'classifier', 'must_be_mapping');
   } else {
+    if (!_hasSafePrototype(parsed.classifier)) _push(errors, 'classifier', 'unsafe_mapping_prototype');
+    _validateUnknownKeys(errors, parsed.classifier, CLASSIFIER_KEYS, 'classifier');
     if (parsed.classifier.artifact_cid == null) {
       _push(errors, 'classifier.artifact_cid', 'required');
-    } else if (typeof parsed.classifier.artifact_cid !== 'string') {
-      _push(errors, 'classifier.artifact_cid', 'must_be_string');
-    } else if (!_isLikelyCid(parsed.classifier.artifact_cid)) {
-      _push(errors, 'classifier.artifact_cid', 'must_look_like_cid');
+    } else {
+      _validateCid(errors, 'classifier.artifact_cid', parsed.classifier.artifact_cid);
     }
     if (parsed.classifier.version != null && typeof parsed.classifier.version !== 'string') {
       _push(errors, 'classifier.version', 'must_be_string');
+    } else if (typeof parsed.classifier.version === 'string' && parsed.classifier.version.length > 64) {
+      _push(errors, 'classifier.version', 'too_long');
     }
   }
   // routes: required mapping of label -> target.
@@ -165,17 +350,24 @@ export function validatePipelineYaml(parsed) {
   } else if (typeof parsed.routes !== 'object' || Array.isArray(parsed.routes)) {
     _push(errors, 'routes', 'must_be_mapping');
   } else {
+    if (!_hasSafePrototype(parsed.routes)) _push(errors, 'routes', 'unsafe_mapping_prototype');
     const labels = Object.keys(parsed.routes);
     if (labels.length === 0) {
       _push(errors, 'routes', 'must_be_non_empty');
     }
+    if (labels.length > PIPELINE_YAML_LIMITS.max_routes) {
+      _push(errors, 'routes', 'too_many');
+    }
     for (const label of labels) {
       const base = `routes.${label}`;
+      _validateRouteLabel(errors, label);
       const target = parsed.routes[label];
       if (target === null || typeof target !== 'object' || Array.isArray(target)) {
         _push(errors, base, 'must_be_mapping');
         continue;
       }
+      if (!_hasSafePrototype(target)) _push(errors, base, 'unsafe_mapping_prototype');
+      _validateUnknownKeys(errors, target, ROUTE_TARGET_KEYS, base);
       const hasCid = target.artifact_cid != null;
       const hasTeacher = target.teacher != null;
       if (!hasCid && !hasTeacher) {
@@ -188,16 +380,10 @@ export function validatePipelineYaml(parsed) {
         continue;
       }
       if (hasCid) {
-        if (typeof target.artifact_cid !== 'string') {
-          _push(errors, `${base}.artifact_cid`, 'must_be_string');
-        } else if (!_isLikelyCid(target.artifact_cid)) {
-          _push(errors, `${base}.artifact_cid`, 'must_look_like_cid');
-        }
+        _validateCid(errors, `${base}.artifact_cid`, target.artifact_cid);
       }
       if (hasTeacher) {
-        if (typeof target.teacher !== 'string' || target.teacher.length === 0) {
-          _push(errors, `${base}.teacher`, 'must_be_non_empty_string');
-        }
+        _validateTeacher(errors, `${base}.teacher`, target.teacher);
       }
     }
   }
@@ -215,13 +401,16 @@ export function validatePipelineYaml(parsed) {
 
 export function collectReferencedCids(parsed) {
   const out = [];
-  if (parsed && parsed.classifier && typeof parsed.classifier.artifact_cid === 'string') {
-    out.push(parsed.classifier.artifact_cid);
+  const classifierCid = parsed && parsed.classifier ? _normaliseCid(parsed.classifier.artifact_cid) : null;
+  if (classifierCid) {
+    out.push(classifierCid);
   }
   if (parsed && parsed.routes && typeof parsed.routes === 'object') {
-    for (const label of Object.keys(parsed.routes)) {
+    for (const label of Object.keys(parsed.routes).slice(0, PIPELINE_YAML_LIMITS.max_routes)) {
+      if (_isReservedKey(label) || !SAFE_ROUTE_LABEL_RE.test(label)) continue;
       const t = parsed.routes[label];
-      if (t && typeof t.artifact_cid === 'string') out.push(t.artifact_cid);
+      const routeCid = t && _normaliseCid(t.artifact_cid);
+      if (routeCid) out.push(routeCid);
     }
   }
   return out;

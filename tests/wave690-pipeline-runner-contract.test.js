@@ -70,8 +70,8 @@ test('W690 pipeline-runner is wired into the direct depth verifier', () => {
   );
   const nextDepthVerifier = ['verify', ['device', 'daemon'].join('-')].join(':');
   assert.ok(
-    pkg.scripts['verify:depth'].includes(`verify:compile-server && npm run verify:pipeline-runner && npm run ${nextDepthVerifier}`),
-    'verify:depth must run pipeline-runner between compile-server and the next runtime verifier',
+    pkg.scripts['verify:depth'].includes(`verify:compile-server && npm run verify:pipeline-runner && npm run verify:pipeline-yaml && npm run ${nextDepthVerifier}`),
+    'verify:depth must run pipeline-runner, pipeline-yaml, then the next runtime verifier',
   );
   assert.match(source, /function _stableJson/);
   assert.match(source, /Object\.create\(null\)/);
