@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 749,
-    "components_without_direct_test_reference": 80,
+    "test_referenced_components": 750,
+    "components_without_direct_test_reference": 79,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -1693,10 +1693,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "814c4116b814d5fa60bb4e9757b63dd874f382c4bedfeb38e85829e1ea386cc8",
+      "sha256": "b9de034ad93fb85c7fb089ae4c1ce09dc64b88c62298bf99b67acf1e638cea04",
       "metrics": {
-        "bytes": 678,
-        "lines": 20,
+        "bytes": 2376,
+        "lines": 72,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -1707,11 +1707,20 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave687-licensing-allowlist-contract.test.js",
+        "tests/wave715-savings-routes-contract.test.js",
+        "tests/wave730-scim-provisioning-contract.test.js",
+        "tests/wave731-trend-extract-contract.test.js",
+        "tests/wave732-verticals-contract.test.js",
+        "tests/wave733-video-bakeoff-contract.test.js",
+        "tests/wave734-video-capture-contract.test.js",
+        "tests/wave735-vision-capture-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

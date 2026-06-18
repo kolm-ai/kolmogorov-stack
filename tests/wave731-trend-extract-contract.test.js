@@ -124,7 +124,7 @@ test('W731 trend extraction is wired into direct depth verification', () => {
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:scim-provisioning && npm run verify:trend-extract && npm run verify:verticals && npm run verify:video-bakeoff && npm run verify:video-capture && npm run verify:vision-capture && npm run verify:vlm-bakeoff && npm run verify:website-status && npm run verify:zip-large && npm run verify:python-onnx-text && npm run verify:fal-backend && npm run verify:vast-backend && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:scim-provisioning && npm run verify:trend-extract && npm run verify:verticals && npm run verify:video-bakeoff && npm run verify:video-capture && npm run verify:vision-capture && npm run verify:vlm-bakeoff && npm run verify:website-status && npm run verify:zip-large && npm run verify:python-onnx-text && npm run verify:fal-backend && npm run verify:vast-backend && npm run verify:browser-extension-popup && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /TREND_EXTRACT_CONTRACT_VERSION/);
   assert.match(source, /_normalizeBigramHashes/);

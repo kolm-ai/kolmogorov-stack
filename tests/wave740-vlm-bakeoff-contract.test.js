@@ -58,7 +58,7 @@ test('W740 VLM bakeoff is wired into direct depth verification', () => {
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:vision-capture && npm run verify:vlm-bakeoff && npm run verify:website-status && npm run verify:zip-large && npm run verify:python-onnx-text && npm run verify:fal-backend && npm run verify:vast-backend && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:vision-capture && npm run verify:vlm-bakeoff && npm run verify:website-status && npm run verify:zip-large && npm run verify:python-onnx-text && npm run verify:fal-backend && npm run verify:vast-backend && npm run verify:browser-extension-popup && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /VLM_BAKEOFF_LIMITS/);
   assert.match(source, /_errorEnvelope/);

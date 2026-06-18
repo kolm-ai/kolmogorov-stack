@@ -58,7 +58,7 @@ test('W789 vast backend is wired into direct depth verification', () => {
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:fal-backend && npm run verify:vast-backend && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:fal-backend && npm run verify:vast-backend && npm run verify:browser-extension-popup && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /VAST_BACKEND_CONTRACT_VERSION/);
   assert.match(source, /_safeHost/);

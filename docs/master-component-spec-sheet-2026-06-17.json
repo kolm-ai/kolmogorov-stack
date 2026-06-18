@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 94.5,
+    "local_engineering_score": 94.6,
     "frontier_product_score": 70.6,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 749,
-    "direct_test_reference_pct": 90.3,
-    "components_without_direct_test_reference": 80,
+    "direct_test_referenced_components": 750,
+    "direct_test_reference_pct": 90.5,
+    "components_without_direct_test_reference": 79,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -2952,8 +2952,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 678,
-          "lines": 20,
+          "bytes": 2376,
+          "lines": 72,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -2967,9 +2967,9 @@
         "risk_signals": [
           "distribution_or_worker_surface"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "814c4116b814d5fa60bb4e9757b63dd874f382c4bedfeb38e85829e1ea386cc8"
+        "sha256": "b9de034ad93fb85c7fb089ae4c1ce09dc64b88c62298bf99b67acf1e638cea04"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -2977,7 +2977,16 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave687-licensing-allowlist-contract.test.js",
+          "tests/wave715-savings-routes-contract.test.js",
+          "tests/wave730-scim-provisioning-contract.test.js",
+          "tests/wave731-trend-extract-contract.test.js",
+          "tests/wave732-verticals-contract.test.js",
+          "tests/wave733-video-bakeoff-contract.test.js",
+          "tests/wave734-video-capture-contract.test.js",
+          "tests/wave735-vision-capture-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
@@ -2985,10 +2994,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/browser-extension/README.md",
