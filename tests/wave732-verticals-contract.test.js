@@ -101,7 +101,7 @@ test('W732 vertical catalog is wired into direct depth verification', () => {
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:trend-extract && npm run verify:verticals && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:trend-extract && npm run verify:verticals && npm run verify:video-bakeoff && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /normalizeVerticalId/);
   assert.match(source, /normalizeVerticalPublisherId/);

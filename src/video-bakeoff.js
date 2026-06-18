@@ -32,16 +32,83 @@
 import crypto from 'node:crypto';
 
 export const VIDEO_BAKEOFF_VERSION = 'w773-v1';
+export const VIDEO_BAKEOFF_CONTRACT_VERSION = 'w733-video-bakeoff-v1';
+export const VIDEO_BAKEOFF_LIMITS = Object.freeze({
+  hard_max_n: 500,
+  max_store_scan_rows: 1000,
+  max_tenant_id_chars: 160,
+  max_namespace_chars: 128,
+  max_artifact_path_chars: 512,
+  max_judge_kind_chars: 64,
+});
 
 // Closed enum of content-kind buckets. Frozen - adding a 6th kind needs
 // a version bump because the UI and the per-kind aggregator pin to this.
-const CONTENT_KINDS = Object.freeze([
+export const CONTENT_KINDS = Object.freeze([
   'tutorial',
   'screencast',
   'presentation',
   'surveillance',
   'other',
 ]);
+
+const SAFE_ID_RE = /^[A-Za-z0-9_.:@-]+$/;
+const SAFE_NAMESPACE_RE = /^[A-Za-z0-9_.:@/-]+$/;
+const SAFE_JUDGE_KIND_RE = /^[A-Za-z0-9_.:@-]+$/;
+
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value), 'utf8').digest('hex');
+}
+
+function _cleanText(value, maxChars) {
+  if (value == null) return null;
+  const raw = String(value);
+  if (/[\u0000-\u001f\u007f]/.test(raw)) return null;
+  const cleaned = raw.replace(/\s+/g, ' ').trim();
+  if (!cleaned || cleaned.length > maxChars) return null;
+  return cleaned;
+}
+
+function _normalizeTenantId(value) {
+  const cleaned = _cleanText(value, VIDEO_BAKEOFF_LIMITS.max_tenant_id_chars);
+  return cleaned && SAFE_ID_RE.test(cleaned) ? cleaned : null;
+}
+
+function _normalizeNamespace(value) {
+  if (value == null || value === '') return null;
+  const cleaned = _cleanText(value, VIDEO_BAKEOFF_LIMITS.max_namespace_chars);
+  return cleaned && SAFE_NAMESPACE_RE.test(cleaned) ? cleaned : null;
+}
+
+function _normalizeArtifactPath(value) {
+  return _cleanText(value, VIDEO_BAKEOFF_LIMITS.max_artifact_path_chars);
+}
+
+function _normalizeJudgeKind(value) {
+  const cleaned = _cleanText(value, VIDEO_BAKEOFF_LIMITS.max_judge_kind_chars);
+  return cleaned && SAFE_JUDGE_KIND_RE.test(cleaned) ? cleaned : 'jaccard';
+}
+
+function _errorEnvelope(error, detail, extra = {}) {
+  return {
+    ok: false,
+    error,
+    version: VIDEO_BAKEOFF_VERSION,
+    contract_version: VIDEO_BAKEOFF_CONTRACT_VERSION,
+    error_sha256: _sha256Hex(detail || error),
+    ...extra,
+  };
+}
+
+function _nowIso(opts) {
+  const ms = opts && Number(opts.now_ms);
+  if (Number.isFinite(ms)) return new Date(ms).toISOString();
+  if (opts && typeof opts.now_iso === 'string') {
+    const t = Date.parse(opts.now_iso);
+    if (Number.isFinite(t)) return new Date(t).toISOString();
+  }
+  return new Date().toISOString();
+}
 
 // Lightweight content-kind classifier. Looks at the captured response
 // head + URL path for keyword hints. NEVER attempts to download the
@@ -130,20 +197,34 @@ export async function runVideoBakeoff({
   opts = {},
 } = {}) {
   // ----- HONESTY: refuse to run without tenant_id (P0 leak prevention). -----
-  if (!tenant_id || typeof tenant_id !== 'string') {
+  const tenantId = _normalizeTenantId(tenant_id);
+  if (!tenantId) {
     return {
       ok: false,
       error: 'tenant_id_required',
       hint: 'pass {tenant_id} - video bakeoff is tenant-scoped',
       version: VIDEO_BAKEOFF_VERSION,
+      contract_version: VIDEO_BAKEOFF_CONTRACT_VERSION,
     };
   }
+
+  const namespaceProvided = namespace != null && namespace !== '';
+  const namespaceFilter = _normalizeNamespace(namespace);
+  if (namespaceProvided && !namespaceFilter) {
+    return _errorEnvelope('invalid_namespace', 'invalid_namespace', {
+      hint: 'namespace must be a bounded URL-safe identifier',
+      tenant_id: tenantId,
+    });
+  }
+
+  const artifactPath = _normalizeArtifactPath(artifact_path);
+  const artifactPathSha256 = artifactPath ? _sha256Hex(artifactPath) : null;
 
   // ----- Cap normalization -----
   let cap = Number(max_n);
   if (!Number.isFinite(cap) || cap < 1) cap = 50;
-  const HARD_CEILING = 500;
-  if (cap > HARD_CEILING) cap = HARD_CEILING;
+  cap = Math.trunc(cap);
+  if (cap > VIDEO_BAKEOFF_LIMITS.hard_max_n) cap = VIDEO_BAKEOFF_LIMITS.hard_max_n;
 
   // ----- Pull video captures via the event-store (or DI fake) -----
   const storeMod = (opts && opts.storeMod)
@@ -157,10 +238,10 @@ export async function runVideoBakeoff({
   try {
     if (typeof storeMod.listEvents === 'function') {
       rawRows = await storeMod.listEvents({
-        tenant_id,
-        namespace: namespace || undefined,
+        tenant_id: tenantId,
+        namespace: namespaceFilter || undefined,
         media_kind: 'video',
-        limit: HARD_CEILING * 2,
+        limit: VIDEO_BAKEOFF_LIMITS.max_store_scan_rows,
       });
     } else if (typeof storeMod.all === 'function') {
       // Fallback for fakes that only implement all(). Apply the full filter
@@ -176,23 +257,21 @@ export async function runVideoBakeoff({
       };
     }
   } catch (e) {
-    return {
-      ok: false,
-      error: 'store_read_failed',
-      detail: String(e && e.message || e),
-      version: VIDEO_BAKEOFF_VERSION,
-    };
+    return _errorEnvelope('store_read_failed', String(e && e.message || e), {
+      tenant_id: tenantId,
+      namespace: namespaceFilter || null,
+    });
   }
 
   // W411 defense-in-depth tenant fence - per-row filter even though we
   // asked listEvents to filter by tenant_id. The fake store path goes
   // through `all()` which returns EVERY tenant; without this filter the
   // fake would leak cross-tenant rows into the bakeoff result.
-  const tenantRows = rawRows.filter(r => r && r.tenant_id === tenant_id);
+  const tenantRows = rawRows.filter(r => r && r.tenant_id === tenantId);
 
   // namespace fence (DI fakes do not pre-filter)
-  const nsRows = namespace
-    ? tenantRows.filter(r => r.namespace === namespace)
+  const nsRows = namespaceFilter
+    ? tenantRows.filter(r => r.namespace === namespaceFilter)
     : tenantRows;
 
   // media_kind fence (DI fakes do not pre-filter)
@@ -203,12 +282,14 @@ export async function runVideoBakeoff({
     return {
       ok: true,
       version: VIDEO_BAKEOFF_VERSION,
-      tenant_id,
-      namespace: namespace || null,
-      artifact_path: artifact_path || null,
+      contract_version: VIDEO_BAKEOFF_CONTRACT_VERSION,
+      tenant_id: tenantId,
+      namespace: namespaceFilter || null,
+      artifact_path: artifactPath ? '[redacted]' : null,
+      artifact_path_sha256: artifactPathSha256,
       count_total: 0,
       count_video_pairs_evaluated: 0,
-      by_content_kind: _emptyKindMap(),
+      by_content_kind: _finalizeKindMap(_emptyKindMap()),
       avg_score: null,
       judge_kind: null,
       message: 'no_video_captures',
@@ -229,7 +310,7 @@ export async function runVideoBakeoff({
         if (!path) return '';
         try {
           const mod = await import('./artifact-runner.js');
-          const ran = await mod.runArtifact(path, input, { tenant_id });
+          const ran = await mod.runArtifact(path, input, { tenant_id: tenantId });
           if (ran == null) return '';
           if (typeof ran === 'string') return ran;
           const out = ran.output != null ? ran.output : ran;
@@ -245,15 +326,15 @@ export async function runVideoBakeoff({
   const judge = (opts && typeof opts.judge === 'function')
     ? opts.judge
     : (base, cand) => _jaccard(_tokens(base), _tokens(cand));
-  const judge_kind = (opts && typeof opts.judgeKind === 'string')
-    ? opts.judgeKind
-    : 'jaccard';
+  const judge_kind = _normalizeJudgeKind(opts && opts.judgeKind);
 
   // ----- Per-row scoring + content-kind bucketing -----
   const byKind = _emptyKindMap();
   let totalScore = 0;
   let totalScored = 0;
   let count_video_pairs_evaluated = 0;
+  let artifact_error_count = 0;
+  let judge_error_count = 0;
 
   for (const row of candidates) {
     const input = _extractInputText(row);
@@ -262,17 +343,25 @@ export async function runVideoBakeoff({
 
     let candidateText = '';
     try {
-      const ran = await runOnArtifact(artifact_path, input);
+      const ran = await runOnArtifact(artifactPath, input);
       if (ran && typeof ran === 'object' && ran.__error__) {
         candidateText = '';
+        artifact_error_count += 1;
       } else {
         candidateText = String(ran || '');
       }
     } catch {
       candidateText = '';
+      artifact_error_count += 1;
     }
 
-    const score = Number(judge(base, candidateText));
+    let score = 0;
+    try {
+      score = Number(judge(base, candidateText));
+    } catch {
+      judge_error_count += 1;
+      score = 0;
+    }
     const safeScore = (Number.isFinite(score) && score >= 0 && score <= 1) ? score : 0;
     totalScore += safeScore;
     totalScored += 1;
@@ -285,38 +374,27 @@ export async function runVideoBakeoff({
     bucket.scores.push(safeScore);
   }
 
-  // Finalize per-kind stats (mean + median) so the UI can show both.
-  for (const k of CONTENT_KINDS) {
-    const b = byKind[k];
-    if (b.count === 0) {
-      b.mean_score = null;
-      b.median_score = null;
-    } else {
-      b.mean_score = b.total_score / b.count;
-      const sorted = b.scores.slice().sort((a, c) => a - c);
-      b.median_score = sorted[Math.floor(sorted.length / 2)];
-    }
-    // The raw scores array is only useful for debugging - keep it out of
-    // the public envelope to avoid bloating the payload.
-    delete b.scores;
-    delete b.total_score;
-  }
+  _finalizeKindMap(byKind);
 
   const avg_score = totalScored > 0 ? totalScore / totalScored : null;
 
   return {
     ok: true,
     version: VIDEO_BAKEOFF_VERSION,
-    tenant_id,
-    namespace: namespace || null,
-    artifact_path: artifact_path || null,
+    contract_version: VIDEO_BAKEOFF_CONTRACT_VERSION,
+    tenant_id: tenantId,
+    namespace: namespaceFilter || null,
+    artifact_path: artifactPath ? '[redacted]' : null,
+    artifact_path_sha256: artifactPathSha256,
     count_total,
     count_video_pairs_evaluated,
     by_content_kind: byKind,
     avg_score,
     judge_kind,
+    artifact_error_count,
+    judge_error_count,
     max_n: cap,
-    generated_at: new Date().toISOString(),
+    generated_at: _nowIso(opts),
   };
 }
 
@@ -336,7 +414,29 @@ function _emptyKindMap() {
   return out;
 }
 
+// Finalize per-kind stats (mean + median) so the UI can show both. Raw score
+// arrays are internal only; keep them out of every public envelope.
+function _finalizeKindMap(byKind) {
+  for (const k of CONTENT_KINDS) {
+    const b = byKind[k];
+    if (b.count === 0) {
+      b.mean_score = null;
+      b.median_score = null;
+    } else {
+      b.mean_score = b.total_score / b.count;
+      const sorted = b.scores.slice().sort((a, c) => a - c);
+      b.median_score = sorted[Math.floor(sorted.length / 2)];
+    }
+    delete b.scores;
+    delete b.total_score;
+  }
+  return byKind;
+}
+
 export default {
   VIDEO_BAKEOFF_VERSION,
+  VIDEO_BAKEOFF_CONTRACT_VERSION,
+  VIDEO_BAKEOFF_LIMITS,
+  CONTENT_KINDS,
   runVideoBakeoff,
 };

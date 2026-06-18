@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 740,
-    "components_without_direct_test_reference": 89,
+    "test_referenced_components": 741,
+    "components_without_direct_test_reference": 88,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -37579,10 +37579,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "a9c9fa604774eb7f934f762579120fae4f8fe409737300d59d2ea93e4c1f61e1",
+      "sha256": "ddee05b0a745a304f2f312c9e4f8e12f0923eae0d4aab177fa61f24e71fcff8b",
       "metrics": {
-        "bytes": 1469233,
-        "lines": 30811,
+        "bytes": 1469445,
+        "lines": 30814,
         "imports": 535,
         "exports": 8,
         "routes": 810,
@@ -37590,7 +37590,7 @@
         "fs_writes": 1,
         "subprocess_refs": 44,
         "network_refs": 34,
-        "crypto_refs": 272,
+        "crypto_refs": 275,
         "markers": 0
       },
       "test_refs": [
@@ -44753,7 +44753,8 @@
         "tests/wave715-savings-routes-contract.test.js",
         "tests/wave730-scim-provisioning-contract.test.js",
         "tests/wave731-trend-extract-contract.test.js",
-        "tests/wave732-verticals-contract.test.js"
+        "tests/wave732-verticals-contract.test.js",
+        "tests/wave733-video-bakeoff-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -44795,25 +44796,32 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "a0afd431ff61756397a08fdb4b57720c4923abb62cfdf022c50e31089c05f14a",
+      "sha256": "bdaafb86ed84d29785a5ca2a723b12588f8226f7238f75a3623189ef6df3fbe6",
       "metrics": {
-        "bytes": 12414,
-        "lines": 343,
+        "bytes": 15824,
+        "lines": 443,
         "imports": 3,
-        "exports": 3,
+        "exports": 6,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 2,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave687-licensing-allowlist-contract.test.js",
+        "tests/wave715-savings-routes-contract.test.js",
+        "tests/wave730-scim-provisioning-contract.test.js",
+        "tests/wave731-trend-extract-contract.test.js",
+        "tests/wave732-verticals-contract.test.js",
+        "tests/wave733-video-bakeoff-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

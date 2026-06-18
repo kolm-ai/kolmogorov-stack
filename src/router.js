@@ -27386,6 +27386,7 @@ res.json({
         error: 'confirm_required',
         hint: 'pass {confirm: true} to acknowledge the bakeoff scope',
         version: 'w773-v1',
+        contract_version: 'w733-video-bakeoff-v1',
       });
     }
     try {
@@ -27398,11 +27399,13 @@ res.json({
       });
       return res.status(env.ok ? 200 : 400).json(env);
     } catch (e) {
+      const detail = String(e && e.message || e || 'video_bakeoff_error');
       return res.status(500).json({
         ok: false,
         error: 'video_bakeoff_error',
-        detail: String(e && e.message || e),
         version: 'w773-v1',
+        contract_version: 'w733-video-bakeoff-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
       });
     }
   });

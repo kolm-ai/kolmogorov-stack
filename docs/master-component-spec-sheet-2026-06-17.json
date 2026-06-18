@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 740,
-    "direct_test_reference_pct": 89.3,
-    "components_without_direct_test_reference": 89,
+    "direct_test_referenced_components": 741,
+    "direct_test_reference_pct": 89.4,
+    "components_without_direct_test_reference": 88,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -33655,8 +33655,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1469233,
-          "lines": 30811,
+          "bytes": 1469445,
+          "lines": 30814,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -33664,7 +33664,7 @@
           "fs_writes": 1,
           "subprocess_refs": 44,
           "network_refs": 34,
-          "crypto_refs": 272,
+          "crypto_refs": 275,
           "markers": 0
         },
         "risk_signals": [
@@ -33678,7 +33678,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "a9c9fa604774eb7f934f762579120fae4f8fe409737300d59d2ea93e4c1f61e1"
+        "sha256": "ddee05b0a745a304f2f312c9e4f8e12f0923eae0d4aab177fa61f24e71fcff8b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -39812,7 +39812,8 @@
           "tests/wave715-savings-routes-contract.test.js",
           "tests/wave730-scim-provisioning-contract.test.js",
           "tests/wave731-trend-extract-contract.test.js",
-          "tests/wave732-verticals-contract.test.js"
+          "tests/wave732-verticals-contract.test.js",
+          "tests/wave733-video-bakeoff-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -39832,24 +39833,24 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 12414,
-          "lines": 343,
+          "bytes": 15824,
+          "lines": 443,
           "imports": 3,
-          "exports": 3,
+          "exports": 6,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 2,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "a0afd431ff61756397a08fdb4b57720c4923abb62cfdf022c50e31089c05f14a"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "bdaafb86ed84d29785a5ca2a723b12588f8226f7238f75a3623189ef6df3fbe6"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -39857,7 +39858,14 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave687-licensing-allowlist-contract.test.js",
+          "tests/wave715-savings-routes-contract.test.js",
+          "tests/wave730-scim-provisioning-contract.test.js",
+          "tests/wave731-trend-extract-contract.test.js",
+          "tests/wave732-verticals-contract.test.js",
+          "tests/wave733-video-bakeoff-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
         "innovation_opportunity": "Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.",
@@ -39866,10 +39874,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "src/video-capture.js",
