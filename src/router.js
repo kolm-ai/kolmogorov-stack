@@ -27118,6 +27118,7 @@ res.json({
           error: 'message_required',
           hint: 'POST body must be {message: {role, content}}',
           version: mod.VISION_CAPTURE_VERSION,
+          contract_version: mod.VISION_CAPTURE_CONTRACT_VERSION,
         });
       }
       const det = mod.detectVisionCapture(message);
@@ -27125,9 +27126,17 @@ res.json({
         ok: true,
         ...det,
         version: mod.VISION_CAPTURE_VERSION,
+        contract_version: mod.VISION_CAPTURE_CONTRACT_VERSION,
       });
     } catch (e) {
-      res.status(500).json({ ok: false, error: 'vision_capture_detect_error', detail: String(e && e.message || e) });
+      const detail = String(e && e.message || e || 'vision_capture_detect_error');
+      res.status(500).json({
+        ok: false,
+        error: 'vision_capture_detect_error',
+        version: 'w771-v1',
+        contract_version: 'w735-vision-capture-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
+      });
     }
   });
 
@@ -27186,7 +27195,14 @@ res.json({
       if (!result.ok) return res.status(400).json(result);
       return res.json(result);
     } catch (e) {
-      res.status(500).json({ ok: false, error: 'vision_captures_list_error', detail: String(e && e.message || e) });
+      const detail = String(e && e.message || e || 'vision_captures_list_error');
+      res.status(500).json({
+        ok: false,
+        error: 'vision_captures_list_error',
+        version: 'w771-v1',
+        contract_version: 'w735-vision-capture-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
+      });
     }
   });
 

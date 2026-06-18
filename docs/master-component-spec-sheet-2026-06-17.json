@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 94.2,
+    "local_engineering_score": 94.3,
     "frontier_product_score": 70.4,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 742,
-    "direct_test_reference_pct": 89.5,
-    "components_without_direct_test_reference": 87,
+    "direct_test_referenced_components": 743,
+    "direct_test_reference_pct": 89.6,
+    "components_without_direct_test_reference": 86,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -33655,8 +33655,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1469888,
-          "lines": 30820,
+          "bytes": 1470473,
+          "lines": 30836,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -33664,7 +33664,7 @@
           "fs_writes": 1,
           "subprocess_refs": 44,
           "network_refs": 34,
-          "crypto_refs": 281,
+          "crypto_refs": 287,
           "markers": 0
         },
         "risk_signals": [
@@ -33678,7 +33678,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "fde60c2c60e870b9a94d3a7257e8e234e9be41350b8b8d0c8718085ad451eaa1"
+        "sha256": "d5a3b3aa85a61827204e67f033106c32d68aa24c0e18259f1529dbc846ba4d2f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -39919,7 +39919,8 @@
           "tests/wave731-trend-extract-contract.test.js",
           "tests/wave732-verticals-contract.test.js",
           "tests/wave733-video-bakeoff-contract.test.js",
-          "tests/wave734-video-capture-contract.test.js"
+          "tests/wave734-video-capture-contract.test.js",
+          "tests/wave735-vision-capture-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
@@ -39989,10 +39990,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 22778,
-          "lines": 586,
+          "bytes": 33302,
+          "lines": 833,
           "imports": 1,
-          "exports": 7,
+          "exports": 10,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -40004,9 +40005,9 @@
         "risk_signals": [
           "cryptographic_or_proof_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "39671576997572f68382baec8c80eed798fa907ce58b1e7b7aa621d19e887ebc"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "6d1d5e1eb1568a72cc488a1e56f4ca824456675f8e0fae8d22bec4be385876f9"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -40014,7 +40015,16 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave687-licensing-allowlist-contract.test.js",
+          "tests/wave715-savings-routes-contract.test.js",
+          "tests/wave730-scim-provisioning-contract.test.js",
+          "tests/wave731-trend-extract-contract.test.js",
+          "tests/wave732-verticals-contract.test.js",
+          "tests/wave733-video-bakeoff-contract.test.js",
+          "tests/wave734-video-capture-contract.test.js",
+          "tests/wave735-vision-capture-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -40023,10 +40033,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "src/vision-tokenize.js",

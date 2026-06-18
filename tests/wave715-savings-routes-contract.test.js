@@ -75,7 +75,7 @@ test('W715 savings routes are directly wired into depth verification', () => {
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:licensing-allowlist && npm run verify:savings-routes && npm run verify:scim-provisioning && npm run verify:trend-extract && npm run verify:verticals && npm run verify:video-bakeoff && npm run verify:video-capture && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:licensing-allowlist && npm run verify:savings-routes && npm run verify:scim-provisioning && npm run verify:trend-extract && npm run verify:verticals && npm run verify:video-bakeoff && npm run verify:video-capture && npm run verify:vision-capture && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /registerSavingsRoutes: router with \.get\/\.post required/);
   assert.throws(() => registerSavingsRoutes({ get() {} }), /router with \.get\/\.post/);

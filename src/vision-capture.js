@@ -53,12 +53,40 @@
 import crypto from 'node:crypto';
 
 export const VISION_CAPTURE_VERSION = 'w771-v1';
+export const VISION_CAPTURE_CONTRACT_VERSION = 'w735-vision-capture-v1';
+export const VISION_CAPTURE_LIMITS = Object.freeze({
+  max_messages: 128,
+  max_message_blocks: 256,
+  max_image_blocks: 32,
+  max_inline_scan_chars: 4096,
+  max_url_chars: 4096,
+  max_data_url_chars: 262144,
+  max_tenant_id_chars: 160,
+  max_namespace_chars: 128,
+  max_response_text_chars: 16000,
+  max_store_rows_scanned: 5000,
+  max_list_limit: 1000,
+  max_image_byte_estimate: 50 * 1024 * 1024,
+});
 
 // Hard cap on the byte_count_estimate field. 50MB is plenty for any single
 // image (4K PNG ~25MB worst case, JPEG photo ~12MB). Capping prevents an
 // adversarial caller (or buggy SDK) from blowing up the estimate field
 // with a malformed base64 payload that decodes to gigabytes.
-export const MAX_IMAGE_BYTE_ESTIMATE = 50 * 1024 * 1024; // 50MB
+export const MAX_IMAGE_BYTE_ESTIMATE = VISION_CAPTURE_LIMITS.max_image_byte_estimate;
+
+export const SUPPORTED_IMAGE_MIMES = Object.freeze([
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+  'image/avif',
+  'image/svg+xml',
+  'image/tiff',
+  'image/bmp',
+  'image/heic',
+  'image/heif',
+]);
 
 // Sentinel for image-block source classification. Frozen so a downstream
 // consumer cannot push a new value and silent-pass schema validation.
@@ -73,21 +101,98 @@ export const IMAGE_SOURCE_KINDS = Object.freeze([
 // Internal helpers.
 // =============================================================================
 
+const SAFE_ID_RE = /^[A-Za-z0-9_.:@-]+$/;
+const SAFE_NAMESPACE_RE = /^[A-Za-z0-9_.:@/-]+$/;
+
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value || ''), 'utf8').digest('hex');
+}
+
+function _cleanStrictText(value, maxChars) {
+  if (value == null) return null;
+  const raw = String(value);
+  if (/[\u0000-\u001f\u007f]/.test(raw)) return null;
+  const cleaned = raw.replace(/\s+/g, ' ').trim();
+  if (!cleaned || cleaned.length > maxChars) return null;
+  return cleaned;
+}
+
+function _cleanLooseText(value, maxChars) {
+  if (value == null) return null;
+  const cleaned = String(value)
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!cleaned) return null;
+  return cleaned.length > maxChars ? cleaned.slice(0, maxChars) : cleaned;
+}
+
+function _normalizeTenantId(value) {
+  const cleaned = _cleanStrictText(value, VISION_CAPTURE_LIMITS.max_tenant_id_chars);
+  return cleaned && SAFE_ID_RE.test(cleaned) ? cleaned : null;
+}
+
+function _normalizeNamespace(value) {
+  const cleaned = _cleanStrictText(
+    value == null || value === '' ? 'default' : value,
+    VISION_CAPTURE_LIMITS.max_namespace_chars,
+  );
+  return cleaned && SAFE_NAMESPACE_RE.test(cleaned) ? cleaned : null;
+}
+
+function _normalizeMimeType(value) {
+  const mime = _cleanStrictText(value, 96);
+  return mime ? mime.toLowerCase() : null;
+}
+
+function _isSupportedImageMime(mime) {
+  return typeof mime === 'string' && SUPPORTED_IMAGE_MIMES.includes(mime.toLowerCase());
+}
+
+function _errorEnvelope(error, detail, extra = {}) {
+  return {
+    ok: false,
+    error,
+    version: VISION_CAPTURE_VERSION,
+    contract_version: VISION_CAPTURE_CONTRACT_VERSION,
+    error_sha256: _sha256Hex(detail || error),
+    ...extra,
+  };
+}
+
+function _mimeFromUrl(url) {
+  if (typeof url !== 'string') return null;
+  let lower = url.toLowerCase();
+  try { lower = new URL(url).pathname.toLowerCase(); } catch { /* best effort */ }
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  if (lower.endsWith('.gif')) return 'image/gif';
+  if (lower.endsWith('.avif')) return 'image/avif';
+  if (lower.endsWith('.svg')) return 'image/svg+xml';
+  if (lower.endsWith('.tif') || lower.endsWith('.tiff')) return 'image/tiff';
+  if (lower.endsWith('.bmp')) return 'image/bmp';
+  if (lower.endsWith('.heic')) return 'image/heic';
+  if (lower.endsWith('.heif')) return 'image/heif';
+  return null;
+}
+
 // Parse data URL of the form "data:<mime>;base64,<payload>" - returns
 // {mime_type, base64_payload, byte_count_estimate} or null on bad shape.
 // Base64 payload size * 3/4 gives the actual decoded byte count.
 function _parseDataUrl(url) {
-  if (typeof url !== 'string') return null;
-  if (!url.startsWith('data:')) return null;
-  const m = url.match(/^data:([^;,]+)?(?:;([^,]+))?,(.+)$/);
+  const safe = _cleanStrictText(url, VISION_CAPTURE_LIMITS.max_data_url_chars);
+  if (!safe || !safe.startsWith('data:')) return null;
+  const m = safe.match(/^data:([^;,]+)?(?:;([^,]+))?,(.*)$/);
   if (!m) return null;
-  const mime = (m[1] || 'application/octet-stream').toLowerCase();
+  const mime = _normalizeMimeType(m[1] || 'application/octet-stream');
+  if (!_isSupportedImageMime(mime)) return null;
   const params = m[2] || '';
   const payload = m[3] || '';
   const isBase64 = /(?:^|;)\s*base64\s*$/i.test(params);
   // Decoded byte count = base64 length * 3/4 (minus padding). We don't decode
   // the actual bytes - that would defeat the "never persist raw image bytes"
-  // honesty rule. The estimate is good to within ±2 bytes.
+  // honesty rule. The estimate is good to within +/- 2 bytes.
   let byteEst;
   if (isBase64) {
     const padding = (payload.match(/=+$/) || [''])[0].length;
@@ -102,16 +207,74 @@ function _parseDataUrl(url) {
     mime_type: mime,
     is_base64: isBase64,
     byte_count_estimate: Math.min(byteEst, MAX_IMAGE_BYTE_ESTIMATE),
+    content_sha256: _sha256Hex(payload),
+    url_sha256: _sha256Hex(safe),
   };
 }
 
-// SHA-256 the URL into a stable hex digest so distill can recognize the
-// same image across captures without ever storing the byte content. Slice
-// to 24 hex chars - 96 bits is enough collision resistance for image
-// dedup; full 64 hex is overkill in a row stamp.
+// SHA-256 the URL into a stable full-length digest so distill can recognize
+// the same image across captures without storing the byte content.
 function _hashUrl(url) {
   if (typeof url !== 'string' || url.length === 0) return null;
-  return crypto.createHash('sha256').update(url, 'utf8').digest('hex').slice(0, 24);
+  return _sha256Hex(url);
+}
+
+function _safeUrlForEnvelope(rawUrl, mimeType = null) {
+  const raw = String(rawUrl || '');
+  const maxChars = raw.startsWith('data:')
+    ? VISION_CAPTURE_LIMITS.max_data_url_chars
+    : VISION_CAPTURE_LIMITS.max_url_chars;
+  const url = _cleanStrictText(rawUrl, maxChars);
+  if (!url) return null;
+
+  if (url.startsWith('data:')) {
+    const parsed = _parseDataUrl(url);
+    if (!parsed) return null;
+    return {
+      url: null,
+      url_sha256: parsed.url_sha256,
+      content_sha256: parsed.content_sha256,
+      mime_type: parsed.mime_type,
+      byte_count_estimate: parsed.byte_count_estimate,
+      source: 'base64',
+    };
+  }
+
+  let parsed;
+  try { parsed = new URL(url); } catch { return null; }
+  if (!['http:', 'https:', 'gs:'].includes(parsed.protocol)) return null;
+  if (parsed.username || parsed.password) return null;
+  if (parsed.protocol === 'gs:' && !parsed.hostname) return null;
+  const safeUrl = parsed.protocol === 'gs:'
+    ? `gs://${parsed.hostname}${parsed.pathname}`
+    : parsed.origin + parsed.pathname;
+  const explicitMime = _normalizeMimeType(mimeType);
+  const inferredMime = explicitMime || _mimeFromUrl(safeUrl);
+  if (explicitMime && !_isSupportedImageMime(explicitMime)) return null;
+  return {
+    url: safeUrl,
+    url_sha256: _hashUrl(url),
+    mime_type: inferredMime,
+    byte_count_estimate: 0,
+    source: parsed.protocol === 'gs:' ? 'gcs' : 'url',
+  };
+}
+
+function _normalizeBase64Image(mimeValue, payloadValue) {
+  const mime = _normalizeMimeType(mimeValue || 'application/octet-stream');
+  if (!_isSupportedImageMime(mime)) return null;
+  if (typeof payloadValue !== 'string') return null;
+  const payload = payloadValue;
+  if (/[\u0000-\u001f\u007f]/.test(payload)) return null;
+  const padding = (payload.match(/=+$/) || [''])[0].length;
+  const byteEst = Math.max(0, Math.floor(payload.length * 3 / 4) - padding);
+  return {
+    url: null,
+    mime_type: mime,
+    byte_count_estimate: Math.min(byteEst, MAX_IMAGE_BYTE_ESTIMATE),
+    source: 'base64',
+    content_sha256: _sha256Hex(payload),
+  };
 }
 
 // Classify the image MIME into a coarse "kind" bucket used by the bakeoff
@@ -154,19 +317,50 @@ export function detectVisionCapture(message) {
     image_url_blocks: [],
     base64_blocks: [],
     total_images: 0,
+    total_image_blocks_detected: 0,
+    contract_version: VISION_CAPTURE_CONTRACT_VERSION,
   };
   if (!message || typeof message !== 'object') return empty;
   const content = message.content;
   // Text-only message - either a plain string or no content field at all.
   // We don't need to dig further; report honestly.
   if (content == null) return empty;
-  if (typeof content === 'string') return empty;
+  if (typeof content === 'string') {
+    const m = content
+      .slice(0, VISION_CAPTURE_LIMITS.max_inline_scan_chars)
+      .match(/data:(image\/[a-z0-9.+-]+);base64,/i);
+    if (!m) return empty;
+    return {
+      is_vision: true,
+      image_url_blocks: [],
+      base64_blocks: [{
+        type: 'image_url',
+        image_url: { url: `data:${m[1].toLowerCase()};base64,` },
+      }],
+      total_images: 1,
+      total_image_blocks_detected: 1,
+      contract_version: VISION_CAPTURE_CONTRACT_VERSION,
+    };
+  }
   if (!Array.isArray(content)) return empty;
 
   const urlBlocks = [];
   const base64Blocks = [];
-  for (const block of content) {
+  let totalDetected = 0;
+  for (const block of content.slice(0, VISION_CAPTURE_LIMITS.max_message_blocks)) {
     if (!block || typeof block !== 'object') continue;
+    const pushUrl = () => {
+      totalDetected += 1;
+      if ((urlBlocks.length + base64Blocks.length) < VISION_CAPTURE_LIMITS.max_image_blocks) {
+        urlBlocks.push(block);
+      }
+    };
+    const pushBase64 = () => {
+      totalDetected += 1;
+      if ((urlBlocks.length + base64Blocks.length) < VISION_CAPTURE_LIMITS.max_image_blocks) {
+        base64Blocks.push(block);
+      }
+    };
 
     // OpenAI / OpenRouter shape: { type: 'image_url', image_url: { url: '...', detail: '...' } }
     // We accept the url field as either a plain HTTPS URL or a data: URL.
@@ -176,13 +370,13 @@ export function detectVisionCapture(message) {
         : (typeof block.image_url === 'string' ? block.image_url : null);
       if (url) {
         if (url.startsWith('data:')) {
-          base64Blocks.push(block);
+          pushBase64();
         } else {
-          urlBlocks.push(block);
+          pushUrl();
         }
       } else {
         // type:image_url but missing url field - honest data, just report it.
-        urlBlocks.push(block);
+        pushUrl();
       }
       continue;
     }
@@ -192,12 +386,12 @@ export function detectVisionCapture(message) {
       const source = (block.source && typeof block.source === 'object') ? block.source : null;
       const srcType = source ? source.type : null;
       if (srcType === 'base64') {
-        base64Blocks.push(block);
+        pushBase64();
       } else if (srcType === 'url') {
-        urlBlocks.push(block);
+        pushUrl();
       } else {
         // Unknown source type - default to url bucket so it's still surfaced.
-        urlBlocks.push(block);
+        pushUrl();
       }
       continue;
     }
@@ -205,11 +399,11 @@ export function detectVisionCapture(message) {
     // Google Gemini / Vertex shape: { fileData: { mimeType, fileUri } }
     // or { inlineData: { mimeType, data: '<base64>' } }
     if (block.fileData && typeof block.fileData === 'object') {
-      urlBlocks.push(block);
+      pushUrl();
       continue;
     }
     if (block.inlineData && typeof block.inlineData === 'object') {
-      base64Blocks.push(block);
+      pushBase64();
       continue;
     }
   }
@@ -220,6 +414,8 @@ export function detectVisionCapture(message) {
     image_url_blocks: urlBlocks,
     base64_blocks: base64Blocks,
     total_images: total,
+    total_image_blocks_detected: totalDetected,
+    contract_version: VISION_CAPTURE_CONTRACT_VERSION,
   };
 }
 
@@ -240,12 +436,9 @@ export function detectVisionCapture(message) {
 //   { ok: false, error: 'invalid_image_block', hint: '...', version: 'w771-v1' }
 export function normalizeImageBlock(block, opts = {}) {
   if (!block || typeof block !== 'object') {
-    return {
-      ok: false,
-      error: 'invalid_image_block',
+    return _errorEnvelope('invalid_image_block', 'block_not_object', {
       hint: 'block must be a non-null object',
-      version: VISION_CAPTURE_VERSION,
-    };
+    });
   }
   const _ = opts; // reserved for future shape options (e.g. strict_mime_validation)
 
@@ -255,38 +448,26 @@ export function normalizeImageBlock(block, opts = {}) {
       ? (typeof block.image_url.url === 'string' ? block.image_url.url : null)
       : (typeof block.image_url === 'string' ? block.image_url : null);
     if (!url) {
-      return {
-        ok: false,
-        error: 'invalid_image_block',
+      return _errorEnvelope('invalid_image_block', 'missing_image_url', {
         hint: 'image_url block missing url field',
-        version: VISION_CAPTURE_VERSION,
-      };
+      });
     }
-    if (url.startsWith('data:')) {
-      const parsed = _parseDataUrl(url);
-      if (!parsed) {
-        return {
-          ok: false,
-          error: 'invalid_image_block',
-          hint: 'data URL did not parse to data:<mime>[;base64],<payload>',
-          version: VISION_CAPTURE_VERSION,
-        };
-      }
-      return {
-        ok: true,
-        url: null,
-        mime_type: parsed.mime_type,
-        byte_count_estimate: parsed.byte_count_estimate,
-        source: 'base64',
-      };
+    const safeUrl = _safeUrlForEnvelope(url);
+    if (!safeUrl) {
+      return _errorEnvelope('invalid_image_url', 'unsafe_or_unsupported_image_url', {
+        hint: 'image URL must be http(s), gs://, or supported data:image/* without credentials or control characters',
+      });
     }
-    // Plain URL.
     return {
       ok: true,
-      url,
-      mime_type: null,
-      byte_count_estimate: 0,
-      source: 'url',
+      url: safeUrl.url,
+      url_sha256: safeUrl.url_sha256,
+      content_sha256: safeUrl.content_sha256 || null,
+      mime_type: safeUrl.mime_type,
+      byte_count_estimate: safeUrl.byte_count_estimate,
+      source: safeUrl.source,
+      version: VISION_CAPTURE_VERSION,
+      contract_version: VISION_CAPTURE_CONTRACT_VERSION,
     };
   }
 
@@ -294,52 +475,61 @@ export function normalizeImageBlock(block, opts = {}) {
   if (block.type === 'image') {
     const source = (block.source && typeof block.source === 'object') ? block.source : null;
     if (!source) {
-      return {
-        ok: false,
-        error: 'invalid_image_block',
+      return _errorEnvelope('invalid_image_block', 'missing_anthropic_source', {
         hint: 'anthropic image block missing source field',
-        version: VISION_CAPTURE_VERSION,
-      };
+      });
     }
     if (source.type === 'base64') {
-      // source.data is the raw base64 payload, source.media_type the MIME.
-      const mime = (typeof source.media_type === 'string' ? source.media_type : 'application/octet-stream').toLowerCase();
-      const payload = typeof source.data === 'string' ? source.data : '';
-      const padding = (payload.match(/=+$/) || [''])[0].length;
-      const byteEst = Math.max(0, Math.floor(payload.length * 3 / 4) - padding);
+      const normalized = _normalizeBase64Image(source.media_type, source.data);
+      if (!normalized) {
+        return _errorEnvelope('invalid_image_block', 'unsupported_or_missing_base64_image', {
+          hint: 'base64 image blocks require a supported image MIME and string data',
+        });
+      }
       return {
         ok: true,
-        url: null,
-        mime_type: mime,
-        byte_count_estimate: Math.min(byteEst, MAX_IMAGE_BYTE_ESTIMATE),
-        source: 'base64',
+        ...normalized,
+        url_sha256: null,
+        version: VISION_CAPTURE_VERSION,
+        contract_version: VISION_CAPTURE_CONTRACT_VERSION,
       };
     }
     if (source.type === 'url') {
       const url = typeof source.url === 'string' ? source.url : null;
       if (!url) {
-        return {
-          ok: false,
-          error: 'invalid_image_block',
+        return _errorEnvelope('invalid_image_block', 'missing_anthropic_source_url', {
           hint: 'anthropic image block source.url missing',
-          version: VISION_CAPTURE_VERSION,
-        };
+        });
+      }
+      const safeUrl = _safeUrlForEnvelope(url, source.media_type);
+      if (!safeUrl) {
+        return _errorEnvelope('invalid_image_url', 'unsafe_or_unsupported_anthropic_url', {
+          hint: 'anthropic source.url must be http(s) or gs:// without credentials and with a supported image MIME when provided',
+        });
       }
       return {
         ok: true,
-        url,
-        mime_type: (typeof source.media_type === 'string' ? source.media_type.toLowerCase() : null),
-        byte_count_estimate: 0,
-        source: 'url',
+        url: safeUrl.url,
+        url_sha256: safeUrl.url_sha256,
+        content_sha256: null,
+        mime_type: safeUrl.mime_type,
+        byte_count_estimate: safeUrl.byte_count_estimate,
+        source: safeUrl.source,
+        version: VISION_CAPTURE_VERSION,
+        contract_version: VISION_CAPTURE_CONTRACT_VERSION,
       };
     }
     // Unknown source type.
     return {
       ok: true,
       url: null,
+      url_sha256: null,
+      content_sha256: null,
       mime_type: null,
       byte_count_estimate: 0,
       source: 'unknown',
+      version: VISION_CAPTURE_VERSION,
+      contract_version: VISION_CAPTURE_CONTRACT_VERSION,
     };
   }
 
@@ -347,46 +537,51 @@ export function normalizeImageBlock(block, opts = {}) {
   if (block.fileData && typeof block.fileData === 'object') {
     const uri = typeof block.fileData.fileUri === 'string' ? block.fileData.fileUri : null;
     if (!uri) {
-      return {
-        ok: false,
-        error: 'invalid_image_block',
+      return _errorEnvelope('invalid_image_block', 'missing_google_file_uri', {
         hint: 'google fileData block missing fileUri',
-        version: VISION_CAPTURE_VERSION,
-      };
+      });
     }
-    const isGcs = uri.startsWith('gs://');
+    const safeUrl = _safeUrlForEnvelope(uri, block.fileData.mimeType);
+    if (!safeUrl) {
+      return _errorEnvelope('invalid_image_url', 'unsafe_or_unsupported_google_file_uri', {
+        hint: 'google fileData.fileUri must be http(s) or gs:// without credentials and with a supported image MIME when provided',
+      });
+    }
     return {
       ok: true,
-      url: uri,
-      mime_type: (typeof block.fileData.mimeType === 'string' ? block.fileData.mimeType.toLowerCase() : null),
-      byte_count_estimate: 0,
-      source: isGcs ? 'gcs' : 'url',
+      url: safeUrl.url,
+      url_sha256: safeUrl.url_sha256,
+      content_sha256: null,
+      mime_type: safeUrl.mime_type,
+      byte_count_estimate: safeUrl.byte_count_estimate,
+      source: safeUrl.source,
+      version: VISION_CAPTURE_VERSION,
+      contract_version: VISION_CAPTURE_CONTRACT_VERSION,
     };
   }
 
   // Google inlineData (base64)
   if (block.inlineData && typeof block.inlineData === 'object') {
-    const mime = (typeof block.inlineData.mimeType === 'string' ? block.inlineData.mimeType : 'application/octet-stream').toLowerCase();
-    const payload = typeof block.inlineData.data === 'string' ? block.inlineData.data : '';
-    const padding = (payload.match(/=+$/) || [''])[0].length;
-    const byteEst = Math.max(0, Math.floor(payload.length * 3 / 4) - padding);
+    const normalized = _normalizeBase64Image(block.inlineData.mimeType, block.inlineData.data);
+    if (!normalized) {
+      return _errorEnvelope('invalid_image_block', 'unsupported_or_missing_inline_image', {
+        hint: 'google inlineData requires a supported image MIME and string data',
+      });
+    }
     return {
       ok: true,
-      url: null,
-      mime_type: mime,
-      byte_count_estimate: Math.min(byteEst, MAX_IMAGE_BYTE_ESTIMATE),
-      source: 'base64',
+      ...normalized,
+      url_sha256: null,
+      version: VISION_CAPTURE_VERSION,
+      contract_version: VISION_CAPTURE_CONTRACT_VERSION,
     };
   }
 
   // Honest envelope on any other shape - we recognize image blocks by the
   // exact three shapes above; everything else is "not an image block we know".
-  return {
-    ok: false,
-    error: 'invalid_image_block',
+  return _errorEnvelope('invalid_image_block', 'unknown_image_block_shape', {
     hint: 'block did not match OpenAI image_url, Anthropic image, or Google fileData/inlineData shape',
-    version: VISION_CAPTURE_VERSION,
-  };
+  });
 }
 
 // =============================================================================
@@ -406,84 +601,102 @@ export async function captureVisionMessage({
   response = null,
   opts = {},
 } = {}) {
-  if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_id_required',
-      hint: 'pass {tenant_id: "<id>"}. Vision capture is tenant-scoped.',
-      version: VISION_CAPTURE_VERSION,
-    };
+  const normalizedTenantId = _normalizeTenantId(tenant_id);
+  if (!normalizedTenantId) {
+    return _errorEnvelope('tenant_id_required', 'invalid_tenant_id', {
+      hint: 'pass a bounded tenant_id. Vision capture is tenant-scoped.',
+    });
+  }
+  const normalizedNamespace = _normalizeNamespace(namespace);
+  if (!normalizedNamespace) {
+    return _errorEnvelope('invalid_namespace', 'invalid_namespace', {
+      hint: 'namespace may contain letters, numbers, dot, underscore, dash, colon, at, and slash only',
+    });
   }
   if (!Array.isArray(messages)) {
-    return {
-      ok: false,
-      error: 'messages_must_be_array',
+    return _errorEnvelope('messages_must_be_array', 'messages_must_be_array', {
       hint: 'pass {messages: [...]}; one chat message per array entry',
-      version: VISION_CAPTURE_VERSION,
-    };
+    });
   }
   // Walk every message; aggregate the vision blocks across the whole turn.
   // The last assistant turn may carry its own image-output too (rare today,
   // but Anthropic's vision-out roadmap supports it) - we treat assistant
   // turns the same as user turns for the detect path.
-  let totalImages = 0;
-  const allUrls = [];
-  const allBase64 = [];
-  for (const msg of messages) {
+  let totalImageBlocksDetected = 0;
+  const allBlocks = [];
+  for (const msg of messages.slice(0, VISION_CAPTURE_LIMITS.max_messages)) {
     const det = detectVisionCapture(msg);
     if (!det.is_vision) continue;
-    totalImages += det.total_images;
-    for (const b of det.image_url_blocks) allUrls.push(b);
-    for (const b of det.base64_blocks) allBase64.push(b);
+    totalImageBlocksDetected += Number(det.total_image_blocks_detected || det.total_images || 0);
+    for (const b of det.image_url_blocks) {
+      if (allBlocks.length < VISION_CAPTURE_LIMITS.max_image_blocks) allBlocks.push(b);
+    }
+    for (const b of det.base64_blocks) {
+      if (allBlocks.length < VISION_CAPTURE_LIMITS.max_image_blocks) allBlocks.push(b);
+    }
   }
 
-  // Hash each URL block; for base64 blocks, hash a stable token derived
-  // from (mime, byte_count_estimate) so the row is still dedupable across
-  // runs without ever ingesting the raw payload bytes.
-  const hashed = [];
-  for (const block of allUrls) {
-    const norm = normalizeImageBlock(block);
-    if (!norm.ok) continue;
-    if (norm.url) hashed.push(_hashUrl(norm.url));
+  if (allBlocks.length === 0) {
+    return {
+      ok: true,
+      captured: false,
+      has_vision: false,
+      vision_block_count: 0,
+      total_image_blocks_detected: totalImageBlocksDetected,
+      version: VISION_CAPTURE_VERSION,
+      contract_version: VISION_CAPTURE_CONTRACT_VERSION,
+    };
   }
-  for (const block of allBase64) {
+
+  const normalizedBlocks = [];
+  let invalidImageBlockCount = 0;
+  for (const block of allBlocks) {
     const norm = normalizeImageBlock(block);
-    if (!norm.ok) continue;
-    // For base64 we hash a stable descriptor so dedup still works without
-    // touching the payload. The dedup token is (mime + estimate + source).
-    hashed.push(_hashUrl(
-      'b64:' + (norm.mime_type || 'unknown') + ':' + String(norm.byte_count_estimate)
-    ));
+    if (!norm.ok) {
+      invalidImageBlockCount += 1;
+      continue;
+    }
+    normalizedBlocks.push(norm);
+  }
+
+  if (normalizedBlocks.length === 0) {
+    return _errorEnvelope('no_valid_image_blocks', 'no_valid_image_blocks', {
+      total_image_blocks_detected: totalImageBlocksDetected,
+      invalid_image_block_count: invalidImageBlockCount,
+    });
   }
 
   // Build the canonical capture row. NEVER include raw image bytes - 
   // only the URL strings (if URL-sourced) and the hash digests. The
   // tests verify the persisted row to confirm this invariant holds.
+  const responseText = typeof response === 'string'
+    ? response
+    : ((response && typeof response.text === 'string') ? response.text : null);
+  const imageUrls = normalizedBlocks.map((n) => n.url).filter((u) => u != null);
+  const imageHashes = normalizedBlocks
+    .map((n) => n.url_sha256 || n.content_sha256 || null)
+    .filter((h) => h != null);
   const captureRow = {
     id: 'vcap_' + crypto.randomBytes(8).toString('hex'),
-    tenant: tenant_id,
-    tenant_id, // both keys so W411 defense-in-depth fences fire either way
-    corpus_namespace: namespace,
+    tenant: normalizedTenantId,
+    tenant_id: normalizedTenantId, // both keys so W411 defense-in-depth fences fire either way
+    corpus_namespace: normalizedNamespace,
     has_vision: true,
-    vision_block_count: totalImages,
-    vision_block_count_url: allUrls.length,
-    vision_block_count_base64: allBase64.length,
+    vision_block_count: normalizedBlocks.length,
+    total_image_blocks_detected: totalImageBlocksDetected,
+    invalid_image_block_count: invalidImageBlockCount,
+    truncated_image_block_count: Math.max(0, totalImageBlocksDetected - allBlocks.length),
+    vision_block_count_url: normalizedBlocks.filter((n) => n.url).length,
+    vision_block_count_base64: normalizedBlocks.filter((n) => n.source === 'base64').length,
     // Only URL strings + hashes go on the row. Raw image bytes are
     // EXPLICITLY DROPPED here. See the test at #10.
-    image_urls: allUrls.map((b) => {
-      const n = normalizeImageBlock(b);
-      return (n.ok && n.url) ? n.url : null;
-    }).filter((u) => u != null),
-    image_urls_hashed: hashed.filter((h) => h != null),
-    image_kinds: allUrls.concat(allBase64).map((b) => {
-      const n = normalizeImageBlock(b);
-      return n.ok ? _kindFromMime(n.mime_type) : 'other';
-    }),
-    response_text: (response && typeof response.text === 'string')
-      ? response.text.slice(0, 16000)
-      : null,
+    image_urls: imageUrls,
+    image_urls_hashed: imageHashes,
+    image_kinds: normalizedBlocks.map((n) => _kindFromMime(n.mime_type)),
+    response_text: _cleanLooseText(responseText, VISION_CAPTURE_LIMITS.max_response_text_chars),
     created_at: new Date().toISOString(),
     version: VISION_CAPTURE_VERSION,
+    contract_version: VISION_CAPTURE_CONTRACT_VERSION,
   };
 
   // Persist via injected storeMod when present, fall back to capture-store.
@@ -494,12 +707,9 @@ export async function captureVisionMessage({
     try {
       await storeMod.insertCapture(captureRow);
     } catch (e) {
-      return {
-        ok: false,
-        error: 'persist_failed',
-        hint: String(e && e.message || e),
-        version: VISION_CAPTURE_VERSION,
-      };
+      return _errorEnvelope('persist_failed', String(e && e.message || e || 'persist_failed'), {
+        hint: 'capture store insert failed',
+      });
     }
   }
   // When opts.storeMod is absent we deliberately do NOT silently auto-bind
@@ -512,10 +722,13 @@ export async function captureVisionMessage({
     captured: true,
     capture_id: captureRow.id,
     has_vision: true,
-    vision_block_count: totalImages,
+    vision_block_count: captureRow.vision_block_count,
+    total_image_blocks_detected: totalImageBlocksDetected,
+    invalid_image_block_count: invalidImageBlockCount,
     image_urls_hashed: captureRow.image_urls_hashed,
     persisted_row: captureRow,
     version: VISION_CAPTURE_VERSION,
+    contract_version: VISION_CAPTURE_CONTRACT_VERSION,
   };
 }
 
@@ -528,42 +741,75 @@ export async function captureVisionMessage({
 // store.all() read. Audit-export uses the same pattern - we copy it here
 // so future schema changes can't silently flip "no leak" to "all leak".
 // =============================================================================
+function _sanitizeCaptureRowForList(row) {
+  const safeUrls = Array.isArray(row.image_urls)
+    ? row.image_urls.map((u) => _safeUrlForEnvelope(u)).filter((u) => u && u.url).map((u) => u.url)
+    : [];
+  const hashes = Array.isArray(row.image_urls_hashed)
+    ? row.image_urls_hashed.filter((h) => typeof h === 'string' && /^[a-f0-9]{24,64}$/i.test(h))
+    : [];
+  return {
+    id: _cleanStrictText(row.id, 96),
+    tenant_id: _normalizeTenantId(row.tenant_id || row.tenant),
+    corpus_namespace: _normalizeNamespace(row.corpus_namespace),
+    has_vision: row.has_vision === true,
+    vision_block_count: Math.max(0, Math.min(Number(row.vision_block_count) || 0, VISION_CAPTURE_LIMITS.max_image_blocks)),
+    vision_block_count_url: Math.max(0, Math.min(Number(row.vision_block_count_url) || safeUrls.length, VISION_CAPTURE_LIMITS.max_image_blocks)),
+    vision_block_count_base64: Math.max(0, Math.min(Number(row.vision_block_count_base64) || 0, VISION_CAPTURE_LIMITS.max_image_blocks)),
+    image_urls: safeUrls,
+    image_urls_hashed: hashes,
+    image_kinds: Array.isArray(row.image_kinds)
+      ? row.image_kinds.slice(0, VISION_CAPTURE_LIMITS.max_image_blocks).map((k) => (
+        ['photo', 'screenshot', 'diagram', 'chart', 'other'].includes(k) ? k : _kindFromMime(k)
+      ))
+      : [],
+    response_text: _cleanLooseText(row.response_text, VISION_CAPTURE_LIMITS.max_response_text_chars),
+    created_at: _cleanStrictText(row.created_at, 64),
+    version: _cleanStrictText(row.version, 32) || VISION_CAPTURE_VERSION,
+    contract_version: _cleanStrictText(row.contract_version, 64) || VISION_CAPTURE_CONTRACT_VERSION,
+  };
+}
+
 export function listVisionCaptures({
   tenant_id,
   namespace = null,
   limit = 100,
   opts = {},
 } = {}) {
-  if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_id_required',
-      version: VISION_CAPTURE_VERSION,
-    };
+  const normalizedTenantId = _normalizeTenantId(tenant_id);
+  if (!normalizedTenantId) {
+    return _errorEnvelope('tenant_id_required', 'invalid_tenant_id');
+  }
+  const normalizedNamespace = namespace == null || namespace === ''
+    ? null
+    : _normalizeNamespace(namespace);
+  if (namespace != null && namespace !== '' && !normalizedNamespace) {
+    return _errorEnvelope('invalid_namespace', 'invalid_namespace');
   }
   const storeMod = (opts && opts.storeMod) || null;
   const all = (storeMod && typeof storeMod.all === 'function') ? storeMod.all : null;
   if (!all) {
     return {
       ok: true,
-      tenant_id,
-      namespace,
+      tenant_id: normalizedTenantId,
+      namespace: normalizedNamespace,
       count: 0,
       captures: [],
       version: VISION_CAPTURE_VERSION,
+      contract_version: VISION_CAPTURE_CONTRACT_VERSION,
       hint: 'no storeMod wired; pass opts.storeMod to read persisted captures',
     };
   }
-  const rawRows = all('observations') || [];
+  const rawRows = (all('observations') || []).slice(0, VISION_CAPTURE_LIMITS.max_store_rows_scanned);
   // W411: per-row tenant filter even after the all() read. We tolerate
   // tenant being on either `tenant` or `tenant_id` because the canonical
   // observations table uses `tenant` (see daemon-connector.js:675) while
   // the vision capture row stamps both for fence resilience.
   const tenantRows = rawRows.filter((r) =>
-    r && (r.tenant === tenant_id || r.tenant_id === tenant_id));
+    r && (r.tenant === normalizedTenantId || r.tenant_id === normalizedTenantId));
   const visionRows = tenantRows.filter((r) => r && r.has_vision === true);
-  const nsFiltered = namespace
-    ? visionRows.filter((r) => r && r.corpus_namespace === namespace)
+  const nsFiltered = normalizedNamespace
+    ? visionRows.filter((r) => r && r.corpus_namespace === normalizedNamespace)
     : visionRows;
   // Most-recent-first by created_at (string ISO compare is fine for our
   // 24-hex-char-prefix timestamps; the stamp guarantees lexicographic order).
@@ -572,14 +818,15 @@ export function listVisionCaptures({
     const tb = String(b.created_at || '');
     return tb.localeCompare(ta);
   });
-  const cap = Math.max(1, Math.min(Number(limit) || 100, 1000));
+  const cap = Math.max(1, Math.min(Number(limit) || 100, VISION_CAPTURE_LIMITS.max_list_limit));
   return {
     ok: true,
-    tenant_id,
-    namespace,
+    tenant_id: normalizedTenantId,
+    namespace: normalizedNamespace,
     count: sorted.length,
-    captures: sorted.slice(0, cap),
+    captures: sorted.slice(0, cap).map((row) => _sanitizeCaptureRowForList(row)),
     limit: cap,
     version: VISION_CAPTURE_VERSION,
+    contract_version: VISION_CAPTURE_CONTRACT_VERSION,
   };
 }

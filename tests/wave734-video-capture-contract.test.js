@@ -45,7 +45,7 @@ test('W734 video capture is wired into direct depth verification', () => {
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:video-bakeoff && npm run verify:video-capture && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:video-bakeoff && npm run verify:video-capture && npm run verify:vision-capture && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /VIDEO_CAPTURE_LIMITS/);
   assert.match(source, /_safeUrlForEnvelope/);
