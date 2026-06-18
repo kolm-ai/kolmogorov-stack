@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 93,
-    "frontier_product_score": 69.7,
+    "local_engineering_score": 93.1,
+    "frontier_product_score": 69.8,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 714,
-    "direct_test_reference_pct": 86.1,
-    "components_without_direct_test_reference": 115,
+    "direct_test_referenced_components": 715,
+    "direct_test_reference_pct": 86.2,
+    "components_without_direct_test_reference": 114,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -7058,15 +7058,15 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 4800,
-          "lines": 141,
-          "imports": 4,
-          "exports": 5,
+          "bytes": 13109,
+          "lines": 361,
+          "imports": 1,
+          "exports": 10,
           "routes": 0,
-          "env_refs": 2,
+          "env_refs": 3,
           "fs_writes": 0,
-          "subprocess_refs": 3,
-          "network_refs": 2,
+          "subprocess_refs": 5,
+          "network_refs": 1,
           "crypto_refs": 0,
           "markers": 0
         },
@@ -7075,9 +7075,9 @@
           "execution_or_subprocess_boundary",
           "network_or_provider_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "d85d006c26bc9ae87e08624f63fe7d8f2ed2373324929bc242248c0a909d702b"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "db55f20eb85833565caf5c879d30f5be21c71a133f5ab6ab4e2d6b185509064a"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -7085,18 +7085,18 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave694-qmd-index-adapter-contract.test.js"
+        ],
         "category_links": [],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
         "suggested_verification": [
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "services/mcp/server.js",

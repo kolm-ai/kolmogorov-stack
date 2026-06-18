@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 714,
-    "components_without_direct_test_reference": 115,
+    "test_referenced_components": 715,
+    "components_without_direct_test_reference": 114,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -6595,27 +6595,29 @@
       "surface": "service",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "d85d006c26bc9ae87e08624f63fe7d8f2ed2373324929bc242248c0a909d702b",
+      "sha256": "db55f20eb85833565caf5c879d30f5be21c71a133f5ab6ab4e2d6b185509064a",
       "metrics": {
-        "bytes": 4800,
-        "lines": 141,
-        "imports": 4,
-        "exports": 5,
+        "bytes": 13109,
+        "lines": 361,
+        "imports": 1,
+        "exports": 10,
         "routes": 0,
-        "env_refs": 2,
+        "env_refs": 3,
         "fs_writes": 0,
-        "subprocess_refs": 3,
-        "network_refs": 2,
+        "subprocess_refs": 5,
+        "network_refs": 1,
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave694-qmd-index-adapter-contract.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -6640,7 +6642,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
       "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
       "suggested_verification": [
         "npm run verify:codegraph"
