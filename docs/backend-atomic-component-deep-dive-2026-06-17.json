@@ -42,7 +42,7 @@
     "component_count": 968,
     "test_referenced_components": 968,
     "components_without_direct_test_reference": 0,
-    "high_priority_components": 64,
+    "high_priority_components": 65,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -72,7 +72,7 @@
       "environment_configuration_boundary": 367,
       "execution_or_subprocess_boundary": 312,
       "http_route_surface": 41,
-      "large_component_contract_risk": 42,
+      "large_component_contract_risk": 43,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 171,
       "open_marker_requires_owner_review": 9,
@@ -323,6 +323,19 @@
         "improvement_track": "maintain_generated_tui_workbench_matrix_and_cli_distribution_contract"
       },
       {
+        "path": "workers/distill/scripts/train_lora.py",
+        "domain": "training_model_optimization",
+        "priority_score": 9,
+        "risk_signals": [
+          "distribution_or_worker_surface",
+          "environment_configuration_boundary",
+          "execution_or_subprocess_boundary",
+          "http_route_surface",
+          "large_component_contract_risk"
+        ],
+        "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+      },
+      {
         "path": "apps/trainer/multinode_launch.py",
         "domain": "training_model_optimization",
         "priority_score": 9,
@@ -460,18 +473,6 @@
           "network_or_provider_boundary"
         ],
         "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests"
-      },
-      {
-        "path": "src/marketplace.js",
-        "domain": "billing_marketplace",
-        "priority_score": 8,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "large_component_contract_risk",
-          "money_or_entitlement_path",
-          "stateful_storage_boundary"
-        ],
-        "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof"
       }
     ]
   },
@@ -23010,10 +23011,10 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "2cb69437afcafc736093a7ee3dd6518f8c9eb7d3faaed4efe67a411b32d60fb4",
+      "sha256": "be0713a6cb7e5624684940bc4da81f290cef8283253746e1e7a9e6d3ff005e58",
       "metrics": {
-        "bytes": 33689,
-        "lines": 830,
+        "bytes": 34840,
+        "lines": 854,
         "imports": 10,
         "exports": 6,
         "routes": 0,
@@ -30055,10 +30056,10 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "34ea6bc99d6bc0e889c43321b11f442ed315a9c262c038c7541b935f27643ea5",
+      "sha256": "ed76e0093d0a4b0bd25d81ac73ac9b55074a18fa2c6ebba377acef00fbc3ffe7",
       "metrics": {
-        "bytes": 77446,
-        "lines": 1575,
+        "bytes": 78936,
+        "lines": 1609,
         "imports": 18,
         "exports": 20,
         "routes": 0,
@@ -57786,10 +57787,10 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "2d7972bfc972f5d1d477b46bb948eab21e9645f21640c647813d867c3f3a70f5",
+      "sha256": "5ba9d1cf020927cd8cd779e505355adce54246bb26f79b6b926c0c9a7a1bdfad",
       "metrics": {
-        "bytes": 34714,
-        "lines": 726,
+        "bytes": 36325,
+        "lines": 763,
         "imports": 10,
         "exports": 0,
         "routes": 0,
@@ -58867,12 +58868,12 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "python",
-      "sha256": "7f3e28d07119bac475215a0c758a0304edd01662659a444eb9a2b8a858dcdb1b",
+      "sha256": "23482fef4b105f9e5e8e6d9cdfeb5d97d40a3a11980aedf9e50b54e0acf377bf",
       "metrics": {
-        "bytes": 39833,
-        "lines": 867,
+        "bytes": 47060,
+        "lines": 1031,
         "imports": 0,
-        "exports": 21,
+        "exports": 24,
         "routes": 1,
         "env_refs": 17,
         "fs_writes": 0,
@@ -58891,9 +58892,10 @@
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
-        "http_route_surface"
+        "http_route_surface",
+        "large_component_contract_risk"
       ],
-      "priority_score": 6,
+      "priority_score": 9,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

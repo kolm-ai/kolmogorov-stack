@@ -11,7 +11,7 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 - Atomic components inventoried: **968**
 - Atomic deep dives complete: **100%**
 - Direct test referenced: **968/968 (100%)**
-- High-priority direct test referenced: **64/64 (100%)**
+- High-priority direct test referenced: **65/65 (100%)**
 - Local readiness proof coverage: **57/57 (100%)**
 - Claimable readiness closed locally: **49/57 (86%)**
 - Readiness proof surplus hill-climb: **104.3/110**
@@ -32,7 +32,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | speculative-decoding | runtime | sota_review_complete_major_frontier_work_open | at=8 open=0/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | finetune-frameworks | training | sota_review_complete_major_frontier_work_open | at=10 open=0/1/4 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | synthetic-data-curation | data | sota_review_complete_major_frontier_work_open | at=8 open=0/3/1 | 3 | npm run verify:stack-sota<br>npm run verify:redaction-benchmark |
-| small-llm-students | model-registry | sota_review_complete_critical_frontier_work_open | at=7 open=1/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
+| small-llm-students | model-registry | sota_review_complete_critical_frontier_work_open | at=8 open=1/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | ondevice-inference | cross-device | sota_review_complete_major_frontier_work_open | at=6 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:platform |
 | llm-routing | gateway | sota_review_complete_major_frontier_work_open | at=7 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_major_frontier_work_open | at=11 open=0/1/2 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |

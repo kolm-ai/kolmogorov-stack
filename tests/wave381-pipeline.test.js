@@ -146,6 +146,70 @@ test('W381 #1 — trainTokenizer.deterministic_hash reproducible (same corpus+se
   }
 });
 
+test('W961 distill passes eval-only holdout to worker without adding training seeds', async () => {
+  const tmp = _mkTmp('w961-holdout');
+  const saved = _snapEnv();
+  try {
+    _setEnv(tmp);
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    delete process.env.KOLM_DISTILL_TEACHER;
+    delete process.env.KOLM_DISTILL_FULL;
+    const fakeWorker = path.join(tmp, 'fake-distill-worker.mjs');
+    fs.writeFileSync(fakeWorker, `
+import fs from 'node:fs';
+import path from 'node:path';
+const args = {};
+for (const raw of process.argv.slice(2)) {
+  const m = /^--([^=]+)=(.*)$/.exec(raw);
+  if (m) args[m[1]] = m[2];
+  else if (raw.startsWith('--')) args[raw.slice(2)] = true;
+}
+const readRows = (p) => fs.readFileSync(p, 'utf8').trim().split(/\\r?\\n/).filter(Boolean).map((line) => JSON.parse(line));
+const seeds = readRows(args.seeds);
+const holdout = args['student-holdout'] ? readRows(args['student-holdout']) : [];
+fs.mkdirSync(args.out, { recursive: true });
+fs.writeFileSync(path.join(args.out, 'manifest.json'), JSON.stringify({
+  worker: 'fake-w961-worker',
+  mode: args.mode,
+  ml_pipeline_run: false,
+  training_pairs_collected: seeds.length,
+  student_holdout_arg_seen: !!args['student-holdout'],
+  student_holdout_rows_seen: holdout.length,
+  seed_inputs: seeds.map((s) => s.input),
+  holdout_inputs: holdout.map((h) => h.input),
+}, null, 2));
+`);
+    const { distill } = await import('../src/distill-pipeline.js');
+    let doneEv = null;
+    for await (const ev of distill({
+      student_base: 'qwen-0.5b',
+      pairs_override: [
+        { event_id: 'train_a', prompt: 'train a', response: 'out a' },
+        { event_id: 'train_b', prompt: 'train b', response: 'out b' },
+      ],
+      holdout_override: [
+        { event_id: 'holdout_a', prompt: 'holdout a', response: 'out holdout' },
+      ],
+      worker_cmd: fakeWorker,
+      max_steps: 2,
+      emit_progress_every: 0,
+    })) {
+      if (ev.done) { doneEv = ev; break; }
+    }
+    assert.ok(doneEv, 'distill must yield done');
+    assert.equal(doneEv.holdout_eval_count, 1);
+    assert.equal(doneEv.manifest.student_holdout_arg_seen, true);
+    assert.equal(doneEv.manifest.student_holdout_rows_seen, 1);
+    assert.deepEqual(doneEv.manifest.seed_inputs, ['train a', 'train b']);
+    assert.deepEqual(doneEv.manifest.holdout_inputs, ['holdout a']);
+    assert.equal(doneEv.manifest.seed_inputs.includes('holdout a'), false,
+      'holdout rows must never be staged as training seeds');
+  } finally {
+    _restoreEnv(saved);
+  }
+});
+
 // ---------------------------------------------------------------------------
 // #2 — trainTokenizer respects vocab_size cap (final ≤ requested).
 test('W381 #2 — trainTokenizer respects vocab_size cap', async () => {

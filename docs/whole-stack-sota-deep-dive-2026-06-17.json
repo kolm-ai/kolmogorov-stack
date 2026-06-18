@@ -209,10 +209,10 @@
       "status": "sota_review_complete_local_frontier_aligned",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 160
+        "line": 161
       },
       "local_sota_review": {
-        "line": 160,
+        "line": 161,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 12,
@@ -421,6 +421,24 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "workers/distill/scripts/train_lora.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave921-trainer-unification.test.js",
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "workers/distill/scripts/train_preference.py",
             "domain": "training_model_optimization",
             "priority_score": 9,
@@ -537,22 +555,6 @@
               "tests/wave-wc14-shell-injection-guards.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "apps/trainer/backends/mlx.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave957-apps-atomic-scope.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "count": 263,
@@ -655,10 +657,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 216
+        "line": 217
       },
       "local_sota_review": {
-        "line": 216,
+        "line": 217,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -904,6 +906,24 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "workers/distill/scripts/train_lora.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave921-trainer-unification.test.js",
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "workers/distill/scripts/train_preference.py",
             "domain": "training_model_optimization",
             "priority_score": 9,
@@ -1022,23 +1042,6 @@
               "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "apps/trainer/airgap_distill_worker.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave953-airgap-distill-worker.test.js",
-              "tests/wave957-apps-atomic-scope.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "count": 327,
@@ -1139,10 +1142,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 267
+        "line": 268
       },
       "local_sota_review": {
-        "line": 267,
+        "line": 268,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1349,6 +1352,24 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "workers/distill/scripts/train_lora.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave921-trainer-unification.test.js",
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "workers/distill/scripts/train_preference.py",
             "domain": "training_model_optimization",
             "priority_score": 9,
@@ -1464,23 +1485,6 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave957-apps-atomic-scope.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "apps/trainer/airgap_distill_worker.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave953-airgap-distill-worker.test.js",
               "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
@@ -1603,10 +1607,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 312
+        "line": 313
       },
       "local_sota_review": {
-        "line": 312,
+        "line": 313,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -2055,10 +2059,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 354
+        "line": 355
       },
       "local_sota_review": {
-        "line": 354,
+        "line": 355,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -2259,6 +2263,24 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "workers/distill/scripts/train_lora.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave921-trainer-unification.test.js",
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "workers/distill/scripts/train_preference.py",
             "domain": "training_model_optimization",
             "priority_score": 9,
@@ -2390,22 +2412,6 @@
               "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "apps/trainer/trainer_local.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave957-apps-atomic-scope.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "count": 205,
@@ -2491,10 +2497,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 389
+        "line": 390
       },
       "local_sota_review": {
-        "line": 389,
+        "line": 390,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2537,12 +2543,13 @@
           {
             "path": "workers/distill/scripts/train_lora.py",
             "domain": "training_model_optimization",
-            "priority_score": 6,
+            "priority_score": 9,
             "risk_signals": [
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "http_route_surface"
+              "http_route_surface",
+              "large_component_contract_risk"
             ],
             "test_refs": [
               "tests/wave602-backend-atomic-deep-dive.test.js",
@@ -2961,10 +2968,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 430
+        "line": 431
       },
       "local_sota_review": {
-        "line": 430,
+        "line": 431,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -3166,6 +3173,24 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "workers/distill/scripts/train_lora.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave921-trainer-unification.test.js",
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "workers/distill/scripts/train_preference.py",
             "domain": "training_model_optimization",
             "priority_score": 9,
@@ -3280,22 +3305,6 @@
             "test_refs": [
               "tests/wave957-apps-atomic-scope.test.js",
               "tests/wave-wc14-shell-injection-guards.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "apps/trainer/backends/mlx.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
@@ -3423,13 +3432,13 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 477
+        "line": 478
       },
       "local_sota_review": {
-        "line": 477,
+        "line": 478,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 7,
+        "already_at_frontier_count": 8,
         "improvement_count": 2,
         "gaps": {
           "critical": 1,
@@ -3650,6 +3659,24 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "workers/distill/scripts/train_lora.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave921-trainer-unification.test.js",
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "workers/distill/scripts/train_preference.py",
             "domain": "training_model_optimization",
             "priority_score": 9,
@@ -3752,22 +3779,6 @@
               "tests/wave381-pipeline.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
-          },
-          {
-            "path": "apps/modal/kolm_trainer_app.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave957-apps-atomic-scope.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "count": 323,
@@ -3894,10 +3905,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 514
+        "line": 517
       },
       "local_sota_review": {
-        "line": 514,
+        "line": 517,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -4371,10 +4382,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 545
+        "line": 548
       },
       "local_sota_review": {
-        "line": 545,
+        "line": 548,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4849,10 +4860,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 592
+        "line": 595
       },
       "local_sota_review": {
-        "line": 592,
+        "line": 595,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -5325,10 +5336,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 625
+        "line": 628
       },
       "local_sota_review": {
-        "line": 625,
+        "line": 628,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5843,10 +5854,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 656
+        "line": 659
       },
       "local_sota_review": {
-        "line": 656,
+        "line": 659,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6353,10 +6364,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 702
+        "line": 705
       },
       "local_sota_review": {
-        "line": 702,
+        "line": 705,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6555,6 +6566,24 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
+            "path": "workers/distill/scripts/train_lora.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave921-trainer-unification.test.js",
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "workers/distill/scripts/train_preference.py",
             "domain": "training_model_optimization",
             "priority_score": 9,
@@ -6674,22 +6703,6 @@
           },
           {
             "path": "apps/trainer/backends/mlx.py",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave957-apps-atomic-scope.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "apps/trainer/backends/rocm.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -6825,10 +6838,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 753
+        "line": 756
       },
       "local_sota_review": {
-        "line": 753,
+        "line": 756,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -7306,10 +7319,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 802
+        "line": 805
       },
       "local_sota_review": {
-        "line": 802,
+        "line": 805,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,

@@ -59,6 +59,37 @@ test('train_lora.py --help succeeds (GPU-free)', { skip: !HAVE_PY }, () => {
   assert.equal(r.status, 0);
   assert.match((r.stdout || '').toString(), /--preflight-only/);
   assert.match((r.stdout || '').toString(), /--backend/);
+  assert.match((r.stdout || '').toString(), /--holdout/);
+});
+
+test('W961 train_lora.py loads eval-only holdout rows GPU-free', { skip: !HAVE_PY }, () => {
+  const scriptDir = path.join(repoRoot, 'workers/distill/scripts');
+  const holdout = path.join(os.tmpdir(), 'kolm-tu-holdout-' + Date.now() + '.jsonl');
+  fs.writeFileSync(holdout, [
+    JSON.stringify({ id: 'a', input: 'A', output: 'OA' }),
+    JSON.stringify({ id: 'b', input: 'B', expected: 'EB' }),
+    JSON.stringify({ event_id: 'c', input: 'C', teacher_output: 'TC' }),
+    JSON.stringify({ input: 'D' }),
+    'not-json',
+  ].join('\n') + '\n');
+  const probe = `
+import importlib.util, json, os, sys
+here = ${JSON.stringify(scriptDir)}
+holdout = ${JSON.stringify(holdout)}
+sys.path.insert(0, here)
+spec = importlib.util.spec_from_file_location("train_lora_holdout_probe", os.path.join(here, "train_lora.py"))
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+print(json.dumps(mod.load_holdout_rows(holdout)))
+`;
+  const r = spawnSync(PY, ['-c', probe], { stdio: 'pipe', timeout: 60000 });
+  assert.equal(r.status, 0, (r.stderr || '').toString());
+  const rows = JSON.parse((r.stdout || '').toString());
+  assert.deepEqual(rows, [
+    { id: 'a', input: 'A', expected: 'OA' },
+    { id: 'b', input: 'B', expected: 'EB' },
+    { id: 'c', input: 'C', expected: 'TC' },
+  ]);
 });
 
 test('train_lora.py backend selector helpers are GPU-free', { skip: !HAVE_PY }, () => {

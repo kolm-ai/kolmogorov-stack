@@ -318,6 +318,14 @@ function trainRowsToDistillPairs(rows) {
   }));
 }
 
+function holdoutRowsToDistillPairs(rows) {
+  return (Array.isArray(rows) ? rows : []).map((row, i) => ({
+    event_id: (row.metadata && row.metadata.id) ? String(row.metadata.id) : `compile_holdout_${i + 1}`,
+    prompt: row.input,
+    response: row.expected ?? row.output,
+  })).filter((p) => p.prompt != null && p.response != null);
+}
+
 function finiteMetric(...vals) {
   for (const v of vals) {
     if (v === null || v === undefined) continue;
@@ -372,8 +380,9 @@ function resolvePortableWeight(studentPath) {
   return null;
 }
 
-async function runNeuralDistillForCompile(job, ctx, trainRows) {
+async function runNeuralDistillForCompile(job, ctx, trainRows, holdoutRows = []) {
   const pairs = trainRowsToDistillPairs(trainRows);
+  const holdoutPairs = holdoutRowsToDistillPairs(holdoutRows);
   const studentBase = job.base_model && job.base_model !== 'none' ? job.base_model : DEFAULT_MODEL;
   const distillFn = typeof ctx.distill === 'function'
     ? ctx.distill
@@ -382,6 +391,7 @@ async function runNeuralDistillForCompile(job, ctx, trainRows) {
   for await (const ev of distillFn({
     student_base: studentBase,
     pairs_override: pairs,
+    holdout_override: holdoutPairs,
     pipeline_mode: job.distill_mode || 'kd_softmax',
     max_steps: Math.max(1, Math.min(Number(process.env.KOLM_COMPILE_NEURAL_MAX_STEPS) || pairs.length || 200, pairs.length || 200)),
     emit_progress_every: 0,
@@ -390,7 +400,12 @@ async function runNeuralDistillForCompile(job, ctx, trainRows) {
     if (ev && ev.done) done = ev;
   }
   if (!done) {
-    return { ok: false, code: 'KOLM_E_NEURAL_DISTILL_NO_RESULT', error: 'neural_compile_failed: distill worker produced no done event' };
+    return {
+      ok: false,
+      code: 'KOLM_E_NEURAL_DISTILL_NO_RESULT',
+      error: 'neural_compile_failed: distill worker produced no done event',
+      holdoutEvalCount: holdoutPairs.length,
+    };
   }
   const manifest = done.manifest || readJsonIfExists(done.artifact_path ? path.join(done.artifact_path, 'manifest.json') : null);
   if (!manifest || manifest.ml_pipeline_run !== true || !done.student_path) {
@@ -400,6 +415,7 @@ async function runNeuralDistillForCompile(job, ctx, trainRows) {
       error: 'neural_compile_failed: recipe_class=distilled_model requires the Python ML worker to run (manifest.ml_pipeline_run=true) and produce a student_path; collect/stub runs are not signed as distilled_model artifacts.',
       done,
       manifest,
+      holdoutEvalCount: holdoutPairs.length,
     };
   }
   const studentHoldout = finiteMetric(
@@ -415,6 +431,7 @@ async function runNeuralDistillForCompile(job, ctx, trainRows) {
       error: 'neural_compile_failed: trained student has no measured holdout metric (student_holdout_accuracy/holdout_accuracy/k_score_final). Run the student holdout eval before signing a distilled_model artifact.',
       done,
       manifest,
+      holdoutEvalCount: holdoutPairs.length,
     };
   }
   const portableWeight = resolvePortableWeight(done.student_path);
@@ -425,9 +442,10 @@ async function runNeuralDistillForCompile(job, ctx, trainRows) {
       error: 'neural_compile_failed: trained student exists but no portable .gguf/.onnx/.wasm weight file was found; export/quantize the student before signing a distilled_model artifact.',
       done,
       manifest,
+      holdoutEvalCount: holdoutPairs.length,
     };
   }
-  return { ok: true, done, manifest, portableWeight, studentBase, studentHoldout };
+  return { ok: true, done, manifest, portableWeight, studentBase, studentHoldout, holdoutEvalCount: holdoutPairs.length };
 }
 
 // Slug a free-text task description into a valid recipe id.
@@ -510,6 +528,7 @@ export async function runJob(job, ctx) {
     const trainForSynthesis = preSplit && Array.isArray(preSplit.train) && preSplit.train.length > 0
       ? preSplit.train
       : seedRows; // single-row corner case: split has empty train, fall back
+    const holdoutForEval = preSplit && Array.isArray(preSplit.holdout) ? preSplit.holdout : [];
     const synthesisInputHash = hashSeeds(trainForSynthesis);
     setStage(job, 'split.done', {
       train_count: preSplit?.train_count ?? trainForSynthesis.length,
@@ -529,8 +548,9 @@ export async function runJob(job, ctx) {
       setStage(job, 'distill.neural.start', {
         student_base: job.base_model && job.base_model !== 'none' ? job.base_model : DEFAULT_MODEL,
         train_count: trainForSynthesis.length,
+        holdout_eval_count: holdoutForEval.length,
       });
-      const neural = await runNeuralDistillForCompile(job, ctx, trainForSynthesis);
+      const neural = await runNeuralDistillForCompile(job, ctx, trainForSynthesis, holdoutForEval);
       setStage(job, 'distill.neural.done', {
         ok: !!neural.ok,
         worker_mode: neural.done?.worker_mode || neural.manifest?.mode || null,
@@ -538,6 +558,7 @@ export async function runJob(job, ctx) {
         student_path: neural.done?.student_path || null,
         portable_weight: neural.portableWeight?.path || null,
         student_holdout_accuracy: neural.studentHoldout ?? null,
+        holdout_eval_count: neural.holdoutEvalCount ?? holdoutForEval.length,
         error_code: neural.code || null,
       });
       if (!neural.ok) {
@@ -552,6 +573,7 @@ export async function runJob(job, ctx) {
             worker_mode: neural.done?.worker_mode || neural.manifest?.mode || null,
             ml_pipeline_run: neural.manifest?.ml_pipeline_run === true,
             student_path: neural.done?.student_path || null,
+            holdout_eval_count: holdoutForEval.length,
           },
         });
         return;
@@ -577,6 +599,7 @@ export async function runJob(job, ctx) {
         distillation_method: neural.manifest.distillation_method || 'lora',
         ml_pipeline_run: true,
         training_pairs_collected: neural.manifest.training_pairs_collected || null,
+        holdout_eval_count: neural.holdoutEvalCount ?? holdoutForEval.length,
         training_pairs_hash: neural.manifest.training_pairs_hash || null,
         synthesis_input_hash: synthesisInputHash,
       };
@@ -647,6 +670,7 @@ export async function runJob(job, ctx) {
           portable_weight_path: neural.portableWeight.path,
           runtime_target: neural.portableWeight.runtime_target,
           student_holdout_accuracy: neural.studentHoldout,
+          holdout_eval_count: neural.holdoutEvalCount ?? holdoutForEval.length,
         },
       }));
       try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup

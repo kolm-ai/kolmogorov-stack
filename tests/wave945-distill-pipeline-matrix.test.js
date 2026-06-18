@@ -93,7 +93,7 @@ test('W945 generated matrix is current and all hard distill gates are green', ()
   assert.equal(m.summary.teacher_classification_count, 10);
   assert.equal(m.summary.open_weight_teacher_count, 7);
   assert.equal(m.summary.proprietary_teacher_count, 3);
-  assert.equal(m.summary.distill_option_count, 27);
+  assert.equal(m.summary.distill_option_count, 28);
   assert.ok(m.summary.worker_flag_count >= 20);
   assert.equal(m.summary.corpus_stats_key_count, 13);
   assert.equal(m.summary.stage_count, 13);

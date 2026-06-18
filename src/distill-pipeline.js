@@ -560,6 +560,19 @@ function _pairToCapture(p, i) {
   };
 }
 
+function _normalizeHoldoutPair(p, i = 0) {
+  if (!p || typeof p !== 'object') return null;
+  const prompt = p.prompt ?? p.input;
+  const response = p.response ?? p.expected ?? p.output ?? p.teacher_output;
+  if (prompt == null || response == null) return null;
+  const metaId = p.metadata && p.metadata.id ? p.metadata.id : null;
+  return {
+    prompt: String(prompt),
+    response: String(response),
+    event_id: p.event_id || p.id || metaId || `holdout_${i + 1}`,
+  };
+}
+
 // Write spec.json + seeds.jsonl into the worker's input dir.
 //
 // W713/W711 - when `ordering` requests curriculum and/or importance, we:
@@ -572,10 +585,11 @@ function _pairToCapture(p, i) {
 //       distribution first.
 // The returned `ordering_meta` records what was actually stamped so distill()
 // can put it on run-meta.json (auditable).
-function _writeWorkerInputs({ runDir, namespace, pairs, baseModel, jobId, ordering = null }) {
+function _writeWorkerInputs({ runDir, namespace, pairs, baseModel, jobId, ordering = null, holdoutPairs = [] }) {
   fs.mkdirSync(runDir, { recursive: true });
   const specPath = path.join(runDir, 'spec.json');
   const seedsPath = path.join(runDir, 'seeds.jsonl');
+  let holdoutEvalPath = null;
   const outDir = path.join(runDir, 'out');
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(specPath, JSON.stringify({
@@ -637,6 +651,15 @@ function _writeWorkerInputs({ runDir, namespace, pairs, baseModel, jobId, orderi
     return JSON.stringify(row);
   }).join('\n') + '\n');
 
+  if (Array.isArray(holdoutPairs) && holdoutPairs.length > 0) {
+    holdoutEvalPath = path.join(runDir, 'holdout-eval.jsonl');
+    fs.writeFileSync(holdoutEvalPath, holdoutPairs.map((p, i) => JSON.stringify({
+      id: p.event_id || `holdout_${i + 1}`,
+      input: p.prompt,
+      output: p.response,
+    })).join('\n') + '\n');
+  }
+
   // Emit the importance-weights JSONL (one row per pair) when importance is
   // active. Uses the rolling-window novelty scorer so the contract matches
   // src/capture-importance.js::buildImportanceJsonlRows exactly.
@@ -654,7 +677,7 @@ function _writeWorkerInputs({ runDir, namespace, pairs, baseModel, jobId, orderi
     ordering_meta.importance_weights = true;
   }
 
-  return { specPath, seedsPath, outDir, importanceWeightsPath, ordering_meta };
+  return { specPath, seedsPath, holdoutEvalPath, outDir, importanceWeightsPath, ordering_meta };
 }
 
 // Main distill iterator. Yields progress events as the worker runs and a
@@ -694,6 +717,7 @@ export async function* distill({
   tokenizer_path = null,
   pipeline_mode = 'kd_softmax',
   pairs_override = null,           // tests can inject pairs directly
+  holdout_override = null,          // eval-only rows; never staged into training seeds
   worker_cmd = null,
   emit_progress_every = 100,
   tenant_id = null,                // W422 P0-4 - canonical tenant scope
@@ -779,6 +803,9 @@ export async function* distill({
   const _holdoutBefore = pairs.length;
   pairs = pairs.filter((p) => !(p && p.holdout_only));
   const holdout_excluded_count = _holdoutBefore - pairs.length;
+  const holdoutPairs = Array.isArray(holdout_override)
+    ? holdout_override.map((p, i) => _normalizeHoldoutPair(p, i)).filter(Boolean)
+    : [];
   // 2. Resolve mode + teacher list (W459 - fallback-aware).
   const { mode: workerMode } = _resolveWorkerMode();
   const teacherList = teacher_fallback ? _pickTeachers() : (() => {
@@ -873,6 +900,7 @@ export async function* distill({
       student_base,
       pipeline_mode,
       pair_count: pairs.length,
+      holdout_eval_count: holdoutPairs.length,
       worker_mode: workerMode,
       teacher: attemptList[0] || null,
       teacher_planned: attemptList,
@@ -905,12 +933,14 @@ export async function* distill({
   // W459 - when resume_from is set, reuse the existing seeds.jsonl + spec.json
   // verbatim (the prior run already paid the IO cost). Otherwise stage fresh
   // worker inputs from this run's pairs.
-  let specPath, seedsPath, outDir;
+  let specPath, seedsPath, holdoutEvalPath, outDir;
   let importanceWeightsPath = null;
   let orderingMeta = null;
   if (resume_from) {
     specPath = path.join(runDir, 'spec.json');
     seedsPath = path.join(runDir, 'seeds.jsonl');
+    holdoutEvalPath = path.join(runDir, 'holdout-eval.jsonl');
+    if (!fs.existsSync(holdoutEvalPath)) holdoutEvalPath = null;
     outDir = path.join(runDir, 'out');
     fs.mkdirSync(outDir, { recursive: true });
     // W711 - a resumed run reuses the prior seeds + importance-weights.jsonl
@@ -926,9 +956,11 @@ export async function* distill({
     const staged = _writeWorkerInputs({
       runDir, namespace: teacher_namespace, pairs, baseModel: student_base, jobId,
       ordering: _ordering,
+      holdoutPairs,
     });
     specPath = staged.specPath;
     seedsPath = staged.seedsPath;
+    holdoutEvalPath = staged.holdoutEvalPath;
     outDir = staged.outDir;
     importanceWeightsPath = staged.importanceWeightsPath;
     orderingMeta = staged.ordering_meta;
@@ -978,6 +1010,7 @@ export async function* distill({
       if (rs.reward != null) args.push(`--rs-reward=${rs.reward}`);
     }
     if (tokenizer_path) args.push(`--tokenizer-path=${tokenizer_path}`);
+    if (holdoutEvalPath) args.push(`--student-holdout=${holdoutEvalPath}`);
     // W713 - tell the worker (and the Python trainer it spawns) to walk the
     // staged rows in curriculum order via a SequentialSampler. The staged
     // seeds.jsonl already carries complexity_proxy + is pre-ordered.
@@ -1201,6 +1234,7 @@ export async function* distill({
     teacher_attempts,
     teacher_attempted_count: teacher_attempts.length,
     pair_count: pairs.length,
+    holdout_eval_count: holdoutPairs.length,
     resumed_from: resume_from || null,
     resume_prior_steps: resumePriorSteps,
     // W411 P0 #8 - how many pairs the distill() boundary refused as

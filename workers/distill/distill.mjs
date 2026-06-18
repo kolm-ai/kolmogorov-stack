@@ -60,6 +60,8 @@
 //   --teacher-holdout-max <N>    cap teacher holdout calls (default: 50)
 //   --teacher-holdout-comparator <name>
 //                                exact (default) | substring | jaccard
+//   --student-holdout <path>     eval-only JSONL for train_lora.py; never used
+//                                for training-pair collection.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -151,6 +153,18 @@ fs.writeFileSync(path.join(outDir, 'train.jsonl'),
   split.train.map(r => JSON.stringify(r)).join('\n') + '\n');
 fs.writeFileSync(path.join(outDir, 'holdout.jsonl'),
   split.holdout.map(r => JSON.stringify(r)).join('\n') + '\n');
+const studentHoldoutPath = args['student-holdout']
+  ? path.resolve(process.cwd(), String(args['student-holdout']))
+  : (split.holdout.length > 0 ? path.join(outDir, 'holdout.jsonl') : null);
+const studentHoldoutRows = studentHoldoutPath && fs.existsSync(studentHoldoutPath)
+  ? readHoldoutRows(studentHoldoutPath)
+  : [];
+const studentHoldoutSource = args['student-holdout']
+  ? 'explicit'
+  : (split.holdout.length > 0 ? 'worker_split' : null);
+const studentHoldoutHash = studentHoldoutPath && fs.existsSync(studentHoldoutPath)
+  ? fileSha256(studentHoldoutPath)
+  : null;
 
 // Wave 158 — student-base catalog validation. Accepts catalog slugs OR any
 // "org/repo" form (for HF repos that aren't in the catalog yet) when
@@ -443,6 +457,7 @@ if (mode === 'full') {
       // importance-weights JSONL lives next to the staged seeds.jsonl (W711).
       if (args.curriculum) pyArgs.push('--curriculum', String(args.curriculum));
       if (args['importance-weights']) pyArgs.push('--importance-weights', String(args['importance-weights']));
+      if (studentHoldoutPath) pyArgs.push('--holdout', studentHoldoutPath);
       const res = spawnSync('python3', pyArgs, { stdio: 'inherit' });
       mlRun = res.status === 0;
       mlReport = { exit_code: res.status, signal: res.signal || null };
@@ -555,6 +570,10 @@ const manifest = {
     )
   ),
   holdout_accuracy: numberOrNull(trainerSummary && trainerSummary.holdout_accuracy),
+  student_holdout_source: studentHoldoutSource,
+  student_holdout_count: studentHoldoutRows.length,
+  student_holdout_path: studentHoldoutPath ? path.relative(outDir, studentHoldoutPath) : null,
+  student_holdout_hash: studentHoldoutHash,
   loss_final: numberOrNull(trainerSummary && (
     trainerSummary.loss_final ??
     trainerSummary.final_loss ??
@@ -597,6 +616,24 @@ function readSeeds(p) {
       if (obj.prompt !== undefined && obj.input === undefined) obj.input = obj.prompt;
       if (obj.completion !== undefined && obj.output === undefined) obj.output = obj.completion;
       if (obj.input !== undefined && obj.output !== undefined) rows.push(obj);
+    } catch { /* skip malformed */ }
+  }
+  return rows;
+}
+
+function readHoldoutRows(p) {
+  const txt = fs.readFileSync(p, 'utf8');
+  const lines = txt.trim().split(/\r?\n/).filter(Boolean);
+  const rows = [];
+  for (const ln of lines) {
+    try {
+      const obj = JSON.parse(ln);
+      if (!obj || typeof obj !== 'object') continue;
+      const input = obj.input ?? obj.prompt;
+      const output = obj.output ?? obj.expected ?? obj.teacher_output ?? obj.response;
+      if (input !== undefined && output !== undefined) {
+        rows.push({ ...obj, input, output });
+      }
     } catch { /* skip malformed */ }
   }
   return rows;

@@ -27,6 +27,7 @@
     "early_stop_config",
     "emit_progress_every",
     "gradient_checkpointing",
+    "holdout_override",
     "importance",
     "k_target",
     "max_steps",
@@ -95,67 +96,67 @@
     {
       "async": false,
       "kind": "function",
-      "line": 676,
+      "line": 699,
       "name": "_resolveDistillTenant"
     },
     {
       "async": true,
       "kind": "function*",
-      "line": 688,
+      "line": 711,
       "name": "distill"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1241,
+      "line": 1275,
       "name": "resolveDistillFinalLoss"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1259,
+      "line": 1293,
       "name": "resolveDistillFinalK"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1291,
+      "line": 1325,
       "name": "summarizeDistillTelemetry"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1317,
+      "line": 1351,
       "name": "listDistillRuns"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1378,
+      "line": 1412,
       "name": "readDistillRun"
     },
     {
       "async": false,
       "kind": "const",
-      "line": 1456,
+      "line": 1490,
       "name": "W808_REGRESSION_GATE_VERSION"
     },
     {
       "async": false,
       "kind": "const",
-      "line": 1457,
+      "line": 1491,
       "name": "W808_KSCORE_DROP_THRESHOLD"
     },
     {
       "async": false,
       "kind": "const",
-      "line": 1458,
+      "line": 1492,
       "name": "W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1460,
+      "line": 1494,
       "name": "_w808RegressionGate"
     }
   ],
@@ -236,85 +237,91 @@
     {
       "async": false,
       "exported": false,
-      "line": 575,
+      "line": 563,
+      "name": "_normalizeHoldoutPair"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 588,
       "name": "_writeWorkerInputs"
     },
     {
       "async": false,
       "exported": true,
-      "line": 676,
+      "line": 699,
       "name": "_resolveDistillTenant"
     },
     {
       "async": true,
       "exported": true,
-      "line": 688,
+      "line": 711,
       "name": "distill"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1241,
+      "line": 1275,
       "name": "resolveDistillFinalLoss"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1255,
+      "line": 1289,
       "name": "_finiteMetric"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1259,
+      "line": 1293,
       "name": "resolveDistillFinalK"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1276,
+      "line": 1310,
       "name": "_normalizeProgressEvent"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1291,
+      "line": 1325,
       "name": "summarizeDistillTelemetry"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1317,
+      "line": 1351,
       "name": "listDistillRuns"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1378,
+      "line": 1412,
       "name": "readDistillRun"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1415,
+      "line": 1449,
       "name": "_safeTail"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1460,
+      "line": 1494,
       "name": "_w808RegressionGate"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1544,
+      "line": 1578,
       "name": "_w808ExtractKscoreFromRunDir"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1561,
+      "line": 1595,
       "name": "_w808ExtractCriticalFailRate"
     }
   ],
@@ -369,7 +376,7 @@
         "seeds.jsonl",
         "importance-weights.jsonl"
       ],
-      "line": 575,
+      "line": 588,
       "owner": "_writeWorkerInputs",
       "present": true,
       "stage": "worker_input_staging"
@@ -435,7 +442,7 @@
         "synthetic_suppressed",
         "measured"
       ],
-      "line": 1167,
+      "line": 1200,
       "owner": "summarizeDistillTelemetry",
       "present": true,
       "stage": "telemetry_summary"
@@ -446,7 +453,7 @@
         "manifest_present",
         "runs.slice"
       ],
-      "line": 1231,
+      "line": 1265,
       "owner": "listDistillRuns",
       "present": true,
       "stage": "run_listing"
@@ -457,7 +464,7 @@
         "_safeTail",
         "tenant_id = 'local'"
       ],
-      "line": 1378,
+      "line": 1412,
       "owner": "readDistillRun",
       "present": true,
       "stage": "run_detail"
@@ -468,7 +475,7 @@
         "critical_fail_rate",
         "rollback"
       ],
-      "line": 1116,
+      "line": 1149,
       "owner": "_w808RegressionGate",
       "present": true,
       "stage": "regression_gate"
@@ -600,12 +607,12 @@
   "summary": {
     "corpus_stats_key_count": 13,
     "direct_test_evidence_count": 173,
-    "distill_bytes": 77446,
-    "distill_lines": 1575,
-    "distill_option_count": 27,
+    "distill_bytes": 78936,
+    "distill_lines": 1609,
+    "distill_option_count": 28,
     "export_count": 19,
     "failed_safety_guards": 0,
-    "function_count": 26,
+    "function_count": 27,
     "missing_required_exports": 0,
     "missing_test_evidence": 0,
     "mode_count": 3,
@@ -615,7 +622,7 @@
     "required_test_evidence_count": 11,
     "stage_count": 13,
     "teacher_classification_count": 10,
-    "worker_flag_count": 20
+    "worker_flag_count": 21
   },
   "teacher_classification": [
     {
@@ -1801,8 +1808,8 @@
       "_resolveOrderingPolicy_refs": 0,
       "_w808RegressionGate_refs": 0,
       "classifyTeacher_refs": 0,
-      "distill_refs": 6,
-      "distill_workflow_refs": 6,
+      "distill_refs": 7,
+      "distill_workflow_refs": 7,
       "listDistillRuns_refs": 0,
       "path": "tests/wave282-compile-routing.test.js",
       "prepareDistillCorpus_refs": 0,
@@ -1812,7 +1819,7 @@
       "selectStudentBackbone_refs": 0,
       "source_lock": false,
       "summarizeDistillTelemetry_refs": 0,
-      "total_symbol_refs": 6
+      "total_symbol_refs": 7
     },
     {
       "MODES_refs": 0,
@@ -2100,8 +2107,8 @@
       "_resolveOrderingPolicy_refs": 0,
       "_w808RegressionGate_refs": 0,
       "classifyTeacher_refs": 0,
-      "distill_refs": 41,
-      "distill_workflow_refs": 41,
+      "distill_refs": 47,
+      "distill_workflow_refs": 47,
       "listDistillRuns_refs": 0,
       "path": "tests/wave381-pipeline.test.js",
       "prepareDistillCorpus_refs": 4,
@@ -2111,7 +2118,7 @@
       "selectStudentBackbone_refs": 6,
       "source_lock": true,
       "summarizeDistillTelemetry_refs": 0,
-      "total_symbol_refs": 51
+      "total_symbol_refs": 57
     },
     {
       "MODES_refs": 0,
@@ -4078,8 +4085,8 @@
       "_resolveOrderingPolicy_refs": 0,
       "_w808RegressionGate_refs": 0,
       "classifyTeacher_refs": 0,
-      "distill_refs": 20,
-      "distill_workflow_refs": 20,
+      "distill_refs": 21,
+      "distill_workflow_refs": 21,
       "listDistillRuns_refs": 0,
       "path": "tests/wave921-trainer-unification.test.js",
       "prepareDistillCorpus_refs": 0,
@@ -4089,7 +4096,7 @@
       "selectStudentBackbone_refs": 0,
       "source_lock": false,
       "summarizeDistillTelemetry_refs": 0,
-      "total_symbol_refs": 20
+      "total_symbol_refs": 21
     },
     {
       "MODES_refs": 0,
@@ -4648,7 +4655,7 @@
   "worker_flags": [
     {
       "flag": "--allow-unknown-student-base",
-      "line": 967
+      "line": 999
     },
     {
       "flag": "--auto",
@@ -4656,51 +4663,51 @@
     },
     {
       "flag": "--curriculum",
-      "line": 571
+      "line": 584
     },
     {
       "flag": "--distillation-method",
-      "line": 971
+      "line": 1003
     },
     {
       "flag": "--importance-weights",
-      "line": 988
+      "line": 1021
     },
     {
       "flag": "--max-rows",
-      "line": 968
+      "line": 1000
     },
     {
       "flag": "--mode",
-      "line": 965
+      "line": 997
     },
     {
       "flag": "--out",
-      "line": 964
+      "line": 996
     },
     {
       "flag": "--rs-n",
-      "line": 974
+      "line": 1006
     },
     {
       "flag": "--rs-reward",
-      "line": 978
+      "line": 1010
     },
     {
       "flag": "--rs-temperature",
-      "line": 975
+      "line": 1007
     },
     {
       "flag": "--rs-threshold",
-      "line": 976
+      "line": 1008
     },
     {
       "flag": "--rs-threshold-mode",
-      "line": 977
+      "line": 1009
     },
     {
       "flag": "--seeds",
-      "line": 963
+      "line": 995
     },
     {
       "flag": "--since-last-compile",
@@ -4708,15 +4715,19 @@
     },
     {
       "flag": "--spec",
-      "line": 962
+      "line": 994
     },
     {
       "flag": "--student-base",
-      "line": 966
+      "line": 998
+    },
+    {
+      "flag": "--student-holdout",
+      "line": 1013
     },
     {
       "flag": "--teacher",
-      "line": 970
+      "line": 1002
     },
     {
       "flag": "--teachers",
@@ -4724,7 +4735,7 @@
     },
     {
       "flag": "--tokenizer-path",
-      "line": 980
+      "line": 1012
     }
   ]
 }
