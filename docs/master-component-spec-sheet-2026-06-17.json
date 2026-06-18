@@ -566,6 +566,7 @@
       "next_best_action": "Execute the linked frontier track: maintain_generated_quantize_worker_matrix_and_frontier_method_contract.",
       "suggested_verification": [
         "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
       ]
@@ -873,9 +874,10 @@
           "relation": "sampled"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
+      "next_best_action": "Execute the linked frontier track: maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract.",
       "suggested_verification": [
         "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
       ]
@@ -1154,6 +1156,7 @@
       "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
       "suggested_verification": [
         "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
       ]
@@ -1226,6 +1229,7 @@
       "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
       "suggested_verification": [
         "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
       ]
@@ -1455,6 +1459,7 @@
       "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
       "suggested_verification": [
         "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
       ]
@@ -1777,6 +1782,7 @@
       "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
       "suggested_verification": [
         "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
       ]
@@ -7220,6 +7226,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -8487,6 +8494,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -8684,6 +8692,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -9575,6 +9584,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -9675,6 +9685,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -12794,6 +12805,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -16013,6 +16025,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19157,6 +19170,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19211,6 +19225,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19260,6 +19275,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19309,6 +19325,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19359,6 +19376,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19409,6 +19427,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19462,6 +19481,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19514,6 +19534,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19624,10 +19645,11 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "split_or_add_generated_contract_map_before_growth",
+        "improvement_track": "maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract",
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19635,7 +19657,7 @@
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract."
     },
     {
       "path": "src/distill-preference.js",
@@ -19682,6 +19704,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19733,6 +19756,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19837,6 +19861,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19883,6 +19908,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -19997,6 +20023,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -20049,6 +20076,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -20095,6 +20123,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -20145,6 +20174,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -20295,6 +20325,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -22658,6 +22689,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -22758,6 +22790,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -22806,6 +22839,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -23969,6 +24003,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -25192,6 +25227,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -25449,6 +25485,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -26749,6 +26786,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -26795,6 +26833,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -26841,6 +26880,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -26889,6 +26929,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -26985,6 +27026,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -28514,6 +28556,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -28560,6 +28603,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -28654,6 +28698,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -28706,6 +28751,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -28754,6 +28800,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -28868,6 +28915,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -28916,6 +28964,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -29017,6 +29066,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -29083,6 +29133,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -29133,6 +29184,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -29244,6 +29296,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -29298,6 +29351,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -29398,6 +29452,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -29445,6 +29500,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -31138,6 +31194,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -31494,6 +31551,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -31681,6 +31739,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -31786,6 +31845,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -32908,6 +32968,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -33018,6 +33079,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -33071,6 +33133,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -34011,6 +34074,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -34516,6 +34580,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -35961,6 +36026,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -38459,6 +38525,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -38867,6 +38934,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -38915,6 +38983,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -38965,6 +39034,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -39013,6 +39083,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -39061,6 +39132,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -39110,6 +39182,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -39162,6 +39235,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -39564,6 +39638,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -39614,6 +39689,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -39669,6 +39745,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -39764,6 +39841,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -40894,6 +40972,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -41000,6 +41079,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -41104,6 +41184,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -41159,6 +41240,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -41208,6 +41290,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -41570,6 +41653,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -41675,6 +41759,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -41740,6 +41825,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -42274,6 +42360,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -42323,6 +42410,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -42376,6 +42464,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -42784,6 +42873,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -42894,6 +42984,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -42945,6 +43036,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43001,6 +43093,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43050,6 +43143,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43099,6 +43193,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43200,6 +43295,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43301,6 +43397,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43350,6 +43447,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43400,6 +43498,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43450,6 +43549,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43507,6 +43607,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43556,6 +43657,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43606,6 +43708,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43673,6 +43776,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43726,6 +43830,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43790,6 +43895,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43859,6 +43965,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -43963,6 +44070,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -44014,6 +44122,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -44160,6 +44269,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -44871,6 +44981,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -44928,6 +45039,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -44984,6 +45096,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45033,6 +45146,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45089,6 +45203,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45141,6 +45256,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45300,6 +45416,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45351,6 +45468,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45517,6 +45635,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45574,6 +45693,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45770,6 +45890,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45828,6 +45949,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45877,6 +45999,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]
@@ -45967,6 +46090,7 @@
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
           "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
           "npm run verify:quant-oracle"
         ]

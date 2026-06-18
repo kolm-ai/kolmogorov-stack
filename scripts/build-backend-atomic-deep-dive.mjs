@@ -23,6 +23,8 @@ const INTENT_CONTRACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'intent-contr
 const INTENT_CONTRACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave943-intent-contract-matrix.test.js');
 const WRAPPER_CLI_MATRIX = path.join(ROOT, 'docs', 'internal', 'wrapper-cli-matrix.json');
 const WRAPPER_CLI_MATRIX_TEST = path.join(ROOT, 'tests', 'wave944-wrapper-cli-matrix.test.js');
+const DISTILL_PIPELINE_MATRIX = path.join(ROOT, 'docs', 'internal', 'distill-pipeline-matrix.json');
+const DISTILL_PIPELINE_MATRIX_TEST = path.join(ROOT, 'tests', 'wave945-distill-pipeline-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
@@ -31,6 +33,7 @@ let quantizeWorkerMatrixGreen = null;
 let binderContractMatrixGreen = null;
 let intentContractMatrixGreen = null;
 let wrapperCliMatrixGreen = null;
+let distillPipelineMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -342,6 +345,35 @@ function wrapperCliMatrixOk() {
   return wrapperCliMatrixGreen;
 }
 
+function distillPipelineMatrixOk() {
+  if (distillPipelineMatrixGreen != null) return distillPipelineMatrixGreen;
+  try {
+    if (!fs.existsSync(DISTILL_PIPELINE_MATRIX) || !fs.existsSync(DISTILL_PIPELINE_MATRIX_TEST)) {
+      distillPipelineMatrixGreen = false;
+      return distillPipelineMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(DISTILL_PIPELINE_MATRIX, 'utf8'));
+    distillPipelineMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.distill_pipeline_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.mode_count === 3
+      && matrix.summary.stage_count === 13
+      && matrix.summary.present_stage_count === 13
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/distill-pipeline.js')
+    );
+  } catch {
+    distillPipelineMatrixGreen = false;
+  }
+  return distillPipelineMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -496,6 +528,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'src/binder.js' && binderContractMatrixOk()) return 'maintain_generated_binder_contract_matrix_and_verifier_failure_taxonomy';
   if (rel === 'src/intent.js' && intentContractMatrixOk()) return 'maintain_generated_intent_contract_matrix_and_routing_workflow_taxonomy';
   if (rel === 'src/wrapper-cli.js' && wrapperCliMatrixOk()) return 'maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract';
+  if (rel === 'src/distill-pipeline.js' && distillPipelineMatrixOk()) return 'maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -546,7 +579,7 @@ function commandsFor(domain) {
     storage_state: ['node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js'],
     compile_artifact_runtime: ['npm run verify:inventions', 'npm run verify:benchmark-evidence', 'npm run verify:wrapper-cli-matrix'],
     capture_data_eval: ['npm run verify:redaction-benchmark', 'npm run verify:quality-calibration'],
-    training_model_optimization: ['npm run verify:quantize-worker-matrix', 'node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
+    training_model_optimization: ['npm run verify:quantize-worker-matrix', 'npm run verify:distill-pipeline-matrix', 'node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
     infra_cloud_device: ['npm run verify:platform', 'npm run verify:package-release'],
     developer_distribution: ['npm run verify:cli-command-matrix', 'npm run verify:package-release'],
