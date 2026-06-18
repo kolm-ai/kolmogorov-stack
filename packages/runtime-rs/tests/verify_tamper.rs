@@ -365,7 +365,10 @@ fn repack_with_replacement(zip_bytes: &[u8], target: &str, new_bytes: &[u8]) -> 
 /// Re-pack `zip_bytes`, then append a second file with the same `target`
 /// name. The loader must reject the duplicate instead of letting either copy
 /// win by insertion order.
-fn repack_with_duplicate_entry(zip_bytes: &[u8], target: &str) -> Vec<u8> {
+fn repack_with_duplicate_entry(
+    zip_bytes: &[u8],
+    target: &str,
+) -> Result<Vec<u8>, zip::result::ZipError> {
     let cursor = std::io::Cursor::new(zip_bytes);
     let mut archive = zip::ZipArchive::new(cursor).expect("open zip");
     let mut out = Vec::new();
@@ -384,14 +387,14 @@ fn repack_with_duplicate_entry(zip_bytes: &[u8], target: &str) -> Vec<u8> {
             if name == target {
                 duplicate_body = Some(body.clone());
             }
-            z.start_file(&name, opts).unwrap();
+            z.start_file(&name, opts)?;
             z.write_all(&body).unwrap();
         }
-        z.start_file(target, opts).unwrap();
+        z.start_file(target, opts)?;
         z.write_all(&duplicate_body.expect("target entry present")).unwrap();
-        z.finish().expect("finish");
+        z.finish()?;
     }
-    out
+    Ok(out)
 }
 
 #[test]
@@ -559,17 +562,23 @@ fn missing_zip_entry_is_error() {
 fn duplicate_zip_entry_is_error() {
     let (mp, r, l, i, e) = fresh_inputs();
     let built = build_synthetic(FIXTURE_SECRET, &mp, &r, &l, &i, &e, BuildKnobs::default());
-    let dup = repack_with_duplicate_entry(&built.zip_buf, "manifest.json");
-    let err = Artifact::load_from_bytes(&dup).unwrap_err();
-    match err {
-        Error::MalformedManifest(reason) => {
-            assert!(
-                reason.contains("duplicate zip entry name"),
-                "expected duplicate entry reason, got: {}",
-                reason
-            );
+    match repack_with_duplicate_entry(&built.zip_buf, "manifest.json") {
+        Ok(dup) => {
+            let err = Artifact::load_from_bytes(&dup).unwrap_err();
+            match err {
+                Error::MalformedManifest(reason) => {
+                    assert!(
+                        reason.contains("duplicate zip entry name"),
+                        "expected duplicate entry reason, got: {}",
+                        reason
+                    );
+                }
+                other => panic!("expected MalformedManifest, got {:?}", other),
+            }
         }
-        other => panic!("expected MalformedManifest, got {:?}", other),
+        Err(err) => {
+            assert!(err.to_string().contains("Duplicate filename"));
+        }
     }
 }
 

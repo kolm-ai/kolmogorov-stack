@@ -130,13 +130,60 @@ pub fn verify_report(
     cid_value: &str,
     actual_body_hashes: Option<ActualBodyHashes<'_>>,
 ) -> VerifyReport {
+    verify_report_inner(
+        secret,
+        manifest,
+        manifest_json_text,
+        receipt,
+        None,
+        signature_json_text,
+        cid_value,
+        actual_body_hashes,
+    )
+}
+
+/// Run every verification check using the raw `receipt.json` text for receipt
+/// body HMAC verification. This preserves legacy numeric JSON shapes such as
+/// `1` versus `1.0` that are lost after deserializing into typed Rust fields.
+pub fn verify_report_with_receipt_json(
+    secret: &[u8],
+    manifest: &Manifest,
+    manifest_json_text: &str,
+    receipt: &Receipt,
+    receipt_json_text: &str,
+    signature_json_text: &str,
+    cid_value: &str,
+    actual_body_hashes: Option<ActualBodyHashes<'_>>,
+) -> VerifyReport {
+    verify_report_inner(
+        secret,
+        manifest,
+        manifest_json_text,
+        receipt,
+        Some(receipt_json_text),
+        signature_json_text,
+        cid_value,
+        actual_body_hashes,
+    )
+}
+
+fn verify_report_inner(
+    secret: &[u8],
+    manifest: &Manifest,
+    manifest_json_text: &str,
+    receipt: &Receipt,
+    receipt_json_text: Option<&str>,
+    signature_json_text: &str,
+    cid_value: &str,
+    actual_body_hashes: Option<ActualBodyHashes<'_>>,
+) -> VerifyReport {
     let mut report = VerifyReport::new(cid_value.to_string(), receipt.signed_by.clone());
 
     report.cid = check_cid(manifest, receipt, cid_value);
     report.manifest_signature = check_manifest_signature(secret, manifest_json_text, signature_json_text);
     let artifact_hash = compute_artifact_hash(manifest, manifest_json_text);
     report.receipt_chain = check_receipt_chain(secret, receipt, &artifact_hash);
-    report.receipt_body = check_receipt_body_signature(secret, receipt);
+    report.receipt_body = check_receipt_body_signature(secret, receipt, receipt_json_text);
     if let Some(actuals) = actual_body_hashes {
         report.body_hashes = check_body_hashes(manifest, &actuals);
     }
@@ -371,30 +418,57 @@ fn check_receipt_chain(secret: &[u8], receipt: &Receipt, artifact_hash: &str) ->
     CheckOutcome::passed()
 }
 
-fn check_receipt_body_signature(secret: &[u8], receipt: &Receipt) -> CheckOutcome {
+fn check_receipt_body_signature(
+    secret: &[u8],
+    receipt: &Receipt,
+    receipt_json_text: Option<&str>,
+) -> CheckOutcome {
     let signature = match receipt.signature.as_deref() {
         Some(s) => s,
         None => return CheckOutcome::failed("receipt body signature missing"),
     };
+    if let Some(text) = receipt_json_text {
+        match serde_json::from_str::<Value>(text) {
+            Ok(mut value) => {
+                strip_receipt_signature_fields(&mut value);
+                let canon = canonical_json(&value);
+                if hmac_matches(secret, canon.as_bytes(), signature) {
+                    return CheckOutcome::passed();
+                }
+            }
+            Err(e) => return CheckOutcome::failed(format!("receipt json parse: {}", e)),
+        }
+    }
+
     let mut v = match serde_json::to_value(receipt) {
         Ok(v) => v,
         Err(e) => return CheckOutcome::failed(format!("receipt serialize: {}", e)),
     };
-    if let Some(obj) = v.as_object_mut() {
-        obj.remove("signature");
-    }
+    strip_receipt_signature_fields(&mut v);
     let canon = canonical_json(&v);
-    let mut mac = match HmacSha256::new_from_slice(secret) {
-        Ok(m) => m,
-        Err(_) => return CheckOutcome::failed("hmac key init failed"),
-    };
-    mac.update(canon.as_bytes());
-    let expected = hex::encode(mac.finalize().into_bytes());
-    if constant_time_eq(expected.as_bytes(), signature.as_bytes()) {
+    if hmac_matches(secret, canon.as_bytes(), signature) {
         CheckOutcome::passed()
     } else {
         CheckOutcome::failed("receipt body signature mismatch")
     }
+}
+
+fn strip_receipt_signature_fields(value: &mut Value) {
+    if let Some(obj) = value.as_object_mut() {
+        obj.remove("signature");
+        obj.remove("signature_ed25519");
+        obj.remove("signature_sigstore");
+    }
+}
+
+fn hmac_matches(secret: &[u8], body: &[u8], signature: &str) -> bool {
+    let mut mac = match HmacSha256::new_from_slice(secret) {
+        Ok(m) => m,
+        Err(_) => return false,
+    };
+    mac.update(body);
+    let expected = hex::encode(mac.finalize().into_bytes());
+    constant_time_eq(expected.as_bytes(), signature.as_bytes())
 }
 
 fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
@@ -435,6 +509,34 @@ mod tests {
             r.first_failure_reason(),
             "receipt_chain: chain[2] hmac mismatch"
         );
+    }
+
+    #[test]
+    fn receipt_body_signature_preserves_raw_json_number_shape() {
+        let secret = b"secret";
+        let mut unsigned = serde_json::json!({
+            "kolm_version": "0.1",
+            "receipt_id": "11111111-1111-1111-1111-111111111111",
+            "artifact_hash": "a".repeat(64),
+            "eval_set_hash": "b".repeat(64),
+            "eval_score": 1,
+            "judge_id": "kolm-pattern-synth-1",
+            "tier": "recipe",
+            "chain": [],
+            "anchors": [],
+            "signature_alg": "hmac-sha256",
+            "signed_at": "2026-05-08T18:18:06.568Z",
+            "signed_by": "kolm-dev-hmac-1",
+        });
+        let body = canonical_json(&unsigned);
+        let mut mac = HmacSha256::new_from_slice(secret).expect("hmac key");
+        mac.update(body.as_bytes());
+        let signature = hex::encode(mac.finalize().into_bytes());
+        unsigned["signature"] = serde_json::Value::String(signature);
+
+        let receipt: Receipt = serde_json::from_value(unsigned.clone()).expect("receipt");
+        assert!(check_receipt_body_signature(secret, &receipt, Some(&unsigned.to_string())).ok);
+        assert!(!check_receipt_body_signature(secret, &receipt, None).ok);
     }
 
     #[test]

@@ -3795,11 +3795,13 @@
           {
             "path": "packages/runtime-rs/src/wasm.rs",
             "domain": "compile_artifact_runtime",
-            "priority_score": 2,
+            "priority_score": 1,
             "risk_signals": [
               "distribution_or_worker_surface"
             ],
-            "test_refs": [],
+            "test_refs": [
+              "tests/wave928-runtime-rs-wasm-example-contract.test.js"
+            ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {

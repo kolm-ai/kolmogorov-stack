@@ -99,22 +99,31 @@ pub struct KScore {
     /// Zip size at probe time (S axis input).
     pub size_bytes: u64,
     /// Normalized size sub-score (0..1).
+    #[serde(default)]
     pub size_score: f64,
     /// Normalized latency sub-score (0..1).
+    #[serde(default)]
     pub latency_score: f64,
     /// Normalized cost sub-score (0..1).
+    #[serde(default)]
     pub cost_score: f64,
     /// Composite score (0..1).
     pub composite: f64,
     /// Whether the artifact passes the ship gate.
+    #[serde(default)]
     pub ships: bool,
     /// Ship gate threshold (`0.85` today).
+    #[serde(default = "default_k_score_gate")]
     pub gate: f64,
     /// Spec identifier (`k-score-1` or `k-score-2`).
     pub spec: String,
     /// Forward-compatible catch-all for new axes (R/F/E/Z, etc.).
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
+}
+
+fn default_k_score_gate() -> f64 {
+    0.85
 }
 
 /// Receipt stored at `receipt.json` inside a `.kolm` zip.
@@ -125,6 +134,7 @@ pub struct Receipt {
     /// Receipt UUID.
     pub receipt_id: String,
     /// Content-id this receipt covers.
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub cid: Option<String>,
     /// Hash of the artifact bytes this receipt covers.
     pub artifact_hash: String,
@@ -148,6 +158,7 @@ pub struct Receipt {
     /// Key namespace (`kolm-dev-hmac-1` today).
     pub signed_by: String,
     /// HMAC over the receipt body (with `signature` field stripped).
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub signature: Option<String>,
     /// Forward-compatible catch-all.
     #[serde(flatten)]

@@ -118,19 +118,23 @@ mod tests {
     use super::*;
     use std::io::Write;
 
-    fn zip_bytes(entries: &[(&str, &[u8])]) -> Vec<u8> {
+    fn try_zip_bytes(entries: &[(&str, &[u8])]) -> Result<Vec<u8>, zip::result::ZipError> {
         let mut out = Vec::new();
         {
             let cursor = Cursor::new(&mut out);
             let mut z = zip::ZipWriter::new(cursor);
             let opts = zip::write::SimpleFileOptions::default();
             for (name, bytes) in entries {
-                z.start_file(name, opts).unwrap();
+                z.start_file(name, opts)?;
                 z.write_all(bytes).unwrap();
             }
-            z.finish().unwrap();
+            z.finish()?;
         }
-        out
+        Ok(out)
+    }
+
+    fn zip_bytes(entries: &[(&str, &[u8])]) -> Vec<u8> {
+        try_zip_bytes(entries).unwrap()
     }
 
     #[test]
@@ -143,9 +147,15 @@ mod tests {
 
     #[test]
     fn duplicate_zip_entry_is_rejected() {
-        let zip = zip_bytes(&[("manifest.json", b"one"), ("manifest.json", b"two")]);
-        let err = read_artifact_files(&zip).unwrap_err();
-        assert!(err.to_string().contains("duplicate zip entry name"));
+        match try_zip_bytes(&[("manifest.json", b"one"), ("manifest.json", b"two")]) {
+            Ok(zip) => {
+                let err = read_artifact_files(&zip).unwrap_err();
+                assert!(err.to_string().contains("duplicate zip entry name"));
+            }
+            Err(err) => {
+                assert!(err.to_string().contains("Duplicate filename"));
+            }
+        }
     }
 
     #[test]

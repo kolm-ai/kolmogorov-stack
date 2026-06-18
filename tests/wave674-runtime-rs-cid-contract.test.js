@@ -6,6 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -20,6 +21,7 @@ function read(rel) {
 function runCargo(args) {
   return spawnSync('cargo', args, {
     cwd: ROOT,
+    env: { ...process.env, CARGO_TARGET_DIR: path.join(os.tmpdir(), 'kolm-runtime-rs-target') },
     encoding: 'utf8',
     timeout: 120000,
   });

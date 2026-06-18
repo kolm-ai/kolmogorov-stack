@@ -95,7 +95,7 @@ test('W925 LangChain package manifest is wired into direct depth verification', 
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:browser-extension-popup && npm run verify:langchain-package-manifest && npm run verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:browser-extension-popup && npm run verify:langchain-package-manifest && npm run verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.equal(target.root, 'packages/langchain-kolm');
   assert.deepEqual(target.manifests, ['package.json']);

@@ -295,7 +295,7 @@ mod tests {
         // Sanity-check the date rendering for a known epoch.
         let ts = epoch_to_civil(0);
         assert_eq!(ts, (1970, 1, 1, 0, 0, 0));
-        let ts = epoch_to_civil(1_705_000_000); // 2024-01-11T16:26:40Z
-        assert_eq!(ts, (2024, 1, 11, 16, 26, 40));
+        let ts = epoch_to_civil(1_705_000_000); // 2024-01-11T19:06:40Z
+        assert_eq!(ts, (2024, 1, 11, 19, 6, 40));
     }
 }

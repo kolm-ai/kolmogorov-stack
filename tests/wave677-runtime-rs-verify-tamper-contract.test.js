@@ -7,6 +7,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
@@ -21,6 +22,7 @@ function read(rel) {
 function runCargo(args) {
   return spawnSync('cargo', args, {
     cwd: ROOT,
+    env: { ...process.env, CARGO_TARGET_DIR: path.join(os.tmpdir(), 'kolm-runtime-rs-target') },
     encoding: 'utf8',
     timeout: 180000,
   });
@@ -37,6 +39,9 @@ test('W677 runtime-rs verifier enforces receipt chain DAG shape', () => {
   assert.match(src, /receipt\.artifact_hash != artifact_hash/);
   assert.match(src, /artifact_hash recompute mismatch/);
   assert.match(src, /compute_artifact_hash\(manifest, manifest_json_text\)/);
+  assert.match(src, /obj\.remove\("signature"\)/);
+  assert.match(src, /obj\.remove\("signature_ed25519"\)/);
+  assert.match(src, /obj\.remove\("signature_sigstore"\)/);
 });
 
 test('W677 runtime-rs tamper fixture pins signed malformed-chain regressions', () => {

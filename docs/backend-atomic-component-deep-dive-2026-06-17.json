@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 754,
-    "components_without_direct_test_reference": 75,
+    "test_referenced_components": 756,
+    "components_without_direct_test_reference": 73,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -3263,7 +3263,8 @@
         "tests/wave674-runtime-rs-cid-contract.test.js",
         "tests/wave675-runtime-rs-tofu-contract.test.js",
         "tests/wave676-runtime-rs-zip-reader-contract.test.js",
-        "tests/wave677-runtime-rs-verify-tamper-contract.test.js"
+        "tests/wave677-runtime-rs-verify-tamper-contract.test.js",
+        "tests/wave928-runtime-rs-wasm-example-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -3306,10 +3307,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "593dc3889c0cadaaf5264d888b66d9a3b38e4852d1ef0b352672c3c3d993f0ee",
+      "sha256": "db0ed58214089ec7d09088b50e7d6f391d77ea273eea6d22c4f79143819d998d",
       "metrics": {
-        "bytes": 1343,
-        "lines": 48,
+        "bytes": 11480,
+        "lines": 336,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3320,11 +3321,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave928-runtime-rs-wasm-example-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -3744,10 +3747,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "bd0757f3bd3f3df7945f2b89dca50bc701040aa16922def9c24c5b3c49ddfd74",
+      "sha256": "b5f563387959b6a66caf09472f234e169e307e6932ed3db5cc15b8d4216a28a7",
       "metrics": {
-        "bytes": 13469,
-        "lines": 350,
+        "bytes": 14364,
+        "lines": 370,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3759,7 +3762,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave674-runtime-rs-cid-contract.test.js"
+        "tests/wave674-runtime-rs-cid-contract.test.js",
+        "tests/wave928-runtime-rs-wasm-example-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -3803,10 +3807,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "844342dbf1f10d21a7fcfc800fe7539f9df2f24ac3aadb9bc6ecae295d8d3ad0",
+      "sha256": "44fcbb0103a44b2808fa5fa8ed7500ef8fb6ca8cd743a2d6778bc0873e8478de",
       "metrics": {
-        "bytes": 5884,
-        "lines": 169,
+        "bytes": 6174,
+        "lines": 180,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3869,9 +3873,9 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "20414f36cd651b182b074ca3f6d38014ca4087db451a546aeedf6582e5ba8f21",
+      "sha256": "f83e3809147178e6d3b9221a7a59895d69b955fd604a33cd6ef29d52d02c2677",
       "metrics": {
-        "bytes": 10195,
+        "bytes": 10194,
         "lines": 302,
         "imports": 0,
         "exports": 0,
@@ -3928,10 +3932,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "906b37ac47f363f8f6bc3b2890dcc626a6bbecd28d3ffc266eaae8c5ffe2c56c",
+      "sha256": "70d01cf90cc9662f49a5a538e2140c7a404871fd2864250002351cce83d6f925",
       "metrics": {
-        "bytes": 16452,
-        "lines": 448,
+        "bytes": 19748,
+        "lines": 550,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3939,7 +3943,7 @@
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 23,
+        "crypto_refs": 30,
         "markers": 0
       },
       "test_refs": [
@@ -3988,10 +3992,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "cba1ce705aa5ab562ad55df406b67b7a860852d486f65ad14446b22b504fe64b",
+      "sha256": "a2d17a3077cd85923845154780b643c2c9c25c8a92da8027019965e5719bcaf2",
       "metrics": {
-        "bytes": 1781,
-        "lines": 55,
+        "bytes": 5402,
+        "lines": 146,
         "imports": 1,
         "exports": 0,
         "routes": 0,
@@ -4002,11 +4006,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave928-runtime-rs-wasm-example-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -4044,10 +4050,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "5aa67214a754178143fd3b93ab1533e08c38fdbba6b41982d38d1f214f5be4a3",
+      "sha256": "3bfecfc81c3503337d60ab9db90a0375c757ab9cb2d73b4307e5fae2e088ccd6",
       "metrics": {
-        "bytes": 6612,
-        "lines": 196,
+        "bytes": 6918,
+        "lines": 206,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -4059,7 +4065,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave676-runtime-rs-zip-reader-contract.test.js"
+        "tests/wave676-runtime-rs-zip-reader-contract.test.js",
+        "tests/wave928-runtime-rs-wasm-example-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -4169,10 +4176,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "rust",
-      "sha256": "6185c5fc4c45fc1779478608f5c29aaf5ddc3fb3cea312d4f5eeae5e3a09099c",
+      "sha256": "50e0f7613a2d71b75a53b71eb3dec477452459b577d83881e03c4a5eff6109eb",
       "metrics": {
-        "bytes": 23545,
-        "lines": 630,
+        "bytes": 23782,
+        "lines": 639,
         "imports": 0,
         "exports": 0,
         "routes": 0,

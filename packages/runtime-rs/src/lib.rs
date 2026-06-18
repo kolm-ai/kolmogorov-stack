@@ -84,6 +84,7 @@ pub use manifest::{
 pub use tofu::{TrustEntry, TrustStore};
 pub use verify::{ActualBodyHashes, CheckOutcome, VerifyReport};
 
+use std::collections::HashMap;
 use std::path::Path;
 
 /// A loaded, parsed `.kolm` artifact.
@@ -96,6 +97,8 @@ use std::path::Path;
 pub struct Artifact {
     manifest: Manifest,
     receipt: Receipt,
+    /// The raw `receipt.json` text exactly as it appears inside the zip.
+    receipt_json: String,
     recipes_json: String,
     signature_json: String,
     manifest_json: String,
@@ -127,8 +130,22 @@ impl Artifact {
 
     /// Load an artifact from an in-memory zip buffer.
     pub fn load_from_bytes(bytes: &[u8]) -> Result<Self, Error> {
+        Self::load_from_bytes_with_limits(bytes, zip_reader::ZipReadLimits::default())
+    }
+
+    /// Load an artifact from an in-memory zip buffer using explicit zip
+    /// extraction limits. Browser, FFI, and service edges should prefer this
+    /// entry point when the caller can receive untrusted artifact bytes.
+    pub fn load_from_bytes_with_limits(
+        bytes: &[u8],
+        limits: zip_reader::ZipReadLimits,
+    ) -> Result<Self, Error> {
+        let files = zip_reader::read_artifact_files_with_limits(bytes, limits)?;
+        Self::from_artifact_files(files)
+    }
+
+    fn from_artifact_files(files: HashMap<String, Vec<u8>>) -> Result<Self, Error> {
         use sha2::{Digest, Sha256};
-        let files = zip_reader::read_artifact_files(bytes)?;
         let manifest_json = files
             .get("manifest.json")
             .ok_or_else(|| Error::MissingFile("manifest.json".into()))?
@@ -146,7 +163,8 @@ impl Artifact {
             .get("receipt.json")
             .ok_or_else(|| Error::MissingFile("receipt.json".into()))?
             .clone();
-        let receipt: Receipt = serde_json::from_slice(&receipt_bytes).map_err(Error::Json)?;
+        let receipt_json = String::from_utf8(receipt_bytes).map_err(Error::Utf8)?;
+        let receipt: Receipt = serde_json::from_str(&receipt_json).map_err(Error::Json)?;
         let recipes_json = String::from_utf8(recipes_json_bytes.clone()).map_err(Error::Utf8)?;
         let signature_json = String::from_utf8(signature_json_bytes).map_err(Error::Utf8)?;
         let manifest_str = String::from_utf8(manifest_json.clone()).map_err(Error::Utf8)?;
@@ -173,6 +191,7 @@ impl Artifact {
         Ok(Self {
             manifest,
             receipt,
+            receipt_json,
             recipes_json,
             signature_json,
             manifest_json: manifest_str,
@@ -224,11 +243,12 @@ impl Artifact {
             evals_json: &self.evals_json_actual_sha256,
             model_pointer: &self.model_pointer_actual_sha256,
         };
-        verify::verify_report(
+        verify::verify_report_with_receipt_json(
             secret.as_bytes(),
             &self.manifest,
             &self.manifest_json,
             &self.receipt,
+            &self.receipt_json,
             &self.signature_json,
             &self.cid,
             Some(actuals),
