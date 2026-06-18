@@ -10,7 +10,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 100,
-    "frontier_product_score": 82.2,
+    "frontier_product_score": 83.2,
     "readiness_proof_surplus_score": 104.3,
     "readiness_proof_surplus_ceiling": 110,
     "score_notes": [
@@ -47,9 +47,9 @@
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 3,
-    "categories_with_major_frontier_work_open": 12,
+    "categories_with_major_frontier_work_open": 11,
     "critical_sota_category_closed_pct": 81.3,
-    "major_sota_category_closed_pct": 25,
+    "major_sota_category_closed_pct": 31.3,
     "readiness": {
       "total": 57,
       "closed": 49,
@@ -288,11 +288,11 @@
     {
       "id": "mcp-tool-gateway-receipts",
       "stack_area": "agent-integrations",
-      "status": "sota_review_complete_major_frontier_work_open",
-      "already_at_frontier_count": 11,
-      "improvement_count": 2,
+      "status": "sota_review_complete_external_or_release_gate_open",
+      "already_at_frontier_count": 12,
+      "improvement_count": 1,
       "critical_gaps": 0,
-      "major_gaps": 1,
+      "major_gaps": 0,
       "minor_gaps": 2,
       "required_components": 3,
       "suggested_verification": [
@@ -522,7 +522,7 @@
         {
           "id": "mcp-tool-gateway-receipts",
           "stack_area": "agent-integrations",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1055,7 +1055,7 @@
         {
           "id": "mcp-tool-gateway-receipts",
           "stack_area": "agent-integrations",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1999,7 +1999,7 @@
         {
           "id": "mcp-tool-gateway-receipts",
           "stack_area": "agent-integrations",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -10208,7 +10208,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -10280,7 +10280,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -10292,10 +10292,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "cli/kolm.js",
@@ -10356,7 +10354,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -10837,7 +10835,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -10848,10 +10846,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "packages/attestation/tests/attestation.test.js",
@@ -14393,7 +14389,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -14405,10 +14401,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-ts/src/index.ts",
@@ -17431,7 +17425,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -17443,10 +17437,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "src/assistant.js",
@@ -17658,7 +17650,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -18165,7 +18157,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -18176,10 +18168,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/audit-routes.js",
@@ -29021,7 +29011,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -29038,10 +29028,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/egress-analyzer.js",
@@ -32937,7 +32925,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -32949,10 +32937,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/intoto-receipt.js",
@@ -32998,7 +32984,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -33009,10 +32995,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/intoto-slsa.js",
@@ -35899,8 +35883,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 11988,
-          "lines": 299,
+          "bytes": 13398,
+          "lines": 329,
           "imports": 2,
           "exports": 3,
           "routes": 2,
@@ -35918,7 +35902,7 @@
         ],
         "priority_score": 7,
         "priority_band": "high",
-        "sha256": "c68c1e3c6d0cc44cbb3b28ca84b1632c88339e6f6453cccf797d13823e4076e1"
+        "sha256": "99933b6591444e9e4a6ee8a23869c86463348e62343b6600d379276961fda2eb"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -35930,7 +35914,8 @@
           "tests/wave-mcp-anchor-guardrail.test.js",
           "tests/wave609-mcp-prod-wiring.test.js",
           "tests/wave641-mcp-upstream-registry.test.js",
-          "tests/wave921-mcp-signed-receipts.test.js"
+          "tests/wave921-mcp-signed-receipts.test.js",
+          "tests/wave966-mcp-tool-contract-pinning.test.js"
         ],
         "category_links": [
           {
@@ -35942,7 +35927,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           },
           {
@@ -35973,16 +35958,16 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 19978,
-          "lines": 486,
+          "bytes": 25081,
+          "lines": 596,
           "imports": 4,
-          "exports": 11,
+          "exports": 14,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 29,
+          "crypto_refs": 30,
           "markers": 0
         },
         "risk_signals": [
@@ -35991,7 +35976,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "208f523f7fd3d7e109d2e33bbe75e13703a95e098a039ae584d34fe6e9359da5"
+        "sha256": "5b9a76a3f7f455039405ddc224355bac04b2186aa6c3ddd5c59b567e56703bff"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -36006,13 +35991,14 @@
           "tests/wave609-mcp-prod-wiring.test.js",
           "tests/wave641-mcp-upstream-registry.test.js",
           "tests/wave921-intoto-attestation.test.js",
-          "tests/wave921-mcp-signed-receipts.test.js"
+          "tests/wave921-mcp-signed-receipts.test.js",
+          "tests/wave966-mcp-tool-contract-pinning.test.js"
         ],
         "category_links": [
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -36023,10 +36009,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: closed_loop_routing_outcome_learning_and_verified_cache."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep closed_loop_routing_outcome_learning_and_verified_cache current."
     },
     {
       "path": "src/mcp-server.js",
@@ -36085,9 +36069,9 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 10863,
-          "lines": 277,
-          "imports": 0,
+          "bytes": 12860,
+          "lines": 325,
+          "imports": 1,
           "exports": 8,
           "routes": 0,
           "env_refs": 4,
@@ -36103,7 +36087,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "e2a052a63baf854c3ef25d68d709649c1959cf6ceecfb0cbfb88142e2877e059"
+        "sha256": "732fd2f04ac1d7fe10786b696bbb38d722fbac378afc91c1006c4110e480c91d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -36112,7 +36096,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave641-mcp-upstream-registry.test.js"
+          "tests/wave641-mcp-upstream-registry.test.js",
+          "tests/wave966-mcp-tool-contract-pinning.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -39892,7 +39877,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -42918,8 +42903,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1471182,
-          "lines": 30850,
+          "bytes": 1471320,
+          "lines": 30851,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -42941,7 +42926,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "43aa7125bd21bac349b0988673d629b5096ec70fa511143efc66016acb2c32f3"
+        "sha256": "dd74024507f8e2de9f04745a6f99681993670d6dd2b3463881aa09f0ea8a7ca6"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -45718,7 +45703,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -48736,7 +48721,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -52707,7 +52692,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -52718,10 +52703,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: closed_loop_routing_outcome_learning_and_verified_cache."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep closed_loop_routing_outcome_learning_and_verified_cache current."
     },
     {
       "path": "workers/itkv/package.json",
@@ -53022,7 +53005,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -53148,7 +53131,7 @@
           {
             "id": "mcp-tool-gateway-receipts",
             "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -53159,10 +53142,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "workers/multimodal-redact-image/package.json",

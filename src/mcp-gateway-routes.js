@@ -88,6 +88,8 @@ function _makePersistence(deps) {
             tenant_id: tenant,
             tenant,
             tool: receipt.tool,
+            tool_contract_hash: receipt.tool_contract_hash || null,
+            tool_contract_source: receipt.tool_contract_source || null,
             receipt,
             at: receipt.timestamp,
           });
@@ -174,6 +176,7 @@ export function register(r, deps = {}) {
     // MCP wire uses params.arguments; accept `args` as an alias for ergonomics.
     const args = (body.arguments != null) ? body.arguments
       : (body.args != null ? body.args : {});
+    const server_id = body.server_id != null ? String(body.server_id) : null;
 
     // Resolve the per-tenant guardrail config (opt-in). A thrown resolver must
     // never take down dispatch - degrade to no screening.
@@ -183,10 +186,28 @@ export function register(r, deps = {}) {
     }
 
     try {
+      let toolContract = null;
+      let toolContractSource = 'unregistered';
+      if (typeof deps.toolContractFor === 'function') {
+        const resolved = deps.toolContractFor({ tool, tenant, server_id });
+        if (resolved && typeof resolved === 'object') {
+          toolContract = resolved;
+          toolContractSource = 'registry';
+        }
+      }
+      if (!toolContract && body.tool_contract && typeof body.tool_contract === 'object' && !Array.isArray(body.tool_contract)) {
+        toolContract = body.tool_contract;
+        toolContractSource = 'client_supplied';
+      }
+      const expectedToolContractHash = body.expected_tool_contract_hash || body.expectedToolContractHash || null;
+
       const out = await wrapToolCall({
         tool,
         tenant,
         args,
+        tool_contract: toolContract,
+        tool_contract_source: toolContractSource,
+        expected_tool_contract_hash: expectedToolContractHash,
         // precomputed result if the caller already invoked the tool; else the
         // injected executor runs it. `undefined` (not present) triggers execute.
         result: ('result' in body) ? body.result : undefined,
@@ -195,7 +216,7 @@ export function register(r, deps = {}) {
         now: (typeof body.now === 'number' || typeof body.now === 'string') ? body.now : undefined,
         call_id: body.call_id ? String(body.call_id) : undefined,
         transport: body.transport != null ? String(body.transport) : null,
-        server_id: body.server_id != null ? String(body.server_id) : null,
+        server_id,
         guardrail,
       });
 
@@ -234,6 +255,15 @@ export function register(r, deps = {}) {
           error: 'mcp_guardrail_blocked',
           stage: e.stage || null,
           verdict: e.verdict || null,
+          version: MCP_GATEWAY_ROUTES_VERSION,
+        });
+      }
+      if (e && e.code === 'mcp_tool_contract_hash_mismatch') {
+        return res.status(409).json({
+          ok: false,
+          error: 'mcp_tool_contract_hash_mismatch',
+          expected_tool_contract_hash: e.expected_tool_contract_hash || null,
+          actual_tool_contract_hash: e.actual_tool_contract_hash || null,
           version: MCP_GATEWAY_ROUTES_VERSION,
         });
       }

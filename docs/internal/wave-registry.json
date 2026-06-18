@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 410,
+    "orphan_tests": 411,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 413,
+    "state_local_green": 414,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 590,
-    "test_only_waves": 410,
-    "waves": 426
+    "test_files": 591,
+    "test_only_waves": 411,
+    "waves": 427
   },
-  "generated_at": "2026-06-18T22:05:43.120Z",
+  "generated_at": "2026-06-18T22:21:02.704Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -490,7 +490,8 @@
       "W956",
       "W957",
       "W958",
-      "W959"
+      "W959",
+      "W966"
     ],
     "plan_only_waves": [
       "W850",
@@ -909,7 +910,8 @@
       "W956",
       "W957",
       "W958",
-      "W959"
+      "W959",
+      "W966"
     ]
   },
   "schema": "kolm.wave_registry.v1",
@@ -4385,7 +4387,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave921-mcp-signed-receipts.test.js tests/wave-mcp-anchor-guardrail.test.js tests/wave609-mcp-prod-wiring.test.js tests/wave641-mcp-upstream-registry.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave921-mcp-signed-receipts.test.js tests/wave-mcp-anchor-guardrail.test.js tests/wave609-mcp-prod-wiring.test.js tests/wave641-mcp-upstream-registry.test.js tests/wave966-mcp-tool-contract-pinning.test.js",
           "script": "npm:verify:mcp-receipts"
         }
       ],
@@ -4594,7 +4596,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave921-mcp-signed-receipts.test.js tests/wave-mcp-anchor-guardrail.test.js tests/wave609-mcp-prod-wiring.test.js tests/wave641-mcp-upstream-registry.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave921-mcp-signed-receipts.test.js tests/wave-mcp-anchor-guardrail.test.js tests/wave609-mcp-prod-wiring.test.js tests/wave641-mcp-upstream-registry.test.js tests/wave966-mcp-tool-contract-pinning.test.js",
           "script": "npm:verify:mcp-receipts"
         }
       ],
@@ -7283,7 +7285,7 @@
           "script": "npm:verify:llm-routing"
         },
         {
-          "command": "node --test --test-concurrency=1 tests/wave921-mcp-signed-receipts.test.js tests/wave-mcp-anchor-guardrail.test.js tests/wave609-mcp-prod-wiring.test.js tests/wave641-mcp-upstream-registry.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave921-mcp-signed-receipts.test.js tests/wave-mcp-anchor-guardrail.test.js tests/wave609-mcp-prod-wiring.test.js tests/wave641-mcp-upstream-registry.test.js tests/wave966-mcp-tool-contract-pinning.test.js",
           "script": "npm:verify:mcp-receipts"
         },
         {
@@ -8046,6 +8048,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave959-browser-webgpu-runner.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W966",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wave921-mcp-signed-receipts.test.js tests/wave-mcp-anchor-guardrail.test.js tests/wave609-mcp-prod-wiring.test.js tests/wave641-mcp-upstream-registry.test.js tests/wave966-mcp-tool-contract-pinning.test.js",
+          "script": "npm:verify:mcp-receipts"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave966-mcp-tool-contract-pinning.test.js"
       ],
       "test_letter_suffixes": []
     }

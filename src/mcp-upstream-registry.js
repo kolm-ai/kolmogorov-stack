@@ -13,6 +13,8 @@
 //   - JSON-RPC errors become signed MCP tool error results; transport errors
 //     remain route errors because no tool result was produced
 
+import { normalizeMcpToolContract } from './mcp-gateway.js';
+
 export const MCP_UPSTREAM_REGISTRY_VERSION = 'w641-mcp-upstream-registry-v1';
 export const MCP_LATEST_PROTOCOL_VERSION = '2025-11-25';
 
@@ -29,6 +31,10 @@ function _array(v) {
     return v.split(',').map((x) => x.trim()).filter(Boolean);
   }
   return [];
+}
+
+function _plainObject(v) {
+  return v && typeof v === 'object' && !Array.isArray(v);
 }
 
 function _err(code, message, extra = {}) {
@@ -65,12 +71,46 @@ function _headersFromConfig(server, env) {
   return headers;
 }
 
+function _normalizeToolEntry(entry) {
+  if (typeof entry === 'string') {
+    const name = entry.trim();
+    return TOOL_NAME_RE.test(name) ? { name, contract: null } : null;
+  }
+  if (!_plainObject(entry)) return null;
+  const contract = normalizeMcpToolContract(entry);
+  const name = contract && contract.name ? contract.name : _asString(entry.name);
+  if (!TOOL_NAME_RE.test(name)) return null;
+  return { name, contract: contract || { name } };
+}
+
+function _toolEntriesFromConfig(server) {
+  const entries = _array(server.tools || server.tool_names).map(_normalizeToolEntry).filter(Boolean);
+  const contractMap = _plainObject(server.tool_contracts || server.toolContracts)
+    ? (server.tool_contracts || server.toolContracts)
+    : {};
+  for (const [name, raw] of Object.entries(contractMap)) {
+    const contract = normalizeMcpToolContract({ ...(_plainObject(raw) ? raw : {}), name });
+    if (contract && TOOL_NAME_RE.test(contract.name)) entries.push({ name: contract.name, contract });
+  }
+  const byName = new Map();
+  for (const entry of entries) {
+    const existing = byName.get(entry.name);
+    if (!existing || (!existing.contract && entry.contract)) byName.set(entry.name, entry);
+  }
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 function _normalizeServer(raw, env, index) {
   const server = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
   const id = _asString(server.id || server.server_id || `mcp-${index + 1}`);
   const transport = _asString(server.transport || 'http').toLowerCase();
   const url = _asString(server.url || server.endpoint);
-  const tools = _array(server.tools || server.tool_names).filter((tool) => TOOL_NAME_RE.test(tool));
+  const toolEntries = _toolEntriesFromConfig(server);
+  const tools = toolEntries.map((entry) => entry.name);
+  const tool_contracts = {};
+  for (const entry of toolEntries) {
+    if (entry.contract) tool_contracts[entry.name] = entry.contract;
+  }
   const tenants = _array(server.tenants || server.tenant_ids).map(String);
   const timeout_ms = Number(server.timeout_ms || server.timeoutMs || 10000);
   const protocol_version = _asString(server.protocol_version || server.protocolVersion || MCP_LATEST_PROTOCOL_VERSION);
@@ -86,6 +126,7 @@ function _normalizeServer(raw, env, index) {
     transport,
     url,
     tools: [...new Set(tools)].sort(),
+    tool_contracts,
     tenants: [...new Set(tenants)].sort(),
     timeout_ms: Number.isFinite(timeout_ms) && timeout_ms > 0 ? Math.min(timeout_ms, 120000) : 10000,
     protocol_version,
@@ -223,6 +264,7 @@ export function makeMcpUpstreamRegistry(opts = {}) {
         transport: server.transport,
         url: server.url,
         tools: server.tools.slice(),
+        tool_contracts: { ...server.tool_contracts },
         tenants: server.tenants.slice(),
         protocol_version: server.protocol_version,
         timeout_ms: server.timeout_ms,
@@ -230,6 +272,11 @@ export function makeMcpUpstreamRegistry(opts = {}) {
     },
     resolve({ tool, tenant, server_id } = {}) {
       return _resolveServer(servers, { tool, tenant, server_id });
+    },
+    toolContractFor({ tool, tenant, server_id } = {}) {
+      const server = _resolveServer(servers, { tool, tenant, server_id });
+      const contract = server.tool_contracts && server.tool_contracts[tool];
+      return contract ? { ...contract } : null;
     },
     async execute({ tool, args = {}, tenant, server_id } = {}) {
       if (typeof fetchImpl !== 'function') {
@@ -262,6 +309,7 @@ export function makeMcpUpstreamExecutorFromEnv(opts = {}) {
     configured: registry.configured,
     registry,
     execute: registry.configured ? registry.execute : undefined,
+    toolContractFor: registry.configured ? registry.toolContractFor : undefined,
   };
 }
 

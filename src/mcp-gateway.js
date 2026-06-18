@@ -140,12 +140,16 @@ export const MCP_SIGNED_FIELDS = Object.freeze([
   'timestamp',
   'tenant_id',
   'tool',
+  'tool_contract_hash',
+  'tool_contract_source',
   'args_hash',
   'result_hash',
   'is_error',
   'transport',
   'server_id',
 ]);
+
+const TOOL_CONTRACT_SOURCE_RE = /^[A-Za-z0-9_.:-]{1,64}$/;
 
 function _sha256Hex(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');
@@ -159,6 +163,89 @@ function _hashCanonical(value) {
   // normalize absent payloads to null so the hash is stable + documented.
   const v = value === undefined ? null : value;
   return `sha256:${_sha256Hex(Buffer.from(canonicalJson(v), 'utf8'))}`;
+}
+
+function _plainObject(v) {
+  return v && typeof v === 'object' && !Array.isArray(v);
+}
+
+function _optionalString(v, max = 4096) {
+  return typeof v === 'string' && v ? v.slice(0, max) : null;
+}
+
+function _normalizeSha256Hash(v) {
+  if (v == null || v === '') return null;
+  const s = String(v).trim();
+  return /^sha256:[0-9a-f]{64}$/.test(s) ? s : null;
+}
+
+function _normalizeToolContractSource(v, hasContract) {
+  const raw = typeof v === 'string' ? v.trim() : '';
+  if (raw && TOOL_CONTRACT_SOURCE_RE.test(raw)) return raw;
+  return hasContract ? 'inline' : 'unregistered';
+}
+
+function _toolContractMismatchError(expected, actual) {
+  const e = new Error(`MCP tool contract hash mismatch: expected ${expected || 'none'}, got ${actual || 'none'}`);
+  e.code = 'mcp_tool_contract_hash_mismatch';
+  e.expected_tool_contract_hash = expected || null;
+  e.actual_tool_contract_hash = actual || null;
+  return e;
+}
+
+function _assertExpectedToolContract(expected, actual) {
+  if (expected == null || expected === '') return;
+  const normalizedExpected = _normalizeSha256Hash(expected);
+  if (!normalizedExpected || normalizedExpected !== (actual || null)) {
+    throw _toolContractMismatchError(normalizedExpected || String(expected), actual || null);
+  }
+}
+
+/**
+ * normalizeMcpToolContract - canonical projection of an MCP Tool descriptor.
+ *
+ * The latest MCP tools spec defines the model-visible contract as fields such
+ * as name, title, description, inputSchema, outputSchema, annotations,
+ * execution, and icons. This projection intentionally excludes per-call args,
+ * result bytes, auth headers, and transient registry bookkeeping so the hash
+ * detects descriptor rug pulls without binding secrets or runtime state.
+ */
+export function normalizeMcpToolContract(contract, fallbackName = null) {
+  if (!_plainObject(contract)) return null;
+  const name = _optionalString(contract.name, 128) || _optionalString(fallbackName, 128);
+  if (!name) return null;
+  const out = { name };
+  const title = _optionalString(contract.title, 512);
+  const description = _optionalString(contract.description, 8192);
+  if (title) out.title = title;
+  if (description) out.description = description;
+  const inputSchema = _plainObject(contract.inputSchema) ? contract.inputSchema
+    : (_plainObject(contract.input_schema) ? contract.input_schema : null);
+  const outputSchema = _plainObject(contract.outputSchema) ? contract.outputSchema
+    : (_plainObject(contract.output_schema) ? contract.output_schema : null);
+  if (inputSchema) out.inputSchema = inputSchema;
+  if (outputSchema) out.outputSchema = outputSchema;
+  if (_plainObject(contract.annotations)) out.annotations = contract.annotations;
+  if (_plainObject(contract.execution)) out.execution = contract.execution;
+  if (Array.isArray(contract.icons)) out.icons = contract.icons;
+  return out;
+}
+
+export function hashMcpToolContract(contract, fallbackName = null) {
+  const normalized = normalizeMcpToolContract(contract, fallbackName);
+  return normalized ? _hashCanonical(normalized) : null;
+}
+
+export function verifyMcpToolContract(receipt) {
+  if (!receipt || typeof receipt !== 'object') return { ok: false, reason: 'receipt missing or not an object' };
+  const expected = _normalizeSha256Hash(receipt.tool_contract_hash);
+  if (!expected) return { ok: false, reason: 'receipt has no pinned tool_contract_hash' };
+  const actual = hashMcpToolContract(receipt.tool_contract, receipt.tool);
+  if (!actual) return { ok: false, reason: 'receipt has no verifiable tool_contract descriptor' };
+  if (actual !== expected) {
+    return { ok: false, reason: 'tool_contract hash mismatch', expected_tool_contract_hash: expected, actual_tool_contract_hash: actual };
+  }
+  return { ok: true, tool_contract_hash: actual, tool_contract_source: receipt.tool_contract_source || null };
 }
 
 /**
@@ -266,6 +353,12 @@ export function buildMcpReceipt(opts = {}) {
 
   const args_hash = opts.args_hash || hashMcpArgs(opts.args);
   const result_hash = opts.result_hash || hashMcpResult(opts.result);
+  const toolContract = normalizeMcpToolContract(opts.tool_contract || opts.tool_descriptor, tool);
+  const tool_contract_hash = opts.tool_contract_hash !== undefined
+    ? _normalizeSha256Hash(opts.tool_contract_hash)
+    : hashMcpToolContract(toolContract, tool);
+  _assertExpectedToolContract(opts.expected_tool_contract_hash, tool_contract_hash);
+  const tool_contract_source = _normalizeToolContractSource(opts.tool_contract_source, !!tool_contract_hash);
   const is_error = typeof opts.is_error === 'boolean'
     ? opts.is_error
     : !!(opts.result && typeof opts.result === 'object' && !Array.isArray(opts.result) && opts.result.isError);
@@ -279,6 +372,8 @@ export function buildMcpReceipt(opts = {}) {
     timestamp: _isoFrom(opts.now),
     tenant_id: tenant,
     tool,
+    tool_contract_hash,
+    tool_contract_source,
     args_hash,
     result_hash,
     is_error,
@@ -396,6 +491,12 @@ export async function wrapToolCall(opts = {}) {
   const tool = String(opts.tool == null ? '' : opts.tool);
   const tenant = String(opts.tenant == null ? '' : opts.tenant);
   const args = opts.args == null ? {} : opts.args;
+  const toolContract = normalizeMcpToolContract(opts.tool_contract || opts.tool_descriptor, tool);
+  const tool_contract_hash = opts.tool_contract_hash !== undefined
+    ? _normalizeSha256Hash(opts.tool_contract_hash)
+    : hashMcpToolContract(toolContract, tool);
+  _assertExpectedToolContract(opts.expected_tool_contract_hash, tool_contract_hash);
+  const tool_contract_source = _normalizeToolContractSource(opts.tool_contract_source, !!tool_contract_hash);
 
   // OPT-IN guardrail screening (mirrors the gateway's applyGuardrail). When no
   // config is supplied the legacy path runs untouched (out.guardrail === null,
@@ -442,6 +543,8 @@ export async function wrapToolCall(opts = {}) {
     tenant,
     args_hash,
     result_hash,
+    tool_contract_hash,
+    tool_contract_source,
     is_error: !!(result && typeof result === 'object' && !Array.isArray(result) && result.isError),
     now: opts.now,
     call_id: opts.call_id,
@@ -449,6 +552,10 @@ export async function wrapToolCall(opts = {}) {
     server_id: opts.server_id,
   });
   const receipt = signMcpReceipt(unsigned, opts.signer, { signed_at: opts.signed_at });
+
+  if (toolContract) {
+    receipt.tool_contract = toolContract;
+  }
 
   // Stamp the (NON-signed) guardrail verdicts onto the receipt. The signature
   // covers only MCP_SIGNED_FIELDS, so this field is outside the signed bytes -
@@ -476,6 +583,9 @@ export default {
   MCP_SIGNED_FIELDS,
   hashMcpArgs,
   hashMcpResult,
+  normalizeMcpToolContract,
+  hashMcpToolContract,
+  verifyMcpToolContract,
   mcpToolCallId,
   buildMcpReceipt,
   signMcpReceipt,

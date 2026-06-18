@@ -30087,6 +30087,7 @@ res.json({
     getSigner: __w609GetReceiptSigner,
     anchorBatcher: __w609McpAnchorBatcher,
     ...(__w641McpUpstream.configured && __w641McpUpstream.execute ? { execute: __w641McpUpstream.execute } : {}),
+    ...(__w641McpUpstream.configured && __w641McpUpstream.toolContractFor ? { toolContractFor: __w641McpUpstream.toolContractFor } : {}),
   });
 
   // Agent Security-Review audit - the signed evidence-report surface. Mounts

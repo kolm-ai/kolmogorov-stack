@@ -70,6 +70,7 @@ test('1. router mounts MCP and in-toto receipt routes with prod store/signer/anc
   assert.match(src, /__registerMcpGatewayRoutes_w921\(r, \{/);
   assert.match(src, /anchorBatcher: __w609McpAnchorBatcher/);
   assert.match(src, /execute: __w641McpUpstream\.execute/);
+  assert.match(src, /toolContractFor: __w641McpUpstream\.toolContractFor/);
 });
 
 test('1b. backend spec records W609/W640/W641 closures and leaves remaining policy gaps open', () => {
