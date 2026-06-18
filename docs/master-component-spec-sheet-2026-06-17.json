@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 93.7,
-    "frontier_product_score": 70.1,
+    "local_engineering_score": 93.8,
+    "frontier_product_score": 70.2,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 730,
-    "direct_test_reference_pct": 88.1,
-    "components_without_direct_test_reference": 99,
+    "direct_test_referenced_components": 731,
+    "direct_test_reference_pct": 88.2,
+    "components_without_direct_test_reference": 98,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -26844,7 +26844,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave688-marketplace-store-contract.test.js"
+          "tests/wave688-marketplace-store-contract.test.js",
+          "tests/wave709-usage-analytics-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof",
@@ -39522,10 +39523,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 5441,
-          "lines": 153,
+          "bytes": 7496,
+          "lines": 211,
           "imports": 0,
-          "exports": 5,
+          "exports": 8,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -39537,9 +39538,9 @@
         "risk_signals": [
           "money_or_entitlement_path"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "2dab11b610607ae2f299d9d6bd6f75d74fcc81bbf6d7935626e4606496d869e4"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "5ede8ebb100cd2ee53ee58689150e0d137e5f1e3b324daba182b6ed9a2aee0b1"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -39547,7 +39548,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave709-usage-analytics-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof",
         "innovation_opportunity": "Bind Stripe event id, entitlement grant, artifact delivery, and invoice line into one signed fulfillment chain.",
@@ -39555,10 +39558,8 @@
           "node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep signed_entitlement_ledger_and_webhook_idempotency_proof current."
     },
     {
       "path": "src/usage.js",

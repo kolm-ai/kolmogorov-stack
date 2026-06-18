@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 730,
-    "components_without_direct_test_reference": 99,
+    "test_referenced_components": 731,
+    "components_without_direct_test_reference": 98,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -29494,7 +29494,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave688-marketplace-store-contract.test.js"
+        "tests/wave688-marketplace-store-contract.test.js",
+        "tests/wave709-usage-analytics-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -44426,12 +44427,12 @@
       "surface": "core-backend",
       "domain": "billing_marketplace",
       "language": "javascript",
-      "sha256": "2dab11b610607ae2f299d9d6bd6f75d74fcc81bbf6d7935626e4606496d869e4",
+      "sha256": "5ede8ebb100cd2ee53ee58689150e0d137e5f1e3b324daba182b6ed9a2aee0b1",
       "metrics": {
-        "bytes": 5441,
-        "lines": 153,
+        "bytes": 7496,
+        "lines": 211,
         "imports": 0,
-        "exports": 5,
+        "exports": 8,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -44440,11 +44441,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave709-usage-analytics-contract.test.js"
+      ],
       "risk_signals": [
         "money_or_entitlement_path"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
