@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 743,
-    "components_without_direct_test_reference": 86,
+    "test_referenced_components": 744,
+    "components_without_direct_test_reference": 85,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -37579,10 +37579,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "d5a3b3aa85a61827204e67f033106c32d68aa24c0e18259f1529dbc846ba4d2f",
+      "sha256": "2ebc24161c8383a950d599c79a96afeeaa1670d6d50bdfcf37066fd17a442040",
       "metrics": {
-        "bytes": 1470473,
-        "lines": 30836,
+        "bytes": 1470754,
+        "lines": 30844,
         "imports": 535,
         "exports": 8,
         "routes": 810,
@@ -37590,7 +37590,7 @@
         "fs_writes": 1,
         "subprocess_refs": 44,
         "network_refs": 34,
-        "crypto_refs": 287,
+        "crypto_refs": 290,
         "markers": 0
       },
       "test_refs": [
@@ -45111,25 +45111,34 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "56357287ad7b56780e46b8e6038ef11fb1a176748ff3784c46829ea2ffa0639f",
+      "sha256": "12986a24fcf5981321c5f64880ce0a78d1a37bd0d56a2474ee8c6d69199c9bb1",
       "metrics": {
-        "bytes": 10025,
-        "lines": 262,
+        "bytes": 15175,
+        "lines": 401,
         "imports": 1,
-        "exports": 3,
+        "exports": 5,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 3,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave687-licensing-allowlist-contract.test.js",
+        "tests/wave715-savings-routes-contract.test.js",
+        "tests/wave730-scim-provisioning-contract.test.js",
+        "tests/wave731-trend-extract-contract.test.js",
+        "tests/wave732-verticals-contract.test.js",
+        "tests/wave733-video-bakeoff-contract.test.js",
+        "tests/wave734-video-capture-contract.test.js",
+        "tests/wave735-vision-capture-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

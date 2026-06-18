@@ -40,6 +40,16 @@
 import crypto from 'node:crypto';
 
 export const VLM_BAKEOFF_VERSION = 'w771-v1';
+export const VLM_BAKEOFF_CONTRACT_VERSION = 'w740-vlm-bakeoff-v1';
+export const VLM_BAKEOFF_LIMITS = Object.freeze({
+  hard_max_n: 500,
+  max_store_scan_rows: 1000,
+  max_tenant_id_chars: 160,
+  max_namespace_chars: 128,
+  max_artifact_path_chars: 512,
+  max_judge_kind_chars: 64,
+  max_text_chars: 16000,
+});
 
 // Image-kind bucket vocabulary. Frozen so the bakeoff envelope's
 // `by_image_kind` shape is stable across calls and a schema sweep can
@@ -55,6 +65,74 @@ export const VLM_IMAGE_KINDS = Object.freeze([
 // =============================================================================
 // Internal helpers.
 // =============================================================================
+
+const SAFE_ID_RE = /^[A-Za-z0-9_.:@-]+$/;
+const SAFE_NAMESPACE_RE = /^[A-Za-z0-9_.:@/-]+$/;
+const SAFE_JUDGE_KIND_RE = /^[A-Za-z0-9_.:@-]+$/;
+
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value || ''), 'utf8').digest('hex');
+}
+
+function _cleanStrictText(value, maxChars) {
+  if (value == null) return null;
+  const raw = String(value);
+  if (/[\u0000-\u001f\u007f]/.test(raw)) return null;
+  const cleaned = raw.replace(/\s+/g, ' ').trim();
+  if (!cleaned || cleaned.length > maxChars) return null;
+  return cleaned;
+}
+
+function _cleanLooseText(value, maxChars) {
+  if (value == null) return '';
+  const cleaned = String(value)
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned.length > maxChars ? cleaned.slice(0, maxChars) : cleaned;
+}
+
+function _normalizeTenantId(value) {
+  const cleaned = _cleanStrictText(value, VLM_BAKEOFF_LIMITS.max_tenant_id_chars);
+  return cleaned && SAFE_ID_RE.test(cleaned) ? cleaned : null;
+}
+
+function _normalizeNamespace(value) {
+  if (value == null || value === '') return null;
+  const cleaned = _cleanStrictText(value, VLM_BAKEOFF_LIMITS.max_namespace_chars);
+  return cleaned && SAFE_NAMESPACE_RE.test(cleaned) ? cleaned : null;
+}
+
+function _normalizeArtifactPath(value) {
+  if (value == null || value === '') return null;
+  return _cleanStrictText(value, VLM_BAKEOFF_LIMITS.max_artifact_path_chars);
+}
+
+function _normalizeJudgeKind(value) {
+  const cleaned = _cleanStrictText(value, VLM_BAKEOFF_LIMITS.max_judge_kind_chars);
+  return cleaned && SAFE_JUDGE_KIND_RE.test(cleaned) ? cleaned : 'heuristic';
+}
+
+function _errorEnvelope(error, detail, extra = {}) {
+  return {
+    ok: false,
+    error,
+    version: VLM_BAKEOFF_VERSION,
+    contract_version: VLM_BAKEOFF_CONTRACT_VERSION,
+    error_sha256: _sha256Hex(detail || error),
+    ...extra,
+  };
+}
+
+function _nowIso(opts) {
+  const ms = opts && Number(opts.now_ms);
+  if (Number.isFinite(ms)) return new Date(ms).toISOString();
+  if (opts && typeof opts.now_iso === 'string') {
+    const t = Date.parse(opts.now_iso);
+    if (Number.isFinite(t)) return new Date(t).toISOString();
+  }
+  return new Date().toISOString();
+}
 
 // Tokenize a string into lowercase word tokens for the heuristic judge.
 // Same lowering + punctuation strip as src/multimodal-bakeoff.js so the
@@ -138,50 +216,85 @@ export async function runVlmBakeoff({
   max_n = 100,
   opts = {},
 } = {}) {
-  if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_id_required',
-      hint: 'pass {tenant_id: "<id>"}. Vision bake-off is tenant-scoped.',
-      version: VLM_BAKEOFF_VERSION,
-    };
+  const tenantId = _normalizeTenantId(tenant_id);
+  if (!tenantId) {
+    return _errorEnvelope('tenant_id_required', 'invalid_tenant_id', {
+      hint: 'pass a bounded tenant_id. Vision bake-off is tenant-scoped.',
+    });
   }
+  const namespaceProvided = namespace != null && namespace !== '';
+  const namespaceFilter = _normalizeNamespace(namespace);
+  if (namespaceProvided && !namespaceFilter) {
+    return _errorEnvelope('invalid_namespace', 'invalid_namespace', {
+      tenant_id: tenantId,
+      hint: 'namespace must be a bounded URL-safe identifier',
+    });
+  }
+  const artifactProvided = artifact_path != null && artifact_path !== '';
+  const artifactPath = _normalizeArtifactPath(artifact_path);
+  if (artifactProvided && !artifactPath) {
+    return _errorEnvelope('invalid_artifact_path', 'invalid_artifact_path', {
+      tenant_id: tenantId,
+      namespace: namespaceFilter || null,
+      hint: 'artifact_path must be bounded and free of control characters',
+    });
+  }
+  const artifactPathSha256 = artifactPath ? _sha256Hex(artifactPath) : null;
+
+  let cap = Number(max_n);
+  if (!Number.isFinite(cap) || cap < 1) cap = 100;
+  cap = Math.trunc(cap);
+  if (cap > VLM_BAKEOFF_LIMITS.hard_max_n) cap = VLM_BAKEOFF_LIMITS.hard_max_n;
 
   const storeMod = (opts && opts.storeMod) || null;
   const all = (storeMod && typeof storeMod.all === 'function') ? storeMod.all : null;
   if (!all) {
-    return {
-      ok: false,
-      error: 'store_not_wired',
+    return _errorEnvelope('store_not_wired', 'store_not_wired', {
       hint: 'opts.storeMod must expose all(table). Tests inject a fake.',
-      version: VLM_BAKEOFF_VERSION,
-    };
+      tenant_id: tenantId,
+      namespace: namespaceFilter || null,
+    });
   }
 
   // W411 defense-in-depth tenant fence: per-row filter AFTER all() read.
-  const rawRows = all('observations') || [];
+  let rawRows = [];
+  try {
+    rawRows = (all('observations') || []).slice(0, VLM_BAKEOFF_LIMITS.max_store_scan_rows);
+  } catch (e) {
+    return _errorEnvelope('store_read_failed', String(e && e.message || e || 'store_read_failed'), {
+      tenant_id: tenantId,
+      namespace: namespaceFilter || null,
+    });
+  }
   const tenantRows = rawRows.filter((r) =>
-    r && (r.tenant === tenant_id || r.tenant_id === tenant_id));
+    r && (r.tenant === tenantId || r.tenant_id === tenantId));
   const visionRows = tenantRows.filter((r) => r && r.has_vision === true);
-  const nsScoped = namespace
-    ? visionRows.filter((r) => r && r.corpus_namespace === namespace)
+  const nsScoped = namespaceFilter
+    ? visionRows.filter((r) => r && r.corpus_namespace === namespaceFilter)
     : visionRows;
 
   if (nsScoped.length === 0) {
     return {
-      ok: false,
-      error: 'no_vision_captures_in_namespace',
-      hint: namespace
-        ? `no vision captures found for tenant ${tenant_id} in namespace ${namespace}`
-        : `no vision captures found for tenant ${tenant_id}`,
-      tenant_id,
-      namespace,
+      ok: true,
+      message: 'no_vision_captures',
+      hint: 'capture vision-bearing messages first via /v1/vision/capture-detect or the connector path',
+      tenant_id: tenantId,
+      namespace: namespaceFilter || null,
+      artifact_path: artifactPath ? '[redacted]' : null,
+      artifact_path_sha256: artifactPathSha256,
+      count_total: 0,
+      count_vision_pairs_evaluated: 0,
+      by_image_kind: Object.fromEntries(VLM_IMAGE_KINDS.map((k) => [k, { count: 0, avg_score: null }])),
+      avg_score: null,
+      judge_kind: null,
+      max_n: cap,
       version: VLM_BAKEOFF_VERSION,
+      contract_version: VLM_BAKEOFF_CONTRACT_VERSION,
     };
   }
 
   // Cap rows at max_n; sensible upper bound to avoid surprise huge replays.
-  const capped = nsScoped.slice(0, Math.max(1, Math.min(Number(max_n) || 100, 1000)));
+  const capped = nsScoped.slice(0, cap);
 
   // Pick the runOnArtifact + judge functions. NEVER call any real network
   // path from inside this module - the DI seam is the contract.
@@ -192,7 +305,7 @@ export async function runVlmBakeoff({
     ? opts.judge
     : _heuristicJudge;
   const judgeKind = (opts && typeof opts.judge === 'function')
-    ? 'callable'
+    ? _normalizeJudgeKind((opts && opts.judgeKind) || 'callable')
     : 'heuristic';
 
   // Per-bucket accumulators.
@@ -200,10 +313,17 @@ export async function runVlmBakeoff({
   for (const k of VLM_IMAGE_KINDS) buckets[k] = { sum: 0, count: 0 };
   let overallSum = 0;
   let overallCount = 0;
+  let artifactErrorCount = 0;
+  let judgeErrorCount = 0;
+  let unscorableRowCount = 0;
 
   for (const row of capped) {
     // The captured base-model response is the comparison anchor.
-    const baseText = String(row.response_text || row.response || '');
+    const baseText = _cleanLooseText(row.response_text || row.response || '', VLM_BAKEOFF_LIMITS.max_text_chars);
+    if (!baseText) {
+      unscorableRowCount += 1;
+      continue;
+    }
 
     let artifactText = '';
     if (runOnArtifact) {
@@ -211,21 +331,34 @@ export async function runVlmBakeoff({
         // The runOnArtifact DI seam receives the row + artifact_path; tests
         // return a deterministic string. Production code wires this to the
         // .kolm artifact runner (src/artifact-runner.js).
-        const ran = await runOnArtifact({ row, artifact_path });
+        const ran = await runOnArtifact({ row, artifact_path: artifactPath });
         // Tolerate both `{output:'...'}` envelopes and raw-string returns.
         if (ran && typeof ran === 'object' && typeof ran.output === 'string') {
-          artifactText = ran.output;
+          artifactText = _cleanLooseText(ran.output, VLM_BAKEOFF_LIMITS.max_text_chars);
         } else if (typeof ran === 'string') {
-          artifactText = ran;
+          artifactText = _cleanLooseText(ran, VLM_BAKEOFF_LIMITS.max_text_chars);
+        } else if (ran && typeof ran === 'object' && ran.__error__) {
+          artifactErrorCount += 1;
         }
-      } catch (_) {
+      } catch {
         // A run failure on a single row does not kill the bake-off; we
         // score it as zero and continue. Failing loud row-by-row would
         // be hostile to a long replay that hits one bad URL.
         artifactText = '';
+        artifactErrorCount += 1;
       }
     }
-    const score = Number(judge(baseText, artifactText)) || 0;
+    let score = 0;
+    try {
+      score = Number(judge(baseText, artifactText));
+    } catch {
+      judgeErrorCount += 1;
+      score = 0;
+    }
+    if (!Number.isFinite(score) || score < 0 || score > 1) {
+      judgeErrorCount += 1;
+      score = 0;
+    }
     const kind = _imageKindFromRow(row);
     const bucketKey = VLM_IMAGE_KINDS.includes(kind) ? kind : 'other';
     buckets[bucketKey].sum += score;
@@ -239,23 +372,29 @@ export async function runVlmBakeoff({
     const b = buckets[k];
     by_image_kind[k] = {
       count: b.count,
-      avg_score: b.count > 0 ? b.sum / b.count : 0,
+      avg_score: b.count > 0 ? b.sum / b.count : null,
     };
   }
-  const avg_score = overallCount > 0 ? overallSum / overallCount : 0;
+  const avg_score = overallCount > 0 ? overallSum / overallCount : null;
 
   return {
     ok: true,
     version: VLM_BAKEOFF_VERSION,
-    tenant_id,
-    namespace,
-    artifact_path,
+    contract_version: VLM_BAKEOFF_CONTRACT_VERSION,
+    tenant_id: tenantId,
+    namespace: namespaceFilter || null,
+    artifact_path: artifactPath ? '[redacted]' : null,
+    artifact_path_sha256: artifactPathSha256,
     count_total: nsScoped.length,
     count_vision_pairs_evaluated: overallCount,
+    unscorable_row_count: unscorableRowCount,
     by_image_kind,
     avg_score,
     judge_kind: judgeKind,
+    artifact_error_count: artifactErrorCount,
+    judge_error_count: judgeErrorCount,
+    max_n: cap,
     bakeoff_id: 'vbk_' + crypto.randomBytes(6).toString('hex'),
-    generated_at: new Date().toISOString(),
+    generated_at: _nowIso(opts),
   };
 }

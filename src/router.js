@@ -27154,6 +27154,7 @@ res.json({
           error: 'confirm_required',
           hint: 'pass {confirm: true} in body. Bake-off replays every vision row through the artifact.',
           version: mod.VLM_BAKEOFF_VERSION,
+          contract_version: mod.VLM_BAKEOFF_CONTRACT_VERSION,
         });
       }
       const tenant_id = req.tenant_record.id;
@@ -27174,7 +27175,14 @@ res.json({
       if (!result.ok) return res.status(400).json(result);
       return res.json(result);
     } catch (e) {
-      res.status(500).json({ ok: false, error: 'vision_bakeoff_error', detail: String(e && e.message || e) });
+      const detail = String(e && e.message || e || 'vision_bakeoff_error');
+      res.status(500).json({
+        ok: false,
+        error: 'vision_bakeoff_error',
+        version: 'w771-v1',
+        contract_version: 'w740-vlm-bakeoff-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
+      });
     }
   });
 
