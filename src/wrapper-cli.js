@@ -1,4 +1,4 @@
-// W-F / wrapper-completion - 22 CLI sub-verbs for the Kolm Wrapper surface.
+// W-F / wrapper-completion - 27 CLI sub-verbs for the Kolm Wrapper surface.
 //
 // This module is the spine of `kolm gateway *`, `kolm captures *`,
 // `kolm receipts *`, and the wrapper-specific `kolm namespace *` actions.
@@ -6,12 +6,15 @@
 // dedicated module keeps the dispatcher slim and lets parallel-wave agents
 // edit the wrapper surface without merge conflicts on the CLI giant.
 //
-// Verb taxonomy (22 sub-verbs):
+// Verb taxonomy (27 sub-verbs):
 //
 //   kolm gateway start - boot src/server.js as gateway
 //   kolm gateway health - GET /v1/health + /v1/gateway/dashboard
 //   kolm gateway providers - GET /v1/gateway/providers
 //   kolm gateway routes - GET /v1/gateway/dashboard.routes
+//   kolm gateway status - local mode + backend reachability
+//   kolm gateway call - OpenAI-compatible call with receipt/capture/redaction
+//   kolm gateway simulate-overflow - local free-tier 429 envelope simulator
 //
 //   kolm captures list - GET /v1/captures/list (filtered)
 //   kolm captures inspect <id> - GET /v1/captures/:id/inspect
@@ -21,17 +24,20 @@
 //   kolm captures stats - GET /v1/receipts/stats (capture facet)
 //   kolm captures export - GET /v1/captures/list paginated → file
 //   kolm captures purge - POST /v1/captures/forget bulk
+//   kolm captures seed - synthetic seed rows for wrapper/load tests
 //
 //   kolm receipts verify <id> - GET /v1/verify/:id (offline-aware)
 //   kolm receipts list - GET /v1/receipts/list
 //   kolm receipts export - GET /v1/receipts/list paginated → file
 //   kolm receipts stats - GET /v1/receipts/stats
+//   kolm receipts rotate-key - rotate local receipt signer with overlap
 //
 //   kolm namespace create <slug> - POST /v1/namespaces
 //   kolm namespace config <slug> - GET|PUT /v1/namespaces/:slug
 //   kolm namespace deploy <slug> - POST /v1/namespaces/:slug/deploy
 //   kolm namespace undeploy <slug> - POST /v1/namespaces/:slug/undeploy
 //   kolm namespace rollback <slug> - POST /v1/namespaces/:slug/rollback
+//   kolm namespace status <slug> - local-first deployment snapshot
 //
 // Every handler prints a single JSON envelope on stdout, sets process.exitCode
 // when something is wrong, and avoids killing the process so the parent CLI's
@@ -81,6 +87,15 @@ function _requireKey(emit) {
     return null;
   }
   return k;
+}
+
+function _parseResponseText(text) {
+  const body = String(text || '');
+  try {
+    return JSON.parse(body);
+  } catch (_) {
+    return { _raw: body.slice(0, 4096), _raw_truncated: body.length > 4096 };
+  }
 }
 
 function _emit(obj) {
@@ -157,7 +172,7 @@ async function _get(url, key, extraHeaders) {
   try { res = await fetch(url, { method: 'GET', headers }); }
   catch (e) { return { ok: false, status: 0, error: 'network', detail: String(e && e.message || e) }; }
   const text = await res.text();
-  let json; try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
+  const json = _parseResponseText(text);
   return { ok: res.status >= 200 && res.status < 300, status: res.status, json };
 }
 
@@ -169,7 +184,7 @@ async function _post(url, key, body, extraHeaders) {
   try { res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body || {}) }); }
   catch (e) { return { ok: false, status: 0, error: 'network', detail: String(e && e.message || e) }; }
   const text = await res.text();
-  let json; try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
+  const json = _parseResponseText(text);
   return { ok: res.status >= 200 && res.status < 300, status: res.status, json };
 }
 
@@ -181,7 +196,7 @@ async function _put(url, key, body, extraHeaders) {
   try { res = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body || {}) }); }
   catch (e) { return { ok: false, status: 0, error: 'network', detail: String(e && e.message || e) }; }
   const text = await res.text();
-  let json; try { json = JSON.parse(text); } catch (_) { json = { _raw: text }; }
+  const json = _parseResponseText(text);
   return { ok: res.status >= 200 && res.status < 300, status: res.status, json };
 }
 

@@ -21,6 +21,8 @@ const BINDER_CONTRACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'binder-contr
 const BINDER_CONTRACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave942-binder-contract-matrix.test.js');
 const INTENT_CONTRACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'intent-contract-matrix.json');
 const INTENT_CONTRACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave943-intent-contract-matrix.test.js');
+const WRAPPER_CLI_MATRIX = path.join(ROOT, 'docs', 'internal', 'wrapper-cli-matrix.json');
+const WRAPPER_CLI_MATRIX_TEST = path.join(ROOT, 'tests', 'wave944-wrapper-cli-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
@@ -28,6 +30,7 @@ let daemonConnectorMatrixGreen = null;
 let quantizeWorkerMatrixGreen = null;
 let binderContractMatrixGreen = null;
 let intentContractMatrixGreen = null;
+let wrapperCliMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -310,6 +313,35 @@ function intentContractMatrixOk() {
   return intentContractMatrixGreen;
 }
 
+function wrapperCliMatrixOk() {
+  if (wrapperCliMatrixGreen != null) return wrapperCliMatrixGreen;
+  try {
+    if (!fs.existsSync(WRAPPER_CLI_MATRIX) || !fs.existsSync(WRAPPER_CLI_MATRIX_TEST)) {
+      wrapperCliMatrixGreen = false;
+      return wrapperCliMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(WRAPPER_CLI_MATRIX, 'utf8'));
+    wrapperCliMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.wrapper_cli_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.command_family_count === 4
+      && matrix.summary.command_count === 27
+      && matrix.summary.duplicate_command_count === 0
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/wrapper-cli.js')
+    );
+  } catch {
+    wrapperCliMatrixGreen = false;
+  }
+  return wrapperCliMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -463,6 +495,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'workers/quantize/scripts/quantize.py' && quantizeWorkerMatrixOk()) return 'maintain_generated_quantize_worker_matrix_and_frontier_method_contract';
   if (rel === 'src/binder.js' && binderContractMatrixOk()) return 'maintain_generated_binder_contract_matrix_and_verifier_failure_taxonomy';
   if (rel === 'src/intent.js' && intentContractMatrixOk()) return 'maintain_generated_intent_contract_matrix_and_routing_workflow_taxonomy';
+  if (rel === 'src/wrapper-cli.js' && wrapperCliMatrixOk()) return 'maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -511,7 +544,7 @@ function commandsFor(domain) {
     billing_marketplace: ['node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js'],
     trust_security_compliance: ['npm run verify:claims-scope', 'npm run verify:compliance-packet'],
     storage_state: ['node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js'],
-    compile_artifact_runtime: ['npm run verify:inventions', 'npm run verify:benchmark-evidence'],
+    compile_artifact_runtime: ['npm run verify:inventions', 'npm run verify:benchmark-evidence', 'npm run verify:wrapper-cli-matrix'],
     capture_data_eval: ['npm run verify:redaction-benchmark', 'npm run verify:quality-calibration'],
     training_model_optimization: ['npm run verify:quantize-worker-matrix', 'node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
