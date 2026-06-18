@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 715,
-    "components_without_direct_test_reference": 114,
+    "test_referenced_components": 716,
+    "components_without_direct_test_reference": 113,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -9408,25 +9408,27 @@
       "surface": "core-backend",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "b843e2fd2b6b4a30efbd127b2fc9274656f813811d9ee10e0eedea3442dc03bf",
+      "sha256": "d9e01a1698594623d4655d077f61e7827cf2afbdd5b0ee50b75e0414a7a3d38d",
       "metrics": {
-        "bytes": 22387,
-        "lines": 549,
-        "imports": 1,
-        "exports": 11,
+        "bytes": 28041,
+        "lines": 754,
+        "imports": 2,
+        "exports": 13,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 2,
+        "crypto_refs": 8,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave695-audit-export-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -37472,10 +37474,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "1a6b625f6e9657aa29181b03f5fc5e5dbbd7fb897f1f7cede338fcdef3ee005b",
+      "sha256": "8a2d4a47d0b302bd9950b21ff757aa3817cbda493a23df9f23ba58545cb8deae",
       "metrics": {
-        "bytes": 1467637,
-        "lines": 30780,
+        "bytes": 1468151,
+        "lines": 30785,
         "imports": 535,
         "exports": 8,
         "routes": 810,
@@ -37483,7 +37485,7 @@
         "fs_writes": 1,
         "subprocess_refs": 44,
         "network_refs": 34,
-        "crypto_refs": 254,
+        "crypto_refs": 257,
         "markers": 0
       },
       "test_refs": [

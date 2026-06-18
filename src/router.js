@@ -26739,6 +26739,11 @@ res.json({
       res.setHeader('X-Kolm-Audit-Export-Row-Count', String(result.row_count));
       res.setHeader('X-Kolm-Audit-Export-Total-In-Range', String(result.total_in_range));
       res.setHeader('X-Kolm-Audit-Export-Truncated', String(result.truncated));
+      if (result.export_id) res.setHeader('X-Kolm-Audit-Export-Id', result.export_id);
+      if (result.proof_version) res.setHeader('X-Kolm-Audit-Export-Proof-Version', result.proof_version);
+      if (result.body_sha256) res.setHeader('X-Kolm-Audit-Export-Body-Sha256', result.body_sha256);
+      if (result.row_set_sha256) res.setHeader('X-Kolm-Audit-Export-Row-Set-Sha256', result.row_set_sha256);
+      if (result.manifest_sha256) res.setHeader('X-Kolm-Audit-Export-Manifest-Sha256', result.manifest_sha256);
       return res.send(result.body);
     } catch (e) {
       res.status(500).json({ ok: false, error: 'audit_export_error', detail: String(e && e.message || e) });

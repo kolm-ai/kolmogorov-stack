@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 715,
-    "direct_test_reference_pct": 86.2,
-    "components_without_direct_test_reference": 114,
+    "direct_test_referenced_components": 716,
+    "direct_test_reference_pct": 86.4,
+    "components_without_direct_test_reference": 113,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -9570,24 +9570,24 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 22387,
-          "lines": 549,
-          "imports": 1,
-          "exports": 11,
+          "bytes": 28041,
+          "lines": 754,
+          "imports": 2,
+          "exports": 13,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 2,
+          "crypto_refs": 8,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "b843e2fd2b6b4a30efbd127b2fc9274656f813811d9ee10e0eedea3442dc03bf"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "d9e01a1698594623d4655d077f61e7827cf2afbdd5b0ee50b75e0414a7a3d38d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -9595,7 +9595,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave695-audit-export-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
         "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
@@ -9604,10 +9606,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/audit-ingest.js",
@@ -33598,8 +33598,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1467637,
-          "lines": 30780,
+          "bytes": 1468151,
+          "lines": 30785,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -33607,7 +33607,7 @@
           "fs_writes": 1,
           "subprocess_refs": 44,
           "network_refs": 34,
-          "crypto_refs": 254,
+          "crypto_refs": 257,
           "markers": 0
         },
         "risk_signals": [
@@ -33621,7 +33621,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "1a6b625f6e9657aa29181b03f5fc5e5dbbd7fb897f1f7cede338fcdef3ee005b"
+        "sha256": "8a2d4a47d0b302bd9950b21ff757aa3817cbda493a23df9f23ba58545cb8deae"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

@@ -31,6 +31,9 @@
 //    ingestion is a silent monitoring failure.
 //  - previewExport caps at 10 rows. Preview is for UI, not a full-dump
 //    backdoor.
+//  - W695 proof hardening adds body_sha256, row_set_sha256,
+//    manifest_sha256, export_id, proof_version, one-snapshot preview
+//    selection, store shape envelopes, and obvious secret redaction.
 //
 // W411 defense-in-depth pattern (cross-reference):
 //   storeMod.all(TABLE).filter(r => r.tenant_id === tenant_id)
@@ -43,9 +46,12 @@
 // change could flip to 'all rows' (catastrophic leak). The explicit per-
 // row filter is the defense.
 
+import crypto from 'node:crypto';
 import * as defaultStoreMod from './store.js';
 
 export const AUDIT_EXPORT_VERSION = 'w770-v1';
+export const AUDIT_EXPORT_PROOF_VERSION = 'w695-v1';
+export const AUDIT_EXPORT_REDACTION_POLICY = 'w695-obvious-secret-redaction';
 
 // All supported export formats. Frozen so callers cannot push a new
 // format and have it silently pass exportAuditEvents shape validation.
@@ -96,6 +102,59 @@ const SECURITY_EVENT_PREFIXES = Object.freeze([
   'key.',
 ]);
 
+const SECRET_PATTERNS = Object.freeze([
+  /\b(?:sk|ghp|gho|ghs|ghu|ghr|xai|ya29|AIza)[_-][A-Za-z0-9_.-]{12,}\b/g,
+  /\bks_[A-Za-z0-9_.-]{12,}\b/g,
+  /\bBearer\s+[A-Za-z0-9._~+/=-]{12,}\b/gi,
+  /([?&](?:api[_-]?key|access[_-]?token|auth[_-]?token|secret|token|password)=)[^&#\s]+/gi,
+  /\b(?:api[_-]?key|access[_-]?token|auth[_-]?token|secret|password)\s*[:=]\s*["']?[A-Za-z0-9._~+/=-]{8,}/gi,
+]);
+
+function _sha256(value) {
+  return crypto.createHash('sha256').update(String(value), 'utf8').digest('hex');
+}
+
+function _canonicalJson(value) {
+  const seen = new WeakSet();
+  const sort = (v) => {
+    if (v == null || typeof v !== 'object') return v;
+    if (seen.has(v)) return '[Circular]';
+    seen.add(v);
+    if (Array.isArray(v)) return v.map(sort);
+    const out = {};
+    for (const key of Object.keys(v).sort()) out[key] = sort(v[key]);
+    return out;
+  };
+  return JSON.stringify(sort(value));
+}
+
+function _sha256Json(value) {
+  return _sha256(_canonicalJson(value));
+}
+
+function _safeExportString(value) {
+  if (value == null) return value;
+  let s = String(value).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '');
+  for (const pattern of SECRET_PATTERNS) {
+    s = s.replace(pattern, (match, prefix) => {
+      if (typeof prefix === 'string' && prefix.length > 0 && match.startsWith(prefix)) {
+        return `${prefix}[redacted_secret]`;
+      }
+      return '[redacted_secret]';
+    });
+  }
+  return s;
+}
+
+function _redactNormalized(norm) {
+  const out = {};
+  for (const col of CSV_COLUMNS) {
+    const value = norm[col];
+    out[col] = (value == null) ? value : _safeExportString(value);
+  }
+  return out;
+}
+
 // =============================================================================
 // Internal row normalization.
 // Audit rows on disk may have heterogeneous shapes (some carry payload.actor
@@ -103,14 +162,14 @@ const SECURITY_EVENT_PREFIXES = Object.freeze([
 // chains and others have event_hash). Normalize at the export boundary so
 // downstream emitters never have to guess.
 // =============================================================================
-function _normalize(row) {
+function _normalize(row, opts = {}) {
   if (!row || typeof row !== 'object') return null;
   const payload = (row.payload && typeof row.payload === 'object') ? row.payload : {};
   const actor = row.actor || payload.actor || payload.operator || payload.operator_id || null;
   // meta_hash = audit-chain anchor. Some rows carry it as event_hash
   // (the W258 chain field). Tolerate both for export fidelity.
   const meta_hash = row.meta_hash || row.event_hash || payload.meta_hash || null;
-  return {
+  const normalized = {
     ts_iso: row.at || row.ts_iso || row.timestamp || null,
     tenant_id: row.tenant_id || null,
     operator_id: actor != null ? String(actor) : null,
@@ -123,6 +182,29 @@ function _normalize(row) {
     request_id: row.request_id || payload.request_id || null,
     meta_hash: meta_hash != null ? String(meta_hash) : null,
   };
+  return (opts && opts.redact === false) ? normalized : _redactNormalized(normalized);
+}
+
+function _normalizeRows(rows) {
+  const out = [];
+  for (const raw of Array.isArray(rows) ? rows : []) {
+    const norm = _normalize(raw);
+    if (norm) out.push(norm);
+  }
+  return out;
+}
+
+function _redactionCount(rows) {
+  let count = 0;
+  for (const raw of Array.isArray(rows) ? rows : []) {
+    const unredacted = _normalize(raw, { redact: false });
+    if (!unredacted) continue;
+    const redacted = _redactNormalized(unredacted);
+    for (const col of CSV_COLUMNS) {
+      if (unredacted[col] != null && redacted[col] !== unredacted[col]) count += 1;
+    }
+  }
+  return count;
 }
 
 // =============================================================================
@@ -336,6 +418,176 @@ function _parseTime(v) {
 const DEFAULT_MAX_ROWS = 10000;
 const HARD_MAX_ROWS = 100000;
 
+function _timeWarnings(from, to, fromMs, toMs) {
+  const warnings = [];
+  const inputs = [
+    ['from', from, fromMs],
+    ['to', to, toMs],
+  ];
+  for (const [name, value, parsed] of inputs) {
+    if (value == null) continue;
+    const s = String(value).trim();
+    if (s.length > 0 && parsed == null) warnings.push(`${name}_ignored_invalid_time`);
+  }
+  return warnings;
+}
+
+function _clampMaxRows(max_rows, fallback = DEFAULT_MAX_ROWS) {
+  let cap = Number(max_rows);
+  if (!Number.isFinite(cap) || cap < 1) cap = fallback;
+  if (cap > HARD_MAX_ROWS) cap = HARD_MAX_ROWS;
+  return Math.floor(cap);
+}
+
+function _generatedAt(opts) {
+  const value = opts && typeof opts.generated_at === 'string' ? opts.generated_at.trim() : '';
+  return value || new Date().toISOString();
+}
+
+function _errorEnvelope(error, extra = {}) {
+  return {
+    ok: false,
+    error,
+    version: AUDIT_EXPORT_VERSION,
+    proof_version: AUDIT_EXPORT_PROOF_VERSION,
+    ...extra,
+  };
+}
+
+function _readAuditRows(opts) {
+  const storeMod = (opts && opts.storeMod) || defaultStoreMod;
+  const all = (storeMod && typeof storeMod.all === 'function') ? storeMod.all : null;
+  if (!all) {
+    return _errorEnvelope('store_not_wired', {
+      hint: 'opts.storeMod must expose all(table) - default is src/store.js',
+    });
+  }
+  try {
+    const rawRows = all.call(storeMod, AUDIT_TABLE) || [];
+    if (!Array.isArray(rawRows)) {
+      return _errorEnvelope('store_bad_shape', {
+        hint: 'storeMod.all("audit_events") must return an array',
+      });
+    }
+    return { ok: true, rows: rawRows };
+  } catch (e) {
+    return _errorEnvelope('store_read_failed', {
+      detail: String(_safeExportString(e && e.message || e)).slice(0, 240),
+    });
+  }
+}
+
+function _selectAuditRows({ tenant_id, from, to, max_rows, opts = {} }) {
+  const read = _readAuditRows(opts);
+  if (!read.ok) return read;
+
+  const fromMs = _parseTime(from);
+  const toMs = _parseTime(to);
+  const warnings = _timeWarnings(from, to, fromMs, toMs);
+  const cap = _clampMaxRows(max_rows);
+
+  // W411 defense-in-depth tenant fence: per-row filter even after we
+  // could "trust" the table read. This is the audit-export law because
+  // future store schema changes could change all()'s tenant semantics.
+  const tenantRows = read.rows.filter((r) => r && r.tenant_id === tenant_id);
+
+  // Time-range filter (no-op when both are null).
+  const ranged = (fromMs == null && toMs == null)
+    ? tenantRows
+    : tenantRows.filter((r) => _withinRange(r, fromMs, toMs));
+
+  // Most-recent-first ordering - matches the audit-log UI + CLI sort so
+  // operators see the same head/tail across surfaces.
+  const sorted = ranged.slice().sort((a, b) => {
+    const ta = Date.parse(a.at || a.ts_iso || '') || 0;
+    const tb = Date.parse(b.at || b.ts_iso || '') || 0;
+    return tb - ta;
+  });
+
+  const capped = sorted.slice(0, cap);
+  return {
+    ok: true,
+    rows: capped,
+    normalized_rows: _normalizeRows(capped),
+    total_in_range: sorted.length,
+    max_rows: cap,
+    warnings,
+    redaction_count: _redactionCount(capped),
+  };
+}
+
+function _renderRows(fmt, rows) {
+  switch (fmt) {
+    case 'csv':  return toCsv(rows);
+    case 'cef':  return toCef(rows);
+    case 'leef': return toLeef(rows);
+    case 'json': return toJsonLines(rows);
+    default: return null;
+  }
+}
+
+function _proofFields({
+  kind,
+  tenant_id,
+  format,
+  from,
+  to,
+  max_rows,
+  row_count,
+  total_in_range,
+  truncated,
+  body,
+  normalized_rows,
+  generated_at,
+  warnings,
+  redaction_count,
+  preview_cap = null,
+}) {
+  const row_set_sha256 = _sha256Json(normalized_rows);
+  const body_sha256 = _sha256(body);
+  const body_bytes = Buffer.byteLength(String(body), 'utf8');
+  const manifest = {
+    kind,
+    version: AUDIT_EXPORT_VERSION,
+    proof_version: AUDIT_EXPORT_PROOF_VERSION,
+    tenant_id_sha256: _sha256(tenant_id),
+    format,
+    from: from == null ? null : String(from),
+    to: to == null ? null : String(to),
+    max_rows,
+    row_count,
+    total_in_range,
+    truncated,
+    generated_at,
+    row_set_sha256,
+    body_sha256,
+    body_bytes,
+    redaction_policy: AUDIT_EXPORT_REDACTION_POLICY,
+    redaction_count,
+    warnings: Array.isArray(warnings) ? warnings.slice() : [],
+  };
+  if (preview_cap != null) manifest.preview_cap = preview_cap;
+  const manifest_sha256 = _sha256Json(manifest);
+  return {
+    export_id: `audexp_${manifest_sha256.slice(0, 24)}`,
+    proof_version: AUDIT_EXPORT_PROOF_VERSION,
+    body_sha256,
+    row_set_sha256,
+    manifest_sha256,
+    body_bytes,
+    redaction_policy: AUDIT_EXPORT_REDACTION_POLICY,
+    redaction_count,
+    warnings: manifest.warnings,
+    proof: {
+      algorithm: 'sha256',
+      manifest,
+      manifest_sha256,
+      body_sha256,
+      row_set_sha256,
+    },
+  };
+}
+
 // =============================================================================
 // exportAuditEvents - orchestrator. Tenant-fenced, format-validated,
 // range-filtered, capped. Returns honest envelope or success envelope.
@@ -355,12 +607,9 @@ export function exportAuditEvents({
   // Honesty: empty tenant_id is never okay. Cross-tenant leak is a P0
   // security incident; we refuse rather than guess.
   if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_id_required',
+    return _errorEnvelope('tenant_id_required', {
       hint: 'pass {tenant_id: "<id>"}. Audit export is tenant-scoped; the route auto-fills from req.tenant_record.id.',
-      version: AUDIT_EXPORT_VERSION,
-    };
+    });
   }
   // Format defaulting MUST distinguish "caller omitted format" (use default
   // 'json') from "caller passed format='' or other falsy string" (honest
@@ -371,82 +620,49 @@ export function exportAuditEvents({
     ? 'json'
     : String(format).toLowerCase();
   if (!EXPORT_FORMATS.includes(fmt)) {
-    return {
-      ok: false,
-      error: 'bad_format',
+    return _errorEnvelope('bad_format', {
       hint: `format must be one of ${JSON.stringify(EXPORT_FORMATS)}; got ${JSON.stringify(format)}`,
       supported: EXPORT_FORMATS,
-      version: AUDIT_EXPORT_VERSION,
-    };
+    });
   }
-  const fromMs = _parseTime(from);
-  const toMs = _parseTime(to);
-  // Cap clamp. Floor of 1 (zero would be a silent backdoor: "I asked for
-  // export, got empty body, must be empty audit log"). Hard ceiling
-  // prevents accidental megaresponse to memory-bounded SIEM agents.
-  let cap = Number(max_rows);
-  if (!Number.isFinite(cap) || cap < 1) cap = DEFAULT_MAX_ROWS;
-  if (cap > HARD_MAX_ROWS) cap = HARD_MAX_ROWS;
+  const selected = _selectAuditRows({ tenant_id, from, to, max_rows, opts });
+  if (!selected.ok) return selected;
 
-  const storeMod = (opts && opts.storeMod) || defaultStoreMod;
-  const all = (storeMod && typeof storeMod.all === 'function') ? storeMod.all : null;
-  if (!all) {
-    return {
-      ok: false,
-      error: 'store_not_wired',
-      hint: 'opts.storeMod must expose all(table) - default is src/store.js',
-      version: AUDIT_EXPORT_VERSION,
-    };
+  const body = _renderRows(fmt, selected.rows);
+  if (body == null) {
+    // Defensive - format already validated above. Keep an honest envelope
+    // so a future refactor doesn't accidentally silent-pass.
+    return _errorEnvelope('bad_format');
   }
-  const rawRows = all(AUDIT_TABLE) || [];
-
-  // W411 defense-in-depth tenant fence: per-row filter even after we
-  // could "trust" the table read. This is the audit-export law because
-  // future store schema changes could change all()'s tenant semantics.
-  const tenantRows = rawRows.filter((r) => r && r.tenant_id === tenant_id);
-
-  // Time-range filter (no-op when both are null).
-  const ranged = (fromMs == null && toMs == null)
-    ? tenantRows
-    : tenantRows.filter((r) => _withinRange(r, fromMs, toMs));
-
-  // Most-recent-first ordering - matches the audit-log UI + CLI sort so
-  // operators see the same head/tail across surfaces.
-  const sorted = ranged.slice().sort((a, b) => {
-    const ta = Date.parse(a.at || a.ts_iso || '') || 0;
-    const tb = Date.parse(b.at || b.ts_iso || '') || 0;
-    return tb - ta;
+  const generated_at = _generatedAt(opts);
+  const proof = _proofFields({
+    kind: 'audit_export',
+    tenant_id,
+    format: fmt,
+    from,
+    to,
+    max_rows: selected.max_rows,
+    row_count: selected.normalized_rows.length,
+    total_in_range: selected.total_in_range,
+    truncated: selected.normalized_rows.length < selected.total_in_range,
+    body,
+    normalized_rows: selected.normalized_rows,
+    generated_at,
+    warnings: selected.warnings,
+    redaction_count: selected.redaction_count,
   });
-
-  const total_in_range = sorted.length;
-  const capped = sorted.slice(0, cap);
-
-  let body;
-  switch (fmt) {
-    case 'csv':  body = toCsv(capped); break;
-    case 'cef':  body = toCef(capped); break;
-    case 'leef': body = toLeef(capped); break;
-    case 'json': body = toJsonLines(capped); break;
-    default:
-      // Defensive - format already validated above. Keep an honest envelope
-      // so a future refactor doesn't accidentally silent-pass.
-      return {
-        ok: false,
-        error: 'bad_format',
-        version: AUDIT_EXPORT_VERSION,
-      };
-  }
   return {
     ok: true,
     format: fmt,
     mime_type: mimeTypeForFormat(fmt),
     body,
-    row_count: capped.length,
-    total_in_range,
-    truncated: capped.length < total_in_range,
-    max_rows: cap,
+    row_count: selected.normalized_rows.length,
+    total_in_range: selected.total_in_range,
+    truncated: selected.normalized_rows.length < selected.total_in_range,
+    max_rows: selected.max_rows,
     version: AUDIT_EXPORT_VERSION,
-    generated_at: new Date().toISOString(),
+    generated_at,
+    ...proof,
   };
 }
 
@@ -467,11 +683,7 @@ export function previewExport({
 } = {}) {
   // Use the same envelope contract as exportAuditEvents for bad input.
   if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_id_required',
-      version: AUDIT_EXPORT_VERSION,
-    };
+    return _errorEnvelope('tenant_id_required');
   }
   // Same honest-default policy as exportAuditEvents: explicit empty/falsy
   // string is bad_format, not silently coerced to 'json'.
@@ -479,60 +691,51 @@ export function previewExport({
     ? 'json'
     : String(format).toLowerCase();
   if (!EXPORT_FORMATS.includes(fmt)) {
-    return {
-      ok: false,
-      error: 'bad_format',
+    return _errorEnvelope('bad_format', {
       supported: EXPORT_FORMATS,
-      version: AUDIT_EXPORT_VERSION,
-    };
+    });
   }
-  // Re-use the orchestrator with a giant cap so total_in_range is honest,
-  // then slice the body. We deliberately call exportAuditEvents twice-free
-  // by passing the max as PREVIEW_HARD_CAP and reading total_in_range from
-  // the same envelope so previewExport never silently misreports the count.
-  const full = exportAuditEvents({
+  // Read the audit store once, then derive both count and body from that same
+  // snapshot. A preview must never race itself into a mismatched count/body.
+  const selected = _selectAuditRows({
+    tenant_id,
+    from,
+    to,
+    max_rows: PREVIEW_HARD_CAP,
+    opts,
+  });
+  if (!selected.ok) return selected;
+
+  const body = _renderRows(fmt, selected.rows);
+  const generated_at = _generatedAt(opts);
+  const proof = _proofFields({
+    kind: 'audit_export_preview',
     tenant_id,
     format: fmt,
     from,
     to,
-    max_rows: HARD_MAX_ROWS,
-    opts,
+    max_rows: selected.max_rows,
+    row_count: selected.normalized_rows.length,
+    total_in_range: selected.total_in_range,
+    truncated: selected.normalized_rows.length < selected.total_in_range,
+    body,
+    normalized_rows: selected.normalized_rows,
+    generated_at,
+    warnings: selected.warnings,
+    redaction_count: selected.redaction_count,
+    preview_cap: PREVIEW_HARD_CAP,
   });
-  if (!full.ok) return full;
-
-  // Re-encode just the preview-capped slice so the body is small.
-  const storeMod = (opts && opts.storeMod) || defaultStoreMod;
-  const all = storeMod.all;
-  const rawRows = all(AUDIT_TABLE) || [];
-  const tenantRows = rawRows.filter((r) => r && r.tenant_id === tenant_id);
-  const fromMs = _parseTime(from);
-  const toMs = _parseTime(to);
-  const ranged = (fromMs == null && toMs == null)
-    ? tenantRows
-    : tenantRows.filter((r) => _withinRange(r, fromMs, toMs));
-  const sorted = ranged.slice().sort((a, b) => {
-    const ta = Date.parse(a.at || a.ts_iso || '') || 0;
-    const tb = Date.parse(b.at || b.ts_iso || '') || 0;
-    return tb - ta;
-  });
-  const preview = sorted.slice(0, PREVIEW_HARD_CAP);
-  let body;
-  switch (fmt) {
-    case 'csv':  body = toCsv(preview); break;
-    case 'cef':  body = toCef(preview); break;
-    case 'leef': body = toLeef(preview); break;
-    case 'json': body = toJsonLines(preview); break;
-  }
   return {
     ok: true,
     format: fmt,
     mime_type: mimeTypeForFormat(fmt),
     body,
-    preview_row_count: preview.length,
-    total_would_export: sorted.length,
+    preview_row_count: selected.normalized_rows.length,
+    total_would_export: selected.total_in_range,
     preview_cap: PREVIEW_HARD_CAP,
     version: AUDIT_EXPORT_VERSION,
-    generated_at: new Date().toISOString(),
+    generated_at,
+    ...proof,
   };
 }
 
@@ -544,5 +747,7 @@ export function listExportFormats() {
     csv_columns: CSV_COLUMNS,
     mime_by_format: { ...MIME_BY_FORMAT },
     version: AUDIT_EXPORT_VERSION,
+    proof_version: AUDIT_EXPORT_PROOF_VERSION,
+    redaction_policy: AUDIT_EXPORT_REDACTION_POLICY,
   };
 }
