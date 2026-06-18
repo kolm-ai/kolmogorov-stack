@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 712,
-    "components_without_direct_test_reference": 117,
+    "test_referenced_components": 714,
+    "components_without_direct_test_reference": 115,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -2559,9 +2559,9 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "python",
-      "sha256": "baff3e640c57996f43b05cab160883c791cc8411f3238763864b99fddf74ae0d",
+      "sha256": "4fd6891b2faa01bc085f7b9fba607d22f77f633ca853ac5401b8d5743577966f",
       "metrics": {
-        "bytes": 369,
+        "bytes": 367,
         "lines": 16,
         "imports": 0,
         "exports": 0,
@@ -2577,7 +2577,8 @@
         "tests/finalized-c4-gkd-onpolicy-lambda-mixture-executor.test.js",
         "tests/wave-dapo-sampling-py.test.js",
         "tests/wave-gkd-onpolicy-executor.test.js",
-        "tests/wave482-sdk-catalog-honesty.test.js"
+        "tests/wave482-sdk-catalog-honesty.test.js",
+        "tests/wave693-python-framework-adapters-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -2619,27 +2620,29 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "python",
-      "sha256": "1c2e7f16f1fc7a95513d77263c63db69632d816be47368325958e2d8e5f2eff6",
+      "sha256": "38e610359d432900ecdcc2ef59f17bfb2136c70af0a2c7dc23687cdce9ca2192",
       "metrics": {
-        "bytes": 6740,
-        "lines": 184,
+        "bytes": 12865,
+        "lines": 338,
         "imports": 0,
-        "exports": 14,
+        "exports": 27,
         "routes": 0,
-        "env_refs": 2,
+        "env_refs": 3,
         "fs_writes": 0,
         "subprocess_refs": 3,
         "network_refs": 0,
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave693-python-framework-adapters-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -2664,7 +2667,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
       "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
       "suggested_verification": [
         "npm run verify:package-release"
@@ -2691,7 +2694,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave482-sdk-catalog-honesty.test.js"
+        "tests/wave482-sdk-catalog-honesty.test.js",
+        "tests/wave693-python-framework-adapters-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -2864,9 +2868,9 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "python",
-      "sha256": "59f44e60418e72b8060afe69b40e148877ecf40f7365af68c1a3e16c3817ec9e",
+      "sha256": "f7496bc185b8f025d62b4cbfa62abf8bc906f81e68c04178b7b5da275804509c",
       "metrics": {
-        "bytes": 375,
+        "bytes": 373,
         "lines": 16,
         "imports": 0,
         "exports": 0,
@@ -2882,7 +2886,8 @@
         "tests/finalized-c4-gkd-onpolicy-lambda-mixture-executor.test.js",
         "tests/wave-dapo-sampling-py.test.js",
         "tests/wave-gkd-onpolicy-executor.test.js",
-        "tests/wave482-sdk-catalog-honesty.test.js"
+        "tests/wave482-sdk-catalog-honesty.test.js",
+        "tests/wave693-python-framework-adapters-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -2924,27 +2929,29 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "python",
-      "sha256": "3bb18ac46dba3f0ee3aee1bf5ef5e3c9b8b659e717ced9a4d63b810f23b881b5",
+      "sha256": "324e86b83b3fc71d30bf621983bc6541cc0c7836ccf687c27644ba258cfcf2ea",
       "metrics": {
-        "bytes": 6905,
-        "lines": 180,
+        "bytes": 13643,
+        "lines": 353,
         "imports": 0,
-        "exports": 12,
+        "exports": 27,
         "routes": 0,
-        "env_refs": 2,
+        "env_refs": 3,
         "fs_writes": 0,
         "subprocess_refs": 2,
         "network_refs": 0,
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave693-python-framework-adapters-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -2969,7 +2976,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
       "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
       "suggested_verification": [
         "npm run verify:package-release"
@@ -2996,7 +3003,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave482-sdk-catalog-honesty.test.js"
+        "tests/wave482-sdk-catalog-honesty.test.js",
+        "tests/wave693-python-framework-adapters-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -4397,7 +4405,8 @@
         "tests/finalized-c4-gkd-onpolicy-lambda-mixture-executor.test.js",
         "tests/wave-dapo-sampling-py.test.js",
         "tests/wave-gkd-onpolicy-executor.test.js",
-        "tests/wave482-sdk-catalog-honesty.test.js"
+        "tests/wave482-sdk-catalog-honesty.test.js",
+        "tests/wave693-python-framework-adapters-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -4459,7 +4468,8 @@
         "tests/finalized-c4-gkd-onpolicy-lambda-mixture-executor.test.js",
         "tests/wave-dapo-sampling-py.test.js",
         "tests/wave-gkd-onpolicy-executor.test.js",
-        "tests/wave482-sdk-catalog-honesty.test.js"
+        "tests/wave482-sdk-catalog-honesty.test.js",
+        "tests/wave693-python-framework-adapters-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -4574,7 +4584,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave482-sdk-catalog-honesty.test.js"
+        "tests/wave482-sdk-catalog-honesty.test.js",
+        "tests/wave693-python-framework-adapters-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
