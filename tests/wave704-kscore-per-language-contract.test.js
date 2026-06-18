@@ -68,7 +68,7 @@ test('W704 source pins per-language K-Score bounds, digest contract, and package
     pkg.scripts['verify:kscore-per-language'],
     'node --test --test-concurrency=1 tests/wave704-kscore-per-language-contract.test.js',
   );
-  assert.match(pkg.scripts['verify:depth'], /verify:kscore-calibration && npm run verify:kscore-per-language && npm run verify:quality-calibration/);
+  assert.match(pkg.scripts['verify:depth'], /verify:kscore-calibration && npm run verify:kscore-per-language && npm run verify:multilingual-augment && npm run verify:quality-calibration/);
 });
 
 test('W704 perLanguageKScore emits finite digest-backed buckets and pooled comparison', () => {

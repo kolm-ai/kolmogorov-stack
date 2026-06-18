@@ -51295,7 +51295,7 @@ async function cmdW760Lang(args) {
     const body = await resp.json().catch(() => ({}));
     _print(body);
     if (body && body.error === 'no_translator_configured') {
-      _warnStderr('no translator backend wired; set KOLM_TRANSLATOR_CMD or inject _w760_translator_caller.');
+      _warnStderr('no translator backend wired on the server; inject _w760_translator_caller in the deployment.');
     }
     if (!resp.ok) process.exit(EXIT.EXECUTION);
     return;
