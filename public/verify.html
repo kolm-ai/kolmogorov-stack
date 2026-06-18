@@ -38,6 +38,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 <link rel="stylesheet" href="/kolm-2026.css">
 <script defer src="/kolm-2026.js"></script>
 <script defer src="/kolm-field.js"></script>
+<script type="module" src="/device/webgpu-runner.js"></script>
 <style>
   /* page-local: the paste verifier. Dark input chrome; the verdict pane is the
      lit sheet (.vw), so the evidence is the brightest thing on the page. */
@@ -80,6 +81,12 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   .vrf-loop__seal { display: flex; align-items: center; gap: var(--s4); margin-bottom: var(--s4); padding-bottom: var(--s4); border-bottom: 1px solid var(--line); }
   .vrf-loop__sealk { margin: 0; font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; color: var(--ink); line-height: 1.5; }
   .vrf-loop__void { display: block; margin-top: 4px; font-weight: 500; color: var(--ink-3); letter-spacing: 0.02em; }
+  #device-proof { margin-top: var(--s5); }
+  #device-proof .vw__fields div { grid-template-columns: 82px minmax(0,1fr); }
+  #device-proof .device-proof__meta { display: grid; gap: 10px; margin: 0; }
+  #device-proof .device-proof__meta div { display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 12px; font-family: var(--mono); font-size: 12px; line-height: 1.5; color: var(--ink-2); }
+  #device-proof .device-proof__meta dt { color: var(--ink-3); }
+  #device-proof .device-proof__meta dd { margin: 0; overflow-wrap: anywhere; color: var(--ink); }
 </style>
 <script type="application/ld+json">
 {
@@ -235,6 +242,38 @@ Paste an evidence report (or a receipt) here, or press "Load sample report".'></
       <span class="band__item">Issuer keyring: <a href="/keys/kolm-issuers.json">kolm-issuers.json</a></span>
       <span class="band__item">Format: <a href="/spec">signed report spec</a></span>
       <span class="band__item"><a href="/badge">Embed a verify badge</a></span>
+    </div>
+
+    <div class="vrf" id="device-proof" aria-label="Browser verify-then-run proof">
+      <div class="vrf__pane">
+        <div class="vrf__panehead">
+          <p class="vrf__panek">Signed weight fixture</p>
+          <span class="vrf__status">local only</span>
+        </div>
+        <div style="padding:var(--s4) 18px">
+          <dl class="device-proof__meta">
+            <div><dt>Manifest</dt><dd>/device/fixtures/tiny-linear.manifest.json</dd></div>
+            <div><dt>Weights</dt><dd>/device/fixtures/tiny-linear.weights.json</dd></div>
+            <div><dt>Gate</dt><dd>SHA-256 weight digest + Ed25519 manifest signature</dd></div>
+            <div><dt>Runtime</dt><dd>WebGPU compute shader, CPU fallback</dd></div>
+          </dl>
+        </div>
+        <div class="vrf__bar">
+          <button class="btn btn--primary btn--sm" id="deviceRunBtn" type="button">Verify and run fixture</button>
+          <a class="btn btn--ghost btn--sm" href="/device/webgpu-runner.html">Open runner</a>
+        </div>
+      </div>
+      <div class="artifact" aria-label="Browser runtime result">
+        <div class="vw is-live">
+          <div class="vw__bar">
+            <span class="vw__title">Weight proof</span>
+            <span class="vw__status" id="deviceRunStatus" role="status">idle</span>
+          </div>
+          <div class="vw__body" id="deviceRunOut" aria-live="polite">
+            <p class="vrf__empty">Run the fixture to verify the signed weight bytes before local execution.</p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </section>

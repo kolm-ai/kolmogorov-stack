@@ -124,12 +124,9 @@ export const MODEL_FRAMEWORK_TARGETS = Object.freeze([
     model_types: ['recipe', 'classifier', 'small-llm', 'embedding'],
     runtime_formats: ['wasm', 'webgpu'],
     env: [],
-    evidence: ['public/sdk.js', 'server.js', 'docs/kolm-format-v1.md'],
-    // Honest status: the browser SDK/WASM artifact path exists, but no WebGPU
-    // model runner is checked in yet. Keep WebGPU as a target until a real
-    // public/device runner and signed-weight verification path ship.
-    status: 'target-declared',
-    note: 'Browser SDK/WASM support exists; WebGPU verify-then-run model execution is planned, not shipped.',
+    evidence: ['public/sdk.js', 'public/device/webgpu-runner.js', 'public/device/fixtures/tiny-linear.manifest.json', 'server.js', 'docs/kolm-format-v1.md'],
+    status: 'implemented',
+    note: 'Browser SDK/WASM support exists, and public/device/webgpu-runner.js now verifies signed weight bytes before executing a tiny WebGPU-or-CPU model fixture. Full WebLLM/LlamaWeb LLM runtime integration remains a separate target.',
   },
   {
     id: 'vllm',
@@ -222,7 +219,7 @@ export const DEVICE_TARGETS = Object.freeze([
   { id: 'ios-coreml-ane', class: 'mobile', runtimes: ['coreml', 'ane'], evidence: ['docs/kolm-format-v1.md', 'docs/product-surfaces.json'], status: 'target-declared' },
   { id: 'android-litert-qnn', class: 'mobile', runtimes: ['litert', 'qnn'], evidence: ['docs/kolm-format-v1.md', 'docs/product-surfaces.json'], status: 'target-declared' },
   { id: 'browser-wasm', class: 'browser', runtimes: ['wasm'], evidence: ['public/sdk.js', 'server.js'], status: 'implemented' },
-  { id: 'browser-webgpu', class: 'browser', runtimes: ['webgpu', 'wasm'], evidence: ['public/sdk.js', 'docs/product-surfaces.json'], status: 'target-declared' },
+  { id: 'browser-webgpu', class: 'browser', runtimes: ['webgpu', 'wasm'], evidence: ['public/device/webgpu-runner.js', 'public/device/webgpu-runner.html', 'public/device/fixtures/tiny-linear.manifest.json', 'public/sdk.js', 'docs/product-surfaces.json'], status: 'implemented' },
   { id: 'jetson-edge', class: 'edge-gpu', runtimes: ['tensorrt-llm', 'triton'], evidence: ['src/compute/registry.json', 'src/target-profiles.js'], status: 'target-declared' },
   { id: 'cloudflare-workers', class: 'edge-cloud', runtimes: ['workers', 'wasm'], evidence: ['docs/cloud-product-readiness.md', 'docs/kolm-format-v1.md'], status: 'target-declared' },
   { id: 'vercel-edge', class: 'edge-cloud', runtimes: ['edge-runtime', 'wasm'], evidence: ['vercel.json', 'docs/cloud-product-readiness.md'], status: 'target-declared' },

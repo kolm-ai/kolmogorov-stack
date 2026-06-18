@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Browser Verify-Then-Run - kolm.ai</title>
+<meta name="description" content="Verify signed model weight bytes in the browser, then execute a tiny WebGPU or CPU model only after the digest and Ed25519 manifest checks pass.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/kolm-2026.css">
+<script defer src="/kolm-2026.js"></script>
+<script type="module" src="/device/webgpu-runner.js"></script>
+<style>
+  .device-proof { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: var(--s5); margin-top: var(--s6); align-items: stretch; }
+  @media (max-width: 900px) { .device-proof { grid-template-columns: minmax(0,1fr); } }
+  .device-proof__panel { background: var(--paper-2); border: 1px solid var(--line); border-top-color: var(--line-top); border-radius: 12px; padding: var(--s4); min-width: 0; }
+  .device-proof__meta { display: grid; gap: 10px; margin: 0; }
+  .device-proof__meta div { display: grid; grid-template-columns: 120px minmax(0,1fr); gap: 12px; font-family: var(--mono); font-size: 12px; color: var(--ink-2); }
+  .device-proof__meta dt { color: var(--ink-3); }
+  .device-proof__meta dd { margin: 0; overflow-wrap: anywhere; color: var(--ink); }
+  .device-proof__out { min-height: 220px; }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="nav" data-nav>
+  <div class="wrap nav__in">
+    <a class="nav__brand" href="/" aria-label="kolm home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx=".4"/><rect x="13" y="9" width="4.5" height="14" rx=".4"/><rect x="22" y="12" width="4.5" height="8" rx=".4"/></svg>
+      <span>kolm</span>
+    </a>
+    <nav class="nav__links" id="navLinks" aria-label="Primary">
+      <a href="/platform">Platform</a>
+      <a href="/runtimes">Runtimes</a>
+      <a href="/spec">Spec</a>
+      <a href="/verify" aria-current="page">Verify</a>
+      <a href="/docs">Docs</a>
+    </nav>
+    <button class="nav__toggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</header>
+<main id="main">
+  <section class="section section--flush hero">
+    <div class="wrap">
+      <div class="section__head" style="max-width:74ch">
+        <p class="eyebrow">Browser runtime proof</p>
+        <h1>Verify weight bytes, then run.</h1>
+        <p class="lede">This page verifies a signed manifest and SHA-256 digest for a tiny model fixture before executing it with WebGPU when available, or a CPU fallback when not. It is a proof boundary, not a production LLM engine.</p>
+      </div>
+      <div class="device-proof">
+        <section class="device-proof__panel" aria-labelledby="manifest-title">
+          <h2 id="manifest-title">Signed fixture</h2>
+          <dl class="device-proof__meta">
+            <div><dt>Manifest</dt><dd>/device/fixtures/tiny-linear.manifest.json</dd></div>
+            <div><dt>Weights</dt><dd>/device/fixtures/tiny-linear.weights.json</dd></div>
+            <div><dt>Runtime</dt><dd>WebGPU compute shader or CPU fallback</dd></div>
+            <div><dt>Policy</dt><dd>Execute only after digest and Ed25519 manifest checks pass</dd></div>
+          </dl>
+          <div style="margin-top:var(--s4)">
+            <button class="btn btn--primary btn--sm" id="deviceRunBtn" type="button">Verify and run</button>
+          </div>
+        </section>
+        <section class="artifact" aria-labelledby="result-title">
+          <div class="vw is-live">
+            <div class="vw__bar">
+              <span class="vw__title" id="result-title">Runtime result</span>
+              <span class="vw__status" id="deviceRunStatus" role="status">idle</span>
+            </div>
+            <div class="vw__body device-proof__out" id="deviceRunOut" aria-live="polite">
+              <p class="vrf__empty">Run the proof to hash the weight bytes, verify the signed manifest, and execute the tiny model locally.</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

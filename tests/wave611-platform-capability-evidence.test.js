@@ -36,28 +36,36 @@ test('W611 #1 - every platform capability evidence path resolves locally', () =>
   assert.deepEqual(collectMissingEvidence(), []);
 });
 
-test('W611 #2 - wasm-webgpu row no longer cites phantom public/device runner evidence', () => {
+test('W611 #2 - wasm-webgpu row now cites only real public/device runner evidence', () => {
   const row = MODEL_FRAMEWORK_TARGETS.find((target) => target.id === 'wasm-webgpu');
   assert.ok(row);
-  assert.equal(row.status, 'target-declared');
-  assert.deepEqual(row.evidence, ['public/sdk.js', 'server.js', 'docs/kolm-format-v1.md']);
-  assert.equal(row.evidence.some((rel) => rel.includes('public/device/webgpu-runner')), false);
-  assert.doesNotMatch(row.note, /runner shipped|now exists|minimal transformers\.js|webgpu-runner\.js/i);
-  assert.match(row.note, /planned, not shipped/i);
+  assert.equal(row.status, 'implemented');
+  assert.deepEqual(row.evidence, [
+    'public/sdk.js',
+    'public/device/webgpu-runner.js',
+    'public/device/fixtures/tiny-linear.manifest.json',
+    'server.js',
+    'docs/kolm-format-v1.md',
+  ]);
+  assert.equal(row.evidence.every((rel) => exists(rel)), true);
+  assert.match(row.note, /verifies signed weight bytes/i);
+  assert.match(row.note, /Full WebLLM\/LlamaWeb LLM runtime integration remains/i);
 });
 
-test('W611 #3 - browser WebGPU remains target-declared and platform validation still passes', () => {
+test('W611 #3 - browser WebGPU has real proof-harness evidence and platform validation still passes', () => {
   const browser = DEVICE_TARGETS.find((target) => target.id === 'browser-webgpu');
   assert.ok(browser);
-  assert.equal(browser.status, 'target-declared');
-  assert.deepEqual(browser.evidence, ['public/sdk.js', 'docs/product-surfaces.json']);
+  assert.equal(browser.status, 'implemented');
+  assert.ok(browser.evidence.includes('public/device/webgpu-runner.js'));
+  assert.ok(browser.evidence.includes('public/device/webgpu-runner.html'));
+  assert.equal(browser.evidence.every((rel) => exists(rel)), true);
   assert.equal(validatePlatformCapabilities().ok, true);
 });
 
-test('W611 #4 - backend spec records the phantom-evidence closure but keeps the real WebGPU gap open', () => {
+test('W611 #4 - backend spec records W611 truthfulness and W959 browser runner closure', () => {
   const spec = fs.readFileSync(SPEC_PATH, 'utf8');
   assert.match(spec, /\| 10 \| ondevice-inference \| 8 \| S\/low \| CLOSED W611: fix phantom WebGPU-runner evidence/i);
   assert.match(spec, /W611 fixed the platform-capabilities phantom evidence claim/i);
-  assert.match(spec, /No in-browser model EXECUTION exists at all/i);
+  assert.match(spec, /CLOSED W959: Browser verify-then-run signed-weight proof harness/i);
   assert.match(spec, /CLOSED W611: Fix phantom WebGPU-runner evidence in platform-capabilities/i);
 });
