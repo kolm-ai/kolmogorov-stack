@@ -9,7 +9,10 @@ const OUT = path.join(ROOT, 'docs', 'backend-atomic-component-deep-dive-2026-06-
 const args = new Set(process.argv.slice(2));
 const API_CONTRACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'api-contract-matrix.json');
 const API_CONTRACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave937-api-contract-matrix.test.js');
+const AUTH_BOUNDARY_MATRIX = path.join(ROOT, 'docs', 'internal', 'auth-boundary-matrix.json');
+const AUTH_BOUNDARY_MATRIX_TEST = path.join(ROOT, 'tests', 'wave938-auth-boundary-matrix.test.js');
 let apiContractMatrixSourceSet = null;
+let authBoundaryMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -101,6 +104,35 @@ function apiContractMatrixSources() {
 
 function hasGeneratedApiContractMap(rel) {
   return apiContractMatrixSources().has(String(rel || '').replace(/\\/g, '/'));
+}
+
+function authBoundaryMatrixOk() {
+  if (authBoundaryMatrixGreen != null) return authBoundaryMatrixGreen;
+  try {
+    if (!fs.existsSync(AUTH_BOUNDARY_MATRIX) || !fs.existsSync(AUTH_BOUNDARY_MATRIX_TEST)) {
+      authBoundaryMatrixGreen = false;
+      return authBoundaryMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(AUTH_BOUNDARY_MATRIX, 'utf8'));
+    authBoundaryMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.auth_boundary_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.public_api_total_rules >= 80
+      && matrix.summary.scope_gate_rules >= 10
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.failed_middleware_guards === 0
+      && matrix.summary.missing_scope_families === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/auth.js')
+    );
+  } catch {
+    authBoundaryMatrixGreen = false;
+  }
+  return authBoundaryMatrixGreen;
 }
 
 function isTextComponent(abs) {
@@ -250,6 +282,7 @@ function riskSignals(rel, metrics) {
 function improvementFor(domain, rel, metrics, tests) {
   const highRisk = riskSignals(rel, metrics).length >= 3;
   if (tests.length === 0 && highRisk) return 'add_targeted_contract_tests_for_high_risk_boundary';
+  if (rel === 'src/auth.js' && authBoundaryMatrixOk()) return 'maintain_generated_auth_boundary_matrix_and_policy_as_data_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -261,7 +294,7 @@ function improvementFor(domain, rel, metrics, tests) {
       ? 'maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate'
       : 'route_contract_auth_idempotency_and_error_shape_matrix';
   }
-  if (domain === 'identity_access') return 'policy_as_data_rbac_sso_and_key_lifecycle_tests';
+  if (domain === 'identity_access') return 'extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests';
   if (domain === 'billing_marketplace') return 'signed_entitlement_ledger_and_webhook_idempotency_proof';
   if (domain === 'trust_security_compliance') return 'unified_proof_chain_revocation_transparency_and_audit_exports';
   if (domain === 'storage_state') return 'tenant_scoped_cas_storage_retention_and_migration_simulation';
@@ -277,7 +310,7 @@ function improvementFor(domain, rel, metrics, tests) {
 function innovationFor(domain) {
   return {
     api_surface: 'Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.',
-    identity_access: 'Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.',
+    identity_access: 'Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.',
     billing_marketplace: 'Bind Stripe event id, entitlement grant, artifact delivery, and invoice line into one signed fulfillment chain.',
     trust_security_compliance: 'Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.',
     storage_state: 'Promote local JSON/disk state into a tenant-scoped CAS object store with lifecycle simulation before storage cutover.',
@@ -294,7 +327,7 @@ function innovationFor(domain) {
 function commandsFor(domain) {
   const map = {
     api_surface: ['npm run verify:api-contract-matrix', 'npm run lint:refs', 'npm run verify:surfaces'],
-    identity_access: ['node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js'],
+    identity_access: ['npm run verify:auth-boundary-matrix', 'node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js'],
     billing_marketplace: ['node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js'],
     trust_security_compliance: ['npm run verify:claims-scope', 'npm run verify:compliance-packet'],
     storage_state: ['node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js'],

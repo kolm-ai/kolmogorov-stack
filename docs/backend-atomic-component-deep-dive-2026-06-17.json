@@ -105,7 +105,7 @@
           "large_component_contract_risk",
           "network_or_provider_boundary"
         ],
-        "improvement_track": "split_or_add_generated_contract_map_before_growth"
+        "improvement_track": "maintain_generated_auth_boundary_matrix_and_policy_as_data_contract"
       },
       {
         "path": "cli/kolm.js",
@@ -329,7 +329,7 @@
           "http_route_surface",
           "network_or_provider_boundary"
         ],
-        "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests"
+        "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests"
       },
       {
         "path": "src/artifact.js",
@@ -425,7 +425,7 @@
           "large_component_contract_risk",
           "network_or_provider_boundary"
         ],
-        "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests"
+        "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests"
       },
       {
         "path": "server.js",
@@ -449,7 +449,7 @@
           "environment_configuration_boundary",
           "http_route_surface"
         ],
-        "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests"
+        "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests"
       },
       {
         "path": "src/transparency-log-routes.js",
@@ -7414,9 +7414,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -7751,9 +7752,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -10084,9 +10086,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -10153,9 +10156,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "split_or_add_generated_contract_map_before_growth",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "maintain_generated_auth_boundary_matrix_and_policy_as_data_contract",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -12008,9 +12012,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -21849,9 +21854,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -22276,9 +22282,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -24588,9 +24595,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -24647,9 +24655,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -24707,9 +24716,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -24768,9 +24778,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -26208,9 +26219,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -27173,9 +27185,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -27231,9 +27244,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -30509,7 +30523,8 @@
       },
       "test_refs": [
         "tests/wave710-meta-routes-contract.test.js",
-        "tests/wave937-api-contract-matrix.test.js"
+        "tests/wave937-api-contract-matrix.test.js",
+        "tests/wave938-auth-boundary-matrix.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -32465,9 +32480,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -32765,9 +32781,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -33360,9 +33377,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -35048,9 +35066,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -35699,9 +35718,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -35992,9 +36012,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -36464,9 +36485,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -36891,9 +36913,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -38851,9 +38874,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -39272,9 +39296,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -40732,9 +40757,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -43183,9 +43209,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -43246,9 +43273,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -43313,9 +43341,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -43378,9 +43407,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -43492,9 +43522,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
@@ -49772,9 +49803,10 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
-      "innovation_opportunity": "Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.",
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
       "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
         "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
