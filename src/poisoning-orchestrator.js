@@ -44,6 +44,47 @@ import {
 } from './teacher-response-hmac.js';
 
 export const POISONING_VERSION = 'w761-v1';
+export const POISONING_CONTRACT_VERSION = 'w714-v1';
+export const POISONING_LIMITS = Object.freeze({
+  max_capture_text_chars: 65_536,
+  max_capture_json_chars: 200_000,
+  max_error_detail_chars: 240,
+  max_evidence_items: 16,
+  max_evidence_chars: 96,
+  max_reason_chars: 128,
+  max_capture_id_chars: 160,
+  max_tenant_id_chars: 160,
+  max_namespace_chars: 128,
+  max_top_evidence: 10,
+});
+
+const SAFE_ID_RE = /^[A-Za-z0-9_.:-]{1,160}$/;
+const SAFE_NAMESPACE_RE = /^[A-Za-z0-9_.:-]{1,128}$/;
+const SAFE_REASON_RE = /^[A-Za-z0-9][A-Za-z0-9_.: -]{0,127}$/;
+const CAPTURE_TEXT_KEYS = new Set(['prompt', 'prompt_redacted', 'input', 'response', 'response_redacted', 'output']);
+const CAPTURE_COPY_KEYS = Object.freeze([
+  'tenant_id',
+  'tenant',
+  'namespace',
+  'corpus_namespace',
+  'event_id',
+  'capture_id',
+  'staged_capture_id',
+  'cid',
+  'id',
+  'prompt',
+  'prompt_redacted',
+  'input',
+  'response',
+  'response_redacted',
+  'output',
+  'latency_ms',
+  'latency_us',
+  'teacher_binding',
+  'anomaly_flagged',
+  'quarantine',
+  'created_at',
+]);
 
 // Risk level ladder. Monotone - higher index strictly dominates lower
 // indices. Helpers escalate by taking the max of all detected signals.
@@ -66,6 +107,158 @@ const MAX_NAMESPACE_SAMPLE = 1000;
 
 // Default sample size for assessNamespacePoisoningRisk.
 const DEFAULT_NAMESPACE_SAMPLE_N = 100;
+
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value == null ? '' : value), 'utf8').digest('hex');
+}
+
+function _cleanText(value, maxChars = POISONING_LIMITS.max_error_detail_chars) {
+  const s = String(value == null ? '' : value)
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[redacted_ssn]')
+    .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[redacted_email]')
+    .replace(/\b(?:sk|ghp|gho|ghs|ghu|ghr)_[A-Za-z0-9_]{16,}\b/g, '[redacted_secret]')
+    .replace(/[A-Za-z]:\\[^\s"'<>]+/g, '[redacted_path]')
+    .replace(/\/(?:Users|home|var|tmp|mnt|opt)\/[^\s"'<>]+/g, '[redacted_path]')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return s.length > maxChars ? s.slice(0, maxChars) : s;
+}
+
+function _safeErrorEnvelope(err, fallback = 'error') {
+  const raw = (err && err.message) || err || fallback;
+  return {
+    detail: _cleanText(raw),
+    detail_sha256: _sha256Hex(raw),
+  };
+}
+
+function _safeId(value, maxChars = POISONING_LIMITS.max_capture_id_chars) {
+  if (typeof value !== 'string') return null;
+  const s = value.trim();
+  if (!s || s.length > maxChars || !SAFE_ID_RE.test(s)) return null;
+  return s;
+}
+
+function _hashRef(prefix, value) {
+  return `${prefix}_${_sha256Hex(value).slice(0, 24)}`;
+}
+
+function _safeNamespace(value) {
+  const s = typeof value === 'string' && value.trim() ? value.trim() : 'default';
+  if (s.length <= POISONING_LIMITS.max_namespace_chars && SAFE_NAMESPACE_RE.test(s)) return s;
+  return _hashRef('ns', s);
+}
+
+function _safeTenantId(value) {
+  return _safeId(value, POISONING_LIMITS.max_tenant_id_chars);
+}
+
+function _safeCaptureId(value) {
+  return _safeId(value, POISONING_LIMITS.max_capture_id_chars);
+}
+
+function _captureRef(row) {
+  const raw = row && (row.event_id || row.capture_id || row.staged_capture_id || row.cid || row.id);
+  const safe = _safeCaptureId(raw);
+  return {
+    capture_id: safe || (raw == null ? null : _hashRef('cap', raw)),
+    capture_id_hash: raw == null ? null : _sha256Hex(raw),
+  };
+}
+
+function _boundedValue(value, key, meta) {
+  if (CAPTURE_TEXT_KEYS.has(key)) {
+    const s = String(value == null ? '' : value);
+    if (s.length > POISONING_LIMITS.max_capture_text_chars) meta.truncated = true;
+    return s.slice(0, POISONING_LIMITS.max_capture_text_chars);
+  }
+  if (value && typeof value === 'object' && key !== 'teacher_binding') {
+    let json = '';
+    try { json = JSON.stringify(value); } catch (_) { json = ''; }
+    if (json.length > POISONING_LIMITS.max_capture_text_chars) meta.truncated = true;
+    return json.slice(0, POISONING_LIMITS.max_capture_text_chars);
+  }
+  return value;
+}
+
+function _boundedCapture(capture) {
+  const out = {};
+  const meta = { truncated: false };
+  for (const key of CAPTURE_COPY_KEYS) {
+    if (!Object.prototype.hasOwnProperty.call(capture, key)) continue;
+    out[key] = _boundedValue(capture[key], key, meta);
+  }
+  let json = '';
+  try { json = JSON.stringify(out); } catch (_) { json = ''; }
+  if (json.length > POISONING_LIMITS.max_capture_json_chars) {
+    meta.truncated = true;
+    for (const key of CAPTURE_TEXT_KEYS) {
+      if (typeof out[key] === 'string') out[key] = out[key].slice(0, Math.floor(POISONING_LIMITS.max_capture_text_chars / 4));
+    }
+  }
+  return { capture: out, truncated: meta.truncated };
+}
+
+function _sanitizeEvidence(evidence) {
+  const arr = Array.isArray(evidence) ? evidence : (evidence == null ? [] : [evidence]);
+  return arr
+    .slice(0, POISONING_LIMITS.max_evidence_items)
+    .map((item) => _cleanText(item, POISONING_LIMITS.max_evidence_chars))
+    .filter(Boolean);
+}
+
+function _sanitizeReason(reason) {
+  if (typeof reason !== 'string') return null;
+  const clean = _cleanText(reason, POISONING_LIMITS.max_reason_chars);
+  if (!clean || !SAFE_REASON_RE.test(clean)) return null;
+  return clean;
+}
+
+function _publicAnomalyDetail(result) {
+  if (!result || typeof result !== 'object') return null;
+  const axes = Array.isArray(result.flagged_axes)
+    ? result.flagged_axes.slice(0, 8).map((axis) => ({
+        axis: _cleanText(axis && axis.axis, 64),
+        sigma: Number.isFinite(Number(axis && axis.sigma)) ? Number(axis.sigma) : null,
+      }))
+    : [];
+  return {
+    ok: result.ok === true,
+    error: result.error || null,
+    anomaly_flagged: result.anomaly_flagged === true,
+    flagged_axes: axes,
+    baseline_size: Number.isFinite(Number(result.baseline_size)) ? Number(result.baseline_size) : null,
+    version: result.version || null,
+  };
+}
+
+function _publicCopyrightDetail(result) {
+  if (!result || typeof result !== 'object') return null;
+  const hits = Array.isArray(result.hits) ? result.hits : [];
+  return {
+    should_quarantine: result.should_quarantine === true,
+    reason: _cleanText(result.reason || '', 96) || null,
+    risk_score: Number.isFinite(Number(result.risk_score)) ? Number(result.risk_score) : 0,
+    hit_count: hits.length,
+    hit_kinds: Array.from(new Set(hits.map((h) => _cleanText(h && h.kind, 64)).filter(Boolean))).sort().slice(0, 8),
+    threshold: Number.isFinite(Number(result.threshold)) ? Number(result.threshold) : null,
+    version: result.version || null,
+  };
+}
+
+function _publicHmacDetail(result) {
+  if (!result || typeof result !== 'object') return null;
+  return {
+    ok: result.ok === true,
+    valid: result.valid === true,
+    reason: result.reason || null,
+    teacher_id_hash: result.teacher_id ? _sha256Hex(result.teacher_id) : null,
+    response_sha256: result.response_sha256 || null,
+    binding_sha256: result.binding_sha256 || null,
+    version: result.version || null,
+  };
+}
 
 // -----------------------------------------------------------------------------
 // Risk ladder helpers.
@@ -91,20 +284,21 @@ function _escalate(current, candidate) {
 async function _runAnomaly(capture) {
   try {
     const mod = await import('./capture-anomaly.js');
-    const tenant_id = capture.tenant_id || capture.tenant || null;
-    const namespace = capture.namespace || capture.corpus_namespace || 'default';
+    const tenant_id = _safeTenantId(capture.tenant_id || capture.tenant);
+    const namespace = _safeNamespace(capture.namespace || capture.corpus_namespace || 'default');
     if (!tenant_id) {
-      return { ok: false, available: true, error: 'missing_tenant_id', detail: 'capture row has no tenant_id - cannot run W808 tenant-fenced detector' };
+      return { ok: false, available: true, error: 'missing_or_invalid_tenant_id', detail: 'capture row has no safe tenant_id - cannot run W808 tenant-fenced detector' };
     }
     const res = mod.detectAnomaly({ row: capture, tenant_id, namespace });
     return { ok: true, available: true, result: res };
   } catch (e) {
+    const safe = _safeErrorEnvelope(e, 'capture-anomaly module unavailable');
     return {
       ok: false,
       available: false,
       error: 'module_unavailable',
       module: 'capture-anomaly',
-      detail: String(e && e.message || e),
+      ...safe,
     };
   }
 }
@@ -115,12 +309,13 @@ async function _runCopyright(capture) {
     const res = mod.classifyForQuarantine(capture, { threshold: 0.25 });
     return { ok: true, available: true, result: res };
   } catch (e) {
+    const safe = _safeErrorEnvelope(e, 'copyright-detector module unavailable');
     return {
       ok: false,
       available: false,
       error: 'module_unavailable',
       module: 'copyright-detector',
-      detail: String(e && e.message || e),
+      ...safe,
     };
   }
 }
@@ -147,7 +342,7 @@ function _runHmac(capture) {
     }
     return { ok: true, status: 'invalid_signature', result };
   } catch (e) {
-    return { ok: false, status: 'error', detail: String(e && e.message || e) };
+    return { ok: false, status: 'error', ..._safeErrorEnvelope(e, 'hmac verification error') };
   }
 }
 
@@ -170,14 +365,17 @@ export async function assessPoisoningRisk(capture) {
       error: 'missing_capture',
       hint: 'pass a capture row object as the first arg',
       version: POISONING_VERSION,
+      contract_version: POISONING_CONTRACT_VERSION,
     };
   }
+  const bounded = _boundedCapture(capture);
+  const safeCapture = bounded.capture;
 
   const [anomalyEnv, copyrightEnv] = await Promise.all([
-    _runAnomaly(capture),
-    _runCopyright(capture),
+    _runAnomaly(safeCapture),
+    _runCopyright(safeCapture),
   ]);
-  const hmacEnv = _runHmac(capture);
+  const hmacEnv = _runHmac(safeCapture);
 
   let risk = 'safe';
   const evidence = [];
@@ -257,18 +455,20 @@ export async function assessPoisoningRisk(capture) {
   return {
     ok: true,
     version: POISONING_VERSION,
+    contract_version: POISONING_CONTRACT_VERSION,
     risk,
     signals: {
       anomaly: anomalyEnv.ok && anomalyEnv.result
-        ? { flagged: anomalyFlagged, detail: anomalyEnv.result }
-        : { flagged: false, error: anomalyEnv.error || null, available: anomalyEnv.available !== false },
+        ? { flagged: anomalyFlagged, detail: _publicAnomalyDetail(anomalyEnv.result) }
+        : { flagged: false, error: anomalyEnv.error || null, available: anomalyEnv.available !== false, detail_sha256: anomalyEnv.detail_sha256 || null },
       copyright: copyrightEnv.ok && copyrightEnv.result
-        ? { hit: copyrightHit, detail: copyrightEnv.result }
-        : { hit: false, error: copyrightEnv.error || null, available: copyrightEnv.available !== false },
-      hmac: { status: hmacEnv.status, detail: hmacEnv.result || null },
+        ? { hit: copyrightHit, detail: _publicCopyrightDetail(copyrightEnv.result) }
+        : { hit: false, error: copyrightEnv.error || null, available: copyrightEnv.available !== false, detail_sha256: copyrightEnv.detail_sha256 || null },
+      hmac: { status: hmacEnv.status, detail: _publicHmacDetail(hmacEnv.result), detail_sha256: hmacEnv.detail_sha256 || null },
     },
     recommendation,
     evidence,
+    capture_truncated: bounded.truncated,
   };
 }
 
@@ -311,15 +511,17 @@ async function _loadEventStore() {
 // captures in (tenant_id, namespace). Returns aggregate counts + top
 // evidence so the operator can see the breakdown without iterating every row.
 export async function assessNamespacePoisoningRisk({ tenant_id, namespace, sample_n = DEFAULT_NAMESPACE_SAMPLE_N } = {}) {
-  if (!tenant_id) {
+  const safeTenantId = _safeTenantId(tenant_id);
+  if (!safeTenantId) {
     return {
       ok: false,
-      error: 'missing_tenant_id',
+      error: 'missing_or_invalid_tenant_id',
       hint: 'assessNamespacePoisoningRisk requires tenant_id for the W411 tenant fence',
       version: POISONING_VERSION,
+      contract_version: POISONING_CONTRACT_VERSION,
     };
   }
-  const ns = namespace || 'default';
+  const ns = _safeNamespace(namespace || 'default');
   const cap = Math.max(1, Math.min(MAX_NAMESPACE_SAMPLE, Math.trunc(Number(sample_n) || DEFAULT_NAMESPACE_SAMPLE_N)));
 
   const es = await _loadEventStore();
@@ -329,32 +531,37 @@ export async function assessNamespacePoisoningRisk({ tenant_id, namespace, sampl
       error: 'event_store_unavailable',
       hint: 'src/event-store.js could not be imported - orchestrator cannot sweep namespace risk',
       version: POISONING_VERSION,
+      contract_version: POISONING_CONTRACT_VERSION,
     };
   }
   let rows;
   try {
-    rows = await es.listEvents({ tenant_id, namespace: ns, limit: cap, order: 'desc' });
+    rows = await es.listEvents({ tenant_id: safeTenantId, namespace: ns, limit: cap, order: 'desc' });
   } catch (e) {
+    const safe = _safeErrorEnvelope(e, 'event store read failed');
     return {
       ok: false,
       error: 'event_store_read_failed',
-      detail: String(e && e.message || e),
+      ...safe,
       version: POISONING_VERSION,
+      contract_version: POISONING_CONTRACT_VERSION,
     };
   }
   // DEFENSE-IN-DEPTH tenant fence (W411). listEvents already filters by
   // tenant_id but we re-check inline so a stale row that slipped past the
   // index cannot pollute the cross-tenant risk verdict.
-  rows = (rows || []).filter((r) => r && (r.tenant_id === tenant_id || r.tenant === tenant_id));
+  rows = (rows || []).filter((r) => r && (r.tenant_id === safeTenantId || r.tenant === safeTenantId));
 
   if (!rows.length) {
     return {
       ok: false,
       error: 'empty_namespace',
-      hint: `no captures in (tenant=${tenant_id}, namespace=${ns}) - poisoning sweep needs at least one row to assess`,
+      hint: `no captures in (tenant_hash=${_sha256Hex(safeTenantId)}, namespace=${ns}) - poisoning sweep needs at least one row to assess`,
       namespace: ns,
+      namespace_hash: _sha256Hex(ns),
       sample_n: cap,
       version: POISONING_VERSION,
+      contract_version: POISONING_CONTRACT_VERSION,
     };
   }
 
@@ -368,11 +575,12 @@ export async function assessNamespacePoisoningRisk({ tenant_id, namespace, sampl
     by_risk[verdict.risk] = (by_risk[verdict.risk] || 0) + 1;
     highest = _escalate(highest, verdict.risk);
     assessed += 1;
-    if (verdict.risk !== 'safe' && top_evidence.length < 10) {
+    if (verdict.risk !== 'safe' && top_evidence.length < POISONING_LIMITS.max_top_evidence) {
+      const ref = _captureRef(row);
       top_evidence.push({
-        capture_id: row.event_id || row.cid || row.id || null,
+        ...ref,
         risk: verdict.risk,
-        evidence: verdict.evidence,
+        evidence: _sanitizeEvidence(verdict.evidence),
       });
     }
   }
@@ -382,8 +590,11 @@ export async function assessNamespacePoisoningRisk({ tenant_id, namespace, sampl
   return {
     ok: true,
     version: POISONING_VERSION,
-    tenant_id,
+    contract_version: POISONING_CONTRACT_VERSION,
+    tenant_id: safeTenantId,
+    tenant_id_hash: _sha256Hex(safeTenantId),
     namespace: ns,
+    namespace_hash: _sha256Hex(ns),
     sample_n: cap,
     assessed,
     highest_risk: highest,
@@ -426,14 +637,18 @@ async function _loadStore() {
 // capture_id, reason) tuple we re-use the existing row's id instead of
 // writing a duplicate. The W411 dedupe pattern.
 export async function quarantineCapture({ tenant_id, capture_id, reason, evidence } = {}) {
-  if (!tenant_id) {
-    return { ok: false, error: 'missing_tenant_id', version: POISONING_VERSION };
+  const safeTenantId = _safeTenantId(tenant_id);
+  const safeCaptureId = _safeCaptureId(capture_id);
+  const safeReason = _sanitizeReason(reason);
+  const safeEvidence = _sanitizeEvidence(evidence);
+  if (!safeTenantId) {
+    return { ok: false, error: 'missing_or_invalid_tenant_id', version: POISONING_VERSION, contract_version: POISONING_CONTRACT_VERSION };
   }
-  if (!capture_id) {
-    return { ok: false, error: 'missing_capture_id', version: POISONING_VERSION };
+  if (!safeCaptureId) {
+    return { ok: false, error: 'missing_or_invalid_capture_id', version: POISONING_VERSION, contract_version: POISONING_CONTRACT_VERSION };
   }
-  if (!reason || typeof reason !== 'string') {
-    return { ok: false, error: 'missing_reason', hint: 'pass {reason:"<short tag>"}', version: POISONING_VERSION };
+  if (!safeReason) {
+    return { ok: false, error: 'missing_or_invalid_reason', hint: 'pass {reason:"<short safe tag>"}', version: POISONING_VERSION, contract_version: POISONING_CONTRACT_VERSION };
   }
 
   const auditMod = await _loadAudit();
@@ -443,14 +658,18 @@ export async function quarantineCapture({ tenant_id, capture_id, reason, evidenc
       error: 'audit_unavailable',
       hint: 'src/audit.js could not be imported',
       version: POISONING_VERSION,
+      contract_version: POISONING_CONTRACT_VERSION,
     };
   }
 
   const op = 'poisoning.capture_quarantined';
   const payload = {
-    capture_id,
-    reason,
-    evidence: Array.isArray(evidence) ? evidence : (evidence ? [String(evidence)] : []),
+    capture_id: safeCaptureId,
+    capture_id_hash: _sha256Hex(safeCaptureId),
+    reason: safeReason,
+    evidence: safeEvidence,
+    evidence_sha256: _sha256Hex(JSON.stringify(safeEvidence)),
+    contract_version: POISONING_CONTRACT_VERSION,
     version: POISONING_VERSION,
   };
 
@@ -469,17 +688,19 @@ export async function quarantineCapture({ tenant_id, capture_id, reason, evidenc
         if (!r) continue;
         if (r.op !== op) continue;
         // Tenant fence (defense-in-depth W411).
-        if (r.tenant_id !== tenant_id) continue;
+        if (r.tenant_id !== safeTenantId) continue;
         const p = r.payload || {};
-        if (p.capture_id === capture_id && p.reason === reason) {
+        if (p.capture_id === safeCaptureId && p.reason === safeReason) {
           return {
             ok: true,
             already_quarantined: true,
-            capture_id,
-            reason,
+            capture_id: safeCaptureId,
+            capture_id_hash: _sha256Hex(safeCaptureId),
+            reason: safeReason,
             quarantined_at: r.at,
             audit_event_id: r.id,
             version: POISONING_VERSION,
+            contract_version: POISONING_CONTRACT_VERSION,
           };
         }
       }
@@ -487,7 +708,7 @@ export async function quarantineCapture({ tenant_id, capture_id, reason, evidenc
   }
 
   const row = auditMod.tryAppendAudit({
-    tenant_id,
+    tenant_id: safeTenantId,
     op,
     payload,
   });
@@ -497,15 +718,18 @@ export async function quarantineCapture({ tenant_id, capture_id, reason, evidenc
       error: 'audit_append_failed',
       hint: 'tryAppendAudit returned null - likely no receipt secret configured',
       version: POISONING_VERSION,
+      contract_version: POISONING_CONTRACT_VERSION,
     };
   }
   return {
     ok: true,
-    capture_id,
-    reason,
+    capture_id: safeCaptureId,
+    capture_id_hash: _sha256Hex(safeCaptureId),
+    reason: safeReason,
     quarantined_at: row.at,
     audit_event_id: row.id,
     version: POISONING_VERSION,
+    contract_version: POISONING_CONTRACT_VERSION,
   };
 }
 
@@ -513,11 +737,21 @@ export async function quarantineCapture({ tenant_id, capture_id, reason, evidenc
 // enforced at the route layer; this function just records the release in
 // the audit chain. Returns the new audit row.
 export async function releaseFromQuarantine({ tenant_id, capture_id, release_reason, released_by } = {}) {
-  if (!tenant_id) {
-    return { ok: false, error: 'missing_tenant_id', version: POISONING_VERSION };
+  const safeTenantId = _safeTenantId(tenant_id);
+  const safeCaptureId = _safeCaptureId(capture_id);
+  const safeReleaseReason = release_reason == null ? null : _sanitizeReason(release_reason);
+  const safeActor = released_by == null ? null : _safeId(released_by, 128);
+  if (!safeTenantId) {
+    return { ok: false, error: 'missing_or_invalid_tenant_id', version: POISONING_VERSION, contract_version: POISONING_CONTRACT_VERSION };
   }
-  if (!capture_id) {
-    return { ok: false, error: 'missing_capture_id', version: POISONING_VERSION };
+  if (!safeCaptureId) {
+    return { ok: false, error: 'missing_or_invalid_capture_id', version: POISONING_VERSION, contract_version: POISONING_CONTRACT_VERSION };
+  }
+  if (release_reason != null && !safeReleaseReason) {
+    return { ok: false, error: 'invalid_release_reason', version: POISONING_VERSION, contract_version: POISONING_CONTRACT_VERSION };
+  }
+  if (released_by != null && !safeActor) {
+    return { ok: false, error: 'invalid_released_by', version: POISONING_VERSION, contract_version: POISONING_CONTRACT_VERSION };
   }
   const auditMod = await _loadAudit();
   if (!auditMod || typeof auditMod.tryAppendAudit !== 'function') {
@@ -525,33 +759,40 @@ export async function releaseFromQuarantine({ tenant_id, capture_id, release_rea
       ok: false,
       error: 'audit_unavailable',
       version: POISONING_VERSION,
+      contract_version: POISONING_CONTRACT_VERSION,
     };
   }
   const row = auditMod.tryAppendAudit({
-    tenant_id,
+    tenant_id: safeTenantId,
     op: 'poisoning.capture_released',
-    actor: released_by || null,
+    actor: safeActor,
     payload: {
-      capture_id,
-      release_reason: release_reason || null,
-      released_by: released_by || null,
+      capture_id: safeCaptureId,
+      capture_id_hash: _sha256Hex(safeCaptureId),
+      release_reason: safeReleaseReason,
+      released_by: safeActor,
+      contract_version: POISONING_CONTRACT_VERSION,
       version: POISONING_VERSION,
     },
   });
   if (!row) {
-    return { ok: false, error: 'audit_append_failed', version: POISONING_VERSION };
+    return { ok: false, error: 'audit_append_failed', version: POISONING_VERSION, contract_version: POISONING_CONTRACT_VERSION };
   }
   return {
     ok: true,
-    capture_id,
+    capture_id: safeCaptureId,
+    capture_id_hash: _sha256Hex(safeCaptureId),
     released_at: row.at,
     audit_event_id: row.id,
     version: POISONING_VERSION,
+    contract_version: POISONING_CONTRACT_VERSION,
   };
 }
 
 export default {
   POISONING_VERSION,
+  POISONING_CONTRACT_VERSION,
+  POISONING_LIMITS,
   POISON_RISK_LEVELS,
   assessPoisoningRisk,
   assessNamespacePoisoningRisk,

@@ -57,7 +57,7 @@ test('W703 source pins OpenAI fine-tune importer bounds and depth wiring', () =>
     pkg.scripts['verify:openai-finetune-importer'],
     'node --test --test-concurrency=1 tests/wave703-openai-finetune-importer-contract.test.js',
   );
-  assert.match(pkg.scripts['verify:depth'], /verify:failure-modes-w745 && npm run verify:openai-finetune-importer && node --test/);
+  assert.match(pkg.scripts['verify:depth'], /verify:failure-modes-w745 && npm run verify:openai-finetune-importer && npm run verify:poisoning-orchestrator && node --test/);
 });
 
 test('W703 parse emits stable capture rows for chat and completion formats', () => {

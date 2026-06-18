@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 735,
-    "components_without_direct_test_reference": 94,
+    "test_referenced_components": 736,
+    "components_without_direct_test_reference": 93,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -25858,7 +25858,8 @@
         "tests/wave685-eval-humaneval-contract.test.js",
         "tests/wave699-drift-alert-w813-contract.test.js",
         "tests/wave700-failure-modes-w745-contract.test.js",
-        "tests/wave703-openai-finetune-importer-contract.test.js"
+        "tests/wave703-openai-finetune-importer-contract.test.js",
+        "tests/wave714-poisoning-orchestrator-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -33906,25 +33907,32 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "4b9bca9aece770f69e55974899f6a1adc185bb07d59ddd34c2713aeab37dfcde",
+      "sha256": "8e0d1e6cfc4e4357d4c826fef4579faf38fd10c583ca6607f4e513db1a7ce824",
       "metrics": {
-        "bytes": 21064,
-        "lines": 561,
+        "bytes": 30908,
+        "lines": 802,
         "imports": 7,
-        "exports": 7,
+        "exports": 9,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 3,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave684-drift-alert-contract.test.js",
+        "tests/wave685-eval-humaneval-contract.test.js",
+        "tests/wave699-drift-alert-w813-contract.test.js",
+        "tests/wave700-failure-modes-w745-contract.test.js",
+        "tests/wave703-openai-finetune-importer-contract.test.js",
+        "tests/wave714-poisoning-orchestrator-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -42566,7 +42574,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave691-teacher-response-hmac-contract.test.js"
+        "tests/wave691-teacher-response-hmac-contract.test.js",
+        "tests/wave714-poisoning-orchestrator-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
