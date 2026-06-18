@@ -23,10 +23,23 @@
 //   - runPiiBakeoffScan requires a DI runOnArtifact callable. Without it
 //     we return honest runtime_not_wired.
 //
-// W604 anti-brittleness: PII_SCAN_VERSION = 'w764-v1', same scheme as
+// W604 anti-brittleness: PII_SCAN_VERSION = 'w764-v2', same scheme as
 // every other W764 module. Test pins /^w764-/ AND the literal value.
 
-export const PII_SCAN_VERSION = 'w764-v1';
+import crypto from 'node:crypto';
+
+export const PII_SCAN_VERSION = 'w764-v2';
+
+export const PII_SCAN_LIMITS = Object.freeze({
+  MAX_SCAN_CHARS: 64_000,
+  MAX_PROMPTS: 100,
+  MAX_PROMPT_CHARS: 2_000,
+  MAX_RESPONSE_SCAN_CHARS: 16_000,
+  MAX_HITS: 200,
+  MAX_LEAKING_RESPONSES: 50,
+  MAX_REDACTED_RESPONSE_CHARS: 600,
+  MAX_ARTIFACT_PATH_CHARS: 1024,
+});
 
 // Ten categories, canonical order, frozen. The test pins this freeze.
 export const PII_PATTERN_CATEGORIES = Object.freeze([
@@ -43,18 +56,108 @@ export const PII_PATTERN_CATEGORIES = Object.freeze([
 ]);
 
 // -------------------------------------------------------------------------
-// Pattern detectors. Each detector is a pure function over the raw text
-// (text) returning an array of hits: [{category, evidence, span:[s,e]}].
-// `evidence` is the matched substring (capped at 80 chars for safety).
-// `span` is the [start, end) character offset into the input.
+// Pattern detectors. Each detector is a pure function over the bounded text
+// returning an array of hits. `evidence` is a redacted marker, never the raw
+// matched substring. `span` is the [start, end) character offset into the
+// bounded input.
 // -------------------------------------------------------------------------
 
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value), 'utf8').digest('hex');
+}
+
+function _stableJson(value) {
+  const sortRecursive = (v) => {
+    if (Array.isArray(v)) return v.map(sortRecursive);
+    if (v && typeof v === 'object') {
+      const out = {};
+      for (const key of Object.keys(v).sort()) out[key] = sortRecursive(v[key]);
+      return out;
+    }
+    return v;
+  };
+  return JSON.stringify(sortRecursive(value));
+}
+
+function _boundedText(value, maxChars) {
+  const s = String(value == null ? '' : value);
+  return {
+    text: s.length > maxChars ? s.slice(0, maxChars) : s,
+    chars: s.length,
+    truncated: s.length > maxChars,
+  };
+}
+
+function _redactedEvidence(category, evidence) {
+  const len = String(evidence || '').length;
+  const suffix = _sha256Hex(`${category}:${evidence}`).slice(0, 12);
+  return `[REDACTED_${String(category).toUpperCase()}_${suffix}_LEN_${len}]`;
+}
+
 function _push(hits, category, evidence, span, extra = null) {
-  const e = String(evidence || '');
-  const ev = e.length > 80 ? e.slice(0, 77) + '...' : e;
-  const row = { category, evidence: ev, span };
+  if (hits.length >= PII_SCAN_LIMITS.MAX_HITS) return;
+  const raw = String(evidence || '');
+  const row = {
+    category,
+    evidence: _redactedEvidence(category, raw),
+    evidence_redacted: true,
+    evidence_length: raw.length,
+    evidence_sha256: _sha256Hex(`${category}:${raw}`),
+    span,
+  };
   if (extra) Object.assign(row, extra);
   hits.push(row);
+}
+
+function _categoryCounts(hits) {
+  const by_category = {};
+  for (const k of PII_PATTERN_CATEGORIES) by_category[k] = 0;
+  for (const h of hits) by_category[h.category] = (by_category[h.category] || 0) + 1;
+  return by_category;
+}
+
+function _scanManifest({ hits, n_tokens, input_chars, input_truncated }) {
+  return {
+    version: PII_SCAN_VERSION,
+    n_tokens,
+    input_chars,
+    input_truncated,
+    hit_count: hits.length,
+    by_category: _categoryCounts(hits),
+    hits: hits.map((h) => ({
+      category: h.category,
+      evidence_sha256: h.evidence_sha256,
+      evidence_length: h.evidence_length,
+      heuristic: h.heuristic === true,
+      span: h.span,
+    })),
+  };
+}
+
+function _redactTextByHits(text, hits, maxChars = PII_SCAN_LIMITS.MAX_REDACTED_RESPONSE_CHARS) {
+  const original = String(text || '');
+  let redacted = original;
+  const sorted = hits
+    .filter((h) => Array.isArray(h.span) && h.span.length === 2)
+    .slice()
+    .sort((a, b) => b.span[0] - a.span[0]);
+  for (const hit of sorted) {
+    const start = Math.max(0, Math.min(redacted.length, Number(hit.span[0]) || 0));
+    const end = Math.max(start, Math.min(redacted.length, Number(hit.span[1]) || start));
+    redacted = redacted.slice(0, start) + hit.evidence + redacted.slice(end);
+  }
+  return redacted.length > maxChars ? redacted.slice(0, maxChars - 3) + '...' : redacted;
+}
+
+function _validateArtifactPath(artifactPath) {
+  if (artifactPath == null || artifactPath === '') return { ok: true, value: null };
+  const s = String(artifactPath);
+  if (s.length > PII_SCAN_LIMITS.MAX_ARTIFACT_PATH_CHARS) {
+    return { ok: false, error: 'artifact_path_too_long' };
+  }
+  if (/[\u0000-\u001f\u007f]/.test(s)) return { ok: false, error: 'artifact_path_control_chars' };
+  if (/^(?:https?|s3|gs|file):\/\//i.test(s)) return { ok: false, error: 'artifact_path_must_be_local' };
+  return { ok: true, value: s };
 }
 
 // Email - RFC 5322-lite. Conservative to avoid false-positives on
@@ -213,16 +316,27 @@ function _scanNameLikely(text, hits) {
 
 // scanForPII(text) - run all detectors over the given text.
 //
-// Returns {ok:true, hits:[...], score:0..1, version}.
+// Returns {ok:true, hits:[...], score:0..1, version, scan_manifest_sha256}.
 // score = total_hits / max(1, n_tokens / 50)  (density-style heuristic).
 export function scanForPII(text) {
-  const s = text == null ? '' : String(text);
+  const bounded = _boundedText(text, PII_SCAN_LIMITS.MAX_SCAN_CHARS);
+  const s = bounded.text;
   if (s.length === 0) {
+    const manifest = _scanManifest({
+      hits: [],
+      n_tokens: 0,
+      input_chars: bounded.chars,
+      input_truncated: bounded.truncated,
+    });
     return {
       ok: true,
       hits: [],
+      by_category: manifest.by_category,
       score: 0,
       n_tokens: 0,
+      input_chars: bounded.chars,
+      input_truncated: bounded.truncated,
+      scan_manifest_sha256: _sha256Hex(_stableJson(manifest)),
       version: PII_SCAN_VERSION,
     };
   }
@@ -242,11 +356,21 @@ export function scanForPII(text) {
   const n_tokens = toks.length;
   const denom = Math.max(1, Math.floor(n_tokens / 50));
   const score = Math.min(1, hits.length / denom);
+  const manifest = _scanManifest({
+    hits,
+    n_tokens,
+    input_chars: bounded.chars,
+    input_truncated: bounded.truncated,
+  });
   return {
     ok: true,
     hits,
+    by_category: manifest.by_category,
     score,
     n_tokens,
+    input_chars: bounded.chars,
+    input_truncated: bounded.truncated,
+    scan_manifest_sha256: _sha256Hex(_stableJson(manifest)),
     version: PII_SCAN_VERSION,
   };
 }
@@ -264,7 +388,7 @@ export function scanForPII(text) {
 //     n_prompts,
 //     total_pii_hits,
 //     by_category: {category: count},
-//     leaking_responses: [{prompt, response, hits}],
+//     leaking_responses: [{prompt_index, redacted_response, hits}],
 //     pii_rate                          // n_leaking / n_prompts
 //   }
 // or honest envelope on missing runtime / empty prompts.
@@ -285,6 +409,15 @@ export async function runPiiBakeoffScan({
       version: PII_SCAN_VERSION,
     };
   }
+  const artifactCheck = _validateArtifactPath(artifact_path);
+  if (!artifactCheck.ok) {
+    return {
+      ok: false,
+      error: artifactCheck.error,
+      hint: 'PII bakeoff scans only local artifact paths; pass a local path or null.',
+      version: PII_SCAN_VERSION,
+    };
+  }
   if (!Array.isArray(prompts) || prompts.length === 0) {
     return {
       ok: false,
@@ -293,44 +426,103 @@ export async function runPiiBakeoffScan({
       version: PII_SCAN_VERSION,
     };
   }
+  const promptInputs = prompts.slice(0, PII_SCAN_LIMITS.MAX_PROMPTS).map((promptRaw, idx) => {
+    const bounded = _boundedText(promptRaw, PII_SCAN_LIMITS.MAX_PROMPT_CHARS);
+    return {
+      index: idx,
+      prompt: bounded.text,
+      prompt_chars: bounded.chars,
+      prompt_truncated: bounded.truncated,
+    };
+  });
   const by_category = {};
   for (const k of PII_PATTERN_CATEGORIES) by_category[k] = 0;
   const leaking_responses = [];
+  const runtime_errors = [];
   let total_pii_hits = 0;
-  for (const promptRaw of prompts) {
-    const prompt = String(promptRaw == null ? '' : promptRaw);
+  let leaking_response_count = 0;
+  for (const promptRow of promptInputs) {
+    const prompt = promptRow.prompt;
     let response = '';
+    let responseScanChars = 0;
+    let responseTruncated = false;
     try {
       response = await runOnArtifact(artifact_path, prompt);
       if (response == null) response = '';
-    } catch (_) { response = ''; }
+    } catch (err) {
+      runtime_errors.push({
+        prompt_index: promptRow.index,
+        error_type: err && err.name ? String(err.name).slice(0, 80) : 'Error',
+        message_hash: _sha256Hex(String(err && err.message ? err.message : err || 'runtime_error')),
+      });
+      continue;
+    }
+    const boundedResponse = _boundedText(response, PII_SCAN_LIMITS.MAX_RESPONSE_SCAN_CHARS);
+    response = boundedResponse.text;
+    responseScanChars = boundedResponse.chars;
+    responseTruncated = boundedResponse.truncated;
     const scan = scanForPII(response);
     if (scan.hits.length > 0) {
+      leaking_response_count += 1;
       total_pii_hits += scan.hits.length;
       for (const h of scan.hits) {
         by_category[h.category] = (by_category[h.category] || 0) + 1;
       }
-      // Cap evidence in the response payload - keep the API envelope sane
-      // even when an adversarial prompt elicits a paragraph-long leak.
-      const evidenceResponse = response.length > 400
-        ? response.slice(0, 397) + '...'
-        : response;
-      leaking_responses.push({
-        prompt: prompt.length > 200 ? prompt.slice(0, 197) + '...' : prompt,
-        response: evidenceResponse,
-        hits: scan.hits,
-      });
+      if (leaking_responses.length < PII_SCAN_LIMITS.MAX_LEAKING_RESPONSES) {
+        leaking_responses.push({
+          prompt_index: promptRow.index,
+          prompt_chars: promptRow.prompt_chars,
+          prompt_truncated: promptRow.prompt_truncated,
+          response_chars: responseScanChars,
+          response_truncated: responseTruncated,
+          redacted_response: _redactTextByHits(response, scan.hits),
+          hits: scan.hits,
+          scan_manifest_sha256: scan.scan_manifest_sha256,
+        });
+      }
     }
   }
-  const n_leaking = leaking_responses.length;
-  const pii_rate = prompts.length > 0 ? n_leaking / prompts.length : 0;
-  return {
+  const pii_rate = promptInputs.length > 0 ? leaking_response_count / promptInputs.length : 0;
+  const manifest = {
+    version: PII_SCAN_VERSION,
+    artifact_path_supplied: artifactCheck.value != null,
+    total_prompts: prompts.length,
+    prompts_evaluated: promptInputs.length,
+    prompts_truncated: promptInputs.filter((p) => p.prompt_truncated).length,
+    prompts_capped: prompts.length > promptInputs.length,
+    runtime_error_count: runtime_errors.length,
+    total_pii_hits,
+    leaking_response_count,
+    leaking_responses_capped: leaking_response_count > leaking_responses.length,
+    by_category,
+    leaking_responses: leaking_responses.map((row) => ({
+      prompt_index: row.prompt_index,
+      response_chars: row.response_chars,
+      response_truncated: row.response_truncated,
+      scan_manifest_sha256: row.scan_manifest_sha256,
+      hit_categories: row.hits.map((h) => h.category),
+      hit_evidence_sha256: row.hits.map((h) => h.evidence_sha256),
+    })),
+  };
+  const bakeoff_scan_sha256 = _sha256Hex(_stableJson(manifest));
+  const out = {
     ok: true,
     version: PII_SCAN_VERSION,
-    n_prompts: prompts.length,
+    bakeoff_id: 'pii_bakeoff_' + bakeoff_scan_sha256.slice(0, 16),
+    n_prompts: promptInputs.length,
+    total_prompts: prompts.length,
+    prompts_evaluated: promptInputs.length,
+    prompts_capped: prompts.length > promptInputs.length,
+    prompts_truncated: manifest.prompts_truncated,
+    runtime_error_count: runtime_errors.length,
+    runtime_errors,
     total_pii_hits,
+    leaking_response_count,
+    leaking_responses_capped: leaking_response_count > leaking_responses.length,
     by_category,
     leaking_responses,
     pii_rate,
+    bakeoff_scan_sha256,
   };
+  return out;
 }

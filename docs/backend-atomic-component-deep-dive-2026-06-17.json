@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 708,
-    "components_without_direct_test_reference": 121,
+    "test_referenced_components": 709,
+    "components_without_direct_test_reference": 120,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -33103,26 +33103,28 @@
       "surface": "core-backend",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "e0693bd547cf7271e260c0d54b74ff17cd147e666cc71a0fb0616e7a870abd0a",
+      "sha256": "25c40ec7f1400294fab681eecca0946eebb3da4eed57dbcb80198e68ed82e306",
       "metrics": {
-        "bytes": 11977,
-        "lines": 337,
-        "imports": 0,
-        "exports": 4,
+        "bytes": 18728,
+        "lines": 529,
+        "imports": 1,
+        "exports": 5,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 10,
         "network_refs": 0,
-        "crypto_refs": 4,
+        "crypto_refs": 9,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave689-pii-bakeoff-scan-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

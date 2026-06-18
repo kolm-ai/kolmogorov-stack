@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 708,
-    "direct_test_reference_pct": 85.4,
-    "components_without_direct_test_reference": 121,
+    "direct_test_referenced_components": 709,
+    "direct_test_reference_pct": 85.5,
+    "components_without_direct_test_reference": 120,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -29955,25 +29955,25 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 11977,
-          "lines": 337,
-          "imports": 0,
-          "exports": 4,
+          "bytes": 18728,
+          "lines": 529,
+          "imports": 1,
+          "exports": 5,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 10,
           "network_refs": 0,
-          "crypto_refs": 4,
+          "crypto_refs": 9,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "e0693bd547cf7271e260c0d54b74ff17cd147e666cc71a0fb0616e7a870abd0a"
+        "sha256": "25c40ec7f1400294fab681eecca0946eebb3da4eed57dbcb80198e68ed82e306"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -29981,7 +29981,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave689-pii-bakeoff-scan-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
         "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
@@ -29990,10 +29992,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/pii-redactor.js",
