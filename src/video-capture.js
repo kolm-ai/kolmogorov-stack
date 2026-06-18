@@ -41,6 +41,18 @@
 import crypto from 'node:crypto';
 
 export const VIDEO_CAPTURE_VERSION = 'w773-v1';
+export const VIDEO_CAPTURE_CONTRACT_VERSION = 'w734-video-capture-v1';
+export const VIDEO_CAPTURE_LIMITS = Object.freeze({
+  max_messages: 128,
+  max_message_blocks: 256,
+  max_video_blocks: 32,
+  max_inline_scan_chars: 4096,
+  max_url_chars: 2048,
+  max_tenant_id_chars: 160,
+  max_namespace_chars: 128,
+  max_response_head_chars: 200,
+  max_byte_count_estimate: 1024 * 1024 * 1024,
+});
 
 // Closed enum of supported video MIME types. Frozen so a refactor cannot
 // silently add a 6th MIME without bumping VIDEO_CAPTURE_VERSION and the
@@ -56,7 +68,84 @@ export const SUPPORTED_VIDEO_MIMES = Object.freeze([
 // 1 GiB byte-count cap. Frontier vendors top out around 256 MiB for sync
 // upload; we go to 1 GiB to allow the staged-upload flow but never beyond.
 // A Content-Length header beyond this is almost certainly hostile.
-const MAX_BYTE_COUNT_ESTIMATE = 1024 * 1024 * 1024;
+export const MAX_BYTE_COUNT_ESTIMATE = VIDEO_CAPTURE_LIMITS.max_byte_count_estimate;
+
+const SAFE_ID_RE = /^[A-Za-z0-9_.:@-]+$/;
+const SAFE_NAMESPACE_RE = /^[A-Za-z0-9_.:@/-]+$/;
+
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value || ''), 'utf8').digest('hex');
+}
+
+function _cleanStrictText(value, maxChars) {
+  if (value == null) return null;
+  const raw = String(value);
+  if (/[\u0000-\u001f\u007f]/.test(raw)) return null;
+  const cleaned = raw.replace(/\s+/g, ' ').trim();
+  if (!cleaned || cleaned.length > maxChars) return null;
+  return cleaned;
+}
+
+function _cleanLooseText(value, maxChars) {
+  if (value == null) return null;
+  const cleaned = String(value)
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!cleaned) return null;
+  return cleaned.length > maxChars ? cleaned.slice(0, maxChars) : cleaned;
+}
+
+function _normalizeTenantId(value) {
+  const cleaned = _cleanStrictText(value, VIDEO_CAPTURE_LIMITS.max_tenant_id_chars);
+  return cleaned && SAFE_ID_RE.test(cleaned) ? cleaned : null;
+}
+
+function _normalizeNamespace(value) {
+  const cleaned = _cleanStrictText(value == null || value === '' ? 'default' : value, VIDEO_CAPTURE_LIMITS.max_namespace_chars);
+  return cleaned && SAFE_NAMESPACE_RE.test(cleaned) ? cleaned : null;
+}
+
+function _normalizeMimeType(value) {
+  const mime = _cleanStrictText(value, 96);
+  return mime ? mime.toLowerCase() : null;
+}
+
+function _errorEnvelope(error, detail, extra = {}) {
+  return {
+    ok: false,
+    error,
+    version: VIDEO_CAPTURE_VERSION,
+    contract_version: VIDEO_CAPTURE_CONTRACT_VERSION,
+    error_sha256: _sha256Hex(detail || error),
+    ...extra,
+  };
+}
+
+function _safeUrlForEnvelope(rawUrl, mimeType) {
+  const url = _cleanStrictText(rawUrl, VIDEO_CAPTURE_LIMITS.max_url_chars);
+  if (!url) return null;
+
+  if (url.startsWith('data:')) {
+    const m = /^data:(video\/[a-z0-9.+-]+);base64,/i.exec(url);
+    const mime = _normalizeMimeType((m && m[1]) || mimeType || 'video/mp4');
+    if (!mime || !SUPPORTED_VIDEO_MIMES.includes(mime)) return null;
+    return {
+      url: `data:${mime};base64,<elided>`,
+      url_sha256: _sha256Hex(url),
+    };
+  }
+
+  let parsed;
+  try { parsed = new URL(url); } catch { return null; }
+  if (!['http:', 'https:'].includes(parsed.protocol)) return null;
+  if (parsed.username || parsed.password) return null;
+  const safeUrl = parsed.origin + parsed.pathname;
+  return {
+    url: safeUrl,
+    url_sha256: _sha256Hex(url),
+  };
+}
 
 // =============================================================================
 // detectVideoCapture - scan a single inbound message for video blocks.
@@ -80,29 +169,31 @@ export function detectVideoCapture(message) {
   // We tolerate both.
   const blocks = [];
   if (Array.isArray(message.content)) {
-    for (const block of message.content) {
+    for (const block of message.content.slice(0, VIDEO_CAPTURE_LIMITS.max_message_blocks)) {
       if (!block || typeof block !== 'object') continue;
       // Type 1 - Anthropic-style video block w/ base64 source.
       if (block.type === 'video') {
-        blocks.push(block);
+        if (blocks.length < VIDEO_CAPTURE_LIMITS.max_video_blocks) blocks.push(block);
         continue;
       }
       // Type 2 - OpenAI-style video_url block.
       if (block.type === 'video_url') {
-        blocks.push(block);
+        if (blocks.length < VIDEO_CAPTURE_LIMITS.max_video_blocks) blocks.push(block);
         continue;
       }
       // Type 3 - generic media block with media_type/mime_type.
       const mt = block.mime_type || block.media_type
         || (block.source && (block.source.mime_type || block.source.media_type));
       if (typeof mt === 'string' && mt.startsWith('video/')) {
-        blocks.push(block);
+        if (blocks.length < VIDEO_CAPTURE_LIMITS.max_video_blocks) blocks.push(block);
         continue;
       }
     }
   } else if (typeof message.content === 'string') {
     // Scan for data:video/* embeds inline. Rare but possible.
-    const m = message.content.match(/data:(video\/[a-z0-9.+-]+);base64,/i);
+    const m = message.content
+      .slice(0, VIDEO_CAPTURE_LIMITS.max_inline_scan_chars)
+      .match(/data:(video\/[a-z0-9.+-]+);base64,/i);
     if (m) {
       blocks.push({
         type: 'video',
@@ -140,6 +231,7 @@ export function normalizeVideoBlock(block) {
       error: 'block_not_object',
       hint: 'normalizeVideoBlock requires a non-null object',
       version: VIDEO_CAPTURE_VERSION,
+      contract_version: VIDEO_CAPTURE_CONTRACT_VERSION,
     };
   }
 
@@ -152,7 +244,7 @@ export function normalizeVideoBlock(block) {
   // Type 2 - {type:'video_url', video_url:{url:'...'}}
   if (block.type === 'video_url' && block.video_url && typeof block.video_url === 'object') {
     url = String(block.video_url.url || '');
-    mime_type = String(block.video_url.mime_type || block.mime_type || _mimeFromUrl(url) || 'video/mp4');
+    mime_type = _normalizeMimeType(block.video_url.mime_type || block.mime_type || _mimeFromUrl(url) || 'video/mp4');
     source = 'video_url';
     if (block.video_url.byte_count != null) byte_count_raw = Number(block.video_url.byte_count);
   }
@@ -161,8 +253,9 @@ export function normalizeVideoBlock(block) {
     if (block.source.type === 'base64') {
       // base64 - synthesize a data: URL placeholder (the actual data is
       // ELIDED downstream; we never persist the bytes).
-      url = 'data:' + String(block.source.media_type || 'video/mp4') + ';base64,<elided>';
-      mime_type = String(block.source.media_type || 'video/mp4');
+      mime_type = _normalizeMimeType(block.source.media_type || 'video/mp4');
+      const dataHead = String(block.source.data || '').slice(0, 256);
+      url = 'data:' + String(mime_type || 'video/mp4') + ';base64,' + dataHead;
       source = 'base64';
       if (typeof block.source.data === 'string') {
         // base64 ~ 4/3 of raw bytes. Use length as a cheap byte-count proxy.
@@ -170,18 +263,18 @@ export function normalizeVideoBlock(block) {
       }
     } else if (block.source.type === 'url' && typeof block.source.url === 'string') {
       url = block.source.url;
-      mime_type = String(block.source.media_type || _mimeFromUrl(url) || 'video/mp4');
+      mime_type = _normalizeMimeType(block.source.media_type || _mimeFromUrl(url) || 'video/mp4');
       source = 'url';
     } else if (typeof block.url === 'string') {
       url = block.url;
-      mime_type = String(block.mime_type || block.media_type || _mimeFromUrl(url) || 'video/mp4');
+      mime_type = _normalizeMimeType(block.mime_type || block.media_type || _mimeFromUrl(url) || 'video/mp4');
       source = 'url';
     }
   }
   // Type 3 - generic mime_type with url
   else if (typeof block.url === 'string') {
     url = block.url;
-    mime_type = String(block.mime_type || block.media_type || _mimeFromUrl(url) || 'video/mp4');
+    mime_type = _normalizeMimeType(block.mime_type || block.media_type || _mimeFromUrl(url) || 'video/mp4');
     source = 'url';
   }
 
@@ -192,6 +285,7 @@ export function normalizeVideoBlock(block) {
       error: 'missing_url_or_data',
       hint: 'block must carry a url, video_url.url, or source.data',
       version: VIDEO_CAPTURE_VERSION,
+      contract_version: VIDEO_CAPTURE_CONTRACT_VERSION,
     };
   }
 
@@ -204,6 +298,18 @@ export function normalizeVideoBlock(block) {
       supported: SUPPORTED_VIDEO_MIMES,
       hint: `mime_type must be one of ${JSON.stringify(SUPPORTED_VIDEO_MIMES)}; got ${JSON.stringify(mime_type)}`,
       version: VIDEO_CAPTURE_VERSION,
+      contract_version: VIDEO_CAPTURE_CONTRACT_VERSION,
+    };
+  }
+
+  const safeUrl = _safeUrlForEnvelope(url, mime_type);
+  if (!safeUrl) {
+    return {
+      ok: false,
+      error: 'invalid_url',
+      hint: 'video URL must be http(s) without credentials, or a supported data:video/* base64 block',
+      version: VIDEO_CAPTURE_VERSION,
+      contract_version: VIDEO_CAPTURE_CONTRACT_VERSION,
     };
   }
 
@@ -220,19 +326,21 @@ export function normalizeVideoBlock(block) {
   }
 
   // duration_s_estimate - honest null when unknown. NEVER fabricate.
-  const duration_s_estimate = (block.duration_s != null && Number.isFinite(Number(block.duration_s)))
+  const duration_s_estimate = (block.duration_s != null && Number.isFinite(Number(block.duration_s)) && Number(block.duration_s) > 0)
     ? Number(block.duration_s)
     : null;
 
   return {
     ok: true,
-    url,
+    url: safeUrl.url,
+    url_sha256: safeUrl.url_sha256,
     mime_type,
     byte_count_estimate,
     byte_count_capped,
     duration_s_estimate,
     source,
     version: VIDEO_CAPTURE_VERSION,
+    contract_version: VIDEO_CAPTURE_CONTRACT_VERSION,
   };
 }
 
@@ -240,7 +348,8 @@ export function normalizeVideoBlock(block) {
 // the extension is unrecognised so the caller can default-or-honest.
 function _mimeFromUrl(url) {
   if (typeof url !== 'string') return null;
-  const lower = url.toLowerCase();
+  let lower = url.toLowerCase();
+  try { lower = new URL(url).pathname.toLowerCase(); } catch { /* best effort */ }
   if (lower.endsWith('.mp4'))  return 'video/mp4';
   if (lower.endsWith('.webm')) return 'video/webm';
   if (lower.endsWith('.mov'))  return 'video/quicktime';
@@ -253,7 +362,7 @@ function _mimeFromUrl(url) {
 // uploaded twice does not double-bill capture rows. We hash the URL
 // rather than the bytes (which we never see).
 function _hashUrl(url) {
-  return crypto.createHash('sha256').update(String(url || '')).digest('hex');
+  return _sha256Hex(url);
 }
 
 // =============================================================================
@@ -278,27 +387,38 @@ export async function captureVideoMessage({
   response = null,
   opts = {},
 } = {}) {
-  if (!tenant_id || typeof tenant_id !== 'string') {
+  const tenantId = _normalizeTenantId(tenant_id);
+  if (!tenantId) {
     return {
       ok: false,
       error: 'tenant_id_required',
       hint: 'pass {tenant_id} - capture rows are tenant-scoped',
       version: VIDEO_CAPTURE_VERSION,
+      contract_version: VIDEO_CAPTURE_CONTRACT_VERSION,
     };
+  }
+
+  const namespaceId = _normalizeNamespace(namespace);
+  if (!namespaceId) {
+    return _errorEnvelope('invalid_namespace', 'invalid_namespace', {
+      hint: 'namespace must be a bounded URL-safe identifier',
+    });
   }
 
   // Scan all messages for video blocks.
   const allBlocks = [];
   if (Array.isArray(messages)) {
-    for (const m of messages) {
+    for (const m of messages.slice(0, VIDEO_CAPTURE_LIMITS.max_messages)) {
       const det = detectVideoCapture(m);
       for (const b of det.video_blocks) allBlocks.push(b);
     }
   }
 
   const has_video = allBlocks.length > 0;
-  const normalized = allBlocks.map(normalizeVideoBlock).filter(n => n && n.ok);
-  const video_urls_hashed = normalized.map(n => _hashUrl(n.url));
+  const normalizedAll = allBlocks.map(normalizeVideoBlock);
+  const normalized = normalizedAll.filter(n => n && n.ok);
+  const invalid_video_block_count = normalizedAll.length - normalized.length;
+  const video_urls_hashed = normalized.map(n => n.url_sha256 || _hashUrl(n.url));
   const frame_count_extracted = (opts && Number.isFinite(Number(opts.frame_count_extracted)))
     ? Number(opts.frame_count_extracted)
     : 0;
@@ -321,8 +441,8 @@ export async function captureVideoMessage({
   // both blow up storage and leak PII through a non-redaction surface.
   const partial = {
     event_id,
-    tenant_id,
-    namespace,
+    tenant_id: tenantId,
+    namespace: namespaceId,
     created_at,
     provider: 'kolm.capture',
     model: 'video.capture',
@@ -338,11 +458,14 @@ export async function captureVideoMessage({
     // the full row so they round-trip cleanly.
     w773: {
       version: VIDEO_CAPTURE_VERSION,
+      contract_version: VIDEO_CAPTURE_CONTRACT_VERSION,
       has_video,
+      total_video_blocks_detected: allBlocks.length,
       video_block_count: normalized.length,
+      invalid_video_block_count,
       video_urls_hashed,
       frame_count_extracted,
-      response_head: response != null ? String(response).slice(0, 200) : null,
+      response_head: _cleanLooseText(response, VIDEO_CAPTURE_LIMITS.max_response_head_chars),
     },
     // Honesty hint - explicit declaration that bytes are not on disk.
     raw_video_bytes_persisted: false,
@@ -355,27 +478,49 @@ export async function captureVideoMessage({
 
   let event;
   if (appendEventFn) {
-    event = await appendEventFn(partial);
+    try {
+      event = await appendEventFn(partial);
+    } catch (e) {
+      return _errorEnvelope('append_failed', String(e && e.message || e), {
+        has_video,
+        video_block_count: normalized.length,
+        invalid_video_block_count,
+      });
+    }
   } else {
-    const es = await import('./event-store.js');
-    event = await es.appendEvent(partial);
+    try {
+      const es = await import('./event-store.js');
+      event = await es.appendEvent(partial);
+    } catch (e) {
+      return _errorEnvelope('append_failed', String(e && e.message || e), {
+        has_video,
+        video_block_count: normalized.length,
+        invalid_video_block_count,
+      });
+    }
   }
 
   return {
     ok: true,
     event,
     has_video,
+    total_video_blocks_detected: allBlocks.length,
     video_block_count: normalized.length,
+    invalid_video_block_count,
     video_urls_hashed,
     frame_count_extracted,
     raw_video_bytes_persisted: false,
     version: VIDEO_CAPTURE_VERSION,
+    contract_version: VIDEO_CAPTURE_CONTRACT_VERSION,
   };
 }
 
 export default {
   VIDEO_CAPTURE_VERSION,
+  VIDEO_CAPTURE_CONTRACT_VERSION,
+  VIDEO_CAPTURE_LIMITS,
   SUPPORTED_VIDEO_MIMES,
+  MAX_BYTE_COUNT_ESTIMATE,
   detectVideoCapture,
   normalizeVideoBlock,
   captureVideoMessage,

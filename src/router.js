@@ -27360,17 +27360,20 @@ res.json({
       return res.status(200).json({
         ok: true,
         version: mod.VIDEO_CAPTURE_VERSION,
+        contract_version: mod.VIDEO_CAPTURE_CONTRACT_VERSION,
         is_video: det.is_video,
         total_videos: det.total_videos,
         normalized,
         supported_mimes: mod.SUPPORTED_VIDEO_MIMES,
       });
     } catch (e) {
+      const detail = String(e && e.message || e || 'video_capture_detect_error');
       return res.status(500).json({
         ok: false,
         error: 'video_capture_detect_error',
-        detail: String(e && e.message || e),
         version: 'w773-v1',
+        contract_version: 'w734-video-capture-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
       });
     }
   });
@@ -27432,6 +27435,7 @@ res.json({
       return res.status(200).json({
         ok: true,
         version: 'w773-v1',
+        contract_version: 'w734-video-capture-v1',
         tenant_id,
         namespace: namespace || null,
         limit,
@@ -27448,11 +27452,13 @@ res.json({
         })),
       });
     } catch (e) {
+      const detail = String(e && e.message || e || 'video_captures_error');
       return res.status(500).json({
         ok: false,
         error: 'video_captures_error',
-        detail: String(e && e.message || e),
         version: 'w773-v1',
+        contract_version: 'w734-video-capture-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
       });
     }
   });

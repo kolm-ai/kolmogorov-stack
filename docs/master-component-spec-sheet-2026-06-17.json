@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 741,
-    "direct_test_reference_pct": 89.4,
-    "components_without_direct_test_reference": 88,
+    "direct_test_referenced_components": 742,
+    "direct_test_reference_pct": 89.5,
+    "components_without_direct_test_reference": 87,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -33655,8 +33655,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1469445,
-          "lines": 30814,
+          "bytes": 1469888,
+          "lines": 30820,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -33664,7 +33664,7 @@
           "fs_writes": 1,
           "subprocess_refs": 44,
           "network_refs": 34,
-          "crypto_refs": 275,
+          "crypto_refs": 281,
           "markers": 0
         },
         "risk_signals": [
@@ -33678,7 +33678,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "ddee05b0a745a304f2f312c9e4f8e12f0923eae0d4aab177fa61f24e71fcff8b"
+        "sha256": "fde60c2c60e870b9a94d3a7257e8e234e9be41350b8b8d0c8718085ad451eaa1"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -39864,7 +39864,8 @@
           "tests/wave730-scim-provisioning-contract.test.js",
           "tests/wave731-trend-extract-contract.test.js",
           "tests/wave732-verticals-contract.test.js",
-          "tests/wave733-video-bakeoff-contract.test.js"
+          "tests/wave733-video-bakeoff-contract.test.js",
+          "tests/wave734-video-capture-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -39885,24 +39886,25 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 14813,
-          "lines": 383,
+          "bytes": 20056,
+          "lines": 528,
           "imports": 2,
-          "exports": 6,
+          "exports": 9,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
-          "subprocess_refs": 0,
+          "subprocess_refs": 1,
           "network_refs": 0,
           "crypto_refs": 7,
           "markers": 0
         },
         "risk_signals": [
-          "cryptographic_or_proof_boundary"
+          "cryptographic_or_proof_boundary",
+          "execution_or_subprocess_boundary"
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "bc43e6dbb83c6a7d7e2be8cf7ddf9ae58a4d431277874466b0fe7439d9175a27"
+        "sha256": "2098b0d055baf781995c413a97a23f0a00752130783ddb4857e4b0e7d0b78d56"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -39910,7 +39912,15 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave687-licensing-allowlist-contract.test.js",
+          "tests/wave715-savings-routes-contract.test.js",
+          "tests/wave730-scim-provisioning-contract.test.js",
+          "tests/wave731-trend-extract-contract.test.js",
+          "tests/wave732-verticals-contract.test.js",
+          "tests/wave733-video-bakeoff-contract.test.js",
+          "tests/wave734-video-capture-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -39919,10 +39929,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "src/video-tokenize.js",
