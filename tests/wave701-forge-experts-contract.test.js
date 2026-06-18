@@ -95,7 +95,7 @@ test('W701 source pins forge-experts safety limits, route fencing, and package w
     pkg.scripts['verify:forge-experts'],
     'node --test --test-concurrency=1 tests/wave701-forge-experts-contract.test.js',
   );
-  assert.match(pkg.scripts['verify:depth'], /verify:forge-inspect && npm run verify:forge-experts && npm run verify:pattern-lake/);
+  assert.match(pkg.scripts['verify:depth'], /verify:forge-inspect && npm run verify:forge-experts && npm run verify:forge-fit && npm run verify:pattern-lake/);
 });
 
 test('W701 analyzeExperts parses bounded router receipts and emits a digest-backed envelope', async (t) => {

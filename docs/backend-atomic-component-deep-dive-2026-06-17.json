@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 723,
-    "components_without_direct_test_reference": 106,
+    "test_referenced_components": 724,
+    "components_without_direct_test_reference": 105,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 406,
+      "cryptographic_or_proof_boundary": 407,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 314,
       "execution_or_subprocess_boundary": 233,
@@ -15420,11 +15420,11 @@
         "tests/r1-runtime-passport.test.js",
         "tests/wave636-multinode-launch.test.js",
         "tests/wave665-router-boundary-contract.test.js",
+        "tests/wave702-forge-fit-contract.test.js",
         "tests/wave724-memory-tier.test.js",
         "tests/wave921-cost-estimator-status.test.js",
         "tests/wave921-module-load-regression.test.js",
-        "tests/wave921-qad.test.js",
-        "tests/wc04-cost-estimator.test.js"
+        "tests/wave921-qad.test.js"
       ],
       "risk_signals": [
         "execution_or_subprocess_boundary"
@@ -24359,7 +24359,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave701-forge-experts-contract.test.js"
+        "tests/wave701-forge-experts-contract.test.js",
+        "tests/wave702-forge-fit-contract.test.js"
       ],
       "risk_signals": [
         "auth_or_tenant_boundary",
@@ -24403,23 +24404,27 @@
       "surface": "core-backend",
       "domain": "identity_access",
       "language": "javascript",
-      "sha256": "730ef9f98c8a5bd76aecfd13488d2b668e493084b5900969f88004cd7e4df0f0",
+      "sha256": "eeb2e84ccd747375982a1ce7ef7b6cf8d44170923af9f978addf36dcbb528102",
       "metrics": {
-        "bytes": 5968,
-        "lines": 142,
+        "bytes": 9711,
+        "lines": 339,
         "imports": 1,
-        "exports": 3,
+        "exports": 12,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave701-forge-experts-contract.test.js",
+        "tests/wave702-forge-fit-contract.test.js"
+      ],
       "risk_signals": [
-        "auth_or_tenant_boundary"
+        "auth_or_tenant_boundary",
+        "cryptographic_or_proof_boundary"
       ],
       "priority_score": 4,
       "deep_dive": {
@@ -32993,7 +32998,8 @@
       },
       "test_refs": [
         "tests/wave659-pattern-lake-contract.test.js",
-        "tests/wave701-forge-experts-contract.test.js"
+        "tests/wave701-forge-experts-contract.test.js",
+        "tests/wave702-forge-fit-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -37516,9 +37522,9 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "a3a607a561e6825a5d68bf5bdca10d28da7bf2155580730e24a5ece489ca7145",
+      "sha256": "7cb16a5a60d2103b99413ac2a751520c6f6d9b453ca9884a8010ba179234d172",
       "metrics": {
-        "bytes": 1467919,
+        "bytes": 1467952,
         "lines": 30777,
         "imports": 535,
         "exports": 8,

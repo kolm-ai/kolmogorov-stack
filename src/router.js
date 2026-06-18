@@ -30354,6 +30354,8 @@ res.json({
           model_params_b: Number(body.model_params_b),
           vram_gb: Number(body.vram_gb),
           context: Number(body.context || 8192),
+          batch: Number(body.batch || 1),
+          kv_precision: String(body.kv_precision || 'fp16'),
           supported_methods: Array.isArray(body.supported_methods) ? body.supported_methods : undefined,
         });
         return res.json({ ok: true, ...picked });
@@ -30368,9 +30370,7 @@ res.json({
       });
       res.json({ ok: true, ...fit });
     } catch (e) {
-      const msg = String(e.message || e);
-      const code = /fit_requires_|fit_unknown_/.test(msg) ? 400 : 500;
-      res.status(code).json({ ok: false, error: msg });
+      res.status(forgeFit.fitErrorStatus(e)).json({ ok: false, error: forgeFit.safeFitError(e) });
     }
   });
 
