@@ -143,11 +143,12 @@ async function _sendObject(res, r, { publicCache = false } = {}) {
 }
 
 async function _listObjects(bucket) {
-  if (!R2.accountId || !_apiToken()) {
+  const accountId = R2.r2AccountId();
+  if (!accountId || !_apiToken()) {
     throw new HttpError(501, 'r2_rest_admin_unavailable', 'object listing requires Cloudflare R2 REST credentials');
   }
   const r = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${R2.accountId}/r2/buckets/${encodeURIComponent(bucket)}/objects?per_page=1000`,
+    `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/r2/buckets/${encodeURIComponent(bucket)}/objects?per_page=1000`,
     { headers: { Authorization: `Bearer ${_apiToken()}` } },
   );
   const j = await r.json().catch(() => ({}));
@@ -174,10 +175,11 @@ export default async function handler(req, res) {
 
     if (op === 'ping') {
       const buckets = await R2.listBuckets();
+      const accountId = R2.r2AccountId();
       return res.json({
         ok: true,
         configured: true,
-        account_prefix: R2.accountId ? `${R2.accountId.slice(0, 8)}...` : null,
+        account_prefix: accountId ? `${accountId.slice(0, 8)}...` : null,
         bucket_count: buckets.length,
       });
     }

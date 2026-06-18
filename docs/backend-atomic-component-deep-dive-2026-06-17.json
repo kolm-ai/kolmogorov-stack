@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 726,
-    "components_without_direct_test_reference": 103,
+    "test_referenced_components": 727,
+    "components_without_direct_test_reference": 102,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 407,
+      "cryptographic_or_proof_boundary": 408,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 314,
       "execution_or_subprocess_boundary": 233,
@@ -575,10 +575,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "4e8f72318f5e5efc8cc4b0c7ad5fa28b759461a675065f5f547f3102b39bc07f",
+      "sha256": "939c60f19f241f0a777b998c17bd2558dd92099fdd7cfc951116ffb996fef40b",
       "metrics": {
-        "bytes": 8584,
-        "lines": 260,
+        "bytes": 8672,
+        "lines": 262,
         "imports": 2,
         "exports": 1,
         "routes": 0,
@@ -13137,7 +13137,8 @@
         "tests/wave555-user-completion-cloud-optimizer.test.js",
         "tests/wave558-object-storage-cloud-contract.test.js",
         "tests/wave583-cloud-compute-broker.test.js",
-        "tests/wave669-cf-config-api-contract.test.js"
+        "tests/wave669-cf-config-api-contract.test.js",
+        "tests/wave705-r2-client-contract.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary",
@@ -35894,27 +35895,30 @@
       "surface": "core-backend",
       "domain": "storage_state",
       "language": "javascript",
-      "sha256": "f7925b565de47528804a2f15972624ed04f6ce28e222fc8bf65afd00f59236ea",
+      "sha256": "5afbd3a913263e01cd1de88ef7b86f0d91c492964af4d275cc5b2930b9036afe",
       "metrics": {
-        "bytes": 5493,
-        "lines": 134,
-        "imports": 1,
-        "exports": 7,
+        "bytes": 17560,
+        "lines": 489,
+        "imports": 2,
+        "exports": 19,
         "routes": 0,
-        "env_refs": 9,
+        "env_refs": 14,
         "fs_writes": 0,
         "subprocess_refs": 0,
-        "network_refs": 5,
-        "crypto_refs": 0,
+        "network_refs": 1,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave705-r2-client-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "network_or_provider_boundary",
         "stateful_storage_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 6,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -35939,7 +35943,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "tenant_scoped_cas_storage_retention_and_migration_simulation",
       "innovation_opportunity": "Promote local JSON/disk state into a tenant-scoped CAS object store with lifecycle simulation before storage cutover.",
       "suggested_verification": [
         "node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js"
