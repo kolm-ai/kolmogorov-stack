@@ -13,9 +13,12 @@ const AUTH_BOUNDARY_MATRIX = path.join(ROOT, 'docs', 'internal', 'auth-boundary-
 const AUTH_BOUNDARY_MATRIX_TEST = path.join(ROOT, 'tests', 'wave938-auth-boundary-matrix.test.js');
 const CLI_COMMAND_MATRIX = path.join(ROOT, 'docs', 'internal', 'cli-command-matrix.json');
 const CLI_COMMAND_MATRIX_TEST = path.join(ROOT, 'tests', 'wave939-cli-command-matrix.test.js');
+const DAEMON_CONNECTOR_MATRIX = path.join(ROOT, 'docs', 'internal', 'daemon-connector-matrix.json');
+const DAEMON_CONNECTOR_MATRIX_TEST = path.join(ROOT, 'tests', 'wave940-daemon-connector-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
+let daemonConnectorMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -170,6 +173,37 @@ function cliCommandMatrixOk() {
   return cliCommandMatrixGreen;
 }
 
+function daemonConnectorMatrixOk() {
+  if (daemonConnectorMatrixGreen != null) return daemonConnectorMatrixGreen;
+  try {
+    if (!fs.existsSync(DAEMON_CONNECTOR_MATRIX) || !fs.existsSync(DAEMON_CONNECTOR_MATRIX_TEST)) {
+      daemonConnectorMatrixGreen = false;
+      return daemonConnectorMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(DAEMON_CONNECTOR_MATRIX, 'utf8'));
+    daemonConnectorMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.daemon_connector_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.passthrough_route_count >= 14
+      && matrix.summary.status_route_count >= 3
+      && matrix.summary.direct_provider_count >= 4
+      && matrix.summary.provider_registry_count >= 10
+      && matrix.summary.fixture_shape_count >= 7
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/daemon-connector.js')
+    );
+  } catch {
+    daemonConnectorMatrixGreen = false;
+  }
+  return daemonConnectorMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -319,6 +353,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (tests.length === 0 && highRisk) return 'add_targeted_contract_tests_for_high_risk_boundary';
   if (rel === 'src/auth.js' && authBoundaryMatrixOk()) return 'maintain_generated_auth_boundary_matrix_and_policy_as_data_contract';
   if (rel === 'cli/kolm.js' && cliCommandMatrixOk()) return 'maintain_generated_cli_command_matrix_and_split_plan';
+  if (rel === 'src/daemon-connector.js' && daemonConnectorMatrixOk()) return 'maintain_generated_daemon_connector_matrix_and_privacy_proxy_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -356,7 +391,7 @@ function innovationFor(domain) {
     runtime_serving_routing: 'Close the semantic routing flywheel by recording outcomes, training route stats, and emitting runtime passports.',
     infra_cloud_device: 'Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.',
     developer_distribution: 'Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.',
-    platform_support: 'Keep support modules small, pure, and linked to at least one owner test or product proof.',
+    platform_support: 'Keep support modules behind generated lifecycle, provider, privacy, storage, and claim-scope contracts before adding more daemon or orchestration behavior.',
   }[domain] || 'Keep the component covered by a local contract and promote repeated patterns into shared primitives.';
 }
 
@@ -373,7 +408,7 @@ function commandsFor(domain) {
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
     infra_cloud_device: ['npm run verify:platform', 'npm run verify:package-release'],
     developer_distribution: ['npm run verify:cli-command-matrix', 'npm run verify:package-release'],
-    platform_support: ['npm run verify:codegraph'],
+    platform_support: ['npm run verify:daemon-connector-matrix', 'npm run verify:codegraph'],
   };
   return map[domain] || ['npm run verify:codegraph'];
 }

@@ -1,0 +1,397 @@
+{
+  "direct_provider_ids": [
+    "anthropic",
+    "gemini",
+    "openai",
+    "openrouter"
+  ],
+  "exports": [
+    {
+      "kind": "const",
+      "line": 1030,
+      "name": "_internals"
+    },
+    {
+      "kind": "function",
+      "line": 765,
+      "name": "buildDaemonApp"
+    },
+    {
+      "kind": "function",
+      "line": 1019,
+      "name": "daemonStatus"
+    },
+    {
+      "kind": "function",
+      "line": 119,
+      "name": "resolveUpstreamKey"
+    },
+    {
+      "kind": "function",
+      "line": 972,
+      "name": "startDaemon"
+    },
+    {
+      "kind": "function",
+      "line": 1000,
+      "name": "stopDaemon"
+    }
+  ],
+  "failed_safety_guards": [],
+  "fixture_shapes": [
+    {
+      "provider": "anthropic",
+      "shape": "message",
+      "upstream_path": "/v1/messages"
+    },
+    {
+      "provider": "openai",
+      "shape": "audio.speech",
+      "upstream_path": "/v1/audio/speech"
+    },
+    {
+      "provider": "openai",
+      "shape": "transcription",
+      "upstream_path": "/v1/audio/transcriptions"
+    },
+    {
+      "provider": "openai",
+      "shape": "transcription",
+      "upstream_path": "/v1/audio/translations"
+    },
+    {
+      "provider": "openai",
+      "shape": "chat.completion",
+      "upstream_path": "/v1/chat/completions"
+    },
+    {
+      "provider": "openai",
+      "shape": "embedding.list",
+      "upstream_path": "/v1/embeddings"
+    },
+    {
+      "provider": "openai",
+      "shape": "moderation",
+      "upstream_path": "/v1/moderations"
+    },
+    {
+      "provider": "openai",
+      "shape": "response",
+      "upstream_path": "/v1/responses"
+    }
+  ],
+  "gates": {
+    "failures": [],
+    "ok": true,
+    "warnings": []
+  },
+  "missing_required_exports": [],
+  "provider_registry_ids": [
+    "anthropic",
+    "deepseek",
+    "fireworks",
+    "gemini",
+    "google",
+    "groq",
+    "local-kolm",
+    "local-ollama",
+    "local-vllm",
+    "openai",
+    "openrouter",
+    "together"
+  ],
+  "purpose": "Generated contract matrix for the local daemon connector proxy boundary: lifecycle exports, passthrough routes, provider coverage, privacy/storage guards, and direct tests.",
+  "required_exports": [
+    "resolveUpstreamKey",
+    "buildDaemonApp",
+    "startDaemon",
+    "stopDaemon",
+    "daemonStatus",
+    "_internals"
+  ],
+  "route_groups": [
+    {
+      "paths": [
+        "/anthropic/v1/messages",
+        "/v1/messages"
+      ],
+      "provider": "anthropic",
+      "route_count": 2
+    },
+    {
+      "paths": [
+        "/health",
+        "/v1/health",
+        "/v1/models"
+      ],
+      "provider": "daemon",
+      "route_count": 3
+    },
+    {
+      "paths": [
+        "/^\\/v1beta\\/models\\/[^/]+:(generate|streamGenerate)Content$/"
+      ],
+      "provider": "gemini",
+      "route_count": 1
+    },
+    {
+      "paths": [
+        "/v1/audio/speech",
+        "/v1/audio/transcriptions",
+        "/v1/audio/translations",
+        "/v1/chat/completions",
+        "/v1/embeddings",
+        "/v1/moderations",
+        "/v1/responses"
+      ],
+      "provider": "openai",
+      "route_count": 7
+    },
+    {
+      "paths": [
+        "/openrouter/v1/chat/completions",
+        "/v1/capture/openrouter",
+        "/v1/capture/openrouter/chat/completions",
+        "/v1/capture/openrouter/v1/chat/completions"
+      ],
+      "provider": "openrouter",
+      "route_count": 4
+    }
+  ],
+  "routes": [
+    {
+      "kind": "health_probe",
+      "line": 894,
+      "method": "GET",
+      "path": "/health",
+      "provider": "daemon",
+      "upstream_path": null
+    },
+    {
+      "kind": "health_probe",
+      "line": 855,
+      "method": "GET",
+      "path": "/v1/health",
+      "provider": "daemon",
+      "upstream_path": null
+    },
+    {
+      "kind": "model_catalog",
+      "line": 901,
+      "method": "GET",
+      "path": "/v1/models",
+      "provider": "daemon",
+      "upstream_path": null
+    },
+    {
+      "kind": "gemini_compat",
+      "line": 849,
+      "method": "POST",
+      "path": "/^\\/v1beta\\/models\\/[^/]+:(generate|streamGenerate)Content$/",
+      "provider": "gemini",
+      "upstream_path": "req.path + query"
+    },
+    {
+      "kind": "anthropic_compat",
+      "line": 846,
+      "method": "POST",
+      "path": "/anthropic/v1/messages",
+      "provider": "anthropic",
+      "upstream_path": "/v1/messages"
+    },
+    {
+      "kind": "openrouter_alias",
+      "line": 842,
+      "method": "POST",
+      "path": "/openrouter/v1/chat/completions",
+      "provider": "openrouter",
+      "upstream_path": "/v1/chat/completions"
+    },
+    {
+      "kind": "openai_compat",
+      "line": 834,
+      "method": "POST",
+      "path": "/v1/audio/speech",
+      "provider": "openai",
+      "upstream_path": "/v1/audio/speech"
+    },
+    {
+      "kind": "openai_compat",
+      "line": 834,
+      "method": "POST",
+      "path": "/v1/audio/transcriptions",
+      "provider": "openai",
+      "upstream_path": "/v1/audio/transcriptions"
+    },
+    {
+      "kind": "openai_compat",
+      "line": 834,
+      "method": "POST",
+      "path": "/v1/audio/translations",
+      "provider": "openai",
+      "upstream_path": "/v1/audio/translations"
+    },
+    {
+      "kind": "openrouter_alias",
+      "line": 839,
+      "method": "POST",
+      "path": "/v1/capture/openrouter",
+      "provider": "openrouter",
+      "upstream_path": "/v1/chat/completions"
+    },
+    {
+      "kind": "openrouter_alias",
+      "line": 840,
+      "method": "POST",
+      "path": "/v1/capture/openrouter/chat/completions",
+      "provider": "openrouter",
+      "upstream_path": "/v1/chat/completions"
+    },
+    {
+      "kind": "openrouter_alias",
+      "line": 841,
+      "method": "POST",
+      "path": "/v1/capture/openrouter/v1/chat/completions",
+      "provider": "openrouter",
+      "upstream_path": "/v1/chat/completions"
+    },
+    {
+      "kind": "openai_compat",
+      "line": 834,
+      "method": "POST",
+      "path": "/v1/chat/completions",
+      "provider": "openai",
+      "upstream_path": "/v1/chat/completions"
+    },
+    {
+      "kind": "openai_compat",
+      "line": 834,
+      "method": "POST",
+      "path": "/v1/embeddings",
+      "provider": "openai",
+      "upstream_path": "/v1/embeddings"
+    },
+    {
+      "kind": "anthropic_compat",
+      "line": 845,
+      "method": "POST",
+      "path": "/v1/messages",
+      "provider": "anthropic",
+      "upstream_path": "/v1/messages"
+    },
+    {
+      "kind": "openai_compat",
+      "line": 834,
+      "method": "POST",
+      "path": "/v1/moderations",
+      "provider": "openai",
+      "upstream_path": "/v1/moderations"
+    },
+    {
+      "kind": "openai_compat",
+      "line": 834,
+      "method": "POST",
+      "path": "/v1/responses",
+      "provider": "openai",
+      "upstream_path": "/v1/responses"
+    }
+  ],
+  "safety_guards": {
+    "body_limit_8mb": true,
+    "bounded_provider_reachability": true,
+    "canonical_event_store_append": true,
+    "cors_preflight_204": true,
+    "durable_response_header": true,
+    "fail_closed_error_path_redacts": true,
+    "fixture_mode_offline": true,
+    "local_sentinel_tenant": true,
+    "missing_credentials_401": true,
+    "model_catalog_no_upstream_call": true,
+    "privacy_block_451": true,
+    "raw_sidecar_opt_in_only": true,
+    "sidecar_private_permissions": true,
+    "x_powered_by_disabled": true,
+    "zero_retention_no_store": true
+  },
+  "schema": "kolm.daemon_connector_matrix.v1",
+  "sources": [
+    "src/daemon-connector.js",
+    "src/provider-registry.js",
+    "tests/wave368-connector.test.js",
+    "tests/wave407b-connector-fixes.test.js",
+    "tests/wave409a-canonical-event-store.test.js",
+    "tests/wave409b-privacy-failclosed.test.js",
+    "tests/wave409k-openai-compat-surface.test.js",
+    "tests/wave411-redaction-leak.test.js",
+    "tests/wave470-suite-order-determinism.test.js",
+    "tests/wave549-hosted-connector-upstream-key.test.js",
+    "tests/wave550-cors-contract.test.js"
+  ],
+  "summary": {
+    "daemon_bytes": 44850,
+    "daemon_lines": 1050,
+    "direct_provider_count": 4,
+    "export_count": 6,
+    "failed_safety_guards": 0,
+    "fixture_shape_count": 8,
+    "missing_required_exports": 0,
+    "missing_test_evidence": 0,
+    "passthrough_route_count": 14,
+    "provider_registry_count": 12,
+    "route_count": 17,
+    "status_route_count": 3,
+    "supported_provider_id_count": 11
+  },
+  "supported_provider_ids": [
+    "anthropic",
+    "deepseek",
+    "fireworks",
+    "google",
+    "groq",
+    "local-kolm",
+    "local-ollama",
+    "local-vllm",
+    "openai",
+    "openrouter",
+    "together"
+  ],
+  "test_evidence": [
+    {
+      "path": "tests/wave368-connector.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave407b-connector-fixes.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave409a-canonical-event-store.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave409b-privacy-failclosed.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave409k-openai-compat-surface.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave411-redaction-leak.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave470-suite-order-determinism.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave549-hosted-connector-upstream-key.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave550-cors-contract.test.js",
+      "present": true
+    }
+  ],
+  "updated_at": "2026-06-18"
+}

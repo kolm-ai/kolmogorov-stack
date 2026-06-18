@@ -104,6 +104,7 @@ const GENERATED_BY = [
   { gen: 'scripts/build-api-contract-matrix.cjs', match: /^docs\/internal\/api-contract-matrix\.json$/ },
   { gen: 'scripts/build-auth-boundary-matrix.cjs', match: /^docs\/internal\/auth-boundary-matrix\.json$/ },
   { gen: 'scripts/build-cli-command-matrix.cjs', match: /^docs\/internal\/cli-command-matrix\.json$/ },
+  { gen: 'scripts/build-daemon-connector-matrix.cjs', match: /^docs\/internal\/daemon-connector-matrix\.json$/ },
 ];
 
 function generatedBy(p) {
@@ -234,6 +235,7 @@ function main() {
     'docs/internal/api-contract-matrix.json',
     'docs/internal/auth-boundary-matrix.json',
     'docs/internal/cli-command-matrix.json',
+    'docs/internal/daemon-connector-matrix.json',
   ]);
   for (const sp of SELF_PATHS) all.delete(sp);
 

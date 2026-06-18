@@ -23,9 +23,9 @@ test('W939 package wiring makes the CLI command matrix a depth and control-file 
     pkg.scripts['verify:cli-command-matrix'],
     'node scripts/build-cli-command-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave939-cli-command-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:auth-boundary-matrix && npm run build:cli-command-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:auth-boundary-matrix && npm run verify:cli-command-matrix && npm run verify:file-ledger/);
-  assert.match(pkg.scripts['verify:depth'], /verify:auth-boundary-matrix && npm run verify:cli-command-matrix && npm run verify:meta-routes/);
+  assert.match(pkg.scripts['build:control-files'], /build:auth-boundary-matrix && npm run build:cli-command-matrix && npm run build:daemon-connector-matrix && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:auth-boundary-matrix && npm run verify:cli-command-matrix && npm run verify:daemon-connector-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['verify:depth'], /verify:auth-boundary-matrix && npm run verify:cli-command-matrix && npm run verify:daemon-connector-matrix && npm run verify:meta-routes/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');
   assert.match(ledgerBuilder, /build-cli-command-matrix\.cjs/);
