@@ -15,10 +15,13 @@ const CLI_COMMAND_MATRIX = path.join(ROOT, 'docs', 'internal', 'cli-command-matr
 const CLI_COMMAND_MATRIX_TEST = path.join(ROOT, 'tests', 'wave939-cli-command-matrix.test.js');
 const DAEMON_CONNECTOR_MATRIX = path.join(ROOT, 'docs', 'internal', 'daemon-connector-matrix.json');
 const DAEMON_CONNECTOR_MATRIX_TEST = path.join(ROOT, 'tests', 'wave940-daemon-connector-matrix.test.js');
+const QUANTIZE_WORKER_MATRIX = path.join(ROOT, 'docs', 'internal', 'quantize-worker-matrix.json');
+const QUANTIZE_WORKER_MATRIX_TEST = path.join(ROOT, 'tests', 'wave941-quantize-worker-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
 let daemonConnectorMatrixGreen = null;
+let quantizeWorkerMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -204,6 +207,39 @@ function daemonConnectorMatrixOk() {
   return daemonConnectorMatrixGreen;
 }
 
+function quantizeWorkerMatrixOk() {
+  if (quantizeWorkerMatrixGreen != null) return quantizeWorkerMatrixGreen;
+  try {
+    if (!fs.existsSync(QUANTIZE_WORKER_MATRIX) || !fs.existsSync(QUANTIZE_WORKER_MATRIX_TEST)) {
+      quantizeWorkerMatrixGreen = false;
+      return quantizeWorkerMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(QUANTIZE_WORKER_MATRIX, 'utf8'));
+    quantizeWorkerMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.quantize_worker_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.method_count === 10
+      && matrix.summary.stable_method_count === 4
+      && matrix.summary.experimental_method_count === 6
+      && matrix.summary.dispatch_covered_methods === 10
+      && matrix.summary.cli_flag_count >= 13
+      && matrix.summary.required_receipt_field_gaps === 0
+      && matrix.summary.subprocess_boundary_count >= 4
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && matrix.summary.worker_package_isolated === true
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('workers/quantize/scripts/quantize.py')
+    );
+  } catch {
+    quantizeWorkerMatrixGreen = false;
+  }
+  return quantizeWorkerMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -354,6 +390,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'src/auth.js' && authBoundaryMatrixOk()) return 'maintain_generated_auth_boundary_matrix_and_policy_as_data_contract';
   if (rel === 'cli/kolm.js' && cliCommandMatrixOk()) return 'maintain_generated_cli_command_matrix_and_split_plan';
   if (rel === 'src/daemon-connector.js' && daemonConnectorMatrixOk()) return 'maintain_generated_daemon_connector_matrix_and_privacy_proxy_contract';
+  if (rel === 'workers/quantize/scripts/quantize.py' && quantizeWorkerMatrixOk()) return 'maintain_generated_quantize_worker_matrix_and_frontier_method_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -387,7 +424,7 @@ function innovationFor(domain) {
     storage_state: 'Promote local JSON/disk state into a tenant-scoped CAS object store with lifecycle simulation before storage cutover.',
     compile_artifact_runtime: 'Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.',
     capture_data_eval: 'Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.',
-    training_model_optimization: 'Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.',
+    training_model_optimization: 'Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.',
     runtime_serving_routing: 'Close the semantic routing flywheel by recording outcomes, training route stats, and emitting runtime passports.',
     infra_cloud_device: 'Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.',
     developer_distribution: 'Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.',
@@ -404,7 +441,7 @@ function commandsFor(domain) {
     storage_state: ['node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js'],
     compile_artifact_runtime: ['npm run verify:inventions', 'npm run verify:benchmark-evidence'],
     capture_data_eval: ['npm run verify:redaction-benchmark', 'npm run verify:quality-calibration'],
-    training_model_optimization: ['node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
+    training_model_optimization: ['npm run verify:quantize-worker-matrix', 'node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
     infra_cloud_device: ['npm run verify:platform', 'npm run verify:package-release'],
     developer_distribution: ['npm run verify:cli-command-matrix', 'npm run verify:package-release'],

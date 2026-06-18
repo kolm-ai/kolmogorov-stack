@@ -47,7 +47,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | `cli/kolm.js` | developer_distribution | 11 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_cli_command_matrix_and_split_plan. |
 | `src/audit-routes.js` | api_surface | 11 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_api_contract_matrix_and_route_split_plan. |
 | `src/daemon-connector.js` | platform_support | 11 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_daemon_connector_matrix_and_privacy_proxy_contract. |
-| `workers/quantize/scripts/quantize.py` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
+| `workers/quantize/scripts/quantize.py` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_quantize_worker_matrix_and_frontier_method_contract. |
 | `src/deploy-generators.js` | infra_cloud_device | 9 | open_marker_requires_owner_review<br>linked_frontier_work_open | Resolve or explicitly owner-review the open TODO/FIXME marker. |
 | `cli/kolm-tui.mjs` | developer_distribution | 9 | linked_frontier_work_open | Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence. |
 | `src/bench-harness.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards. |

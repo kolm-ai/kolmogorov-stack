@@ -1,0 +1,408 @@
+{
+  "cli_flags": [
+    {
+      "flag": "--bits",
+      "line": 70,
+      "opt_in": false
+    },
+    {
+      "flag": "--calib",
+      "line": 65,
+      "opt_in": false
+    },
+    {
+      "flag": "--calib-fp4",
+      "line": 93,
+      "opt_in": true
+    },
+    {
+      "flag": "--calib-fp4-block",
+      "line": 103,
+      "opt_in": true
+    },
+    {
+      "flag": "--calib-fp4-max-layers",
+      "line": 107,
+      "opt_in": true
+    },
+    {
+      "flag": "--device",
+      "line": 72,
+      "opt_in": false
+    },
+    {
+      "flag": "--group-size",
+      "line": 68,
+      "opt_in": false
+    },
+    {
+      "flag": "--in",
+      "line": 63,
+      "opt_in": false
+    },
+    {
+      "flag": "--method",
+      "line": 60,
+      "opt_in": false
+    },
+    {
+      "flag": "--mixed-precision",
+      "line": 75,
+      "opt_in": false
+    },
+    {
+      "flag": "--out",
+      "line": 64,
+      "opt_in": false
+    },
+    {
+      "flag": "--self-test-moe",
+      "line": 112,
+      "opt_in": true
+    },
+    {
+      "flag": "--trust-remote-code",
+      "line": 84,
+      "opt_in": true
+    }
+  ],
+  "exit_codes": [
+    {
+      "code": 0,
+      "meaning": "quantized OK; receipt written"
+    },
+    {
+      "code": 2,
+      "meaning": "--method invalid OR required python deps missing for the method"
+    },
+    {
+      "code": 3,
+      "meaning": "--in path missing or unreadable"
+    },
+    {
+      "code": 4,
+      "meaning": "quantization itself raised (model_load / compute / save)"
+    }
+  ],
+  "experimental_methods": [
+    "aqlm",
+    "exl2",
+    "exl3",
+    "hqq",
+    "qat",
+    "quip"
+  ],
+  "failed_safety_guards": [],
+  "gates": {
+    "failures": [],
+    "ok": true,
+    "warnings": []
+  },
+  "method_dispatch": [
+    {
+      "dispatch_function": "run_aqlm",
+      "dispatch_present": true,
+      "method": "aqlm"
+    },
+    {
+      "dispatch_function": "run_awq",
+      "dispatch_present": true,
+      "method": "awq"
+    },
+    {
+      "dispatch_function": "run_exl2",
+      "dispatch_present": true,
+      "method": "exl2"
+    },
+    {
+      "dispatch_function": "run_exl3",
+      "dispatch_present": true,
+      "method": "exl3"
+    },
+    {
+      "dispatch_function": "run_gptq",
+      "dispatch_present": true,
+      "method": "gptq"
+    },
+    {
+      "dispatch_function": "run_hqq",
+      "dispatch_present": true,
+      "method": "hqq"
+    },
+    {
+      "dispatch_function": "run_int_bnb",
+      "dispatch_present": true,
+      "method": "int4"
+    },
+    {
+      "dispatch_function": "run_int_bnb",
+      "dispatch_present": true,
+      "method": "int8"
+    },
+    {
+      "dispatch_function": "run_qat",
+      "dispatch_present": true,
+      "method": "qat"
+    },
+    {
+      "dispatch_function": "run_quip",
+      "dispatch_present": true,
+      "method": "quip"
+    }
+  ],
+  "methods": [
+    "aqlm",
+    "awq",
+    "exl2",
+    "exl3",
+    "gptq",
+    "hqq",
+    "int4",
+    "int8",
+    "qat",
+    "quip"
+  ],
+  "missing_receipt_fields": [],
+  "purpose": "Generated contract matrix for the quantize worker boundary: method menu, CLI flags, reproducibility receipt, optimizer subprocesses, frontier quantization controls, worker isolation, and direct tests.",
+  "receipt_fields": [
+    "device",
+    "duration_sec",
+    "finished_at",
+    "fp4_calibration",
+    "in",
+    "input_tree_sha256",
+    "method",
+    "mixed_precision_applied_bits",
+    "mixed_precision_applied_group_size",
+    "mixed_precision_profile",
+    "mixed_precision_warnings",
+    "moe",
+    "moe_detection",
+    "ok",
+    "out",
+    "output_files_sha256",
+    "python_version",
+    "tool",
+    "trust_remote_code"
+  ],
+  "required_receipt_fields": [
+    "ok",
+    "method",
+    "input_tree_sha256",
+    "output_files_sha256",
+    "duration_sec",
+    "device",
+    "python_version",
+    "tool",
+    "trust_remote_code",
+    "finished_at",
+    "fp4_calibration",
+    "mixed_precision_profile",
+    "mixed_precision_warnings",
+    "mixed_precision_applied_bits",
+    "mixed_precision_applied_group_size",
+    "moe",
+    "moe_detection"
+  ],
+  "run_functions": [
+    {
+      "line": 441,
+      "name": "_run_exllamav2"
+    },
+    {
+      "line": 336,
+      "name": "run_aqlm"
+    },
+    {
+      "line": 306,
+      "name": "run_awq"
+    },
+    {
+      "line": 475,
+      "name": "run_exl2"
+    },
+    {
+      "line": 481,
+      "name": "run_exl3"
+    },
+    {
+      "line": 637,
+      "name": "run_fp4_calibration"
+    },
+    {
+      "line": 272,
+      "name": "run_gptq"
+    },
+    {
+      "line": 487,
+      "name": "run_hqq"
+    },
+    {
+      "line": 233,
+      "name": "run_int_bnb"
+    },
+    {
+      "line": 528,
+      "name": "run_qat"
+    },
+    {
+      "line": 391,
+      "name": "run_quip"
+    }
+  ],
+  "safety_guards": {
+    "experimental_methods_env_gated": true,
+    "fp4_calibration_degrades_gracefully": true,
+    "input_path_and_config_required": true,
+    "lazy_imports_per_method": true,
+    "method_choices_argparse": true,
+    "mixed_precision_validates_and_warns": true,
+    "moe_detection_gated_on_config": true,
+    "receipt_hashes_input_and_output": true,
+    "router_precision_sacred_fp16": true,
+    "self_test_moe_no_model_short_circuit": true,
+    "stable_methods_fail_hint": true,
+    "subprocess_returncodes_fail_loud": true,
+    "trust_remote_code_opt_in_and_receipted": true
+  },
+  "schema": "kolm.quantize_worker_matrix.v1",
+  "sources": [
+    "workers/quantize/scripts/quantize.py",
+    "workers/quantize/quantize.mjs",
+    "workers/quantize/package.json",
+    "workers/quantize/requirements.txt",
+    "src/quantization-oracle.js",
+    "tests/wave195-quantize-worker.test.js",
+    "tests/finalized-c5-turnkey-experimental-quant-runners.test.js",
+    "tests/finalized-c5-real-layer-importance-mixed-precision.test.js",
+    "tests/wave921-fp4-calib-trust-remote.test.js",
+    "tests/wave921-moe-quantize.test.js",
+    "tests/wave582-quantization-oracle.test.js",
+    "tests/wave605-quantization-oracle-frontier.test.js",
+    "tests/wave606-quant-accuracy-floor.test.js",
+    "tests/wave613-fp4-calib-oracle.test.js",
+    "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+  ],
+  "stable_methods": [
+    "awq",
+    "gptq",
+    "int4",
+    "int8"
+  ],
+  "subprocess_boundaries": [
+    {
+      "check_false": true,
+      "function": "_run_exllamav2",
+      "line": 441,
+      "module_names": [
+        "exllamav2.conversion.convert"
+      ],
+      "repo_envs": [],
+      "returncode_checked": true
+    },
+    {
+      "check_false": true,
+      "function": "run_aqlm",
+      "line": 336,
+      "module_names": [
+        "aqlm.main"
+      ],
+      "repo_envs": [
+        "AQLM_REPO_PATH"
+      ],
+      "returncode_checked": true
+    },
+    {
+      "check_false": true,
+      "function": "run_qat",
+      "line": 528,
+      "module_names": [
+        "efficient_qat.main_block_ap"
+      ],
+      "repo_envs": [
+        "EFFICIENT_QAT_REPO_PATH"
+      ],
+      "returncode_checked": true
+    },
+    {
+      "check_false": true,
+      "function": "run_quip",
+      "line": 391,
+      "module_names": [
+        "quip_sharp.quantize_llama"
+      ],
+      "repo_envs": [
+        "QUIP_SHARP_REPO_PATH"
+      ],
+      "returncode_checked": true
+    }
+  ],
+  "summary": {
+    "cli_flag_count": 13,
+    "dispatch_covered_methods": 10,
+    "exit_code_count": 4,
+    "experimental_method_count": 6,
+    "failed_safety_guards": 0,
+    "method_count": 10,
+    "missing_test_evidence": 0,
+    "quantize_bytes": 72983,
+    "quantize_lines": 1583,
+    "receipt_field_count": 19,
+    "required_receipt_field_gaps": 0,
+    "run_function_count": 11,
+    "stable_method_count": 4,
+    "subprocess_boundary_count": 4,
+    "worker_package_isolated": true
+  },
+  "test_evidence": [
+    {
+      "path": "tests/wave195-quantize-worker.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/finalized-c5-turnkey-experimental-quant-runners.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/finalized-c5-real-layer-importance-mixed-precision.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave921-fp4-calib-trust-remote.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave921-moe-quantize.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave582-quantization-oracle.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave605-quantization-oracle-frontier.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave606-quant-accuracy-floor.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/wave613-fp4-calib-oracle.test.js",
+      "present": true
+    },
+    {
+      "path": "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js",
+      "present": true
+    }
+  ],
+  "updated_at": "2026-06-18",
+  "worker_package": {
+    "package_name": "@kolm/quantize-worker",
+    "private": true,
+    "python_requires_count": 11,
+    "requirements_include_heavy_deps": true,
+    "root_excludes_heavy_deps": true,
+    "type": "module"
+  }
+}
