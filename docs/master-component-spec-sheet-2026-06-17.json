@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 724,
-    "direct_test_reference_pct": 87.3,
-    "components_without_direct_test_reference": 105,
+    "direct_test_referenced_components": 725,
+    "direct_test_reference_pct": 87.5,
+    "components_without_direct_test_reference": 104,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -22005,7 +22005,8 @@
           "tests/wave684-drift-alert-contract.test.js",
           "tests/wave685-eval-humaneval-contract.test.js",
           "tests/wave699-drift-alert-w813-contract.test.js",
-          "tests/wave700-failure-modes-w745-contract.test.js"
+          "tests/wave700-failure-modes-w745-contract.test.js",
+          "tests/wave703-openai-finetune-importer-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -22055,6 +22056,7 @@
           "tests/wave685-eval-humaneval-contract.test.js",
           "tests/wave699-drift-alert-w813-contract.test.js",
           "tests/wave700-failure-modes-w745-contract.test.js",
+          "tests/wave703-openai-finetune-importer-contract.test.js",
           "tests/wave812-failure-modes.test.js",
           "tests/wave816-failure-to-capture-loop.test.js"
         ],
@@ -23705,24 +23707,24 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 6742,
-          "lines": 203,
+          "bytes": 13514,
+          "lines": 424,
           "imports": 3,
-          "exports": 2,
+          "exports": 6,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 6,
+          "crypto_refs": 13,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "7dc4909e9ddd6cc287186de76bdcac4e93d7e63df00fa7bb23a34552d7f7457e"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "7c3ac720ff723074e72a5a1c44ab6d55da09e5adc2f70e76c5f1218c7b4cce40"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -23730,7 +23732,13 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave684-drift-alert-contract.test.js",
+          "tests/wave685-eval-humaneval-contract.test.js",
+          "tests/wave699-drift-alert-w813-contract.test.js",
+          "tests/wave700-failure-modes-w745-contract.test.js",
+          "tests/wave703-openai-finetune-importer-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -23738,10 +23746,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/importers/openrouter.js",

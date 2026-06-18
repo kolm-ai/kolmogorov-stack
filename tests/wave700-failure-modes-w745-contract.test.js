@@ -56,7 +56,7 @@ test('W700 source pins W745 bounds, digest contract, and package wiring', () => 
     pkg.scripts['verify:failure-modes-w745'],
     'node --test --test-concurrency=1 tests/wave700-failure-modes-w745-contract.test.js',
   );
-  assert.match(pkg.scripts['verify:depth'], /verify:drift-alert-w813 && npm run verify:failure-modes-w745 && node --test/);
+  assert.match(pkg.scripts['verify:depth'], /verify:drift-alert-w813 && npm run verify:failure-modes-w745 && npm run verify:openai-finetune-importer && node --test/);
 });
 
 test('W700 clusterByKeywords bounds input and keeps join CIDs non-enumerable', () => {

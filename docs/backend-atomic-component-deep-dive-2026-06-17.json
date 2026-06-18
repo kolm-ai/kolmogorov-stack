@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 724,
-    "components_without_direct_test_reference": 105,
+    "test_referenced_components": 725,
+    "components_without_direct_test_reference": 104,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -23770,7 +23770,8 @@
         "tests/wave684-drift-alert-contract.test.js",
         "tests/wave685-eval-humaneval-contract.test.js",
         "tests/wave699-drift-alert-w813-contract.test.js",
-        "tests/wave700-failure-modes-w745-contract.test.js"
+        "tests/wave700-failure-modes-w745-contract.test.js",
+        "tests/wave703-openai-finetune-importer-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -23831,6 +23832,7 @@
         "tests/wave685-eval-humaneval-contract.test.js",
         "tests/wave699-drift-alert-w813-contract.test.js",
         "tests/wave700-failure-modes-w745-contract.test.js",
+        "tests/wave703-openai-finetune-importer-contract.test.js",
         "tests/wave812-failure-modes.test.js",
         "tests/wave816-failure-to-capture-loop.test.js"
       ],
@@ -25833,25 +25835,31 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "7dc4909e9ddd6cc287186de76bdcac4e93d7e63df00fa7bb23a34552d7f7457e",
+      "sha256": "7c3ac720ff723074e72a5a1c44ab6d55da09e5adc2f70e76c5f1218c7b4cce40",
       "metrics": {
-        "bytes": 6742,
-        "lines": 203,
+        "bytes": 13514,
+        "lines": 424,
         "imports": 3,
-        "exports": 2,
+        "exports": 6,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 6,
+        "crypto_refs": 13,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave684-drift-alert-contract.test.js",
+        "tests/wave685-eval-humaneval-contract.test.js",
+        "tests/wave699-drift-alert-w813-contract.test.js",
+        "tests/wave700-failure-modes-w745-contract.test.js",
+        "tests/wave703-openai-finetune-importer-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
