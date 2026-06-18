@@ -27,7 +27,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | --- | --- | --- | --- | --- | --- |
 | distillation | training | sota_review_complete_local_frontier_aligned | at=12 open=0/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | moe-distill-quant | training | sota_review_complete_major_frontier_work_open | at=7 open=0/4/2 | 6 | npm run verify:stack-sota<br>npm run verify:inventions |
-| quantization | compiler-runtime | sota_review_complete_major_frontier_work_open | at=11 open=0/3/1 | 3 | npm run verify:stack-sota<br>npm run verify:quant-oracle |
+| quantization | compiler-runtime | sota_review_complete_major_frontier_work_open | at=12 open=0/3/1 | 3 | npm run verify:stack-sota<br>npm run verify:quant-oracle |
 | kv-cache | runtime | sota_review_complete_major_frontier_work_open | at=8 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | speculative-decoding | runtime | sota_review_complete_major_frontier_work_open | at=8 open=0/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | finetune-frameworks | training | sota_review_complete_external_or_release_gate_open | at=11 open=0/0/4 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |

@@ -161,7 +161,7 @@
       "id": "quantization",
       "stack_area": "compiler-runtime",
       "status": "sota_review_complete_major_frontier_work_open",
-      "already_at_frontier_count": 11,
+      "already_at_frontier_count": 12,
       "improvement_count": 2,
       "critical_gaps": 0,
       "major_gaps": 3,
@@ -41334,8 +41334,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 31391,
-          "lines": 850,
+          "bytes": 33031,
+          "lines": 905,
           "imports": 3,
           "exports": 5,
           "routes": 0,
@@ -41347,11 +41347,12 @@
           "markers": 0
         },
         "risk_signals": [
-          "environment_configuration_boundary"
+          "environment_configuration_boundary",
+          "large_component_contract_risk"
         ],
-        "priority_score": 1,
-        "priority_band": "normal",
-        "sha256": "2a468d1d86d9bfe1030a0e65bd47900905bd1817e75a10f8d9eb7b3faf6d6663"
+        "priority_score": 4,
+        "priority_band": "medium",
+        "sha256": "dfb65d1faa9e30774d4d2e917f2725637a88487a6e3d2dbbc6a6ad3b632a599c"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

@@ -37,6 +37,9 @@ node scripts/quantization-oracle.mjs --task extraction --device rtx-4090-24gb --
 | aqlm | low-bit research optimizer | worker plus repo checkout |
 | quip | sub-2-bit research optimizer | worker plus repo checkout |
 | qat | highest-quality trained quant | worker plus repo checkout |
+| spinquant | W4A4KV4 learned-rotation plan | external research plan, no in-repo worker |
+| respinquant | W4A4/W3A3 layer-wise fused-rotation plan | external research plan, no in-repo worker |
+| infoquant | W4A4KV4 PSOT distribution-shaping plan | external research plan, no in-repo worker |
 | kivi_kv | KV-cache compression | runtime policy, not weight export |
 
 ## Promotion Rule

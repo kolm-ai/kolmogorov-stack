@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { quantizationOracleCatalog, rankQuantizationStrategies } from '../src/quantization-oracle.js';
+import { methodAvailability, quantizationOracleCatalog, rankQuantizationStrategies } from '../src/quantization-oracle.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
@@ -34,6 +34,14 @@ test('1. catalog exposes Blackwell FP4 export methods and device presets', () =>
   assert.equal(catalog.methods.mc_moe.moe_only, true);
   assert.equal(catalog.methods.gemq.execution_status, 'worker_external_repo');
   assert.equal(catalog.methods.gemq.moe_only, true);
+
+  for (const method of ['spinquant', 'respinquant', 'infoquant']) {
+    assert.equal(catalog.methods[method].execution_status, 'worker_external_repo');
+    assert.equal(catalog.methods[method].worker_method, null);
+    assert.equal(catalog.methods[method].experimental, true);
+    assert.equal(catalog.methods[method].activation_quantization, true);
+    assert.equal(catalog.methods[method].kv_quantization, true);
+  }
 
   assert.equal(catalog.devices['b200-180gb'].blackwell, true);
   assert.equal(catalog.devices['gb200-180gb'].blackwell, true);
@@ -126,7 +134,7 @@ test('4. FP4 quality estimate is model-size aware before accuracy-gate promotion
   assert.ok(largeNvfp4.estimates.quality > smallNvfp4.estimates.quality);
 });
 
-test('5. backend spec records W605/W613/W964 closures while leaving FP4 export-fusion work open', () => {
+test('5. backend spec records W605/W613/W964/W965 closures while leaving artifact runners open', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
 
   assert.match(spec, /W605/);
@@ -134,10 +142,42 @@ test('5. backend spec records W605/W613/W964 closures while leaving FP4 export-f
   assert.match(spec, /W613/);
   assert.match(spec, /W964/);
   assert.match(spec, /quality_loss size-aware/);
+  assert.match(spec, /W965/);
+  assert.match(spec, /external_runner_not_wired/);
   assert.match(spec, /Fuse the BATQuant calibration plan into the NVFP4 export/);
+  assert.match(spec, /Build artifact-producing runners for rotation\/distribution-shaping W4A4 methods/);
 });
 
-test('6. MoE input routes to router-fp16 advisory policy and names external expert methods', () => {
+test('6. W4A4 rotation frontier methods are cataloged but never worker-promoted without an artifact runner', () => {
+  const plan = rankQuantizationStrategies({
+    task: 'medical',
+    runtime: 'cuda',
+    memory_gb: 80,
+    params_b: 8,
+    context_tokens: 8192,
+    calibration_rows: 512,
+    quality_floor: 0.95,
+    experimental_enabled: true,
+  });
+
+  assert.equal(plan.ok, true);
+  assert.notEqual(plan.recommendation.primary.method, 'respinquant');
+  assert.notEqual(plan.recommendation.primary.method, 'spinquant');
+  assert.notEqual(plan.recommendation.primary.method, 'infoquant');
+  for (const method of ['spinquant', 'respinquant', 'infoquant']) {
+    const candidate = plan.candidates.find((c) => c.method === method);
+    assert.equal(candidate.execution_status, 'worker_external_repo');
+    assert.equal(candidate.feasible, false);
+    assert.ok(candidate.warnings.includes('requires_external_research_repo'));
+    assert.ok(candidate.warnings.includes('external_runner_not_wired'));
+  }
+
+  const availability = methodAvailability('respinquant', { KOLM_ENABLE_EXPERIMENTAL_QUANTS: '1' });
+  assert.equal(availability.available, false);
+  assert.equal(availability.reason, 'external_repo_only');
+});
+
+test('7. MoE input routes to router-fp16 advisory policy and names external expert methods', () => {
   const plan = rankQuantizationStrategies({
     task: 'chat',
     runtime: 'vllm',

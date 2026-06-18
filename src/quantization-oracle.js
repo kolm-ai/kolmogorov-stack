@@ -211,6 +211,54 @@ const METHOD_CATALOG = Object.freeze({
     runtimes: ['cuda', 'tensorrt'],
     sources: ['EfficientQAT'],
   },
+  spinquant: {
+    label: 'SpinQuant learned rotations W4A4KV4',
+    worker_method: null,
+    execution_status: 'worker_external_repo',
+    experimental: true,
+    bits: 4,
+    compression: 0.24,
+    quality_loss: 0.029,
+    latency_gain: 1.95,
+    calibration_required: true,
+    activation_quantization: true,
+    kv_quantization: true,
+    transform_family: 'learned_global_rotation',
+    runtimes: ['cuda'],
+    sources: ['SpinQuant', 'W4A4KV4 learned rotations'],
+  },
+  respinquant: {
+    label: 'ReSpinQuant layer-wise fused rotations W4A4/W3A3',
+    worker_method: null,
+    execution_status: 'worker_external_repo',
+    experimental: true,
+    bits: 4,
+    compression: 0.24,
+    quality_loss: 0.024,
+    latency_gain: 2.0,
+    calibration_required: true,
+    activation_quantization: true,
+    kv_quantization: true,
+    transform_family: 'layer_wise_offline_fused_rotation',
+    runtimes: ['cuda'],
+    sources: ['ReSpinQuant', 'W4A4/W3A3 residual subspace rotations'],
+  },
+  infoquant: {
+    label: 'InfoQuant PSOT W4A4KV4 distribution shaping',
+    worker_method: null,
+    execution_status: 'worker_external_repo',
+    experimental: true,
+    bits: 4,
+    compression: 0.24,
+    quality_loss: 0.03,
+    latency_gain: 1.95,
+    calibration_required: true,
+    activation_quantization: true,
+    kv_quantization: true,
+    transform_family: 'peak_suppression_orthogonal_transform',
+    runtimes: ['cuda'],
+    sources: ['InfoQuant', 'PSOT W4A4KV4'],
+  },
   moe_mixed_policy: {
     label: 'MoE router-fp16 / expert-low-bit policy',
     worker_method: null,
@@ -311,8 +359,9 @@ const RUNTIME_ALIASES = Object.freeze({
 });
 
 // Experimental quantization gate. Methods flagged experimental in the catalog
-// (hqq, exl2, exl3, aqlm, quip, qat) drive external toolchains/research repos
-// that the customer must install themselves, so advertising them as run-now
+// (hqq, exl2, exl3, aqlm, quip, qat, spinquant, respinquant, infoquant)
+// drive external toolchains/research repos that the customer must install
+// themselves, so advertising them as run-now
 // creates an expectation mismatch (the catalog lists them, but a plain
 // `--quantize aqlm` cannot ship without the upstream optimizer). They stay in
 // the catalog for planning + documentation, but the planner only recommends an
@@ -567,7 +616,13 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
   }
   if (quality < qualityFloor) warnings.push(`quality_below_floor:${quality}<${qualityFloor}`);
   if (method.calibration_required && calibrationRows < 64) warnings.push('calibration_set_too_small');
-  if (method.execution_status.includes('external_repo')) warnings.push('requires_external_research_repo');
+  if (method.execution_status.includes('external_repo')) {
+    warnings.push('requires_external_research_repo');
+    if (!method.worker_method) {
+      warnings.push('external_runner_not_wired');
+      hardFail = true;
+    }
+  }
   if (method.execution_status === 'external_toolchain') warnings.push('not_in_quantize_worker');
   if (privacyMode === 'airgap' && method.execution_status === 'external_toolchain') warnings.push('airgap_needs_preinstalled_toolchain');
 
@@ -828,7 +883,7 @@ export function methodAvailability(methodId, env = process.env) {
       experimental,
       available: false,
       reason: 'external_repo_only',
-      hint: `${id} is cataloged for MoE planning but has no in-repo worker method yet; use the oracle policy as an external execution plan`,
+      hint: `${id} is cataloged as an external research plan but has no in-repo worker method yet; use the oracle policy as an external execution plan`,
     };
   }
   return {

@@ -23,7 +23,7 @@ function readJson(file) {
 
 test('1. oracle catalog covers worker methods plus external/runtime-only methods', () => {
   const catalog = quantizationOracleCatalog();
-  for (const method of ['fp16', 'int8', 'smoothquant', 'int4', 'gptq', 'awq', 'nvfp4', 'mxfp4', 'hqq', 'exl2', 'aqlm', 'quip', 'qat', 'moe_mixed_policy', 'mc_moe', 'gemq', 'kivi_kv']) {
+  for (const method of ['fp16', 'int8', 'smoothquant', 'int4', 'gptq', 'awq', 'nvfp4', 'mxfp4', 'hqq', 'exl2', 'aqlm', 'quip', 'qat', 'spinquant', 'respinquant', 'infoquant', 'moe_mixed_policy', 'mc_moe', 'gemq', 'kivi_kv']) {
     assert.ok(catalog.methods[method], `catalog missing ${method}`);
   }
   assert.equal(catalog.methods.awq.worker_method, 'awq');
@@ -152,7 +152,7 @@ test('5c. CLI quantization oracle accepts MoE topology flags', () => {
   assert.equal(plan.recommendation.moe_quantization.policy.router, 'fp16');
 });
 
-test('5d. external-only MoE quant methods never masquerade as worker-ready', () => {
+test('5d. external-only quant methods never masquerade as worker-ready', () => {
   const gated = methodAvailability('mc_moe', {});
   assert.equal(gated.available, false);
   assert.equal(gated.reason, 'experimental_gated');
@@ -161,6 +161,12 @@ test('5d. external-only MoE quant methods never masquerade as worker-ready', () 
   assert.equal(enabled.known, true);
   assert.equal(enabled.available, false);
   assert.equal(enabled.reason, 'external_repo_only');
+
+  const rotation = methodAvailability('infoquant', { KOLM_ENABLE_EXPERIMENTAL_QUANTS: '1' });
+  assert.equal(rotation.known, true);
+  assert.equal(rotation.available, false);
+  assert.equal(rotation.reason, 'external_repo_only');
+  assert.match(rotation.hint, /external research plan/);
 });
 
 async function makeRouterApp() {
