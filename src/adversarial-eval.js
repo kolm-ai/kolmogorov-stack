@@ -26,6 +26,13 @@ import path from 'node:path';
 import * as eventStore from './event-store.js';
 
 export const ADVERSARIAL_VERSION = 'adv-v1';
+export const ADVERSARIAL_LIMITS = Object.freeze({
+  max_questions: 1000,
+  max_clusters: 200,
+  max_cluster_id_chars: 96,
+  max_cluster_label_chars: 240,
+  max_namespace_chars: 80,
+});
 
 const PROVIDER = 'kolm_adversarial_eval';
 
@@ -58,16 +65,51 @@ function _benchRoot() {
   return path.join(base, 'benches');
 }
 
+function _safeSlug(value, fallback, maxLen) {
+  const raw = String(value == null ? '' : value)
+    .trim()
+    .replace(/[\x00-\x1f\x7f]/g, '')
+    .replace(/\\/g, '/')
+    .split('/')
+    .filter(Boolean)
+    .join('-')
+    .replace(/[^A-Za-z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/^\.+$/, '');
+  const slug = raw || fallback;
+  return slug.slice(0, maxLen);
+}
+
+function _safeLabel(value, fallback, maxLen) {
+  const raw = String(value == null ? fallback : value)
+    .replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return (raw || fallback).slice(0, maxLen);
+}
+
+function _safeBenchDir(namespace) {
+  const root = path.resolve(_benchRoot());
+  const dir = path.resolve(root, `adversarial-${namespace}`);
+  const rootWithSep = root.endsWith(path.sep) ? root : root + path.sep;
+  if (dir !== root && !dir.startsWith(rootWithSep)) {
+    throw new Error('unsafe_bench_namespace');
+  }
+  return dir;
+}
+
 // Normalize a weak-cluster entry (string OR {cluster_id, label}) into a stable
 // {cluster_id, label} pair. A bare string is used as both id and label.
 function _normCluster(c, idx) {
   if (c && typeof c === 'object') {
-    const cluster_id = String(c.cluster_id != null ? c.cluster_id : (c.label != null ? c.label : `cluster_${idx}`));
-    const label = String(c.label != null ? c.label : cluster_id);
+    const rawId = c.cluster_id != null ? c.cluster_id : (c.label != null ? c.label : `cluster_${idx}`);
+    const cluster_id = _safeSlug(rawId, `cluster_${idx}`, ADVERSARIAL_LIMITS.max_cluster_id_chars);
+    const label = _safeLabel(c.label != null ? c.label : rawId, cluster_id, ADVERSARIAL_LIMITS.max_cluster_label_chars);
     return { cluster_id, label };
   }
-  const s = String(c == null ? `cluster_${idx}` : c);
-  return { cluster_id: s, label: s };
+  const cluster_id = _safeSlug(c, `cluster_${idx}`, ADVERSARIAL_LIMITS.max_cluster_id_chars);
+  const label = _safeLabel(c, cluster_id, ADVERSARIAL_LIMITS.max_cluster_label_chars);
+  return { cluster_id, label };
 }
 
 // The five adversarial templates. Each takes a normalized cluster {label} and
@@ -114,15 +156,18 @@ export function buildProbes(cluster, perTemplate) {
 // the file size is predictable.
 export async function generateAdversarialSet({ tenant, namespace, weak_clusters, n } = {}) {
   try {
-    const ns = namespace || 'default';
-    const tn = tenant || 'tenant_local';
+    const ns = _safeSlug(namespace || 'default', 'default', ADVERSARIAL_LIMITS.max_namespace_chars);
+    const tn = _safeLabel(tenant || 'tenant_local', 'tenant_local', 160);
     if (!Array.isArray(weak_clusters) || weak_clusters.length === 0) {
       return { ok: false, error: 'weak_clusters must be a non-empty array', version: ADVERSARIAL_VERSION };
     }
-    const clusters = weak_clusters.map((c, i) => _normCluster(c, i));
-    const target = (n == null || !Number.isFinite(Number(n)))
+    const clusters = weak_clusters
+      .slice(0, ADVERSARIAL_LIMITS.max_clusters)
+      .map((c, i) => _normCluster(c, i));
+    const requested = (n == null || !Number.isFinite(Number(n)))
       ? Math.max(clusters.length * 5, 10)
       : Math.max(1, Math.trunc(Number(n)));
+    const target = Math.min(requested, ADVERSARIAL_LIMITS.max_questions);
 
     // perTemplate so that clusters.length * 5 * perTemplate >= target.
     const perTemplate = Math.max(1, Math.ceil(target / (clusters.length * _TEMPLATES.length)));
@@ -155,7 +200,7 @@ export async function generateAdversarialSet({ tenant, namespace, weak_clusters,
       }
     }
 
-    const dir = path.join(_benchRoot(), `adversarial-${ns}`);
+    const dir = _safeBenchDir(ns);
     fs.mkdirSync(dir, { recursive: true });
     const benchFile = path.join(dir, 'questions.jsonl');
     fs.writeFileSync(benchFile, lines.join('\n') + (lines.length ? '\n' : ''), 'utf8');
@@ -181,9 +226,13 @@ export async function generateAdversarialSet({ tenant, namespace, weak_clusters,
     return {
       ok: true,
       version: ADVERSARIAL_VERSION,
+      namespace: ns,
       bench_file: benchFile,
       n_questions: lines.length,
       clusters_covered: clustersCovered,
+      clusters_considered: clusters.length,
+      limits: ADVERSARIAL_LIMITS,
+      truncated: weak_clusters.length > clusters.length || target < requested,
       persist,
     };
   } catch (e) {

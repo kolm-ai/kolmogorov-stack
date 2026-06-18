@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 830,
-    "test_referenced_components": 761,
-    "components_without_direct_test_reference": 69,
+    "test_referenced_components": 769,
+    "components_without_direct_test_reference": 61,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -7528,12 +7528,12 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "0463cdb502359723e7009c9178537dde314a00e0bca0f32195fee8f5c5643081",
+      "sha256": "64c142fa1abbd92063ef2c5024a49107eb3d1192e92986f7f0da10623e06eaf0",
       "metrics": {
-        "bytes": 9368,
-        "lines": 216,
+        "bytes": 11157,
+        "lines": 265,
         "imports": 4,
-        "exports": 4,
+        "exports": 5,
         "routes": 0,
         "env_refs": 2,
         "fs_writes": 0,
@@ -7542,11 +7542,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave930-eval-safety-harnesses-contract.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -11666,11 +11668,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave930-eval-safety-harnesses-contract.test.js"
+      ],
       "risk_signals": [
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -16890,12 +16894,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave930-eval-safety-harnesses-contract.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -17176,11 +17182,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave930-eval-safety-harnesses-contract.test.js"
+      ],
       "risk_signals": [
         "network_or_provider_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -22536,11 +22544,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave930-eval-safety-harnesses-contract.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -22592,11 +22602,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave930-eval-safety-harnesses-contract.test.js"
+      ],
       "risk_signals": [
         "environment_configuration_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -22648,11 +22660,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave930-eval-safety-harnesses-contract.test.js"
+      ],
       "risk_signals": [
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -23774,11 +23788,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave930-eval-safety-harnesses-contract.test.js"
+      ],
       "risk_signals": [
         "execution_or_subprocess_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

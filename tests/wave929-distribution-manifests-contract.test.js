@@ -180,6 +180,6 @@ test('W929 #6 - depth verification runs distribution manifest checks before SOTA
   const pkg = readJson(ROOT_PACKAGE_REL);
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && node scripts\/audit-sota-readiness\.cjs/
+    /verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && node scripts\/audit-sota-readiness\.cjs/
   );
 });

@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 95,
-    "frontier_product_score": 70.9,
+    "local_engineering_score": 95.3,
+    "frontier_product_score": 71.1,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 830,
     "atomic_deep_dive_complete": 830,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 761,
-    "direct_test_reference_pct": 91.7,
-    "components_without_direct_test_reference": 69,
+    "direct_test_referenced_components": 769,
+    "direct_test_reference_pct": 92.7,
+    "components_without_direct_test_reference": 61,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -7824,10 +7824,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 9368,
-          "lines": 216,
+          "bytes": 11157,
+          "lines": 265,
           "imports": 4,
-          "exports": 4,
+          "exports": 5,
           "routes": 0,
           "env_refs": 2,
           "fs_writes": 0,
@@ -7839,9 +7839,9 @@
         "risk_signals": [
           "environment_configuration_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "0463cdb502359723e7009c9178537dde314a00e0bca0f32195fee8f5c5643081"
+        "sha256": "64c142fa1abbd92063ef2c5024a49107eb3d1192e92986f7f0da10623e06eaf0"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -7849,7 +7849,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave930-eval-safety-harnesses-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -7858,10 +7860,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "src/adversarial-prompts.js",
@@ -11502,7 +11502,7 @@
         "risk_signals": [
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
         "sha256": "4a47211cc9fa72c1610ad01c83d9725b58d5403824f1e89548577807ff2d57a2"
       },
@@ -11512,7 +11512,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave930-eval-safety-harnesses-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -11520,10 +11522,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/calibration-set.js",
@@ -15989,7 +15989,7 @@
           "environment_configuration_boundary",
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
         "sha256": "0b5b7228d132a046244efd08bf61fec532a302946474a243549c461ee8ab1269"
       },
@@ -15999,7 +15999,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave930-eval-safety-harnesses-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -16007,10 +16009,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/cost-displacement.js",
@@ -16221,7 +16221,7 @@
         "risk_signals": [
           "network_or_provider_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
         "sha256": "66ad310d197c90724778399bd98cba6731b9fa67bf20283d7f26b110252f0244"
       },
@@ -16231,7 +16231,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave930-eval-safety-harnesses-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -16240,10 +16242,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "src/curriculum-sort.js",
@@ -20929,7 +20929,7 @@
         "risk_signals": [
           "environment_configuration_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
         "sha256": "6ab72721291b11379ead7985d8001067e4ddd86746d0a6cda5fe9999a4347bb8"
       },
@@ -20939,7 +20939,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave930-eval-safety-harnesses-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -20948,10 +20950,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "src/eval-mtbench.js",
@@ -20976,7 +20976,7 @@
         "risk_signals": [
           "environment_configuration_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
         "sha256": "7ddab58e708bf27954302789e0962add93053deeb1a6369e2f9392deb87fb2e9"
       },
@@ -20986,7 +20986,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave930-eval-safety-harnesses-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -20995,10 +20997,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "src/eval-numeric.js",
@@ -21023,7 +21023,7 @@
         "risk_signals": [
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
         "sha256": "31cca06750a6a756b02feaf81b2d9e92083b9abdcbce50c42a9bf043c821a285"
       },
@@ -21033,7 +21033,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave930-eval-safety-harnesses-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
@@ -21042,10 +21044,8 @@
           "npm run verify:quality-calibration"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep measurement_harness_data_value_and_holdout_leakage_guards current."
     },
     {
       "path": "src/event-schema.js",
@@ -21951,7 +21951,7 @@
         "risk_signals": [
           "execution_or_subprocess_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
         "sha256": "2498fe834a0e35b747309af1025a0791ef85cd623636cea099ba5f73be99ff5c"
       },
@@ -21961,7 +21961,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave930-eval-safety-harnesses-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -21969,10 +21971,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/failure-analyst.js",
