@@ -55,7 +55,7 @@ const STACK_CATEGORIES = Object.freeze([
     domains: ['runtime_serving_routing', 'training_model_optimization'],
     readiness_surfaces: ['runtime-compute', 'ai-ml-optimizer'],
     keywords: ['speculative', 'spec-decode', 'accelerate', 'draft', 'eagle'],
-    required_paths: ['src/accelerate.js', 'src/speculative-decoding.js', 'src/spec-decode.js'],
+    required_paths: ['src/accelerate.js', 'src/speculative-decoding.js', 'src/spec-decode.js', 'apps/trainer/eagle3_train.py'],
   },
   {
     id: 'finetune-frameworks',

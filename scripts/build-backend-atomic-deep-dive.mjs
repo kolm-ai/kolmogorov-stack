@@ -55,7 +55,7 @@ let otelMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
-  directories: ['src', 'api', 'cli', 'services', 'workers', 'packages'],
+  directories: ['src', 'api', 'apps', 'cli', 'services', 'workers', 'packages'],
   excluded_directories: [
     '.git',
     'node_modules',
@@ -652,6 +652,7 @@ function languageFor(rel) {
 
 function surfaceFor(rel) {
   if (rel === 'server.js' || rel.startsWith('api/') || rel.includes('router') || rel.endsWith('-routes.js')) return 'api-http';
+  if (rel.startsWith('apps/')) return 'worker';
   if (rel.startsWith('cli/')) return 'cli';
   if (rel.startsWith('workers/')) return 'worker';
   if (rel.startsWith('services/')) return 'service';
@@ -717,12 +718,13 @@ function testRefsFor(rel, tests) {
   const base = path.basename(noExt);
   const normalizedRel = rel.replace(/\\/g, '/');
   const genericBase = new Set(['index', 'package', 'readme', 'config', 'server', 'build', 'verify', 'test']);
-  const refs = [];
+  const exactRefs = [];
+  const fuzzyRefs = [];
   for (const test of tests) {
-    if (test.body.includes(normalizedRel) || test.body.includes(noExt) || (!genericBase.has(base) && base.length >= 5 && test.body.includes(base))) refs.push(test.rel);
-    if (refs.length >= 8) break;
+    if (test.body.includes(normalizedRel) || test.body.includes(noExt)) exactRefs.push(test.rel);
+    else if (!genericBase.has(base) && base.length >= 5 && test.body.includes(base)) fuzzyRefs.push(test.rel);
   }
-  return refs;
+  return [...new Set([...exactRefs, ...fuzzyRefs])].slice(0, 8);
 }
 
 function riskSignals(rel, metrics) {
@@ -738,7 +740,7 @@ function riskSignals(rel, metrics) {
   if (metrics.env_refs > 0) signals.push('environment_configuration_boundary');
   if (metrics.markers > 0) signals.push('open_marker_requires_owner_review');
   if (metrics.lines >= 900) signals.push('large_component_contract_risk');
-  if (p.startsWith('packages/') || p.startsWith('workers/') || p.startsWith('cli/')) signals.push('distribution_or_worker_surface');
+  if (p.startsWith('packages/') || p.startsWith('workers/') || p.startsWith('apps/') || p.startsWith('cli/')) signals.push('distribution_or_worker_surface');
   return [...new Set(signals)].sort();
 }
 

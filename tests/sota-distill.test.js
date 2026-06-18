@@ -14,7 +14,7 @@
 //                                  train_gkd.py (white-box GKD) + teacher gate +
 //                                  KOLM_ONPOLICY_NO_TRAINER opt-out.
 //   D-04 src/spec-decode.js        resolveTrainer() in_repo fallback to
-//                                  train_specdecode.py + KOLM_SPECDECODE_NO_TRAINER
+//                                  apps/trainer/eagle3_train.py + KOLM_SPECDECODE_NO_TRAINER
 //                                  opt-out.
 //   D-05 workers/distill/scripts/* train_preference.py + train_specdecode.py
 //                                  --self-test (K-score margin reward + EAGLE KL
@@ -301,7 +301,7 @@ test('D-03 onpolicy KOLM_ONPOLICY_NO_TRAINER=1 opt-out is honored', () => {
 // D-04: speculative-decoding trainer wiring
 // ---------------------------------------------------------------------------
 
-test('D-04 spec-decode resolveTrainer defaults to in_repo train_specdecode.py', () => {
+test('D-04 spec-decode resolveTrainer defaults to in_repo eagle3_train.py', () => {
   const prev = process.env.KOLM_SPECDECODE_TRAINER;
   const prevNo = process.env.KOLM_SPECDECODE_NO_TRAINER;
   delete process.env.KOLM_SPECDECODE_TRAINER;
@@ -310,7 +310,7 @@ test('D-04 spec-decode resolveTrainer defaults to in_repo train_specdecode.py', 
     const t = specdecode.resolveTrainer();
     assert.ok(t, 'in_repo trainer resolved');
     assert.equal(t.source, 'in_repo');
-    assert.ok(t.argv[1].endsWith('train_specdecode.py'));
+    assert.ok(t.argv[1].endsWith(path.join('apps', 'trainer', 'eagle3_train.py')));
     const d = specdecode.doctor();
     assert.ok(d.ok && d.ready);
     assert.equal(d.trainer_source, 'in_repo');

@@ -64,16 +64,17 @@ function whichSync(name) {
   return null;
 }
 
-// W713 - resolve the speculative-decoding draft-head trainer. The real in-repo
-// trainer is workers/distill/scripts/train_specdecode.py (EAGLE draft head +
-// Medusa head pack). It was catalog-only with no runnable path; this default
-// wires it. Resolution order:
+// W713/W957 - resolve the speculative-decoding draft-head trainer. The canonical
+// in-repo trainer is apps/trainer/eagle3_train.py: EAGLE-3 multi-layer feature
+// head training in Python, delegating non-eagle3 kinds to the older worker for
+// compatibility. Resolution order:
 //   1. KOLM_SPECDECODE_NO_TRAINER=1 forces the durable no-tool path (test seam,
 //      mirrors src/distill-grpo.js's KOLM_GRPO_NO_TRAINER).
 //   2. $KOLM_SPECDECODE_TRAINER override (JSON array or PATH name) - an
 //      override that points nowhere is "no trainer", not a silent fallback.
 //   3. A `kolm-spec-decode-train` / `spec-decode-train` on PATH.
-//   4. The in-repo train_specdecode.py (the genuine EAGLE/Medusa trainer).
+//   4. The in-repo EAGLE-3 trainer.
+//   5. The legacy train_specdecode.py worker fallback.
 function resolveTrainer() {
   if (process.env.KOLM_SPECDECODE_NO_TRAINER === '1') return null;
   const envCmd = process.env.KOLM_SPECDECODE_TRAINER;
@@ -94,8 +95,10 @@ function resolveTrainer() {
     if (r) return { argv: [r], source: 'path' };
   }
   // In-repo trainer (mirrors distill-grpo.js in_repo fallback).
-  const inRepo = path.join(_repoRoot, 'workers', 'distill', 'scripts', 'train_specdecode.py');
-  if (fs.existsSync(inRepo)) return { argv: [_pythonBin(), inRepo], source: 'in_repo' };
+  const eagle3 = path.join(_repoRoot, 'apps', 'trainer', 'eagle3_train.py');
+  if (fs.existsSync(eagle3)) return { argv: [_pythonBin(), eagle3], source: 'in_repo' };
+  const legacy = path.join(_repoRoot, 'workers', 'distill', 'scripts', 'train_specdecode.py');
+  if (fs.existsSync(legacy)) return { argv: [_pythonBin(), legacy], source: 'in_repo' };
   return null;
 }
 

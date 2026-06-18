@@ -83,13 +83,13 @@
   ],
   "summary": {
     "category_count": 16,
-    "categories_with_critical_frontier_work_open": 6,
+    "categories_with_critical_frontier_work_open": 5,
     "categories_with_major_frontier_work_open": 13,
-    "total_atomic_component_links": 3540,
+    "total_atomic_component_links": 4443,
     "status_counts": {
       "sota_review_complete_local_frontier_aligned": 1,
-      "sota_review_complete_critical_frontier_work_open": 6,
-      "sota_review_complete_major_frontier_work_open": 8,
+      "sota_review_complete_critical_frontier_work_open": 5,
+      "sota_review_complete_major_frontier_work_open": 9,
       "sota_review_complete_external_or_release_gate_open": 1
     },
     "readiness_open_requirements": [
@@ -202,10 +202,10 @@
       "status": "sota_review_complete_local_frontier_aligned",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 156
+        "line": 157
       },
       "local_sota_review": {
-        "line": 156,
+        "line": 157,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 12,
@@ -261,14 +261,50 @@
               "execution_or_subprocess_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-gkd-onpolicy-lambda-mixture-executor.test.js",
-              "tests/sota-distill.test.js",
-              "tests/wave-gkd-onpolicy-executor.test.js"
+              "tests/wave-gkd-onpolicy-executor.test.js",
+              "tests/wave921-trainer-unification.test.js",
+              "tests/finalized-c4-gkd-onpolicy-lambda-mixture-executor.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "sampled": [
+          {
+            "path": "apps/trainer/distill.py",
+            "domain": "training_model_optimization",
+            "priority_score": 12,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave252-ml-fixes.test.js",
+              "tests/wave258-audit-fixes.test.js",
+              "tests/wave828-reasoning-v2.test.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/main.py",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
@@ -301,11 +337,28 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/cloud-compile.test.js",
-              "tests/finalized-c1-signed-artifact-packaging.test.js",
-              "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+              "tests/wave719-daq.test.js",
+              "tests/wave921-fp4-calib-trust-remote.test.js",
+              "tests/wave921-moe-quantize.test.js"
             ],
             "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
+          },
+          {
+            "path": "apps/trainer/multinode_launch.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave636-multinode-launch.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/bench-harness.js",
@@ -319,9 +372,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave937-api-contract-matrix.test.js",
-              "tests/wave938-auth-boundary-matrix.test.js"
+              "tests/wave950-bench-harness-matrix.test.js",
+              "tests/wrapper-s4.test.js",
+              "tests/wave710-meta-routes-contract.test.js"
             ],
             "improvement_track": "maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract"
           },
@@ -337,9 +390,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
               "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js"
+              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js",
+              "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
@@ -372,9 +425,26 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js",
-              "tests/wave952-readiness-proof-matrix.test.js"
+              "tests/wave952-readiness-proof-matrix.test.js",
+              "tests/sota-distill.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/remote_ssh.py",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -412,23 +482,7 @@
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           },
           {
-            "path": "src/model-weights-puller.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave386-model-weights.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/distill.mjs",
+            "path": "apps/modal/kolm_trainer_app.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -439,112 +493,62 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/_fixtures-w422-noop-worker.cjs",
-              "tests/agent-audit-ingest.test.js",
-              "tests/cid.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/teacher-bridge.mjs",
+            "path": "apps/trainer/airgap_distill_worker.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
               "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave144-distill-worker.test.js",
-              "tests/wave158-cross-vendor.test.js",
-              "tests/wave292-teacher-bridge-fail-closed.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/vision-tokenize/tokenize.mjs",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c1-recipe-synthesis-engine.test.js",
-              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "api/teacher-chat.js",
-            "domain": "api_surface",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "http_route_surface",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave692-teacher-chat-api-contract.test.js"
-            ],
-            "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
-          },
-          {
-            "path": "src/benchmark-compare.js",
-            "domain": "capture_data_eval",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave144-bench-compare.test.js",
-              "tests/wave144-predibase-demo.test.js"
-            ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
-          },
-          {
-            "path": "src/data-select.js",
-            "domain": "capture_data_eval",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/wave921-data-curate-modules.test.js"
+              "tests/wave953-airgap-distill-worker.test.js",
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "src/distill-approval-queue.js",
+            "path": "apps/trainer/backends/directml.py",
             "domain": "training_model_optimization",
-            "priority_score": 6,
+            "priority_score": 7,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave782-approval-queue.test.js"
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave-wc14-shell-injection-guards.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/mlx.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 198,
+        "count": 261,
         "missing_required_paths": []
       },
       "readiness": {
@@ -644,10 +648,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 212
+        "line": 213
       },
       "local_sota_review": {
-        "line": 212,
+        "line": 213,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -711,14 +715,50 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/cloud-compile.test.js",
-              "tests/finalized-c1-signed-artifact-packaging.test.js",
-              "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+              "tests/wave719-daq.test.js",
+              "tests/wave921-fp4-calib-trust-remote.test.js",
+              "tests/wave921-moe-quantize.test.js"
             ],
             "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
           }
         ],
         "sampled": [
+          {
+            "path": "apps/trainer/distill.py",
+            "domain": "training_model_optimization",
+            "priority_score": 12,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave252-ml-fixes.test.js",
+              "tests/wave258-audit-fixes.test.js",
+              "tests/wave828-reasoning-v2.test.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/main.py",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
@@ -735,6 +775,23 @@
               "tests/wave656-airgap-routes-contract.test.js",
               "tests/wave831-airgap.test.js",
               "tests/wave953-airgap-distill-worker.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/multinode_launch.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave636-multinode-launch.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -768,9 +825,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
               "tests/wave144-bench-compare.test.js",
-              "tests/wave144-completions-api.test.js"
+              "tests/wave144-completions-api.test.js",
+              "tests/wave144-completions-server.test.js"
             ],
             "improvement_track": "maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract"
           },
@@ -787,8 +844,8 @@
             ],
             "test_refs": [
               "tests/wave683-capture-forget-contract.test.js",
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave888L-blocker-10-fix.test.js"
+              "tests/wave888L-blocker-10-fix.test.js",
+              "tests/wave944-wrapper-cli-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract"
           },
@@ -821,9 +878,45 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js",
-              "tests/wave952-readiness-proof-matrix.test.js"
+              "tests/wave952-readiness-proof-matrix.test.js",
+              "tests/sota-distill.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/runtime/serve.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 8,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave921-serve-config.test.js",
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/_spawn-helpers.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/backends/remote_ssh.py",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -838,9 +931,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-orchestrator.test.js",
-              "tests/agent-audit-report-ready-notify.test.js"
+              "tests/artifact-end-to-end.test.js",
+              "tests/cid.test.js",
+              "tests/finalized-c1-provenance-receipt-transparency-chain.test.js"
             ],
             "improvement_track": "maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract"
           },
@@ -878,85 +971,23 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "src/compile.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/agent-audit-report-ready-notify.test.js",
-              "tests/cid.test.js",
-              "tests/cloud-compile.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "src/kscore-axis-theory.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "large_component_contract_risk"
-            ],
-            "test_refs": [
-              "tests/finalized-c6-kscore-axis-identifiability-theory.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "src/model-weights-puller.js",
+            "path": "apps/modal/kolm_trainer_app.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave386-model-weights.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "src/self-synthesis-engine.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "large_component_contract_risk"
-            ],
-            "test_refs": [
-              "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave648-compile-server-contract.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "workers/distill/distill.mjs",
+            "path": "apps/trainer/airgap_distill_worker.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -967,32 +998,13 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/_fixtures-w422-noop-worker.cjs",
-              "tests/agent-audit-ingest.test.js",
-              "tests/cid.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/teacher-bridge.mjs",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave144-distill-worker.test.js",
-              "tests/wave158-cross-vendor.test.js",
-              "tests/wave292-teacher-bridge-fail-closed.test.js"
+              "tests/wave953-airgap-distill-worker.test.js",
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 227,
+        "count": 325,
         "missing_required_paths": []
       },
       "readiness": {
@@ -1090,10 +1102,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 259
+        "line": 260
       },
       "local_sota_review": {
-        "line": 259,
+        "line": 260,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1116,8 +1128,8 @@
             ],
             "test_refs": [
               "tests/wave605-quantization-oracle-frontier.test.js",
-              "tests/wave613-fp4-calib-oracle.test.js",
-              "tests/wrapper-s6.test.js"
+              "tests/wrapper-s6.test.js",
+              "tests/wave613-fp4-calib-oracle.test.js"
             ],
             "improvement_track": "maintain_contract_tests_and_claim_scope_mapping"
           },
@@ -1148,14 +1160,50 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/cloud-compile.test.js",
-              "tests/finalized-c1-signed-artifact-packaging.test.js",
-              "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+              "tests/wave719-daq.test.js",
+              "tests/wave921-fp4-calib-trust-remote.test.js",
+              "tests/wave921-moe-quantize.test.js"
             ],
             "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
           }
         ],
         "sampled": [
+          {
+            "path": "apps/trainer/distill.py",
+            "domain": "training_model_optimization",
+            "priority_score": 12,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave252-ml-fixes.test.js",
+              "tests/wave258-audit-fixes.test.js",
+              "tests/wave828-reasoning-v2.test.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/main.py",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
@@ -1172,6 +1220,23 @@
               "tests/wave656-airgap-routes-contract.test.js",
               "tests/wave831-airgap.test.js",
               "tests/wave953-airgap-distill-worker.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/multinode_launch.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave636-multinode-launch.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -1205,9 +1270,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
               "tests/wave144-bench-compare.test.js",
-              "tests/wave144-completions-api.test.js"
+              "tests/wave144-completions-api.test.js",
+              "tests/wave144-completions-server.test.js"
             ],
             "improvement_track": "maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract"
           },
@@ -1224,8 +1289,8 @@
             ],
             "test_refs": [
               "tests/wave683-capture-forget-contract.test.js",
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave888L-blocker-10-fix.test.js"
+              "tests/wave888L-blocker-10-fix.test.js",
+              "tests/wave944-wrapper-cli-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract"
           },
@@ -1258,9 +1323,45 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js",
-              "tests/wave952-readiness-proof-matrix.test.js"
+              "tests/wave952-readiness-proof-matrix.test.js",
+              "tests/sota-distill.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/runtime/serve.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 8,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave921-serve-config.test.js",
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/_spawn-helpers.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/backends/remote_ssh.py",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -1275,9 +1376,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-orchestrator.test.js",
-              "tests/agent-audit-report-ready-notify.test.js"
+              "tests/artifact-end-to-end.test.js",
+              "tests/cid.test.js",
+              "tests/finalized-c1-provenance-receipt-transparency-chain.test.js"
             ],
             "improvement_track": "maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract"
           },
@@ -1315,85 +1416,23 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "src/compile.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/agent-audit-report-ready-notify.test.js",
-              "tests/cid.test.js",
-              "tests/cloud-compile.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "src/kscore-axis-theory.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "large_component_contract_risk"
-            ],
-            "test_refs": [
-              "tests/finalized-c6-kscore-axis-identifiability-theory.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "src/model-weights-puller.js",
+            "path": "apps/modal/kolm_trainer_app.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave386-model-weights.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "src/self-synthesis-engine.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "large_component_contract_risk"
-            ],
-            "test_refs": [
-              "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave648-compile-server-contract.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "workers/distill/distill.mjs",
+            "path": "apps/trainer/airgap_distill_worker.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -1404,32 +1443,13 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/_fixtures-w422-noop-worker.cjs",
-              "tests/agent-audit-ingest.test.js",
-              "tests/cid.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/teacher-bridge.mjs",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave144-distill-worker.test.js",
-              "tests/wave158-cross-vendor.test.js",
-              "tests/wave292-teacher-bridge-fail-closed.test.js"
+              "tests/wave953-airgap-distill-worker.test.js",
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 266,
+        "count": 376,
         "missing_required_paths": []
       },
       "readiness": {
@@ -1546,10 +1566,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 304
+        "line": 305
       },
       "local_sota_review": {
-        "line": 304,
+        "line": 305,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -1615,9 +1635,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
               "tests/wave144-bench-compare.test.js",
-              "tests/wave144-completions-api.test.js"
+              "tests/wave144-completions-api.test.js",
+              "tests/wave144-completions-server.test.js"
             ],
             "improvement_track": "maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract"
           },
@@ -1634,10 +1654,29 @@
             ],
             "test_refs": [
               "tests/wave683-capture-forget-contract.test.js",
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave888L-blocker-10-fix.test.js"
+              "tests/wave888L-blocker-10-fix.test.js",
+              "tests/wave944-wrapper-cli-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract"
+          },
+          {
+            "path": "apps/runtime/serve.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 8,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave921-serve-config.test.js",
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/_spawn-helpers.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
             "path": "src/artifact.js",
@@ -1650,9 +1689,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-orchestrator.test.js",
-              "tests/agent-audit-report-ready-notify.test.js"
+              "tests/artifact-end-to-end.test.js",
+              "tests/cid.test.js",
+              "tests/finalized-c1-provenance-receipt-transparency-chain.test.js"
             ],
             "improvement_track": "maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract"
           },
@@ -1674,6 +1713,22 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
+            "path": "apps/trainer/inference_cache.py",
+            "domain": "storage_state",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "tenant_scoped_cas_storage_retention_and_migration_simulation"
+          },
+          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -1685,9 +1740,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-report-ready-notify.test.js",
-              "tests/cid.test.js",
-              "tests/cloud-compile.test.js"
+              "tests/path-to-100-w3-real-compile-holdout.test.js",
+              "tests/path-to-100-w3b-wizard-real-stream.test.js",
+              "tests/r2-artifact-lifecycle.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -1736,6 +1791,81 @@
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {
+            "path": "apps/trainer/backends/lambda_runner.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 6,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "apps/trainer/backends/modal_runner.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "apps/trainer/backends/replicate_runner.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "apps/trainer/backends/runpod_runner.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "apps/trainer/backends/together_runner.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
             "path": "src/dsl.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 6,
@@ -1749,117 +1879,9 @@
               "tests/wave438-real-compile.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "src/native-compile.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave144-native-compile.test.js",
-              "tests/wave409q-c-rust-wasm-verify.test.js",
-              "tests/wave438-real-compile.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "src/runners/gguf-runner.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave287-runtime-dispatch.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "workers/itkv/itkv.mjs",
-            "domain": "runtime_serving_routing",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [
-              "tests/wave706-itkv-worker-shell-contract.test.js"
-            ],
-            "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache"
-          },
-          {
-            "path": "workers/runtime-build/build.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [
-              "tests/wave651-runtime-build-contract.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "packages/browser-extension/verifier.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 5,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-routes.test.js",
-              "tests/agent-verify-hardening.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "services/mcp/server.js",
-            "domain": "runtime_serving_routing",
-            "priority_score": 5,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave654-mcp-server-contract.test.js"
-            ],
-            "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache"
-          },
-          {
-            "path": "src/accelerate.js",
-            "domain": "runtime_serving_routing",
-            "priority_score": 5,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/sota-computequant.test.js",
-              "tests/wave-wc05-envelope.test.js",
-              "tests/wave195-quantize-worker.test.js"
-            ],
-            "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache"
           }
         ],
-        "count": 134,
+        "count": 180,
         "missing_required_paths": []
       },
       "readiness": {
@@ -1993,25 +2015,41 @@
     {
       "id": "speculative-decoding",
       "stack_area": "runtime",
-      "status": "sota_review_complete_critical_frontier_work_open",
+      "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 346
+        "line": 347
       },
       "local_sota_review": {
-        "line": 346,
+        "line": 347,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 7,
-        "improvement_count": 4,
+        "already_at_frontier_count": 8,
+        "improvement_count": 3,
         "gaps": {
-          "critical": 1,
+          "critical": 0,
           "major": 1,
           "minor": 1
         }
       },
       "atomic_components": {
         "required": [
+          {
+            "path": "apps/trainer/eagle3_train.py",
+            "domain": "training_model_optimization",
+            "priority_score": 5,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/sota-distill.test.js",
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave957-eagle3-train.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/accelerate.js",
             "domain": "runtime_serving_routing",
@@ -2024,7 +2062,7 @@
             "test_refs": [
               "tests/sota-computequant.test.js",
               "tests/wave-wc05-envelope.test.js",
-              "tests/wave195-quantize-worker.test.js"
+              "tests/wave727-accelerate.test.js"
             ],
             "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache"
           },
@@ -2038,8 +2076,8 @@
             ],
             "test_refs": [
               "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
-              "tests/sota-cli.test.js",
-              "tests/sota-computequant.test.js"
+              "tests/sota-distill.test.js",
+              "tests/wave957-eagle3-train.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -2049,14 +2087,50 @@
             "priority_score": 0,
             "risk_signals": [],
             "test_refs": [
+              "tests/wave635-speculative-registry-sync.test.js",
               "tests/research-docs.test.js",
-              "tests/sota-distill.test.js",
-              "tests/wave603-whole-stack-sota-deep-dive.test.js"
+              "tests/sota-distill.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
         ],
         "sampled": [
+          {
+            "path": "apps/trainer/distill.py",
+            "domain": "training_model_optimization",
+            "priority_score": 12,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave252-ml-fixes.test.js",
+              "tests/wave258-audit-fixes.test.js",
+              "tests/wave828-reasoning-v2.test.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/main.py",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
@@ -2089,11 +2163,28 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/cloud-compile.test.js",
-              "tests/finalized-c1-signed-artifact-packaging.test.js",
-              "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+              "tests/wave719-daq.test.js",
+              "tests/wave921-fp4-calib-trust-remote.test.js",
+              "tests/wave921-moe-quantize.test.js"
             ],
             "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
+          },
+          {
+            "path": "apps/trainer/multinode_launch.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave636-multinode-launch.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/distill-pipeline.js",
@@ -2142,9 +2233,26 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js",
-              "tests/wave952-readiness-proof-matrix.test.js"
+              "tests/wave952-readiness-proof-matrix.test.js",
+              "tests/sota-distill.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/remote_ssh.py",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -2165,23 +2273,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "src/model-weights-puller.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave386-model-weights.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/distill.mjs",
+            "path": "apps/modal/kolm_trainer_app.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -2192,147 +2284,94 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/_fixtures-w422-noop-worker.cjs",
-              "tests/agent-audit-ingest.test.js",
-              "tests/cid.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/teacher-bridge.mjs",
+            "path": "apps/trainer/airgap_distill_worker.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
               "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave144-distill-worker.test.js",
-              "tests/wave158-cross-vendor.test.js",
-              "tests/wave292-teacher-bridge-fail-closed.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/vision-tokenize/tokenize.mjs",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c1-recipe-synthesis-engine.test.js",
-              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "src/distill-approval-queue.js",
-            "domain": "training_model_optimization",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave782-approval-queue.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "src/kolm-meta-trainer.js",
-            "domain": "training_model_optimization",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave832-kolm-meta.test.js"
+              "tests/wave953-airgap-distill-worker.test.js",
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/audio-tokenize/tokenize.mjs",
+            "path": "apps/trainer/backends/directml.py",
             "domain": "training_model_optimization",
-            "priority_score": 6,
+            "priority_score": 7,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c1-recipe-synthesis-engine.test.js",
-              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/scripts/train_gkd.py",
-            "domain": "training_model_optimization",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c4-gkd-onpolicy-lambda-mixture-executor.test.js",
-              "tests/sota-distill.test.js",
-              "tests/wave-gkd-onpolicy-executor.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/scripts/train_lora_unsloth.py",
-            "domain": "training_model_optimization",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary"
-            ],
-            "test_refs": [
-              "tests/wave921-trainer-unification.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/scripts/train_lora.py",
-            "domain": "training_model_optimization",
-            "priority_score": 6,
-            "risk_signals": [
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "http_route_surface"
+              "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js",
-              "tests/wave602-backend-atomic-deep-dive.test.js"
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave-wc14-shell-injection-guards.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/mlx.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/rocm.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/trainer_local.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 148,
+        "count": 203,
         "missing_required_paths": []
       },
       "readiness": {
@@ -2415,10 +2454,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 380
+        "line": 382
       },
       "local_sota_review": {
-        "line": 380,
+        "line": 382,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2469,14 +2508,50 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js",
-              "tests/wave602-backend-atomic-deep-dive.test.js"
+              "tests/wave602-backend-atomic-deep-dive.test.js",
+              "tests/wave921-trainer-unification.test.js",
+              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
         "sampled": [
+          {
+            "path": "apps/trainer/distill.py",
+            "domain": "training_model_optimization",
+            "priority_score": 12,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave252-ml-fixes.test.js",
+              "tests/wave258-audit-fixes.test.js",
+              "tests/wave828-reasoning-v2.test.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/main.py",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
@@ -2509,11 +2584,28 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/cloud-compile.test.js",
-              "tests/finalized-c1-signed-artifact-packaging.test.js",
-              "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+              "tests/wave719-daq.test.js",
+              "tests/wave921-fp4-calib-trust-remote.test.js",
+              "tests/wave921-moe-quantize.test.js"
             ],
             "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
+          },
+          {
+            "path": "apps/trainer/multinode_launch.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave636-multinode-launch.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/deploy-generators.js",
@@ -2579,9 +2671,26 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js",
-              "tests/wave952-readiness-proof-matrix.test.js"
+              "tests/wave952-readiness-proof-matrix.test.js",
+              "tests/sota-distill.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/remote_ssh.py",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -2602,74 +2711,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "src/deploy-pipeline.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave888d-deploy-pipeline.test.js",
-              "tests/wave890-13-deployment.test.js"
-            ],
-            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
-          },
-          {
-            "path": "src/device-install.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave-wc14-shell-injection-guards.test.js",
-              "tests/wave372-runtime-devices.test.js",
-              "tests/wc04-compile-pipeline.test.js"
-            ],
-            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
-          },
-          {
-            "path": "src/marketplace-finetune.js",
-            "domain": "billing_marketplace",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "money_or_entitlement_path",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave650-marketplace-finetune-contract.test.js"
-            ],
-            "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof"
-          },
-          {
-            "path": "src/model-weights-puller.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave386-model-weights.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/distill.mjs",
+            "path": "apps/modal/kolm_trainer_app.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -2680,14 +2722,12 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/_fixtures-w422-noop-worker.cjs",
-              "tests/agent-audit-ingest.test.js",
-              "tests/cid.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/teacher-bridge.mjs",
+            "path": "apps/trainer/airgap_distill_worker.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -2695,69 +2735,65 @@
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave144-distill-worker.test.js",
-              "tests/wave158-cross-vendor.test.js",
-              "tests/wave292-teacher-bridge-fail-closed.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/vision-tokenize/tokenize.mjs",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/finalized-c1-recipe-synthesis-engine.test.js",
-              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "src/cloud-providers/runpod.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary",
-              "open_marker_requires_owner_review"
-            ],
-            "test_refs": [
-              "tests/finalized-c8-durable-compute-scheduler.test.js",
-              "tests/secure-training.test.js",
-              "tests/sota-persistence.test.js"
-            ],
-            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
-          },
-          {
-            "path": "src/cloud-sync.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary",
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave378-cloud-sync.test.js",
-              "tests/wave384-cli-wiring.test.js",
-              "tests/wave384-router-wiring.test.js"
+              "tests/wave953-airgap-distill-worker.test.js",
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
-            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/directml.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave-wc14-shell-injection-guards.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/mlx.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/rocm.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 200,
+        "count": 269,
         "missing_required_paths": []
       },
       "readiness": {
@@ -2888,10 +2924,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 421
+        "line": 423
       },
       "local_sota_review": {
-        "line": 421,
+        "line": 423,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -2916,9 +2952,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
               "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js"
+              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js",
+              "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
@@ -2928,8 +2964,8 @@
             "priority_score": 0,
             "risk_signals": [],
             "test_refs": [
-              "tests/finalized-c3-data-shapley-marginal-contribution-valuation.test.js",
-              "tests/wave921-data-engine-modules.test.js"
+              "tests/wave921-data-engine-modules.test.js",
+              "tests/finalized-c3-data-shapley-marginal-contribution-valuation.test.js"
             ],
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           },
@@ -2948,6 +2984,42 @@
           }
         ],
         "sampled": [
+          {
+            "path": "apps/trainer/distill.py",
+            "domain": "training_model_optimization",
+            "priority_score": 12,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave252-ml-fixes.test.js",
+              "tests/wave258-audit-fixes.test.js",
+              "tests/wave828-reasoning-v2.test.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/main.py",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
@@ -2980,11 +3052,28 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/cloud-compile.test.js",
-              "tests/finalized-c1-signed-artifact-packaging.test.js",
-              "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+              "tests/wave719-daq.test.js",
+              "tests/wave921-fp4-calib-trust-remote.test.js",
+              "tests/wave921-moe-quantize.test.js"
             ],
             "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
+          },
+          {
+            "path": "apps/trainer/multinode_launch.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave636-multinode-launch.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/bench-harness.js",
@@ -2998,9 +3087,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave937-api-contract-matrix.test.js",
-              "tests/wave938-auth-boundary-matrix.test.js"
+              "tests/wave950-bench-harness-matrix.test.js",
+              "tests/wrapper-s4.test.js",
+              "tests/wave710-meta-routes-contract.test.js"
             ],
             "improvement_track": "maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract"
           },
@@ -3051,9 +3140,26 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js",
-              "tests/wave952-readiness-proof-matrix.test.js"
+              "tests/wave952-readiness-proof-matrix.test.js",
+              "tests/sota-distill.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/remote_ssh.py",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -3091,23 +3197,7 @@
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
           },
           {
-            "path": "src/model-weights-puller.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave386-model-weights.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "workers/distill/distill.mjs",
+            "path": "apps/modal/kolm_trainer_app.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -3118,14 +3208,12 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/_fixtures-w422-noop-worker.cjs",
-              "tests/agent-audit-ingest.test.js",
-              "tests/cid.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/teacher-bridge.mjs",
+            "path": "apps/trainer/airgap_distill_worker.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -3133,17 +3221,16 @@
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave144-distill-worker.test.js",
-              "tests/wave158-cross-vendor.test.js",
-              "tests/wave292-teacher-bridge-fail-closed.test.js"
+              "tests/wave953-airgap-distill-worker.test.js",
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/vision-tokenize/tokenize.mjs",
+            "path": "apps/trainer/backends/directml.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -3151,80 +3238,32 @@
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c1-recipe-synthesis-engine.test.js",
-              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js"
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave-wc14-shell-injection-guards.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "src/benchmark-compare.js",
-            "domain": "capture_data_eval",
-            "priority_score": 6,
+            "path": "apps/trainer/backends/mlx.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave144-bench-compare.test.js",
-              "tests/wave144-predibase-demo.test.js"
-            ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
-          },
-          {
-            "path": "src/data-select.js",
-            "domain": "capture_data_eval",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/wave921-data-curate-modules.test.js"
-            ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
-          },
-          {
-            "path": "src/distill-approval-queue.js",
-            "domain": "training_model_optimization",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave782-approval-queue.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "src/kolm-meta-trainer.js",
-            "domain": "training_model_optimization",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave832-kolm-meta.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 199,
+        "count": 262,
         "missing_required_paths": []
       },
       "readiness": {
@@ -3347,10 +3386,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 468
+        "line": 470
       },
       "local_sota_review": {
-        "line": 468,
+        "line": 470,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3389,9 +3428,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-ingest.test.js",
-              "tests/finalized-c1-distillation-pipeline.test.js",
-              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js"
+              "tests/wave349-mobile-recommender.test.js",
+              "tests/wave390-mobile-device-fit.test.js",
+              "tests/wave557-provider-gemma-model-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -3411,6 +3450,42 @@
           }
         ],
         "sampled": [
+          {
+            "path": "apps/trainer/distill.py",
+            "domain": "training_model_optimization",
+            "priority_score": 12,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave252-ml-fixes.test.js",
+              "tests/wave258-audit-fixes.test.js",
+              "tests/wave828-reasoning-v2.test.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/main.py",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
@@ -3443,11 +3518,28 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/cloud-compile.test.js",
-              "tests/finalized-c1-signed-artifact-packaging.test.js",
-              "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+              "tests/wave719-daq.test.js",
+              "tests/wave921-fp4-calib-trust-remote.test.js",
+              "tests/wave921-moe-quantize.test.js"
             ],
             "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
+          },
+          {
+            "path": "apps/trainer/multinode_launch.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave636-multinode-launch.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/distill-pipeline.js",
@@ -3479,9 +3571,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
               "tests/wave144-bench-compare.test.js",
-              "tests/wave144-completions-api.test.js"
+              "tests/wave144-completions-api.test.js",
+              "tests/wave144-completions-server.test.js"
             ],
             "improvement_track": "maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract"
           },
@@ -3498,8 +3590,8 @@
             ],
             "test_refs": [
               "tests/wave683-capture-forget-contract.test.js",
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave888L-blocker-10-fix.test.js"
+              "tests/wave888L-blocker-10-fix.test.js",
+              "tests/wave944-wrapper-cli-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract"
           },
@@ -3532,9 +3624,45 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js",
-              "tests/wave952-readiness-proof-matrix.test.js"
+              "tests/wave952-readiness-proof-matrix.test.js",
+              "tests/sota-distill.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/runtime/serve.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 8,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave921-serve-config.test.js",
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/_spawn-helpers.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/backends/remote_ssh.py",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -3549,9 +3677,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-orchestrator.test.js",
-              "tests/agent-audit-report-ready-notify.test.js"
+              "tests/artifact-end-to-end.test.js",
+              "tests/cid.test.js",
+              "tests/finalized-c1-provenance-receipt-transparency-chain.test.js"
             ],
             "improvement_track": "maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract"
           },
@@ -3589,85 +3717,7 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
-            "path": "src/compile.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/agent-audit-report-ready-notify.test.js",
-              "tests/cid.test.js",
-              "tests/cloud-compile.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "src/kscore-axis-theory.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "large_component_contract_risk"
-            ],
-            "test_refs": [
-              "tests/finalized-c6-kscore-axis-identifiability-theory.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "src/model-weights-puller.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave386-model-weights.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "src/self-synthesis-engine.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "large_component_contract_risk"
-            ],
-            "test_refs": [
-              "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "workers/compile-server/server.mjs",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave648-compile-server-contract.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
-          },
-          {
-            "path": "workers/distill/distill.mjs",
+            "path": "apps/modal/kolm_trainer_app.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -3678,14 +3728,12 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/_fixtures-w422-noop-worker.cjs",
-              "tests/agent-audit-ingest.test.js",
-              "tests/cid.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 223,
+        "count": 321,
         "missing_required_paths": []
       },
       "readiness": {
@@ -3809,10 +3857,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 503
+        "line": 505
       },
       "local_sota_review": {
-        "line": 503,
+        "line": 505,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -3851,7 +3899,7 @@
             "test_refs": [
               "tests/wave-wc14-shell-injection-guards.test.js",
               "tests/wave372-runtime-devices.test.js",
-              "tests/wave384-router-wiring.test.js"
+              "tests/wave888c-device-ssh.test.js"
             ],
             "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
           },
@@ -3904,9 +3952,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c11-cli-tui-dx-contract.test.js",
               "tests/path-to-100-w1-tui-real-runner.test.js",
-              "tests/sota-tui.test.js"
+              "tests/sota-tui.test.js",
+              "tests/wave949-tui-workbench-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_tui_workbench_matrix_and_cli_distribution_contract"
           },
@@ -3939,9 +3987,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
               "tests/wave144-bench-compare.test.js",
-              "tests/wave144-completions-api.test.js"
+              "tests/wave144-completions-api.test.js",
+              "tests/wave144-completions-server.test.js"
             ],
             "improvement_track": "maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract"
           },
@@ -3958,10 +4006,29 @@
             ],
             "test_refs": [
               "tests/wave683-capture-forget-contract.test.js",
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave888L-blocker-10-fix.test.js"
+              "tests/wave888L-blocker-10-fix.test.js",
+              "tests/wave944-wrapper-cli-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract"
+          },
+          {
+            "path": "apps/runtime/serve.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 8,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave921-serve-config.test.js",
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/_spawn-helpers.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
             "path": "src/artifact.js",
@@ -3974,9 +4041,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-orchestrator.test.js",
-              "tests/agent-audit-report-ready-notify.test.js"
+              "tests/artifact-end-to-end.test.js",
+              "tests/cid.test.js",
+              "tests/finalized-c1-provenance-receipt-transparency-chain.test.js"
             ],
             "improvement_track": "maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract"
           },
@@ -3998,6 +4065,22 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
+            "path": "apps/trainer/backends/mlx.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -4009,9 +4092,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-report-ready-notify.test.js",
-              "tests/cid.test.js",
-              "tests/cloud-compile.test.js"
+              "tests/path-to-100-w3-real-compile-holdout.test.js",
+              "tests/path-to-100-w3b-wizard-real-stream.test.js",
+              "tests/r2-artifact-lifecycle.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -4095,56 +4178,22 @@
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {
-            "path": "packages/sdk-ts/README.md",
-            "domain": "developer_distribution",
+            "path": "apps/trainer/backends/lambda_runner.py",
+            "domain": "compile_artifact_runtime",
             "priority_score": 6,
             "risk_signals": [
-              "cryptographic_or_proof_boundary",
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/path-to-100-w2-truth-in-labeling.test.js",
-              "tests/r4-deploy-generators.test.js",
-              "tests/research-docs.test.js"
-            ],
-            "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence"
-          },
-          {
-            "path": "src/assistant-client.js",
-            "domain": "developer_distribution",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "http_route_surface"
             ],
             "test_refs": [
-              "tests/wave888p-cli-nl-routing.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
-            "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence"
-          },
-          {
-            "path": "src/cloud-providers/runpod.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "network_or_provider_boundary",
-              "open_marker_requires_owner_review"
-            ],
-            "test_refs": [
-              "tests/finalized-c8-durable-compute-scheduler.test.js",
-              "tests/secure-training.test.js",
-              "tests/sota-persistence.test.js"
-            ],
-            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
         ],
-        "count": 242,
+        "count": 293,
         "missing_required_paths": []
       },
       "readiness": {
@@ -4285,10 +4334,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 531
+        "line": 533
       },
       "local_sota_review": {
-        "line": 531,
+        "line": 533,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4359,9 +4408,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-ingest.test.js",
               "tests/agent-kolm-capture-bridge.test.js",
-              "tests/asr-packages.test.js"
+              "tests/billing-tiers.test.js",
+              "tests/byoc-gpu-attestation.test.js"
             ],
             "improvement_track": "maintain_generated_api_contract_matrix_and_route_split_plan"
           },
@@ -4377,9 +4426,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-routes-errorpaths.test.js",
-              "tests/agent-audit-routes.test.js",
-              "tests/asr-revenue-gate.test.js"
+              "tests/asr-revenue-gate.test.js",
+              "tests/crypto-services.test.js",
+              "tests/reattest-signer-wiring.test.js"
             ],
             "improvement_track": "maintain_generated_api_contract_matrix_and_route_split_plan"
           },
@@ -4397,7 +4446,7 @@
             "test_refs": [
               "tests/wave368-connector.test.js",
               "tests/wave407b-connector-fixes.test.js",
-              "tests/wave409a-canonical-event-store.test.js"
+              "tests/wave409b-privacy-failclosed.test.js"
             ],
             "improvement_track": "maintain_generated_daemon_connector_matrix_and_privacy_proxy_contract"
           },
@@ -4413,9 +4462,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave937-api-contract-matrix.test.js",
-              "tests/wave938-auth-boundary-matrix.test.js"
+              "tests/wave950-bench-harness-matrix.test.js",
+              "tests/wrapper-s4.test.js",
+              "tests/wave710-meta-routes-contract.test.js"
             ],
             "improvement_track": "maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract"
           },
@@ -4431,9 +4480,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-gkd-onpolicy-lambda-mixture-executor.test.js",
               "tests/finalized-c7-artifact-provenance-repro.test.js",
-              "tests/wave144-native-compile.test.js"
+              "tests/wave144-native-compile.test.js",
+              "tests/wave144-seeds-gate.test.js"
             ],
             "improvement_track": "maintain_generated_binder_contract_matrix_and_verifier_failure_taxonomy"
           },
@@ -4449,9 +4498,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
               "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js"
+              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js",
+              "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
@@ -4467,9 +4516,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/finalized-c1-verifier-filtered-active-synthesis-loop.test.js",
-              "tests/framework-export.test.js"
+              "tests/wave351-intent.test.js",
+              "tests/wave353-agent-guide.test.js",
+              "tests/wave389-production-ready-parity.test.js"
             ],
             "improvement_track": "maintain_generated_intent_contract_matrix_and_routing_workflow_taxonomy"
           },
@@ -4553,8 +4602,8 @@
             ],
             "test_refs": [
               "tests/finalized-c3-data-shapley-marginal-contribution-valuation.test.js",
-              "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
-              "tests/finalized-c5-calibration-set-construction.test.js"
+              "tests/wave921-multi-signal-routing.test.js",
+              "tests/wave921-semantic-router.test.js"
             ],
             "improvement_track": "maintain_contract_tests_and_claim_scope_mapping"
           },
@@ -4606,23 +4655,24 @@
             "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate"
           },
           {
-            "path": "src/benchmark-compare.js",
-            "domain": "capture_data_eval",
+            "path": "apps/replicate/predict.py",
+            "domain": "platform_support",
             "priority_score": 6,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
               "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave144-bench-compare.test.js",
-              "tests/wave144-predibase-demo.test.js"
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/finalized-c1-sandbox-verification-kscore-gate.test.js",
+              "tests/finalized-c1-verifier-filtered-active-synthesis-loop.test.js"
             ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
+            "improvement_track": "maintain_contract_tests_and_claim_scope_mapping"
           }
         ],
-        "count": 337,
+        "count": 369,
         "missing_required_paths": []
       },
       "readiness": {
@@ -4762,10 +4812,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 578
+        "line": 580
       },
       "local_sota_review": {
-        "line": 578,
+        "line": 580,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -4858,9 +4908,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c11-cli-tui-dx-contract.test.js",
               "tests/path-to-100-w1-tui-real-runner.test.js",
-              "tests/sota-tui.test.js"
+              "tests/sota-tui.test.js",
+              "tests/wave949-tui-workbench-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_tui_workbench_matrix_and_cli_distribution_contract"
           },
@@ -4891,9 +4941,9 @@
               "large_component_contract_risk"
             ],
             "test_refs": [
-              "tests/wave370-privacy.test.js",
               "tests/wave411-golden-e2e-smoke.test.js",
-              "tests/wave411-redaction-leak.test.js"
+              "tests/wave411-redaction-leak.test.js",
+              "tests/wave451-multimodal-redact.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -4907,8 +4957,8 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/site.test.js",
-              "tests/trust-center.test.js"
+              "tests/trust-center.test.js",
+              "tests/site.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -4924,9 +4974,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
+              "tests/wave454-media-redact-worker.test.js",
               "tests/artifact-end-to-end.test.js",
-              "tests/finalized-c1-distillation-pipeline.test.js",
-              "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+              "tests/finalized-c1-distillation-pipeline.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -4988,9 +5038,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
               "tests/agent-audit-delta-badge-routes.test.js",
-              "tests/agent-audit-routes.test.js"
+              "tests/agent-audit-routes.test.js",
+              "tests/agent-verify-hardening.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -5018,9 +5068,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/model-signing-sidecars.test.js",
-              "tests/server.test.js",
-              "tests/wave149-ed25519-default.test.js"
+              "tests/wave150-sigstore.test.js",
+              "tests/wave162-sigstore-rekor.test.js",
+              "tests/wave258-audit-fixes.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -5085,7 +5135,7 @@
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           }
         ],
-        "count": 165,
+        "count": 167,
         "missing_required_paths": []
       },
       "readiness": {
@@ -5238,10 +5288,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 611
+        "line": 613
       },
       "local_sota_review": {
-        "line": 611,
+        "line": 613,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5279,8 +5329,8 @@
             ],
             "test_refs": [
               "tests/crypto-services.test.js",
-              "tests/wave603-whole-stack-sota-deep-dive.test.js",
-              "tests/wave888i-gateway-overhead.test.js"
+              "tests/wave921-fallback-reason-clamp.test.js",
+              "tests/wave921-gateway-guardrail.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -5295,9 +5345,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/model-signing-sidecars.test.js",
-              "tests/server.test.js",
-              "tests/wave149-ed25519-default.test.js"
+              "tests/wave150-sigstore.test.js",
+              "tests/wave162-sigstore-rekor.test.js",
+              "tests/wave258-audit-fixes.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -5331,9 +5381,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
               "tests/wave144-bench-compare.test.js",
-              "tests/wave144-completions-api.test.js"
+              "tests/wave144-completions-api.test.js",
+              "tests/wave144-completions-server.test.js"
             ],
             "improvement_track": "maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract"
           },
@@ -5350,10 +5400,29 @@
             ],
             "test_refs": [
               "tests/wave683-capture-forget-contract.test.js",
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave888L-blocker-10-fix.test.js"
+              "tests/wave888L-blocker-10-fix.test.js",
+              "tests/wave944-wrapper-cli-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract"
+          },
+          {
+            "path": "apps/runtime/serve.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 8,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave921-serve-config.test.js",
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/_spawn-helpers.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
             "path": "src/artifact.js",
@@ -5366,9 +5435,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-orchestrator.test.js",
-              "tests/agent-audit-report-ready-notify.test.js"
+              "tests/artifact-end-to-end.test.js",
+              "tests/cid.test.js",
+              "tests/finalized-c1-provenance-receipt-transparency-chain.test.js"
             ],
             "improvement_track": "maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract"
           },
@@ -5407,6 +5476,22 @@
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
+            "path": "apps/trainer/inference_cache.py",
+            "domain": "storage_state",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "tenant_scoped_cas_storage_retention_and_migration_simulation"
+          },
+          {
             "path": "src/compile.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 7,
@@ -5418,9 +5503,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-report-ready-notify.test.js",
-              "tests/cid.test.js",
-              "tests/cloud-compile.test.js"
+              "tests/path-to-100-w3-real-compile-holdout.test.js",
+              "tests/path-to-100-w3b-wizard-real-stream.test.js",
+              "tests/r2-artifact-lifecycle.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -5448,9 +5533,9 @@
               "large_component_contract_risk"
             ],
             "test_refs": [
-              "tests/wave370-privacy.test.js",
               "tests/wave411-golden-e2e-smoke.test.js",
-              "tests/wave411-redaction-leak.test.js"
+              "tests/wave411-redaction-leak.test.js",
+              "tests/wave451-multimodal-redact.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -5478,8 +5563,8 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/site.test.js",
-              "tests/trust-center.test.js"
+              "tests/trust-center.test.js",
+              "tests/site.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -5511,74 +5596,44 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
+              "tests/wave454-media-redact-worker.test.js",
               "tests/artifact-end-to-end.test.js",
-              "tests/finalized-c1-distillation-pipeline.test.js",
-              "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+              "tests/finalized-c1-distillation-pipeline.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
           {
-            "path": "src/audit-retention.js",
-            "domain": "trust_security_compliance",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave696-audit-retention-contract.test.js"
-            ],
-            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
-          },
-          {
-            "path": "src/dsl.js",
+            "path": "apps/trainer/backends/lambda_runner.py",
             "domain": "compile_artifact_runtime",
             "priority_score": 6,
             "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "large_component_contract_risk"
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface"
             ],
             "test_refs": [
-              "tests/wave144-dsl-codegen.test.js",
-              "tests/wave144-native-compile.test.js",
-              "tests/wave438-real-compile.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {
-            "path": "src/ed25519.js",
-            "domain": "trust_security_compliance",
+            "path": "apps/trainer/backends/modal_runner.py",
+            "domain": "compile_artifact_runtime",
             "priority_score": 6,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
               "environment_configuration_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
+              "execution_or_subprocess_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-delta-badge-routes.test.js",
-              "tests/agent-audit-routes.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
-            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
-          },
-          {
-            "path": "src/intoto-receipt-routes.js",
-            "domain": "api_surface",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "http_route_surface"
-            ],
-            "test_refs": [
-              "tests/wave921-intoto-attestation.test.js"
-            ],
-            "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate"
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
         ],
-        "count": 194,
+        "count": 240,
         "missing_required_paths": []
       },
       "readiness": {
@@ -5751,10 +5806,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 642
+        "line": 644
       },
       "local_sota_review": {
-        "line": 642,
+        "line": 644,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5778,9 +5833,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-orchestrator.test.js",
-              "tests/agent-audit-report-ready-notify.test.js"
+              "tests/artifact-end-to-end.test.js",
+              "tests/cid.test.js",
+              "tests/finalized-c1-provenance-receipt-transparency-chain.test.js"
             ],
             "improvement_track": "maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract"
           },
@@ -5795,9 +5850,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
               "tests/agent-audit-delta-badge-routes.test.js",
-              "tests/agent-audit-routes.test.js"
+              "tests/agent-audit-routes.test.js",
+              "tests/agent-verify-hardening.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -5863,9 +5918,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c11-cli-tui-dx-contract.test.js",
               "tests/path-to-100-w1-tui-real-runner.test.js",
-              "tests/sota-tui.test.js"
+              "tests/sota-tui.test.js",
+              "tests/wave949-tui-workbench-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_tui_workbench_matrix_and_cli_distribution_contract"
           },
@@ -5881,9 +5936,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
               "tests/wave144-bench-compare.test.js",
-              "tests/wave144-completions-api.test.js"
+              "tests/wave144-completions-api.test.js",
+              "tests/wave144-completions-server.test.js"
             ],
             "improvement_track": "maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract"
           },
@@ -5900,10 +5955,29 @@
             ],
             "test_refs": [
               "tests/wave683-capture-forget-contract.test.js",
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave888L-blocker-10-fix.test.js"
+              "tests/wave888L-blocker-10-fix.test.js",
+              "tests/wave944-wrapper-cli-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract"
+          },
+          {
+            "path": "apps/runtime/serve.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 8,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave921-serve-config.test.js",
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/_spawn-helpers.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
             "path": "src/attestation-report-builder.js",
@@ -5951,9 +6025,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-report-ready-notify.test.js",
-              "tests/cid.test.js",
-              "tests/cloud-compile.test.js"
+              "tests/path-to-100-w3-real-compile-holdout.test.js",
+              "tests/path-to-100-w3b-wizard-real-stream.test.js",
+              "tests/r2-artifact-lifecycle.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -5981,9 +6055,9 @@
               "large_component_contract_risk"
             ],
             "test_refs": [
-              "tests/wave370-privacy.test.js",
               "tests/wave411-golden-e2e-smoke.test.js",
-              "tests/wave411-redaction-leak.test.js"
+              "tests/wave411-redaction-leak.test.js",
+              "tests/wave451-multimodal-redact.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -6011,8 +6085,8 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/site.test.js",
-              "tests/trust-center.test.js"
+              "tests/trust-center.test.js",
+              "tests/site.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -6044,61 +6118,44 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
+              "tests/wave454-media-redact-worker.test.js",
               "tests/artifact-end-to-end.test.js",
-              "tests/finalized-c1-distillation-pipeline.test.js",
-              "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+              "tests/finalized-c1-distillation-pipeline.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
           {
-            "path": "packages/sdk-ts/README.md",
-            "domain": "developer_distribution",
+            "path": "apps/trainer/backends/lambda_runner.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 6,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+          },
+          {
+            "path": "apps/trainer/backends/modal_runner.py",
+            "domain": "compile_artifact_runtime",
             "priority_score": 6,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
-              "network_or_provider_boundary"
+              "execution_or_subprocess_boundary"
             ],
             "test_refs": [
-              "tests/path-to-100-w2-truth-in-labeling.test.js",
-              "tests/r4-deploy-generators.test.js",
-              "tests/research-docs.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
-            "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence"
-          },
-          {
-            "path": "src/assistant-client.js",
-            "domain": "developer_distribution",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/wave888p-cli-nl-routing.test.js"
-            ],
-            "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence"
-          },
-          {
-            "path": "src/audit-retention.js",
-            "domain": "trust_security_compliance",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave696-audit-retention-contract.test.js"
-            ],
-            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
         ],
-        "count": 243,
+        "count": 290,
         "missing_required_paths": []
       },
       "readiness": {
@@ -6259,10 +6316,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 688
+        "line": 690
       },
       "local_sota_review": {
-        "line": 688,
+        "line": 690,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6337,6 +6394,42 @@
         ],
         "sampled": [
           {
+            "path": "apps/trainer/distill.py",
+            "domain": "training_model_optimization",
+            "priority_score": 12,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave252-ml-fixes.test.js",
+              "tests/wave258-audit-fixes.test.js",
+              "tests/wave828-reasoning-v2.test.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
+          },
+          {
+            "path": "apps/trainer/main.py",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "http_route_surface",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
             "path": "workers/quantize/scripts/quantize.py",
             "domain": "training_model_optimization",
             "priority_score": 10,
@@ -6349,11 +6442,28 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/cloud-compile.test.js",
-              "tests/finalized-c1-signed-artifact-packaging.test.js",
-              "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js"
+              "tests/wave719-daq.test.js",
+              "tests/wave921-fp4-calib-trust-remote.test.js",
+              "tests/wave921-moe-quantize.test.js"
             ],
             "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
+          },
+          {
+            "path": "apps/trainer/multinode_launch.py",
+            "domain": "training_model_optimization",
+            "priority_score": 9,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave636-multinode-launch.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/deploy-generators.js",
@@ -6419,9 +6529,26 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/sota-distill.test.js",
               "tests/wave921-trainer-unification.test.js",
-              "tests/wave952-readiness-proof-matrix.test.js"
+              "tests/wave952-readiness-proof-matrix.test.js",
+              "tests/sota-distill.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/remote_ssh.py",
+            "domain": "training_model_optimization",
+            "priority_score": 8,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -6459,89 +6586,23 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "src/deploy-pipeline.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave888d-deploy-pipeline.test.js",
-              "tests/wave890-13-deployment.test.js"
-            ],
-            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
-          },
-          {
-            "path": "src/device-install.js",
-            "domain": "infra_cloud_device",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave-wc14-shell-injection-guards.test.js",
-              "tests/wave372-runtime-devices.test.js",
-              "tests/wc04-compile-pipeline.test.js"
-            ],
-            "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
-          },
-          {
-            "path": "src/model-weights-puller.js",
+            "path": "apps/modal/kolm_trainer_app.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave386-model-weights.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "src/privacy-membrane.js",
-            "domain": "trust_security_compliance",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "large_component_contract_risk"
-            ],
-            "test_refs": [
-              "tests/wave370-privacy.test.js",
-              "tests/wave411-golden-e2e-smoke.test.js",
-              "tests/wave411-redaction-leak.test.js"
-            ],
-            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
-          },
-          {
-            "path": "src/trust-center.js",
-            "domain": "trust_security_compliance",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "http_route_surface"
-            ],
-            "test_refs": [
-              "tests/site.test.js",
-              "tests/trust-center.test.js"
-            ],
-            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
-          },
-          {
-            "path": "workers/distill/distill.mjs",
+            "path": "apps/trainer/airgap_distill_worker.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -6552,14 +6613,13 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/_fixtures-w422-noop-worker.cjs",
-              "tests/agent-audit-ingest.test.js",
-              "tests/cid.test.js"
+              "tests/wave953-airgap-distill-worker.test.js",
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/distill/teacher-bridge.mjs",
+            "path": "apps/trainer/backends/directml.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -6567,35 +6627,16 @@
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave144-distill-worker.test.js",
-              "tests/wave158-cross-vendor.test.js",
-              "tests/wave292-teacher-bridge-fail-closed.test.js"
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave-wc14-shell-injection-guards.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
-            "path": "workers/media-redact/redact.mjs",
-            "domain": "trust_security_compliance",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/artifact-end-to-end.test.js",
-              "tests/finalized-c1-distillation-pipeline.test.js",
-              "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
-            ],
-            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
-          },
-          {
-            "path": "workers/vision-tokenize/tokenize.mjs",
+            "path": "apps/trainer/backends/mlx.py",
             "domain": "training_model_optimization",
             "priority_score": 7,
             "risk_signals": [
@@ -6603,17 +6644,31 @@
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c1-recipe-synthesis-engine.test.js",
-              "tests/finalized-c4-cross-tokenizer-kd-logit-alignment.test.js",
-              "tests/finalized-c4-distill-method-truthfulness.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "apps/trainer/backends/rocm.py",
+            "domain": "training_model_optimization",
+            "priority_score": 7,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 253,
+        "count": 308,
         "missing_required_paths": []
       },
       "readiness": {
@@ -6733,10 +6788,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 739
+        "line": 741
       },
       "local_sota_review": {
-        "line": 739,
+        "line": 741,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6792,8 +6847,8 @@
             ],
             "test_refs": [
               "tests/active-redteam.test.js",
-              "tests/agent-audit-ingest.test.js",
-              "tests/agent-audit-orchestrator.test.js"
+              "tests/agent-audit-orchestrator.test.js",
+              "tests/connector-openai-agents.test.js"
             ],
             "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests"
           }
@@ -6813,9 +6868,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-ingest.test.js",
               "tests/agent-kolm-capture-bridge.test.js",
-              "tests/asr-packages.test.js"
+              "tests/billing-tiers.test.js",
+              "tests/byoc-gpu-attestation.test.js"
             ],
             "improvement_track": "maintain_generated_api_contract_matrix_and_route_split_plan"
           },
@@ -6831,9 +6886,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-routes-errorpaths.test.js",
-              "tests/agent-audit-routes.test.js",
-              "tests/asr-revenue-gate.test.js"
+              "tests/asr-revenue-gate.test.js",
+              "tests/crypto-services.test.js",
+              "tests/reattest-signer-wiring.test.js"
             ],
             "improvement_track": "maintain_generated_api_contract_matrix_and_route_split_plan"
           },
@@ -6849,9 +6904,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave937-api-contract-matrix.test.js",
-              "tests/wave938-auth-boundary-matrix.test.js"
+              "tests/wave950-bench-harness-matrix.test.js",
+              "tests/wrapper-s4.test.js",
+              "tests/wave710-meta-routes-contract.test.js"
             ],
             "improvement_track": "maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract"
           },
@@ -6867,9 +6922,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
               "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js"
+              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js",
+              "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
@@ -7012,9 +7067,9 @@
               "large_component_contract_risk"
             ],
             "test_refs": [
-              "tests/wave370-privacy.test.js",
               "tests/wave411-golden-e2e-smoke.test.js",
-              "tests/wave411-redaction-leak.test.js"
+              "tests/wave411-redaction-leak.test.js",
+              "tests/wave451-multimodal-redact.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -7028,8 +7083,8 @@
               "http_route_surface"
             ],
             "test_refs": [
-              "tests/site.test.js",
-              "tests/trust-center.test.js"
+              "tests/trust-center.test.js",
+              "tests/site.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -7045,9 +7100,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
+              "tests/wave454-media-redact-worker.test.js",
               "tests/artifact-end-to-end.test.js",
-              "tests/finalized-c1-distillation-pipeline.test.js",
-              "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+              "tests/finalized-c1-distillation-pipeline.test.js"
             ],
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
@@ -7067,7 +7122,7 @@
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
           }
         ],
-        "count": 181,
+        "count": 191,
         "missing_required_paths": []
       },
       "readiness": {
@@ -7214,10 +7269,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 788
+        "line": 790
       },
       "local_sota_review": {
-        "line": 788,
+        "line": 790,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,
@@ -7261,9 +7316,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-orchestrator.test.js",
-              "tests/agent-audit-report-ready-notify.test.js"
+              "tests/artifact-end-to-end.test.js",
+              "tests/cid.test.js",
+              "tests/finalized-c1-provenance-receipt-transparency-chain.test.js"
             ],
             "improvement_track": "maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract"
           },
@@ -7314,9 +7369,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c11-cli-tui-dx-contract.test.js",
               "tests/path-to-100-w1-tui-real-runner.test.js",
-              "tests/sota-tui.test.js"
+              "tests/sota-tui.test.js",
+              "tests/wave949-tui-workbench-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_tui_workbench_matrix_and_cli_distribution_contract"
           },
@@ -7332,9 +7387,9 @@
               "network_or_provider_boundary"
             ],
             "test_refs": [
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave937-api-contract-matrix.test.js",
-              "tests/wave938-auth-boundary-matrix.test.js"
+              "tests/wave950-bench-harness-matrix.test.js",
+              "tests/wrapper-s4.test.js",
+              "tests/wave710-meta-routes-contract.test.js"
             ],
             "improvement_track": "maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract"
           },
@@ -7350,9 +7405,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
               "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js"
+              "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js",
+              "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
@@ -7403,9 +7458,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
               "tests/wave144-bench-compare.test.js",
-              "tests/wave144-completions-api.test.js"
+              "tests/wave144-completions-api.test.js",
+              "tests/wave144-completions-server.test.js"
             ],
             "improvement_track": "maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract"
           },
@@ -7422,10 +7477,29 @@
             ],
             "test_refs": [
               "tests/wave683-capture-forget-contract.test.js",
-              "tests/wave710-meta-routes-contract.test.js",
-              "tests/wave888L-blocker-10-fix.test.js"
+              "tests/wave888L-blocker-10-fix.test.js",
+              "tests/wave944-wrapper-cli-matrix.test.js"
             ],
             "improvement_track": "maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract"
+          },
+          {
+            "path": "apps/runtime/serve.py",
+            "domain": "compile_artifact_runtime",
+            "priority_score": 8,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave921-serve-config.test.js",
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/_spawn-helpers.js"
+            ],
+            "improvement_track": "split_or_add_generated_contract_map_before_growth"
           },
           {
             "path": "src/data-ingest.js",
@@ -7456,9 +7530,9 @@
               "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/agent-audit-report-ready-notify.test.js",
-              "tests/cid.test.js",
-              "tests/cloud-compile.test.js"
+              "tests/path-to-100-w3-real-compile-holdout.test.js",
+              "tests/path-to-100-w3b-wizard-real-stream.test.js",
+              "tests/r2-artifact-lifecycle.test.js"
             ],
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
@@ -7542,39 +7616,22 @@
             "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           },
           {
-            "path": "packages/sdk-ts/README.md",
-            "domain": "developer_distribution",
+            "path": "apps/trainer/backends/lambda_runner.py",
+            "domain": "compile_artifact_runtime",
             "priority_score": 6,
             "risk_signals": [
-              "cryptographic_or_proof_boundary",
               "distribution_or_worker_surface",
               "environment_configuration_boundary",
-              "network_or_provider_boundary"
-            ],
-            "test_refs": [
-              "tests/path-to-100-w2-truth-in-labeling.test.js",
-              "tests/r4-deploy-generators.test.js",
-              "tests/research-docs.test.js"
-            ],
-            "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence"
-          },
-          {
-            "path": "src/assistant-client.js",
-            "domain": "developer_distribution",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "http_route_surface"
             ],
             "test_refs": [
-              "tests/wave888p-cli-nl-routing.test.js"
+              "tests/wave957-apps-atomic-scope.test.js"
             ],
-            "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence"
+            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
         ],
-        "count": 330,
+        "count": 388,
         "missing_required_paths": []
       },
       "readiness": {
