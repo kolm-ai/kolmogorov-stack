@@ -1,8 +1,8 @@
 {
   "counts": {
     "asset_paths": 18,
-    "config_paths": 377,
-    "dirty_paths": 3,
+    "config_paths": 378,
+    "dirty_paths": 4,
     "docs_paths": 375,
     "fixture_paths": 70,
     "generated_paths": 5,
@@ -10,14 +10,14 @@
     "release_included_paths": 1224,
     "report_paths": 0,
     "scratch_or_quarantine_paths": 0,
-    "source_paths": 2400,
-    "test_paths": 798,
-    "total_paths": 4043,
+    "source_paths": 2401,
+    "test_paths": 800,
+    "total_paths": 4047,
     "unowned_paths": 0,
-    "untracked_paths": 3
+    "untracked_paths": 4
   },
   "failures": [],
-  "generated_at": "2026-06-18T17:46:53.352Z",
+  "generated_at": "2026-06-18T18:09:10.388Z",
   "paths": [
     {
       "bytes": 634,
@@ -1726,6 +1726,16 @@
       "kind": "source",
       "large_file": false,
       "path": "apps/trainer/function_calling.py",
+      "redline": null,
+      "release_included": false
+    },
+    {
+      "bytes": 20931,
+      "dirty_state": "untracked",
+      "generated_by": null,
+      "kind": "source",
+      "large_file": false,
+      "path": "apps/trainer/gad.py",
       "redline": null,
       "release_included": false
     },
@@ -6970,7 +6980,7 @@
       "release_included": true
     },
     {
-      "bytes": 2630519,
+      "bytes": 2637810,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "source",
@@ -8050,7 +8060,7 @@
       "release_included": true
     },
     {
-      "bytes": 227939,
+      "bytes": 228813,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "docs",
@@ -8210,7 +8220,7 @@
       "release_included": true
     },
     {
-      "bytes": 1851205,
+      "bytes": 1851340,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "docs",
@@ -8640,7 +8650,7 @@
       "release_included": true
     },
     {
-      "bytes": 1963816,
+      "bytes": 1963777,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "docs",
@@ -8650,7 +8660,7 @@
       "release_included": true
     },
     {
-      "bytes": 8396,
+      "bytes": 8391,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "docs",
@@ -10700,7 +10710,7 @@
       "release_included": true
     },
     {
-      "bytes": 294958,
+      "bytes": 295009,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "docs",
@@ -11450,7 +11460,7 @@
       "release_included": false
     },
     {
-      "bytes": 35449,
+      "bytes": 35514,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "config",
@@ -14706,6 +14716,16 @@
       "kind": "config",
       "large_file": false,
       "path": "recipes/minicpm5-1b-support-edge.json",
+      "redline": null,
+      "release_included": false
+    },
+    {
+      "bytes": 2551,
+      "dirty_state": "untracked",
+      "generated_by": null,
+      "kind": "config",
+      "large_file": false,
+      "path": "recipes/support-gad.json",
       "redline": null,
       "release_included": false
     },
@@ -18010,8 +18030,8 @@
       "release_included": false
     },
     {
-      "bytes": 3106,
-      "dirty_state": "untracked",
+      "bytes": 3105,
+      "dirty_state": "clean",
       "generated_by": null,
       "kind": "source",
       "large_file": false,
@@ -23861,7 +23881,7 @@
     },
     {
       "bytes": 21445,
-      "dirty_state": "untracked",
+      "dirty_state": "clean",
       "generated_by": null,
       "kind": "source",
       "large_file": false,
@@ -26010,7 +26030,7 @@
       "release_included": true
     },
     {
-      "bytes": 18617,
+      "bytes": 26592,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "source",
@@ -26050,7 +26070,7 @@
       "release_included": true
     },
     {
-      "bytes": 24904,
+      "bytes": 27069,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "source",
@@ -26090,7 +26110,7 @@
       "release_included": true
     },
     {
-      "bytes": 21921,
+      "bytes": 22877,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "source",
@@ -34680,7 +34700,7 @@
       "release_included": false
     },
     {
-      "bytes": 13977,
+      "bytes": 14092,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "test",
@@ -34900,7 +34920,7 @@
       "release_included": false
     },
     {
-      "bytes": 2479,
+      "bytes": 2553,
       "dirty_state": "clean",
       "generated_by": null,
       "kind": "test",
@@ -38030,12 +38050,32 @@
       "release_included": false
     },
     {
-      "bytes": 8322,
-      "dirty_state": "untracked",
+      "bytes": 8321,
+      "dirty_state": "clean",
       "generated_by": null,
       "kind": "test",
       "large_file": false,
       "path": "tests/wave955-agent-benchmark-adapter.test.js",
+      "redline": null,
+      "release_included": false
+    },
+    {
+      "bytes": 7999,
+      "dirty_state": "untracked",
+      "generated_by": null,
+      "kind": "test",
+      "large_file": false,
+      "path": "tests/wave956-gad-cli.test.js",
+      "redline": null,
+      "release_included": false
+    },
+    {
+      "bytes": 10090,
+      "dirty_state": "untracked",
+      "generated_by": null,
+      "kind": "test",
+      "large_file": false,
+      "path": "tests/wave956-gad-onpolicy.test.js",
       "redline": null,
       "release_included": false
     },

@@ -97,6 +97,21 @@ const STRATEGIES = Object.freeze([
     best_for: ['generation', 'chat', 'reasoning', 'api-teacher', 'teacher-text-only'],
   },
   {
+    id: 'gad',
+    label: 'GAD black-box adversarial distillation',
+    family: 'online',
+    command_kind: 'gad-blackbox',
+    min_real_pairs: 500,
+    min_holdout_pairs: 100,
+    teacher_required: true,
+    requires_teacher_logits: false,
+    privacy: ['standard', 'regulated', 'zero_retention', 'airgap'],
+    best_for: ['generation', 'chat', 'reasoning', 'api-teacher', 'teacher-text-only', 'adversarial-distill'],
+    references: [
+      { name: 'Generative Adversarial Distillation', method: 'teacher-text-vs-student-rollout-discriminator', status: 'frontier_reference', paper: 'arXiv:2511.10643' },
+    ],
+  },
+  {
     id: 'gkd_onpolicy',
     label: 'GKD on-policy local-teacher distillation',
     family: 'online',
@@ -388,6 +403,7 @@ function commandFor(strategy, profile) {
   if (strategy.command_kind === 'cloud-train') return `kolm cloud train ${ns} --base ${base}`;
   if (strategy.command_kind === 'distill') return `kolm distill --namespace ${ns} --base-model ${base} --mode ${strategy.id}`;
   if (strategy.command_kind === 'ropd-blackbox') return `kolm distill onpolicy --ropd --namespace ${ns}`;
+  if (strategy.command_kind === 'gad-blackbox') return `kolm distill onpolicy --gad --namespace ${ns}`;
   if (strategy.command_kind === 'onpolicy-gkd') return `kolm distill onpolicy train --namespace ${ns} --pairs <pairs.jsonl> --student <student-path> --teacher <local-teacher>`;
   if (strategy.command_kind === 'local-worker-objective') return `kolm distill --local-worker --mode full --teacher-local --objective=${strategy.objective} --spec <spec.json> --seeds <pairs.jsonl> --out <out-dir>`;
   if (strategy.command_kind === 'moe-distill') return `kolm distill moe-to-dense --namespace ${ns} --teacher ${clean(profile.moe.teacher_model, 'local-moe-teacher')} --student-base ${base} --plan-only`;
@@ -417,7 +433,8 @@ function scoreStrategy(strategy, profile) {
   if (profile.task === 'extraction' && strategy.id === 'lora_sft') score += 12;
   if (profile.label_noise >= 0.18 && strategy.id === 'rejection_sampling') score += 18;
   if (profile.teacher_agreement < 0.65 && strategy.id === 'rejection_sampling') score += 12;
-  if (profile.teacher_access.text_only && strategy.id === 'ropd') score += 35;
+  if (profile.teacher_access.text_only && strategy.id === 'gad') score += 45;
+  if (profile.teacher_access.text_only && strategy.id === 'ropd') score += 32;
   if (profile.teacher_access.text_only && strategy.id === 'rejection_sampling') score += 8;
   if (profile.teacher_access.has_open_weights_teacher && strategy.id === 'gkd_onpolicy') score += 24;
   if (profile.teacher_access.has_open_weights_teacher && strategy.id === 'distillm2') score += 14;
@@ -429,13 +446,15 @@ function scoreStrategy(strategy, profile) {
     if (profile.task === 'reasoning') score += 10;
   }
   if (profile.task === 'reasoning' && strategy.id === 'cot_distill') score += 30;
+  if (profile.task === 'reasoning' && strategy.id === 'gad') score += 12;
   if (profile.task === 'reasoning' && strategy.id === 'ropd') score += 10;
   if (profile.preference_pairs >= 50 && strategy.id === 'preference_optimization') score += 22;
   if (profile.existing_artifact && strategy.id === 'onpolicy_distill') score += 16;
+  if (profile.existing_artifact && strategy.id === 'gad') score += 12;
   if (profile.existing_artifact && strategy.id === 'ropd') score += 10;
   if (profile.repeat_rate >= 0.45 && strategy.id === 'rule_or_cache_first') score += 16;
   if (profile.target_latency_ms <= 60 && strategy.id === 'speculative_decoding_train') score += 14;
-  if (profile.budget_usd > 0 && ['kd_softmax', 'speculative_decoding_train', 'ropd'].includes(strategy.id)) score -= 5;
+  if (profile.budget_usd > 0 && ['kd_softmax', 'speculative_decoding_train', 'gad', 'ropd'].includes(strategy.id)) score -= 5;
   if (!feasible) score -= blockers.length * 10;
   if (strategy.family === 'data' && (profile.real_pairs < 50 || profile.holdout_pairs < 10)) score += 30;
   const command = feasible ? commandFor(strategy, profile) : null;

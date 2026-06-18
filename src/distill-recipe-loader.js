@@ -78,10 +78,10 @@ const VALID_TRAIN_BACKENDS = new Set(['auto', 'hf', 'unsloth']);
 // Distillation OBJECTIVE (loss). seqkd is the SFT-on-strings default; the
 // logit-level objectives (forward_kl/reverse_kl/jsd/distillm2/gkd) require a
 // LOCAL teacher (logits), enforced by _validateDistill.
-// W921 - 'ropd' (rubric-based on-policy distillation) is black-box: it scores
-// rollouts with teacher TEXT only (no logits), so it is valid with API teachers
-// and is intentionally NOT in LOGIT_OBJECTIVES.
-const VALID_OBJECTIVES = new Set(['seqkd', 'forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd', 'ropd']);
+// W921/W956 - 'ropd' and 'gad' are black-box on-policy objectives: they score
+// student rollouts with teacher TEXT only (no logits), so they are valid with
+// API teachers and intentionally NOT in LOGIT_OBJECTIVES.
+const VALID_OBJECTIVES = new Set(['seqkd', 'forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd', 'ropd', 'gad']);
 // Objectives that need teacher LOGITS (API teachers are text-only).
 const LOGIT_OBJECTIVES = new Set(['forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd']);
 // LoRA-variant vocabulary (kept in sync with src/distill-efficiency.js).
@@ -327,6 +327,59 @@ function _validateDistill(distill, recipe) {
   return issues;
 }
 
+// W956 - optional `gad` section: Generative Adversarial Distillation black-box
+// minimax stage. This validates the recipe contract before any teacher/GPU
+// spend; the executable surface is `kolm distill onpolicy --gad`.
+function _validateGad(gad) {
+  const issues = [];
+  if (gad === undefined) return issues;
+  if (!_isPlainObject(gad)) {
+    issues.push('gad must be an object if present');
+    return issues;
+  }
+  if (gad.objective !== undefined && gad.objective !== 'gad') {
+    issues.push(`gad.objective must be "gad" (got ${JSON.stringify(gad.objective)})`);
+  }
+  if (gad.trainer !== undefined && typeof gad.trainer !== 'string') {
+    issues.push('gad.trainer must be a string if present');
+  }
+  if (gad.teacher_regime !== undefined && gad.teacher_regime !== 'black_box_text') {
+    issues.push('gad.teacher_regime must be "black_box_text"');
+  }
+  if (gad.teacher_local !== undefined && typeof gad.teacher_local !== 'boolean') {
+    issues.push('gad.teacher_local must be a boolean');
+  }
+  if (gad.teacher_local === true) {
+    issues.push('gad.teacher_local must be false for black-box GAD (teacher TEXT only, no logits)');
+  }
+  const ints = [
+    ['num_rollouts', 2],
+    ['num_teacher_refs', 1],
+    ['discriminator_steps', 1],
+    ['max_completion_length', 1],
+    ['max_steps', 1],
+  ];
+  for (const [k, min] of ints) {
+    if (gad[k] !== undefined && (!Number.isInteger(gad[k]) || gad[k] < min)) {
+      issues.push(`gad.${k} must be an integer >= ${min}`);
+    }
+  }
+  const positive = ['discriminator_lr', 'learning_rate', 'reward_temperature', 'temperature'];
+  for (const k of positive) {
+    if (gad[k] !== undefined && (typeof gad[k] !== 'number' || gad[k] <= 0)) {
+      issues.push(`gad.${k} must be a positive number`);
+    }
+  }
+  if (gad.collapse_penalty !== undefined
+    && (typeof gad.collapse_penalty !== 'number' || gad.collapse_penalty < 0)) {
+    issues.push('gad.collapse_penalty must be a non-negative number');
+  }
+  if (gad.papers !== undefined && !Array.isArray(gad.papers)) {
+    issues.push('gad.papers must be an array if present');
+  }
+  return issues;
+}
+
 // W921 - optional `grpo` section: verifiable-reward RL fine-tuning stage.
 function _validateGrpo(grpo) {
   const issues = [];
@@ -493,6 +546,7 @@ export function loadRecipe(nameOrPath, opts = {}) {
   // W921 - additive opt-in sections. All optional; a recipe without them is
   // validated exactly as before (backward-compat).
   issues.push(..._validateDistill(recipe.distill, recipe));
+  issues.push(..._validateGad(recipe.gad));
   issues.push(..._validateGrpo(recipe.grpo));
   issues.push(..._validatePreference(recipe.preference));
   issues.push(..._validateSynth(recipe.synth));

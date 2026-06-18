@@ -15,7 +15,7 @@ function distillationSection() {
   return body.slice(start, end);
 }
 
-test('W604 #1 - proprietary API teachers route generation to black-box ROPD', () => {
+test('W604 #1 - proprietary API teachers route generation to black-box GAD', () => {
   const plan = planDistillStrategy({
     task: 'generation',
     real_pairs: 1500,
@@ -23,9 +23,9 @@ test('W604 #1 - proprietary API teachers route generation to black-box ROPD', ()
     teachers: ['anthropic'],
   }, {});
   assert.equal(plan.ok, true);
-  assert.equal(plan.recommendation.id, 'ropd');
+  assert.equal(plan.recommendation.id, 'gad');
   assert.equal(plan.profile.teacher_access.text_only, true);
-  assert.match(plan.recommendation.command, /kolm distill onpolicy --ropd/);
+  assert.match(plan.recommendation.command, /kolm distill onpolicy --gad/);
 });
 
 test('W604 #2 - logit distillation is blocked when teacher logits are unavailable', () => {
@@ -57,10 +57,11 @@ test('W604 #3 - local teacher access keeps GKD first and logit objectives feasib
   }
 });
 
-test('W604 #4 - backend spec records recommender closure but leaves GAD open', () => {
+test('W604 #4 - backend spec records recommender closure and GAD implementation closure', () => {
   const section = distillationSection();
-  assert.match(section, /RECOMMENDER ORACLE \(src\/distill-strategy\.js, W604\)/);
+  assert.match(section, /RECOMMENDER ORACLE \(src\/distill-strategy\.js, W604(?:\+W956)?\)/);
   assert.match(section, /\(completed-local, W604\)/);
-  assert.match(section, /\[critical\] GAD/);
+  assert.match(section, /\[closed W956\] GAD/);
+  assert.doesNotMatch(section, /\[critical\] GAD/);
   assert.doesNotMatch(section, /\[major\] The recommender oracle src\/distill-strategy\.js is stale/);
 });

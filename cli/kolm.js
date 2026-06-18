@@ -22934,6 +22934,14 @@ async function cmdDistillTeacherCouncil(args) {
 // the envelope. The local module path is the default; --remote routes
 // through the corresponding /v1/distill/* route on the configured server.
 async function cmdDistillOnPolicy(args) {
+  // W956 - black-box GAD path. `kolm distill onpolicy --gad ...` (and the
+  // alias `kolm distill onpolicy gad ...`) dispatches the Python minimax
+  // adversarial distiller. This is still teacher-TEXT-only, but its learning
+  // loop belongs in apps/trainer/gad.py; Node owns the CLI/receipt boundary.
+  if (args.includes('--gad') || args[0] === 'gad') {
+    const gadArgs = (args[0] === 'gad') ? args.slice(1) : args.filter((a) => a !== '--gad');
+    return cmdDistillGad(gadArgs);
+  }
   // W921 NEXT-1 — black-box ROPD path. `kolm distill onpolicy --ropd ...` (and
   // its alias `kolm distill onpolicy ropd ...`) dispatches the rubric-based
   // on-policy distiller in src/distill-onpolicy.js (doctorRopd / buildRopdPrompts
@@ -22992,6 +23000,7 @@ async function cmdDistillOnPolicy(args) {
     process.exit(out.ok ? 0 : 3);
   }
   console.error(`usage: kolm distill onpolicy {doctor|train [--pairs <jsonl> --student <path> --teacher <path|id>]}`);
+  console.error(`       kolm distill onpolicy --gad {doctor|train --seeds <jsonl> --student <path>}   (GAD black-box minimax KD, arXiv:2511.10643)`);
   console.error(`       kolm distill onpolicy --ropd {doctor|train --seeds <jsonl> --student <path>}  (black-box on-policy KD, arXiv:2605.07396)`);
   process.exit(EXIT.BAD_ARGS);
 }
@@ -23422,6 +23431,133 @@ async function cmdDistillRopd(args) {
   console.log(`ok  ropd run prepared (${built.count} prompts, ${built.with_refs} with teacher refs, rollouts=${numRollouts}, teacher_refs=${numTeacherRefs})`);
   console.log('  objective: ' + (out.objective || ROPD_OBJECTIVE) + ' (black-box; teacher TEXT only)');
   console.log('  rubric:    ' + rubricMinItems + '-' + rubricMaxItems + ' items');
+  console.log('  run_dir:   ' + out.run_dir);
+  if (out.trainer_kicked === false || out.deferred) {
+    console.log('  status:    prompts + run dir written (trainer not installed)');
+    if (out.install_hint) console.log('  hint:      ' + out.install_hint.split('\n')[0]);
+  } else {
+    console.log('  status:    trainer kicked');
+  }
+}
+
+// W956 - `kolm distill onpolicy --gad` (GAD: Generative Adversarial
+// Distillation, arXiv:2511.10643). Black-box minimax KD: train a discriminator
+// over teacher TEXT vs student rollouts, then use "looks like teacher" as the
+// per-sequence reward for an on-policy GRPO-style student update. The Python
+// trainer owns the model math; this CLI owns prompt build, flag validation, and
+// the durable no-trainer envelope.
+async function cmdDistillGad(args) {
+  const sub = args[0];
+  const rest = args.slice(1);
+  if (sub === 'doctor') {
+    const { doctorGad } = await import('../src/distill-onpolicy.js');
+    const out = doctorGad();
+    console.log(JSON.stringify(out, null, 2));
+    process.exit(out.ready ? 0 : 3);
+  }
+
+  const train_args = (sub === 'train') ? rest : args;
+  const seedsFile = pickFlag(train_args, '--seeds') || pickFlag(train_args, '--prompts');
+  const student = pickFlag(train_args, '--student');
+  const studentBase = pickFlag(train_args, '--student-base') || null;
+  const ns = pickFlag(train_args, '--namespace') || 'default';
+  const outDir = pickFlag(train_args, '--out') || null;
+  const wantJson = train_args.includes('--json');
+
+  const numRolloutsFlag = pickFlag(train_args, '--num-rollouts');
+  const numTeacherRefsFlag = pickFlag(train_args, '--num-teacher-refs');
+  const discriminatorStepsFlag = pickFlag(train_args, '--discriminator-steps');
+  const discriminatorLrFlag = pickFlag(train_args, '--discriminator-lr');
+  const lrFlag = pickFlag(train_args, '--learning-rate');
+  const rewardTempFlag = pickFlag(train_args, '--reward-temperature');
+  const collapsePenaltyFlag = pickFlag(train_args, '--collapse-penalty');
+  const tempFlag = pickFlag(train_args, '--temperature');
+  const maxCompFlag = pickFlag(train_args, '--max-completion-length');
+  const maxStepsFlag = pickFlag(train_args, '--max-steps');
+
+  const { GAD_OBJECTIVE, buildGadPromptsJsonl, trainGad } = await import('../src/distill-onpolicy.js');
+  if (!seedsFile || !student) {
+    console.error('usage: kolm distill onpolicy --gad --seeds <jsonl> --student <path> [--student-base <hf-id>] [--num-rollouts 8] [--num-teacher-refs 4] [--discriminator-steps 16] [--discriminator-lr 0.35] [--learning-rate 1e-6] [--reward-temperature 1.0] [--collapse-penalty 0.15] [--temperature 1.0] [--max-completion-length 1024] [--max-steps 32] [--namespace ns] [--out <dir>] [--json]');
+    console.error('  objective: ' + GAD_OBJECTIVE + ' (black-box minimax, teacher TEXT only -- no logits; arXiv:2511.10643)');
+    console.error('  seeds:   JSONL of {prompt|input, teacher_refs:[...] | teacher | response | chosen, optional student_rollouts:[...]}');
+    console.error('  also:    kolm distill onpolicy --gad doctor');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  if (!fs.existsSync(seedsFile)) { console.error('not found: ' + seedsFile); process.exit(EXIT.NOT_FOUND); }
+
+  function _posInt(flag, val) {
+    if (val == null) return null;
+    const n = Number(val);
+    if (!Number.isInteger(n) || n <= 0) {
+      console.error(`error: ${flag} must be a positive integer (got '${val}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    return n;
+  }
+  function _num(flag, val, def, { min = 0, exclusive = false } = {}) {
+    if (val == null) return def;
+    const n = Number(val);
+    if (!Number.isFinite(n) || (exclusive ? n <= min : n < min)) {
+      const op = exclusive ? '>' : '>=';
+      console.error(`error: ${flag} must be a finite number ${op} ${min} (got '${val}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    return n;
+  }
+
+  const numRollouts = numRolloutsFlag != null ? _posInt('--num-rollouts', numRolloutsFlag) : 8;
+  if (numRollouts < 2) {
+    console.error('error: --num-rollouts must be >= 2 (GRPO needs a group)');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const numTeacherRefs = numTeacherRefsFlag != null ? _posInt('--num-teacher-refs', numTeacherRefsFlag) : 4;
+  const discriminatorSteps = discriminatorStepsFlag != null ? _posInt('--discriminator-steps', discriminatorStepsFlag) : 16;
+  const maxSteps = maxStepsFlag != null ? _posInt('--max-steps', maxStepsFlag) : 32;
+
+  let seeds;
+  try {
+    seeds = fs.readFileSync(seedsFile, 'utf8').split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l));
+  } catch (e) {
+    console.error('could not parse --seeds JSONL: ' + (e && e.message ? e.message : e));
+    process.exit(EXIT.EXECUTION);
+  }
+  const runRoot = outDir || path.join(KOLM_DIR, 'gad-runs', `gad_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+  fs.mkdirSync(runRoot, { recursive: true });
+  const promptsPath = path.join(runRoot, 'prompts.jsonl');
+  const built = buildGadPromptsJsonl(seeds, promptsPath);
+  if (!built.ok) {
+    console.error('prompts build failed: ' + (built.error || 'unknown'));
+    process.exit(EXIT.EXECUTION);
+  }
+  const out = trainGad({
+    promptsPath,
+    studentPath: student,
+    studentBase,
+    numRollouts,
+    numTeacherRefs,
+    discriminatorSteps,
+    discriminatorLr: _num('--discriminator-lr', discriminatorLrFlag, 0.35, { min: 0, exclusive: true }),
+    learningRate: _num('--learning-rate', lrFlag, 1e-6, { min: 0, exclusive: true }),
+    rewardTemperature: _num('--reward-temperature', rewardTempFlag, 1.0, { min: 0, exclusive: true }),
+    collapsePenalty: _num('--collapse-penalty', collapsePenaltyFlag, 0.15, { min: 0 }),
+    temperature: _num('--temperature', tempFlag, 1.0, { min: 0 }),
+    maxCompletionLength: maxCompFlag != null ? _posInt('--max-completion-length', maxCompFlag) : 1024,
+    maxSteps,
+    outDir: runRoot,
+    namespace: ns,
+  });
+  if (wantJson) {
+    console.log(JSON.stringify({ ...out, prompts: built }, null, 2));
+    process.exit(out.ok ? 0 : EXIT.EXECUTION);
+  }
+  if (!out.ok) {
+    console.error('gad failed: ' + (out.error || 'unknown') + (out.detail ? ' -- ' + out.detail : ''));
+    if (out.install_hint) console.error(out.install_hint);
+    process.exit(EXIT.EXECUTION);
+  }
+  console.log(`ok  gad run prepared (${built.count} prompts, ${built.with_refs} with teacher refs, rollouts=${numRollouts}, teacher_refs=${numTeacherRefs})`);
+  console.log('  objective: ' + (out.objective || GAD_OBJECTIVE) + ' (black-box minimax; teacher TEXT only)');
+  console.log('  discriminator: steps=' + discriminatorSteps + ' lr=' + _num('--discriminator-lr', discriminatorLrFlag, 0.35, { min: 0, exclusive: true }));
   console.log('  run_dir:   ' + out.run_dir);
   if (out.trainer_kicked === false || out.deferred) {
     console.log('  status:    prompts + run dir written (trainer not installed)');

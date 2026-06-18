@@ -900,11 +900,11 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "9b4b2f573e218da09ef8b04361a9bca7a5b02e68dd1cd62e9cd86ae849965725",
+      "sha256": "d32dc11ca229359bfd3ccbfe6a916672858e02f7b4556cf8e33d5f9f938b86e9",
       "metrics": {
-        "bytes": 2630519,
-        "lines": 57219,
-        "imports": 542,
+        "bytes": 2637810,
+        "lines": 57355,
+        "imports": 544,
         "exports": 1,
         "routes": 0,
         "env_refs": 414,
@@ -21218,16 +21218,16 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "c8acc556ff1d33d541a7243807c14c99467d829d5d2f0b54e035af57d1f0dda0",
+      "sha256": "40bb40bc9cd2648b6b7b1637a6e9da075e790b17443d20a6a4563ed59f36f0e3",
       "metrics": {
-        "bytes": 18617,
-        "lines": 487,
+        "bytes": 26592,
+        "lines": 707,
         "imports": 5,
-        "exports": 8,
+        "exports": 13,
         "routes": 0,
-        "env_refs": 9,
+        "env_refs": 11,
         "fs_writes": 0,
-        "subprocess_refs": 5,
+        "subprocess_refs": 7,
         "network_refs": 0,
         "crypto_refs": 0,
         "markers": 0
@@ -21236,7 +21236,9 @@
         "tests/sota-cli.test.js",
         "tests/sota-distill.test.js",
         "tests/wave921-ropd-cli.test.js",
-        "tests/wave921-ropd-onpolicy.test.js"
+        "tests/wave921-ropd-onpolicy.test.js",
+        "tests/wave956-gad-cli.test.js",
+        "tests/wave956-gad-onpolicy.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary",
@@ -21480,10 +21482,10 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "4a4d3d3cc7e2f6f0076b105af144f01619cde436655b5ac184420ffcd64c4e74",
+      "sha256": "96da8a04ab6bb973ee2eacb2335102e2e0f3d2e308f283faa305289f75162ae1",
       "metrics": {
-        "bytes": 24904,
-        "lines": 574,
+        "bytes": 27069,
+        "lines": 628,
         "imports": 6,
         "exports": 2,
         "routes": 0,
@@ -21500,7 +21502,8 @@
         "tests/wave921-lora-variants-galore-packing.test.js",
         "tests/wave921-qad.test.js",
         "tests/wave921-ropd-onpolicy.test.js",
-        "tests/wave921-trainer-unification.test.js"
+        "tests/wave921-trainer-unification.test.js",
+        "tests/wave956-gad-onpolicy.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -21728,10 +21731,10 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "80536a82f4abd41549c00c1ed1b459b5468cc11f3c0dc5b24424aeed2514cb94",
+      "sha256": "875c639a93b3c712eeb95e59bc4edf6648910991c49272a560f9b5a7c1389feb",
       "metrics": {
-        "bytes": 21921,
-        "lines": 513,
+        "bytes": 22877,
+        "lines": 532,
         "imports": 2,
         "exports": 3,
         "routes": 0,

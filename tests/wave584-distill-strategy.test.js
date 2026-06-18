@@ -35,6 +35,7 @@ test('W584 #1 - catalog covers no-train, supervised, KD, preference, on-policy, 
     'kd_softmax',
     'rejection_sampling',
     'ropd',
+    'gad',
     'gkd_onpolicy',
     'distillm2',
     'moe_to_dense_distill',
@@ -60,13 +61,14 @@ test('W584 #2 - catalog exposes spec id, family coverage, and teacher_required f
   }
   assert.ok(catalog.strategies.some((s) => s.id === 'kd_softmax' && s.teacher_required && s.requires_teacher_logits));
   assert.ok(catalog.strategies.some((s) => s.id === 'ropd' && s.teacher_required && !s.requires_teacher_logits));
+  assert.ok(catalog.strategies.some((s) => s.id === 'gad' && s.teacher_required && !s.requires_teacher_logits));
   const moe = catalog.strategies.find((s) => s.id === 'moe_to_dense_distill');
   assert.equal(moe.execution_status, 'plan_only');
   assert.equal(moe.requires_moe, true);
   assert.ok(moe.references.some((r) => /moe-to-dense/i.test(r.name)));
 });
 
-test('W584 #3 - API-teacher generation chooses black-box ROPD instead of logit KD', () => {
+test('W584 #3 - API-teacher generation chooses black-box GAD instead of logit KD', () => {
   const plan = planDistillStrategy({
     task: 'generation',
     real_pairs: 1500,
@@ -75,8 +77,8 @@ test('W584 #3 - API-teacher generation chooses black-box ROPD instead of logit K
     privacy: 'standard',
   }, { ANTHROPIC_API_KEY: 'secret' });
   assert.equal(plan.ok, true);
-  assert.equal(plan.recommendation.id, 'ropd');
-  assert.match(plan.recommendation.command, /kolm distill onpolicy --ropd --namespace default/);
+  assert.equal(plan.recommendation.id, 'gad');
+  assert.match(plan.recommendation.command, /kolm distill onpolicy --gad --namespace default/);
   assert.equal(plan.ranked.find((r) => r.id === 'kd_softmax').feasible, false);
   assert.ok(plan.ranked.find((r) => r.id === 'kd_softmax').blockers.includes('teacher_logits_required'));
   assert.doesNotMatch(JSON.stringify(plan), /sk-|secret-key|ANTHROPIC_API_KEY_VALUE/);
@@ -91,8 +93,8 @@ test('W584 #4 - teacher-backed generation honors caller namespace and gates secr
     base_model: 'Qwen/Qwen2.5-7B-Instruct',
   }, { ANTHROPIC_API_KEY: 'secret-value' });
   assert.equal(plan.ok, true);
-  assert.equal(plan.recommendation.id, 'ropd');
-  assert.match(plan.recommendation.command, /kolm distill onpolicy --ropd --namespace support-copilot/);
+  assert.equal(plan.recommendation.id, 'gad');
+  assert.match(plan.recommendation.command, /kolm distill onpolicy --gad --namespace support-copilot/);
   assert.equal(plan.secret_values_included, false);
   assert.doesNotMatch(JSON.stringify(plan), /secret-value/);
 });
@@ -173,7 +175,7 @@ test('W584 #9 - API exposes distill strategy planning without auth-only side eff
   assert.equal(planned.status, 200);
   const body = await planned.json();
   assert.equal(body.data.plan.secret_values_included, false);
-  assert.equal(body.data.plan.recommendation.id, 'ropd');
+  assert.equal(body.data.plan.recommendation.id, 'gad');
 });
 
 test('W584 #10 - API exposes authenticated catalog and planner envelopes with surface + readiness metadata', async (t) => {
@@ -229,7 +231,7 @@ test('W584 #11 - CLI/script and package gates expose strategy verification', () 
     timeout: 15000,
   });
   assert.equal(r.status, 0, r.stderr || r.stdout);
-  assert.match(r.stdout, /recommendation=ropd/);
+  assert.match(r.stdout, /recommendation=gad/);
   const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
   assert.match(pkg.scripts['verify:distill-strategy'], /distill-strategy\.mjs/);
   assert.match(pkg.scripts['verify:depth'], /npm run verify:distill-strategy/);
@@ -257,7 +259,7 @@ test('W584 #12 - CLI exposes direct distill strategy planning and catalog output
   assert.equal(planned.status, 0, planned.stderr || planned.stdout);
   const plan = JSON.parse(planned.stdout);
   assert.equal(plan.ok, true);
-  assert.equal(plan.recommendation.id, 'ropd');
+  assert.equal(plan.recommendation.id, 'gad');
   assert.equal(plan.secret_values_included, false);
 
   const catalog = spawnSync(process.execPath, [CLI, 'distill', 'strategy', '--catalog', '--json'], {
@@ -328,7 +330,7 @@ test('W584 #16 - text-only MoE signal does not bypass the local-logit requiremen
     teacher_model: 'Qwen/Qwen3-30B-A3B-MoE',
   }, {});
   assert.equal(plan.ok, true);
-  assert.equal(plan.recommendation.id, 'ropd');
+  assert.equal(plan.recommendation.id, 'gad');
   const row = plan.ranked.find((r) => r.id === 'moe_to_dense_distill');
   assert.equal(row.feasible, false);
   assert.ok(row.blockers.includes('teacher_logits_required'));

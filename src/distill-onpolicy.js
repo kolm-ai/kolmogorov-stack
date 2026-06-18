@@ -473,6 +473,220 @@ export function trainRopd({
   };
 }
 
+// ===========================================================================
+// W956 - GAD (Generative Adversarial Distillation), BLACK-BOX minimax path.
+//
+// GAD trains a discriminator over teacher TEXT vs current student rollouts, then
+// uses the discriminator's "looks like teacher" score as the on-policy reward.
+// The Python trainer owns the minimax/discriminator math and optional Torch
+// loop; this JS layer only resolves, builds JSONL, and dispatches.
+// ===========================================================================
+
+export const GAD_OBJECTIVE = 'gad';
+
+const GAD_INSTALL_HINT = [
+  'GAD (black-box adversarial distillation) needs torch + transformers + peft for real training.',
+  '',
+  'install: pip install torch transformers peft',
+  '',
+  'the trainer lives at apps/trainer/gad.py and is invoked as:',
+  '  python gad.py --prompts <jsonl> --student <path> --out <dir>',
+  '    --num-rollouts 8 --discriminator-steps 16',
+  '',
+  'override with $KOLM_GAD_TRAINER (absolute path to a compatible script).',
+  'no GPU needed for --dry-run / --self-test (the pure discriminator/minimax core is CPU).',
+].join('\n');
+
+export function resolveGadTrainer() {
+  if (process.env.KOLM_GAD_NO_TRAINER === '1') return null;
+  const envCmd = process.env.KOLM_GAD_TRAINER;
+  if (envCmd) return fs.existsSync(envCmd) ? { script: envCmd, source: 'env' } : null;
+  const inRepo = path.join(_repoRoot, 'apps', 'trainer', 'gad.py');
+  if (fs.existsSync(inRepo)) return { script: inRepo, source: 'in_repo' };
+  return null;
+}
+
+export function doctorGad() {
+  const t = resolveGadTrainer();
+  let torch_available = false;
+  let transformers_version = null;
+  try {
+    const r = spawnSync(_pythonBin(),
+      ['-c', 'import torch,transformers,peft;print(getattr(transformers,"__version__","unknown"))'],
+      { stdio: 'pipe', timeout: 30000 });
+    if (r.status === 0) {
+      transformers_version = (r.stdout || '').toString('utf8').trim();
+      torch_available = true;
+    }
+  } catch (_) { /* torch stack absent - dry-run still works */ }
+  return {
+    ok: !!t,
+    ready: !!t && torch_available,
+    kind: 'distill_gad',
+    objective: GAD_OBJECTIVE,
+    teacher_regime: 'black_box_text',
+    algorithm: 'minimax_discriminator_reward',
+    trainer: t ? t.script : null,
+    trainer_source: t ? t.source : null,
+    torch_available,
+    transformers_version,
+    papers: ['arXiv:2511.10643', 'arXiv:2402.03300'],
+    install_hint: GAD_INSTALL_HINT,
+  };
+}
+
+export function buildGadPromptsJsonl(seeds, outPath) {
+  if (!Array.isArray(seeds)) return { ok: false, error: 'seeds_not_array' };
+  if (!outPath) return { ok: false, error: 'path_required' };
+  const rows = [];
+  let withRefs = 0;
+  let withRollouts = 0;
+  for (const s of seeds) {
+    if (!s || typeof s !== 'object') continue;
+    const prompt = s.prompt != null ? String(s.prompt)
+      : (s.input != null ? String(s.input) : null);
+    if (!prompt) continue;
+    let refs = null;
+    if (Array.isArray(s.teacher_refs)) {
+      refs = s.teacher_refs.filter((r) => r != null && String(r).trim()).map(String);
+    } else {
+      for (const key of ['teacher', 'response', 'chosen', 'output']) {
+        if (s[key] != null && String(s[key]).trim()) { refs = [String(s[key])]; break; }
+      }
+    }
+    let rollouts = null;
+    if (Array.isArray(s.student_rollouts)) {
+      rollouts = s.student_rollouts.filter((r) => r != null && String(r).trim()).map(String);
+    } else if (Array.isArray(s.candidates)) {
+      rollouts = s.candidates.map((c) => (typeof c === 'string' ? c : (c && (c.text || c.response || c.completion))))
+        .filter((r) => r != null && String(r).trim()).map(String);
+    }
+    const row = { prompt };
+    if (refs && refs.length) { row.teacher_refs = refs; withRefs += 1; }
+    if (rollouts && rollouts.length) { row.student_rollouts = rollouts; withRollouts += 1; }
+    rows.push(row);
+  }
+  try {
+    const dir = path.dirname(outPath);
+    if (dir && !fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(outPath,
+      rows.map((r) => JSON.stringify(r)).join('\n') + (rows.length ? '\n' : ''), 'utf8');
+  } catch (e) {
+    return { ok: false, error: 'write_failed', detail: e.message };
+  }
+  return { ok: true, path: outPath, count: rows.length, with_refs: withRefs, with_rollouts: withRollouts };
+}
+
+export function trainGad({
+  promptsPath,
+  studentPath,
+  studentBase = null,
+  numRollouts = 8,
+  numTeacherRefs = 4,
+  discriminatorSteps = 16,
+  discriminatorLr = 0.35,
+  learningRate = 1e-6,
+  rewardTemperature = 1.0,
+  collapsePenalty = 0.15,
+  temperature = 1.0,
+  maxCompletionLength = 1024,
+  maxSteps = 32,
+  outDir = null,
+  namespace = 'default',
+  tenant_id = 'local',
+  timeoutMs = 60 * 60 * 1000,
+} = {}) {
+  if (!promptsPath || !fs.existsSync(promptsPath)) {
+    return { ok: false, error: 'prompts_missing', detail: `prompts file not found: ${promptsPath}` };
+  }
+  if (!studentPath) {
+    return { ok: false, error: 'student_missing', detail: 'studentPath required' };
+  }
+  if (!Number.isFinite(numRollouts) || numRollouts < 2) {
+    return { ok: false, error: 'bad_num_rollouts', detail: 'numRollouts must be >= 2 (GRPO needs a group)' };
+  }
+  if (!Number.isFinite(discriminatorSteps) || discriminatorSteps < 1) {
+    return { ok: false, error: 'bad_discriminator_steps', detail: 'discriminatorSteps must be >= 1' };
+  }
+
+  const runDir = outDir || path.join(os.homedir(), '.kolm', 'gad-runs',
+    `gad_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+  fs.mkdirSync(runDir, { recursive: true });
+
+  const t = resolveGadTrainer();
+  if (!t) {
+    return {
+      ok: true,
+      deferred: true,
+      kind: 'distill_gad',
+      objective: GAD_OBJECTIVE,
+      num_rollouts: numRollouts,
+      num_teacher_refs: numTeacherRefs,
+      discriminator_steps: discriminatorSteps,
+      run_dir: runDir,
+      trainer_kicked: false,
+      error: 'no_trainer_installed',
+      install_hint: GAD_INSTALL_HINT,
+    };
+  }
+
+  const args = [
+    t.script,
+    '--prompts', promptsPath,
+    '--student', studentPath,
+    '--out', runDir,
+    '--num-rollouts', String(numRollouts),
+    '--num-teacher-refs', String(numTeacherRefs),
+    '--discriminator-steps', String(discriminatorSteps),
+    '--discriminator-lr', String(discriminatorLr),
+    '--learning-rate', String(learningRate),
+    '--reward-temperature', String(rewardTemperature),
+    '--collapse-penalty', String(collapsePenalty),
+    '--temperature', String(temperature),
+    '--max-completion-length', String(maxCompletionLength),
+    '--max-steps', String(maxSteps),
+    '--namespace', namespace,
+    '--tenant', tenant_id,
+  ];
+  if (studentBase) args.push('--student-base', studentBase);
+
+  let result;
+  try {
+    result = spawnSync(_pythonBin(), args, { stdio: 'pipe', timeout: timeoutMs });
+  } catch (e) {
+    return { ok: false, error: 'trainer_spawn_failed', detail: e.message, run_dir: runDir };
+  }
+  const stdout = (result.stdout || '').toString('utf8');
+  const stderr = (result.stderr || '').toString('utf8');
+  if (result.status !== 0) {
+    return {
+      ok: false,
+      error: result.status === null ? 'trainer_timeout' : 'trainer_failed',
+      exit_code: result.status,
+      objective: GAD_OBJECTIVE,
+      run_dir: runDir,
+      stdout: stdout.slice(-2000),
+      stderr: stderr.slice(-2000),
+    };
+  }
+  let manifest = null;
+  const manifestPath = path.join(runDir, 'run-meta.json');
+  if (fs.existsSync(manifestPath)) {
+    try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); } catch (_) { /* tolerate */ }
+  }
+  return {
+    ok: true,
+    kind: 'distill_gad',
+    objective: GAD_OBJECTIVE,
+    num_rollouts: numRollouts,
+    num_teacher_refs: numTeacherRefs,
+    discriminator_steps: discriminatorSteps,
+    run_dir: runDir,
+    manifest,
+    stdout: stdout.slice(-2000),
+  };
+}
+
 export default {
   doctor,
   trainOnPolicy,
@@ -483,4 +697,10 @@ export default {
   doctorRopd,
   buildRopdPromptsJsonl,
   trainRopd,
+  // W956 GAD black-box minimax surface (additive).
+  GAD_OBJECTIVE,
+  resolveGadTrainer,
+  doctorGad,
+  buildGadPromptsJsonl,
+  trainGad,
 };
