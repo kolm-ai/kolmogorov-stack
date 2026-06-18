@@ -40,7 +40,270 @@
 // torch, transformers, llama.cpp bindings, etc. The puller is a
 // node:https stream + crypto.createHash. Stays in default install.
 
+import crypto from 'node:crypto';
+import { buildSignatureBlock as buildEd25519Block, verifySignatureBlock as verifyEd25519Block } from './ed25519.js';
+
 export const TIERS = ['edge', 'mobile', 'laptop', 'workstation', 'datacenter'];
+export const MODEL_WEIGHT_ARTIFACT_MANIFEST_SCHEMA = 'kolm.model_weight_artifact_manifest.v1';
+export const MODEL_WEIGHT_ARTIFACT_SIGNATURE_SPEC = 'kolm-model-weight-artifact-manifest-ed25519-v1';
+export const MODEL_WEIGHT_ARTIFACT_MANIFEST_FILENAME = 'model.weight.manifest.json';
+
+const SHA256_RE = /^[0-9a-f]{64}$/;
+const SUPPORTED_WEIGHT_ARTIFACT_FORMATS = new Set([
+  'gguf',
+  'mlc',
+  'onnx',
+  'wasm',
+  'safetensors',
+  'tokenizer',
+  'config',
+  'native',
+  'other',
+]);
+const SUPPORTED_WEIGHT_RUNTIME_TARGETS = new Set([
+  'llama.cpp',
+  'llama.cpp-webgpu',
+  'webllm',
+  'onnxruntime-node',
+  'onnxruntime-web',
+  'webgpu',
+  'native',
+  'mlc',
+]);
+
+function canonicalJson(v) {
+  if (v === null || typeof v !== 'object') return JSON.stringify(v);
+  if (Array.isArray(v)) return '[' + v.map(canonicalJson).join(',') + ']';
+  const k = Object.keys(v).sort();
+  return '{' + k.map(x => JSON.stringify(x) + ':' + canonicalJson(v[x])).join(',') + '}';
+}
+
+function sha256Hex(input) {
+  return crypto.createHash('sha256').update(input).digest('hex');
+}
+
+function normalizeArtifactPath(p) {
+  const s = String(p || '').replace(/\\/g, '/').replace(/^\.\/+/, '');
+  if (!s) throw new Error('weight artifact file path is required');
+  if (s.startsWith('/') || /^[A-Za-z]:\//.test(s)) {
+    throw new Error(`weight artifact file path must be relative, got ${JSON.stringify(p)}`);
+  }
+  if (s.split('/').some((part) => part === '..' || part === '')) {
+    throw new Error(`weight artifact file path cannot contain empty or .. segments: ${JSON.stringify(p)}`);
+  }
+  if (/[\x00-\x1f\x7f]/.test(s)) {
+    throw new Error(`weight artifact file path contains control characters: ${JSON.stringify(p)}`);
+  }
+  return s;
+}
+
+function inferArtifactFormat(file) {
+  const path = String(file.path || file.filename || '').toLowerCase();
+  const explicit = file.format ? String(file.format).toLowerCase() : null;
+  if (explicit && SUPPORTED_WEIGHT_ARTIFACT_FORMATS.has(explicit)) return explicit;
+  if (path.endsWith('.gguf')) return 'gguf';
+  if (path.endsWith('.onnx')) return 'onnx';
+  if (path.endsWith('.wasm')) return 'wasm';
+  if (path.endsWith('.safetensors')) return 'safetensors';
+  if (path.endsWith('.json')) {
+    if (path.includes('tokenizer')) return 'tokenizer';
+    return 'config';
+  }
+  if (path.endsWith('.bin') || path.includes('-mlc/') || path.includes('_mlc/')) return 'mlc';
+  return 'other';
+}
+
+function runtimeTargetsForFormat(format) {
+  if (format === 'gguf') return ['llama.cpp', 'llama.cpp-webgpu'];
+  if (format === 'onnx') return ['onnxruntime-node', 'onnxruntime-web'];
+  if (format === 'mlc') return ['webllm', 'mlc'];
+  if (format === 'wasm') return ['webgpu'];
+  if (format === 'native') return ['native'];
+  return [];
+}
+
+function normalizeRuntimeTargets(targets, files = []) {
+  const inferred = [];
+  for (const file of files) {
+    for (const t of runtimeTargetsForFormat(file.format || inferArtifactFormat(file))) inferred.push(t);
+  }
+  const all = [...(Array.isArray(targets) ? targets : []), ...inferred]
+    .map((t) => String(t || '').trim())
+    .filter(Boolean);
+  const deduped = Array.from(new Set(all));
+  for (const t of deduped) {
+    if (!SUPPORTED_WEIGHT_RUNTIME_TARGETS.has(t)) {
+      throw new Error(`unsupported weight runtime target ${JSON.stringify(t)}`);
+    }
+  }
+  return deduped.sort();
+}
+
+export function normalizeWeightArtifactFile(file) {
+  if (!file || typeof file !== 'object') {
+    throw new Error('weight artifact file must be an object');
+  }
+  const path = normalizeArtifactPath(file.path || file.filename);
+  const bytes = Number(file.bytes);
+  if (!Number.isSafeInteger(bytes) || bytes <= 0) {
+    throw new Error(`weight artifact file ${path} requires positive integer bytes`);
+  }
+  const sha256 = String(file.sha256 || '').toLowerCase();
+  if (!SHA256_RE.test(sha256)) {
+    throw new Error(`weight artifact file ${path} requires lowercase 64-hex sha256`);
+  }
+  const format = inferArtifactFormat({ ...file, path });
+  const role = String(file.role || (format === 'wasm' ? 'model_lib' : 'weights'));
+  const row = {
+    path,
+    bytes,
+    sha256,
+    format,
+    role,
+  };
+  const runtimeTargets = normalizeRuntimeTargets(file.runtime_targets || [], [row]);
+  if (runtimeTargets.length) row.runtime_targets = runtimeTargets;
+  if (file.source_url) row.source_url = String(file.source_url);
+  if (file.source_revision) row.source_revision = String(file.source_revision);
+  return row;
+}
+
+export function hashWeightArtifactFiles(files) {
+  const rows = (files || []).map(normalizeWeightArtifactFile).sort((a, b) => a.path.localeCompare(b.path));
+  return sha256Hex(canonicalJson(rows.map((f) => ({
+    path: f.path,
+    bytes: f.bytes,
+    sha256: f.sha256,
+    format: f.format,
+    role: f.role,
+    runtime_targets: f.runtime_targets || [],
+    source_url: f.source_url || null,
+    source_revision: f.source_revision || null,
+  }))));
+}
+
+export function buildModelWeightArtifactManifest({
+  artifact_id,
+  model_id,
+  variant,
+  runtime_targets,
+  files,
+  source,
+  created_at,
+  policy,
+} = {}) {
+  const normalizedFiles = (files || []).map(normalizeWeightArtifactFile).sort((a, b) => a.path.localeCompare(b.path));
+  if (normalizedFiles.length === 0) {
+    throw new Error('model weight artifact manifest requires at least one file');
+  }
+  const targets = normalizeRuntimeTargets(runtime_targets || [], normalizedFiles);
+  if (targets.length === 0) {
+    throw new Error('model weight artifact manifest requires at least one runtime target');
+  }
+  const totalBytes = normalizedFiles.reduce((a, f) => a + f.bytes, 0);
+  const weightsSha256 = hashWeightArtifactFiles(normalizedFiles);
+  return {
+    schema: MODEL_WEIGHT_ARTIFACT_MANIFEST_SCHEMA,
+    artifact_id: String(artifact_id || `${model_id || 'unknown'}:${variant || 'default'}`),
+    model_id: String(model_id || 'unknown'),
+    variant: String(variant || 'default'),
+    runtime_targets: targets,
+    source: source && typeof source === 'object' ? { ...source } : null,
+    created_at: created_at || new Date().toISOString(),
+    file_count: normalizedFiles.length,
+    total_bytes: totalBytes,
+    weights_sha256: weightsSha256,
+    files: normalizedFiles,
+    policy: {
+      require_signature: policy?.require_signature !== false,
+      no_unsigned_auto_fetch: policy?.no_unsigned_auto_fetch !== false,
+      ...(policy?.cache_backend ? { cache_backend: String(policy.cache_backend) } : {}),
+    },
+  };
+}
+
+export function canonicalModelWeightArtifactManifest(manifest) {
+  if (!manifest || typeof manifest !== 'object') {
+    throw new Error('model weight artifact manifest must be an object');
+  }
+  const files = (manifest.files || []).map(normalizeWeightArtifactFile).sort((a, b) => a.path.localeCompare(b.path));
+  const signed = {
+    schema: manifest.schema,
+    artifact_id: manifest.artifact_id,
+    model_id: manifest.model_id,
+    variant: manifest.variant,
+    runtime_targets: normalizeRuntimeTargets(manifest.runtime_targets || [], files),
+    source: manifest.source || null,
+    created_at: manifest.created_at,
+    file_count: files.length,
+    total_bytes: files.reduce((a, f) => a + f.bytes, 0),
+    weights_sha256: hashWeightArtifactFiles(files),
+    files,
+    policy: manifest.policy || null,
+    signature_spec: MODEL_WEIGHT_ARTIFACT_SIGNATURE_SPEC,
+  };
+  return canonicalJson(signed);
+}
+
+export function signModelWeightArtifactManifest(manifest, signer, opts = {}) {
+  if (!signer || !signer.privateKey || !signer.publicKey) {
+    throw new Error('signModelWeightArtifactManifest requires an Ed25519 signer');
+  }
+  const payloadCanonical = canonicalModelWeightArtifactManifest(manifest);
+  return {
+    ...manifest,
+    signature_spec: MODEL_WEIGHT_ARTIFACT_SIGNATURE_SPEC,
+    signature_ed25519: buildEd25519Block({
+      privateKey: signer.privateKey,
+      publicKey: signer.publicKey,
+      key_fingerprint: signer.key_fingerprint,
+      payloadCanonical,
+      signed_at: opts.signed_at || manifest.created_at || new Date().toISOString(),
+    }),
+  };
+}
+
+export function verifyModelWeightArtifactManifest(manifest, opts = {}) {
+  try {
+    if (!manifest || typeof manifest !== 'object') return { ok: false, reason: 'manifest missing' };
+    if (manifest.schema !== MODEL_WEIGHT_ARTIFACT_MANIFEST_SCHEMA) {
+      return { ok: false, reason: `unexpected schema ${JSON.stringify(manifest.schema)}` };
+    }
+    const files = (manifest.files || []).map(normalizeWeightArtifactFile).sort((a, b) => a.path.localeCompare(b.path));
+    if (files.length === 0) return { ok: false, reason: 'files missing' };
+    const runtimeTargets = normalizeRuntimeTargets(manifest.runtime_targets || [], files);
+    if (runtimeTargets.length === 0) return { ok: false, reason: 'runtime_targets missing' };
+    const totalBytes = files.reduce((a, f) => a + f.bytes, 0);
+    if (manifest.file_count !== files.length) return { ok: false, reason: 'file_count mismatch' };
+    if (manifest.total_bytes !== totalBytes) return { ok: false, reason: 'total_bytes mismatch' };
+    const expectedWeights = hashWeightArtifactFiles(files);
+    if (manifest.weights_sha256 !== expectedWeights) return { ok: false, reason: 'weights_sha256 mismatch' };
+    if (opts.require_signature || manifest.policy?.require_signature === true) {
+      if (manifest.signature_spec !== MODEL_WEIGHT_ARTIFACT_SIGNATURE_SPEC) {
+        return { ok: false, reason: 'signature_spec missing or unexpected' };
+      }
+      const sig = verifyEd25519Block(manifest.signature_ed25519, canonicalModelWeightArtifactManifest(manifest));
+      if (!sig.ok) return { ok: false, reason: `signature invalid: ${sig.reason}` };
+    }
+    return {
+      ok: true,
+      file_count: files.length,
+      total_bytes: totalBytes,
+      weights_sha256: expectedWeights,
+      runtime_targets: runtimeTargets,
+    };
+  } catch (e) {
+    return { ok: false, reason: String(e.message || e) };
+  }
+}
+
+export function serializeModelWeightArtifactManifest(manifest) {
+  return JSON.stringify(manifest, null, 2);
+}
+
+export function hashModelWeightArtifactManifest(manifest) {
+  return sha256Hex(Buffer.from(serializeModelWeightArtifactManifest(manifest), 'utf8'));
+}
 
 // Convenience: bytes to human.
 export function fmtBytes(n) {
@@ -523,9 +786,20 @@ export function coverageReport(frontierIds, candidateIds) {
 
 export default {
   TIERS,
+  MODEL_WEIGHT_ARTIFACT_MANIFEST_SCHEMA,
+  MODEL_WEIGHT_ARTIFACT_SIGNATURE_SPEC,
+  MODEL_WEIGHT_ARTIFACT_MANIFEST_FILENAME,
   ALL_VARIANTS,
   fmtBytes,
   hfResolveUrl,
+  normalizeWeightArtifactFile,
+  hashWeightArtifactFiles,
+  buildModelWeightArtifactManifest,
+  canonicalModelWeightArtifactManifest,
+  signModelWeightArtifactManifest,
+  verifyModelWeightArtifactManifest,
+  serializeModelWeightArtifactManifest,
+  hashModelWeightArtifactManifest,
   variantsFor,
   getVariant,
   tierTotalBytes,

@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 411,
+    "orphan_tests": 412,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 414,
+    "state_local_green": 415,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 591,
-    "test_only_waves": 411,
-    "waves": 427
+    "test_files": 592,
+    "test_only_waves": 412,
+    "waves": 428
   },
-  "generated_at": "2026-06-18T22:21:02.704Z",
+  "generated_at": "2026-06-18T22:51:53.018Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -491,7 +491,8 @@
       "W957",
       "W958",
       "W959",
-      "W966"
+      "W966",
+      "W967"
     ],
     "plan_only_waves": [
       "W850",
@@ -911,7 +912,8 @@
       "W957",
       "W958",
       "W959",
-      "W966"
+      "W966",
+      "W967"
     ]
   },
   "schema": "kolm.wave_registry.v1",
@@ -3671,7 +3673,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js tests/wave967-model-weight-artifact-binding.test.js",
           "script": "npm:verify:ondevice"
         }
       ],
@@ -4425,7 +4427,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js tests/wave967-model-weight-artifact-binding.test.js",
           "script": "npm:verify:ondevice"
         }
       ],
@@ -8040,7 +8042,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js tests/wave967-model-weight-artifact-binding.test.js",
           "script": "npm:verify:ondevice"
         }
       ],
@@ -8067,6 +8069,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave966-mcp-tool-contract-pinning.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W967",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js tests/wave967-model-weight-artifact-binding.test.js",
+          "script": "npm:verify:ondevice"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave967-model-weight-artifact-binding.test.js"
       ],
       "test_letter_suffixes": []
     }

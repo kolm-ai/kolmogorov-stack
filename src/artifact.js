@@ -71,7 +71,15 @@ import { computeKScore as computeKScoreFromKscoreModule } from './kscore.js';
 // Stricter-only + fail-closed: can never flip ships=false -> true.
 import { conformalBoundedGate } from './kscore-gate-harness.js';
 import { verifyAttestation, manifestBlock as ccManifestBlock, STATES as CC_STATES } from './confidential-compute.js';
-import { loadSignerKeyFromEnv as loadEd25519SignerFromEnv, loadOrCreateDefaultSigner as loadEd25519DefaultSigner, buildSignatureBlock as buildEd25519Block } from './ed25519.js';
+import { loadOrCreateDefaultSigner as loadEd25519DefaultSigner, buildSignatureBlock as buildEd25519Block } from './ed25519.js';
+import {
+  MODEL_WEIGHT_ARTIFACT_MANIFEST_FILENAME,
+  buildModelWeightArtifactManifest,
+  hashModelWeightArtifactManifest,
+  serializeModelWeightArtifactManifest,
+  signModelWeightArtifactManifest,
+  verifyModelWeightArtifactManifest,
+} from './model-weights-manifest.js';
 // Model-signing sidecars (model-signing-standards). emitArtifactAttestation
 // writes a signed SLSA Provenance v1 DSSE envelope; toOmsArtifactManifest writes
 // an OpenSSF Model-Signing (OMS) file manifest. Both seal over the ACTUAL
@@ -234,6 +242,14 @@ function digestFilePair(absPath) {
   } finally {
     fs.closeSync(fd);
   }
+}
+
+function modelWeightRuntimeTargets(runtimeTarget) {
+  if (runtimeTarget === 'gguf') return ['llama.cpp', 'llama.cpp-webgpu'];
+  if (runtimeTarget === 'onnx') return ['onnxruntime-node', 'onnxruntime-web'];
+  if (runtimeTarget === 'wasm') return ['webgpu'];
+  if (runtimeTarget === 'native') return ['native'];
+  return [];
 }
 
 // W367 - recipe.bundle.mjs builder. Wraps each rule recipe's source body
@@ -453,6 +469,12 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   const secret = requireSignSecret();
   const repro = reproducibleBuildContext({ source_date_epoch, reproducible_build });
   const buildTimestamp = repro.enabled ? repro.timestamp : new Date().toISOString();
+  let ed25519Signer = null;
+  try {
+    ed25519Signer = loadEd25519DefaultSigner();
+  } catch (e) {
+    console.error(`[artifact] WARNING: ed25519 signer load skipped: ${e.message}`);
+  }
   // W252 - K-score ship gate is load-bearing. If a K-score is supplied AND
   // it says ships=false, the builder must refuse unless the caller explicitly
   // passes allow_below_gate=true (which gets stamped on the manifest so the
@@ -1024,6 +1046,44 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       bytes: model_weights.content.length,
     };
   }
+  let _modelWeightArtifactManifest = null;
+  let _modelWeightArtifactManifestJson = null;
+  if (_modelWeightsRecord && ['gguf', 'onnx', 'wasm', 'native'].includes(_runtimeTargetDeclared)) {
+    const unsignedWeightManifest = buildModelWeightArtifactManifest({
+      artifact_id: `${job_id}:${_modelWeightsRecord.filename}`,
+      model_id: base_model || 'unknown',
+      variant: _runtimeTargetDeclared,
+      runtime_targets: modelWeightRuntimeTargets(_runtimeTargetDeclared),
+      files: [{
+        path: _modelWeightsRecord.filename,
+        bytes: _modelWeightsRecord.bytes,
+        sha256: _modelWeightsRecord.sha256,
+        format: _runtimeTargetDeclared,
+        role: _runtimeTargetDeclared === 'wasm' ? 'model_lib' : 'weights',
+      }],
+      source: {
+        kind: 'kolm-artifact',
+        job_id,
+        runtime_target: _runtimeTargetDeclared,
+        declared_path: _modelWeightsRecord.filename,
+      },
+      created_at: buildTimestamp,
+      policy: {
+        require_signature: process.env.KOLM_ED25519_DISABLE !== '1',
+        no_unsigned_auto_fetch: true,
+      },
+    });
+    _modelWeightArtifactManifest = ed25519Signer
+      ? signModelWeightArtifactManifest(unsignedWeightManifest, ed25519Signer, { signed_at: buildTimestamp })
+      : unsignedWeightManifest;
+    const weightManifestCheck = verifyModelWeightArtifactManifest(_modelWeightArtifactManifest, {
+      require_signature: process.env.KOLM_ED25519_DISABLE !== '1',
+    });
+    if (!weightManifestCheck.ok) {
+      throw new Error(`model weight artifact manifest invalid: ${weightManifestCheck.reason}`);
+    }
+    _modelWeightArtifactManifestJson = serializeModelWeightArtifactManifest(_modelWeightArtifactManifest);
+  }
   // W457 - model_pointer is the legacy pointer-only document (no real
   // weights). Suppressed entirely when a real model_weights bundle was
   // supplied - the bundled weights are the source of truth, the pointer
@@ -1110,6 +1170,9 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // manifest.runtime_target + runtime_target_config[<target>_path] to locate
   // the entry, hashes the bytes, and refuses to pass when sha256 drifts.
   if (_modelWeightsRecord) hashes.model_weights = _modelWeightsRecord.sha256;
+  if (_modelWeightArtifactManifest) {
+    hashes.model_weight_artifact_manifest = hashModelWeightArtifactManifest(_modelWeightArtifactManifest);
+  }
   // Wave 144 - extra files (e.g. tokenizer.json) ride inside the .kolm zip.
   // Each gets a hash in manifest.hashes.extra_files keyed by filename, and the
   // canonical hash-of-extra-files folds into artifact_hash_input so tampering
@@ -1321,6 +1384,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
     runtime_target: _runtimeTargetDeclared,
     runtime_target_config: _runtimeTargetConfig,
     entrypoint: _entrypoint,
+    ...(_modelWeightArtifactManifest ? { model_weight_artifact_manifest: _modelWeightArtifactManifest } : {}),
     artifact_class: _finalClass,
     // Wave 151 - per-class recipe count surfaces "we have 6 rule recipes and
     // 1 distilled-model recipe" without forcing readers to parse recipes.json.
@@ -1887,6 +1951,9 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   if (_modelWeightsRecord) {
     artifact_hash_input.model_weights_hash = _modelWeightsRecord.sha256;
   }
+  if (_modelWeightArtifactManifest) {
+    artifact_hash_input.model_weight_artifact_manifest_hash = hashes.model_weight_artifact_manifest;
+  }
   const artifact_hash = sha256(canonicalJson(artifact_hash_input));
 
   // Build the HMAC chain. Each step seals the previous step's output.
@@ -2023,12 +2090,6 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // compute Ed25519 over canonical(body INCLUDING HMAC signature) → add
   // `signature_ed25519` block. The verifier strips `signature_ed25519`
   // and `signature` independently and re-canonicalizes both.
-  let ed25519Signer = null;
-  try {
-    ed25519Signer = loadEd25519DefaultSigner();
-  } catch (e) {
-    console.error(`[artifact] WARNING: ed25519 signer load skipped: ${e.message}`);
-  }
   // Wave 150 - sigstore (cosign-compatible) bundle is layered on top of
   // Ed25519 when both the Ed25519 signer is present AND sigstore is not
   // explicitly disabled. signature_alg upgrades to reflect every active
@@ -2175,6 +2236,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       throw new Error(`model_weights.filename=${JSON.stringify(_modelWeightsRecord.filename)} does not match declared path ${JSON.stringify(_expectedPath)}; the verifier would refuse the bundle`);
     }
     files.push({ filename: _modelWeightsRecord.filename, content: _modelWeightsRecord.content });
+    files.push({ filename: MODEL_WEIGHT_ARTIFACT_MANIFEST_FILENAME, content: Buffer.from(_modelWeightArtifactManifestJson, 'utf8') });
   } else if (['gguf', 'onnx', 'wasm', 'native'].includes(_runtimeTargetDeclared)) {
     // W457 - runtime_target declared a weight class but no model_weights was
     // supplied. This is the honest-failure path: the verifier would refuse the
@@ -2195,7 +2257,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
   // Wave 144 - append extra files (e.g. tokenizer.json) last so they don't
   // shift offsets of the load-bearing files above. Filename collisions with
   // the reserved set would silently shadow; we guard here.
-  const RESERVED_FILENAMES = new Set(['manifest.json', 'recipes.json', 'signature.sig', 'evals.json', 'receipt.json', 'credential.json', 'model.gguf', 'lora.bin', 'index.sqlite-vec', 'workflow_ir.json', 'attestation_report.json', 'recipe.bundle.mjs', 'provenance.intoto.dsse.json', 'model.sig.bundle']);
+  const RESERVED_FILENAMES = new Set(['manifest.json', 'recipes.json', 'signature.sig', 'evals.json', 'receipt.json', 'credential.json', 'model.gguf', 'lora.bin', 'index.sqlite-vec', 'workflow_ir.json', 'attestation_report.json', 'recipe.bundle.mjs', MODEL_WEIGHT_ARTIFACT_MANIFEST_FILENAME, 'provenance.intoto.dsse.json', 'model.sig.bundle']);
   // W457 - also reserve the bundled model_weights filename so an extra_files
   // entry can't silently shadow real weights with a tampered payload.
   if (_modelWeightsRecord) RESERVED_FILENAMES.add(_modelWeightsRecord.filename);

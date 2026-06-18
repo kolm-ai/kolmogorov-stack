@@ -22,7 +22,20 @@ import http from 'node:http';
 import crypto from 'node:crypto';
 import { URL } from 'node:url';
 
-import { ALL_VARIANTS, getVariant, hfResolveUrl, fmtBytes, variantsFor, listVariantsByTier } from './model-weights-manifest.js';
+import {
+  ALL_VARIANTS,
+  MODEL_WEIGHT_ARTIFACT_MANIFEST_FILENAME,
+  buildModelWeightArtifactManifest,
+  fmtBytes,
+  getVariant,
+  hashModelWeightArtifactManifest,
+  hfResolveUrl,
+  serializeModelWeightArtifactManifest,
+  signModelWeightArtifactManifest,
+  variantsFor,
+  listVariantsByTier,
+} from './model-weights-manifest.js';
+import { loadOrCreateDefaultSigner as loadEd25519DefaultSigner } from './ed25519.js';
 
 const DEFAULT_USER_AGENT = 'kolm.ai/W386-model-prefetch';
 const DEFAULT_TIMEOUT_MS = 60_000;
@@ -69,11 +82,37 @@ export function cacheKey(model_id, variant, file_path) {
   return `${model_id}::${variant}::${file_path}`;
 }
 
+export function variantCacheKey(model_id, variant) {
+  return `${model_id}::${variant}`;
+}
+
 // Local on-disk path for a manifest file. We slugify the repo so different
 // fallback repos for the same model_id don't stomp.
 export function localPathFor(cacheDir, row, file) {
   const slug = (row.model_id + '__' + row.variant).replace(/[^A-Za-z0-9._-]+/g, '_');
   return path.join(cacheDir, slug, path.basename(file.path));
+}
+
+export function artifactManifestPathFor(cacheDir, row) {
+  const slug = (row.model_id + '__' + row.variant).replace(/[^A-Za-z0-9._-]+/g, '_');
+  return path.join(cacheDir, slug, MODEL_WEIGHT_ARTIFACT_MANIFEST_FILENAME);
+}
+
+export function sha256File(filePath) {
+  const h = crypto.createHash('sha256');
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    const CHUNK = 1024 * 1024;
+    const buf = Buffer.alloc(CHUNK);
+    while (true) {
+      const read = fs.readSync(fd, buf, 0, CHUNK, null);
+      if (read <= 0) break;
+      h.update(buf.subarray(0, read));
+    }
+    return h.digest('hex');
+  } finally {
+    fs.closeSync(fd);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -184,10 +223,16 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
   if (fs.existsSync(dest)) {
     const sz = fs.statSync(dest).size;
     if (file.bytes && sz === file.bytes) {
-      return { ok: true, bytes: sz, path: dest, resumed: false, already_cached: true };
+      const cachedSha = sha256File(dest);
+      if (file.sha256 && cachedSha !== file.sha256) {
+        try { fs.unlinkSync(dest); } catch (_) {} // deliberate: cleanup
+      } else {
+        return { ok: true, bytes: sz, sha256: cachedSha, path: dest, resumed: false, already_cached: true };
+      }
+    } else {
+      // Size mismatch - re-download.
+      try { fs.unlinkSync(dest); } catch (_) {} // deliberate: cleanup
     }
-    // Size mismatch - re-download.
-    try { fs.unlinkSync(dest); } catch (_) {} // deliberate: cleanup
   }
 
   // Resume?
@@ -197,7 +242,12 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
     if (file.bytes && already >= file.bytes) {
       // Treat as complete, just promote.
       fs.renameSync(part, dest);
-      return { ok: true, bytes: already, path: dest, resumed: true, already_cached: false };
+      const promotedSha = sha256File(dest);
+      if (file.sha256 && promotedSha !== file.sha256) {
+        try { fs.unlinkSync(dest); } catch (_) {} // deliberate: cleanup
+        throw new Error(`sha256_mismatch expected=${file.sha256} actual=${promotedSha}`);
+      }
+      return { ok: true, bytes: already, sha256: promotedSha, path: dest, resumed: true, already_cached: false };
     }
   }
 
@@ -207,7 +257,12 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
   if (r.statusCode === 416) {
     // Range not satisfiable - server says we've already got the whole thing.
     fs.renameSync(part, dest);
-    return { ok: true, bytes: already, path: dest, resumed: true, already_cached: false };
+    const promotedSha = sha256File(dest);
+    if (file.sha256 && promotedSha !== file.sha256) {
+      try { fs.unlinkSync(dest); } catch (_) {} // deliberate: cleanup
+      throw new Error(`sha256_mismatch expected=${file.sha256} actual=${promotedSha}`);
+    }
+    return { ok: true, bytes: already, sha256: promotedSha, path: dest, resumed: true, already_cached: false };
   }
   if (r.statusCode < 200 || r.statusCode >= 300) {
     r.res.resume();
@@ -237,11 +292,10 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
     let bytesDone = already;
     let lastProgress = 0;
     const hash = crypto.createHash('sha256');
-    // sha256 only verifiable when we DOWNLOADED the full file (not a resume).
-    const verifySha = !!file.sha256 && already === 0;
+    const canUseStreamHash = already === 0;
 
     r.res.on('data', (chunk) => {
-      if (verifySha) hash.update(chunk);
+      if (canUseStreamHash) hash.update(chunk);
       bytesDone += chunk.length;
       const since = bytesDone - lastProgress;
       if (onProgress && since > 256 * 1024) {
@@ -256,18 +310,63 @@ export async function pullFile({ row, file, cacheDir, onProgress, timeoutMs }) {
     r.res.pipe(ws);
     ws.on('finish', () => {
       if (onProgress) try { onProgress({ bytes_done: bytesDone, bytes_total: totalLen, file: file.path }); } catch (_) {} // deliberate: cleanup
-      if (verifySha) {
-        const actual = hash.digest('hex');
-        if (actual !== file.sha256) {
-          try { fs.unlinkSync(part); } catch (_) {} // deliberate: cleanup
+      try { fs.renameSync(part, dest); } catch (e) { return reject(e); }
+      let actual;
+      try {
+        actual = canUseStreamHash ? hash.digest('hex') : sha256File(dest);
+        if (file.sha256 && actual !== file.sha256) {
+          try { fs.unlinkSync(dest); } catch (_) {} // deliberate: cleanup
           return reject(new Error(`sha256_mismatch expected=${file.sha256} actual=${actual}`));
         }
+      } catch (e) {
+        return reject(e);
       }
-      try { fs.renameSync(part, dest); } catch (e) { return reject(e); }
-      resolve({ ok: true, bytes: bytesDone, path: dest, resumed: already > 0, already_cached: false });
+      resolve({ ok: true, bytes: bytesDone, sha256: actual, path: dest, resumed: already > 0, already_cached: false });
     });
     ws.on('error', (e) => reject(e));
   });
+}
+
+export function buildPulledWeightArtifactManifest({ row, files, downloaded_at, sign = true } = {}) {
+  if (!row || typeof row !== 'object') throw new Error('buildPulledWeightArtifactManifest requires a manifest row');
+  const pulled = (files || []).filter((f) => f && f.ok !== false);
+  if (pulled.length === 0) throw new Error('buildPulledWeightArtifactManifest requires pulled file rows');
+  const manifest = buildModelWeightArtifactManifest({
+    artifact_id: variantCacheKey(row.model_id, row.variant),
+    model_id: row.model_id,
+    variant: row.variant,
+    files: pulled.map((f) => ({
+      path: f.file,
+      bytes: f.bytes,
+      sha256: f.sha256,
+      source_url: hfResolveUrl(row.hf_repo, row.hf_revision, f.file),
+      source_revision: row.hf_revision,
+    })),
+    source: {
+      kind: 'huggingface-resolve',
+      hf_repo: row.hf_repo,
+      hf_revision: row.hf_revision,
+      manifest_row_tier: row.tier,
+    },
+    created_at: downloaded_at || new Date().toISOString(),
+    policy: { require_signature: process.env.KOLM_ED25519_DISABLE !== '1', no_unsigned_auto_fetch: true },
+  });
+  if (!sign || process.env.KOLM_ED25519_DISABLE === '1') return manifest;
+  const signer = loadEd25519DefaultSigner();
+  return signModelWeightArtifactManifest(manifest, signer, { signed_at: manifest.created_at });
+}
+
+export function savePulledWeightArtifactManifest(cacheDir, row, artifactManifest) {
+  const manifestPath = artifactManifestPathFor(cacheDir, row);
+  fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
+  const tmp = manifestPath + '.tmp';
+  const json = serializeModelWeightArtifactManifest(artifactManifest);
+  fs.writeFileSync(tmp, json);
+  fs.renameSync(tmp, manifestPath);
+  return {
+    path: manifestPath,
+    sha256: hashModelWeightArtifactManifest(artifactManifest),
+  };
 }
 
 // Pull an entire variant (all files). Updates the on-disk cache index.
@@ -284,10 +383,11 @@ export async function pullVariant({ row, cacheDir, onProgress, probe = true, tim
   }
   const files = [];
   let totalBytes = 0;
+  const downloadedAt = new Date().toISOString();
   for (const f of row.files) {
     try {
       const res = await pullFile({ row, file: f, cacheDir, onProgress, timeoutMs });
-      files.push({ file: f.path, ok: true, bytes: res.bytes, already_cached: res.already_cached, path: res.path });
+      files.push({ file: f.path, ok: true, bytes: res.bytes, sha256: res.sha256, already_cached: res.already_cached, path: res.path });
       totalBytes += res.bytes;
       // Re-read index just before write so we merge with any concurrent
       // worker's updates instead of clobbering them (prefetch concurrency=3+).
@@ -298,8 +398,8 @@ export async function pullVariant({ row, cacheDir, onProgress, probe = true, tim
         file: f.path,
         bytes: res.bytes,
         path: res.path,
-        sha256: f.sha256 || null,
-        downloaded_at: new Date().toISOString(),
+        sha256: res.sha256 || f.sha256 || null,
+        downloaded_at: downloadedAt,
       };
       saveIndex(cacheDir, idx);
     } catch (e) {
@@ -307,7 +407,36 @@ export async function pullVariant({ row, cacheDir, onProgress, probe = true, tim
       return { ok: false, files, total_bytes: totalBytes, reason: 'pull_failed', detail: e.message };
     }
   }
-  return { ok: true, files, total_bytes: totalBytes };
+  let artifactManifest = null;
+  let artifactManifestSaved = null;
+  try {
+    artifactManifest = buildPulledWeightArtifactManifest({ row, files, downloaded_at: downloadedAt });
+    artifactManifestSaved = savePulledWeightArtifactManifest(cacheDir, row, artifactManifest);
+    const idx = loadIndex(cacheDir);
+    if (!idx.artifact_manifests || typeof idx.artifact_manifests !== 'object') idx.artifact_manifests = {};
+    idx.artifact_manifests[variantCacheKey(row.model_id, row.variant)] = {
+      model_id: row.model_id,
+      variant: row.variant,
+      path: artifactManifestSaved.path,
+      sha256: artifactManifestSaved.sha256,
+      weights_sha256: artifactManifest.weights_sha256,
+      file_count: artifactManifest.file_count,
+      total_bytes: artifactManifest.total_bytes,
+      signed: !!artifactManifest.signature_ed25519,
+      updated_at: downloadedAt,
+    };
+    saveIndex(cacheDir, idx);
+  } catch (e) {
+    return { ok: false, files, total_bytes: totalBytes, reason: 'artifact_manifest_failed', detail: e.message };
+  }
+  return {
+    ok: true,
+    files,
+    total_bytes: totalBytes,
+    artifact_manifest: artifactManifest,
+    artifact_manifest_path: artifactManifestSaved.path,
+    artifact_manifest_sha256: artifactManifestSaved.sha256,
+  };
 }
 
 // List what is on disk. Returns array of {key, model_id, variant, file, bytes,
@@ -460,5 +589,10 @@ export default {
   cacheTotalBytes,
   clearCache,
   rescanCache,
+  variantCacheKey,
+  artifactManifestPathFor,
+  sha256File,
+  buildPulledWeightArtifactManifest,
+  savePulledWeightArtifactManifest,
   prefetchTier,
 };

@@ -23,6 +23,7 @@
     "mixed_precision_profile_hash",
     "mixed_precision_proof_hash",
     "model_pointer_hash",
+    "model_weight_artifact_manifest_hash",
     "model_weights_hash",
     "moe_hash",
     "output_schema_hash",
@@ -43,7 +44,7 @@
         "requireSignSecret",
         "RECIPE_RECEIPT_SECRET not set"
       ],
-      "line": 177,
+      "line": 185,
       "owner": "requireSignSecret",
       "phase": "sign_secret_resolution",
       "present": true
@@ -55,7 +56,7 @@
         "container magic mismatch",
         "container length mismatch"
       ],
-      "line": 147,
+      "line": 155,
       "owner": "decodeContainer",
       "phase": "pack_index_container_codec",
       "present": true
@@ -66,7 +67,7 @@
         "export default async function run",
         "RECIPES"
       ],
-      "line": 257,
+      "line": 273,
       "owner": "buildRecipeBundleMjs",
       "phase": "recipe_bundle_esm",
       "present": true
@@ -78,7 +79,7 @@
         "source_date_epoch",
         "zipDate"
       ],
-      "line": 364,
+      "line": 380,
       "owner": "reproducibleBuildContext",
       "phase": "reproducible_build_context",
       "present": true
@@ -89,7 +90,7 @@
         "rcpt_",
         "artifact_hash"
       ],
-      "line": 378,
+      "line": 394,
       "owner": "deterministicReceiptId",
       "phase": "deterministic_receipt_id",
       "present": true
@@ -111,7 +112,7 @@
         "contamination_impact_block",
         "corrected_below_gate"
       ],
-      "line": 512,
+      "line": 534,
       "owner": "contamination_impact_block",
       "phase": "contamination_impact_gate",
       "present": true
@@ -177,7 +178,7 @@
         "validateGuardrailRulesW736",
         "guardrails_hash"
       ],
-      "line": 83,
+      "line": 91,
       "owner": "validateOutputSchemaSpec",
       "phase": "output_schema_guardrails",
       "present": true
@@ -188,7 +189,7 @@
         "region_hash",
         "sustainability_badge"
       ],
-      "line": 452,
+      "line": 468,
       "owner": "parent_cid",
       "phase": "parent_region_sustainability",
       "present": true
@@ -210,7 +211,7 @@
         "runtime_target_config",
         "requires model_weights"
       ],
-      "line": 452,
+      "line": 468,
       "owner": "model_weights",
       "phase": "model_weights_runtime_target",
       "present": true
@@ -221,7 +222,7 @@
         "eval_source: 'self_generated'",
         "production_ready"
       ],
-      "line": 1147,
+      "line": 1210,
       "owner": "seed_provenance_block",
       "phase": "seed_provenance_honesty",
       "present": true
@@ -232,7 +233,7 @@
         "compiled_target_files",
         "target_toolchain_pin"
       ],
-      "line": 1253,
+      "line": 1316,
       "owner": "compiled_targets_block",
       "phase": "compiled_targets_manifest",
       "present": true
@@ -244,7 +245,7 @@
         "artifact_class",
         "hashes"
       ],
-      "line": 1306,
+      "line": 1369,
       "owner": "const manifest =",
       "phase": "manifest_core_fields",
       "present": true
@@ -267,7 +268,7 @@
         "stepSeal('task'",
         "stepSeal('package'"
       ],
-      "line": 1893,
+      "line": 1960,
       "owner": "stepSeal",
       "phase": "receipt_hmac_chain",
       "present": true
@@ -278,7 +279,7 @@
         "dataset_hash",
         "build_toolchain"
       ],
-      "line": 1955,
+      "line": 2022,
       "owner": "eventSourceHashes",
       "phase": "receipt_auditor_fields",
       "present": true
@@ -322,7 +323,7 @@
         "manifest.json",
         "recipe.bundle.mjs"
       ],
-      "line": 2198,
+      "line": 2260,
       "owner": "RESERVED_FILENAMES",
       "phase": "file_layout_reserved_slots",
       "present": true
@@ -333,7 +334,7 @@
         "model.sig.bundle",
         "toOmsArtifactManifest"
       ],
-      "line": 75,
+      "line": 83,
       "owner": "emitArtifactAttestation",
       "phase": "model_signing_sidecars",
       "present": true
@@ -344,7 +345,7 @@
         "fs.createReadStream",
         "z.finalize()"
       ],
-      "line": 2206,
+      "line": 2268,
       "owner": "packageArtifact",
       "phase": "zip_packaging_stream",
       "present": true
@@ -355,7 +356,7 @@
         "probeBytes",
         "Pass 2"
       ],
-      "line": 2322,
+      "line": 2384,
       "owner": "buildAndZip",
       "phase": "two_pass_kscore_zip",
       "present": true
@@ -366,7 +367,7 @@
         "cleanupOnFail",
         "fs.unlinkSync(p)"
       ],
-      "line": 2367,
+      "line": 2429,
       "owner": "cleanupOnFail",
       "phase": "outpath_preflight_cleanup",
       "present": true
@@ -377,7 +378,7 @@
         "requiresRekor",
         "rekor_log_entry"
       ],
-      "line": 82,
+      "line": 90,
       "owner": "attestArtifactWithRekor",
       "phase": "rekor_pinning_policy",
       "present": true
@@ -388,7 +389,7 @@
         "constantTimeEqualHex",
         "hmac mismatch"
       ],
-      "line": 2501,
+      "line": 2563,
       "owner": "verifyManifestSignature",
       "phase": "manifest_signature_verify",
       "present": true
@@ -399,7 +400,7 @@
         "./devices.js",
         "vram_gb"
       ],
-      "line": 2560,
+      "line": 2622,
       "owner": "verifyDeviceFit",
       "phase": "device_fit",
       "present": true
@@ -410,7 +411,7 @@
         "HETEROGENEOUS_WEIGHTS_VERSION",
         "present_modalities"
       ],
-      "line": 2659,
+      "line": 2721,
       "owner": "addHeterogeneousWeights",
       "phase": "heterogeneous_weights",
       "present": true
@@ -421,7 +422,7 @@
         "digestFilePair",
         "CHUNK"
       ],
-      "line": 195,
+      "line": 203,
       "owner": "sha256File",
       "phase": "large_file_hashing",
       "present": true
@@ -564,73 +565,73 @@
     {
       "async": false,
       "kind": "const",
-      "line": 119,
+      "line": 127,
       "name": "ARTIFACT_CLASSES"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 147,
+      "line": 155,
       "name": "decodePack"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 148,
+      "line": 156,
       "name": "decodeIndex"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 257,
+      "line": 273,
       "name": "buildRecipeBundleMjs"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 417,
+      "line": 433,
       "name": "computeKScore"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 452,
+      "line": 468,
       "name": "buildPayload"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 2285,
+      "line": 2347,
       "name": "packageArtifact"
     },
     {
       "async": true,
       "kind": "function",
-      "line": 2322,
+      "line": 2384,
       "name": "buildAndZip"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 2501,
+      "line": 2563,
       "name": "verifyManifestSignature"
     },
     {
       "async": true,
       "kind": "function",
-      "line": 2560,
+      "line": 2622,
       "name": "verifyDeviceFit"
     },
     {
       "async": false,
       "kind": "const",
-      "line": 2628,
+      "line": 2690,
       "name": "HETEROGENEOUS_WEIGHTS_VERSION"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 2662,
+      "line": 2724,
       "name": "addHeterogeneousWeights"
     }
   ],
@@ -639,181 +640,187 @@
     {
       "async": false,
       "exported": false,
-      "line": 126,
+      "line": 134,
       "name": "encodePack"
     },
     {
       "async": false,
       "exported": false,
-      "line": 135,
+      "line": 143,
       "name": "encodeIndex"
     },
     {
       "async": false,
       "exported": true,
-      "line": 147,
+      "line": 155,
       "name": "decodePack"
     },
     {
       "async": false,
       "exported": true,
-      "line": 148,
+      "line": 156,
       "name": "decodeIndex"
     },
     {
       "async": false,
       "exported": false,
-      "line": 149,
+      "line": 157,
       "name": "decodeContainer"
     },
     {
       "async": false,
       "exported": false,
-      "line": 167,
+      "line": 175,
       "name": "signSecret"
     },
     {
       "async": false,
       "exported": false,
-      "line": 177,
+      "line": 185,
       "name": "requireSignSecret"
     },
     {
       "async": false,
       "exported": false,
-      "line": 185,
+      "line": 193,
       "name": "sha256"
     },
     {
       "async": false,
       "exported": false,
-      "line": 189,
+      "line": 197,
       "name": "blake2b"
     },
     {
       "async": false,
       "exported": false,
-      "line": 195,
+      "line": 203,
       "name": "sha256File"
     },
     {
       "async": false,
       "exported": false,
-      "line": 212,
+      "line": 220,
       "name": "digestPair"
     },
     {
       "async": false,
       "exported": false,
-      "line": 219,
+      "line": 227,
       "name": "digestFilePair"
     },
     {
       "async": false,
+      "exported": false,
+      "line": 247,
+      "name": "modelWeightRuntimeTargets"
+    },
+    {
+      "async": false,
       "exported": true,
-      "line": 257,
+      "line": 273,
       "name": "buildRecipeBundleMjs"
     },
     {
       "async": false,
       "exported": false,
-      "line": 330,
+      "line": 346,
       "name": "canonicalJson"
     },
     {
       "async": false,
       "exported": false,
-      "line": 337,
+      "line": 353,
       "name": "hasSourceDateEpochValue"
     },
     {
       "async": false,
       "exported": false,
-      "line": 341,
+      "line": 357,
       "name": "parseSourceDateEpoch"
     },
     {
       "async": false,
       "exported": false,
-      "line": 364,
+      "line": 380,
       "name": "reproducibleBuildContext"
     },
     {
       "async": false,
       "exported": false,
-      "line": 378,
+      "line": 394,
       "name": "deterministicReceiptId"
     },
     {
       "async": false,
       "exported": true,
-      "line": 417,
+      "line": 433,
       "name": "computeKScore"
     },
     {
       "async": false,
       "exported": false,
-      "line": 428,
+      "line": 444,
       "name": "normalizeLicense"
     },
     {
       "async": false,
       "exported": true,
-      "line": 452,
+      "line": 468,
       "name": "buildPayload"
     },
     {
       "async": false,
       "exported": true,
-      "line": 2285,
+      "line": 2347,
       "name": "packageArtifact"
     },
     {
       "async": true,
       "exported": true,
-      "line": 2322,
+      "line": 2384,
       "name": "buildAndZip"
     },
     {
       "async": false,
       "exported": true,
-      "line": 2501,
+      "line": 2563,
       "name": "verifyManifestSignature"
     },
     {
       "async": false,
       "exported": false,
-      "line": 2546,
+      "line": 2608,
       "name": "constantTimeEqualHex"
     },
     {
       "async": true,
       "exported": true,
-      "line": 2560,
+      "line": 2622,
       "name": "verifyDeviceFit"
     },
     {
       "async": false,
       "exported": false,
-      "line": 2647,
+      "line": 2709,
       "name": "_looksLikeWeightBuffer"
     },
     {
       "async": false,
       "exported": false,
-      "line": 2655,
+      "line": 2717,
       "name": "_toBuffer"
     },
     {
       "async": false,
       "exported": true,
-      "line": 2662,
+      "line": 2724,
       "name": "addHeterogeneousWeights"
     },
     {
       "async": false,
       "exported": false,
-      "line": 2746,
+      "line": 2808,
       "name": "_normalizeWeightRecords"
     }
   ],
@@ -961,16 +968,16 @@
     "tests/wave948-artifact-matrix.test.js"
   ],
   "summary": {
-    "artifact_bytes": 149983,
-    "artifact_hash_slot_count": 35,
-    "artifact_lines": 2774,
+    "artifact_bytes": 152819,
+    "artifact_hash_slot_count": 36,
+    "artifact_lines": 2836,
     "build_and_zip_field_count": 57,
     "build_payload_field_count": 61,
-    "direct_test_evidence_count": 98,
+    "direct_test_evidence_count": 99,
     "env_ref_count": 9,
     "export_count": 12,
     "failed_safety_guards": 0,
-    "function_count": 30,
+    "function_count": 31,
     "missing_required_exports": 0,
     "missing_test_evidence": 0,
     "phase_count": 35,
@@ -2722,6 +2729,24 @@
       "path": "tests/wave955-agent-benchmark-adapter.test.js",
       "source_lock": false,
       "total_symbol_refs": 0,
+      "verifyDeviceFit_refs": 0,
+      "verifyManifestSignature_refs": 0
+    },
+    {
+      "ARTIFACT_CLASSES_refs": 0,
+      "HETEROGENEOUS_WEIGHTS_VERSION_refs": 0,
+      "addHeterogeneousWeights_refs": 0,
+      "artifact_workflow_refs": 4,
+      "buildAndZip_refs": 0,
+      "buildPayload_refs": 2,
+      "buildRecipeBundleMjs_refs": 0,
+      "computeKScore_refs": 0,
+      "decodeIndex_refs": 0,
+      "decodePack_refs": 0,
+      "packageArtifact_refs": 0,
+      "path": "tests/wave967-model-weight-artifact-binding.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 2,
       "verifyDeviceFit_refs": 0,
       "verifyManifestSignature_refs": 0
     },
