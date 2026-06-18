@@ -33,17 +33,98 @@ import {
   SAVINGS_FEE_RATE_DEFAULT,
 } from './savings-tracker.js';
 
+export const SAVINGS_ROUTES_CONTRACT_VERSION = 'w715-v1';
+export const SAVINGS_ROUTE_LIMITS = Object.freeze({
+  max_tenant_id_chars: 160,
+  max_namespace_chars: 128,
+  max_provider_chars: 64,
+  max_model_chars: 128,
+  max_error_detail_chars: 180,
+  max_tokens_per_call: 50_000_000,
+});
+
+const SAFE_ID_RE = /^[A-Za-z0-9_.:-]{1,160}$/;
+const SAFE_NAMESPACE_RE = /^[A-Za-z0-9_.:-]{1,128}$/;
+const SAFE_PROVIDER_RE = /^[A-Za-z0-9_.:-]{1,64}$/;
+const SAFE_MODEL_RE = /^[A-Za-z0-9_.:/-]{1,128}$/;
+
+function _cleanText(value, maxChars = SAVINGS_ROUTE_LIMITS.max_error_detail_chars) {
+  const s = String(value == null ? '' : value)
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[redacted_email]')
+    .replace(/\b(?:sk|ghp|gho|ghs|ghu|ghr)_[A-Za-z0-9_]{16,}\b/g, '[redacted_secret]')
+    .replace(/[A-Za-z]:\\[^\s"'<>]+/g, '[redacted_path]')
+    .replace(/\/(?:Users|home|var|tmp|mnt|opt)\/[^\s"'<>]+/g, '[redacted_path]')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return s.length > maxChars ? s.slice(0, maxChars) : s;
+}
+
+function _errorDetail(err) {
+  return _cleanText((err && err.message) || err || 'savings route error');
+}
+
+function _json(res, statusCode, body) {
+  return res.status(statusCode).json({
+    route_contract_version: SAVINGS_ROUTES_CONTRACT_VERSION,
+    ...body,
+  });
+}
+
+function _safeId(value, maxChars = SAVINGS_ROUTE_LIMITS.max_tenant_id_chars) {
+  if (typeof value !== 'string' && typeof value !== 'number') return null;
+  const s = String(value).trim();
+  if (!s || s.length > maxChars || !SAFE_ID_RE.test(s)) return null;
+  return s;
+}
+
+function _safeNamespace(value) {
+  const raw = value == null || value === '' ? 'default' : String(value).trim();
+  if (!raw || raw.length > SAVINGS_ROUTE_LIMITS.max_namespace_chars || !SAFE_NAMESPACE_RE.test(raw)) return null;
+  return raw;
+}
+
+function _safeProvider(value) {
+  if (value == null || value === '') return null;
+  const raw = String(value).trim().toLowerCase();
+  if (!raw || raw.length > SAVINGS_ROUTE_LIMITS.max_provider_chars || !SAFE_PROVIDER_RE.test(raw)) return null;
+  return raw;
+}
+
+function _safeModel(value) {
+  if (value == null || value === '') return null;
+  const raw = String(value).trim();
+  if (!raw || raw.length > SAVINGS_ROUTE_LIMITS.max_model_chars || !SAFE_MODEL_RE.test(raw)) return null;
+  return raw;
+}
+
+function _safeTokenCount(value) {
+  if (value == null || value === '') return 0;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0 || Math.floor(n) !== n || n > SAVINGS_ROUTE_LIMITS.max_tokens_per_call) return null;
+  return n;
+}
+
+function _safeTimestamp(value) {
+  if (value == null || value === '') return { ok: true, value: null };
+  const d = new Date(value);
+  if (!Number.isFinite(d.getTime())) return { ok: false, value: null };
+  return { ok: true, value: d.toISOString() };
+}
+
 function _authOrReject(req, res) {
   const trec = req && req.tenant_record;
-  if (!trec) {
+  const tenant_id = trec && _safeId(trec.id);
+  if (!trec || !tenant_id) {
     res.status(401).json({
       ok: false,
       error: 'auth_required',
       hint: 'send Authorization: Bearer <ks_* or kao_* key>',
+      route_contract_version: SAVINGS_ROUTES_CONTRACT_VERSION,
     });
     return null;
   }
-  return trec;
+  return { ...trec, id: tenant_id };
 }
 
 function _periodDays(req) {
@@ -55,24 +136,31 @@ function _periodDays(req) {
 }
 
 export function registerSavingsRoutes(r) {
+  if (!r || typeof r.get !== 'function' || typeof r.post !== 'function') {
+    throw new Error('registerSavingsRoutes: router with .get/.post required');
+  }
+
   // GET /v1/savings/baseline - show whether a baseline window is active +
   // its start time + accumulated spend so far.
   r.get('/v1/savings/baseline', async (req, res) => {
     const trec = _authOrReject(req, res);
     if (!trec) return;
-    const namespace = String((req.query && req.query.namespace) || 'default');
+    const namespace = _safeNamespace(req.query && req.query.namespace);
+    if (!namespace) {
+      return _json(res, 400, { ok: false, error: 'invalid_namespace', hint: 'namespace must match [A-Za-z0-9_.:-] and be <=128 chars' });
+    }
     const period_days = _periodDays(req);
     if (period_days == null) {
-      return res.status(400).json({ ok: false, error: 'invalid_period_days', hint: 'period_days must be 1..365' });
+      return _json(res, 400, { ok: false, error: 'invalid_period_days', hint: 'period_days must be 1..365' });
     }
     try {
       const env = await getBaselineSpend({ tenant_id: trec.id, namespace, period_days });
-      return res.json({ ok: true, ...env });
+      return res.json({ ok: true, route_contract_version: SAVINGS_ROUTES_CONTRACT_VERSION, ...env });
     } catch (e) {
-      return res.status(500).json({
+      return _json(res, 500, {
         ok: false,
         error: 'savings_baseline_error',
-        detail: String((e && e.message) || e),
+        detail: _errorDetail(e),
       });
     }
   });
@@ -83,16 +171,22 @@ export function registerSavingsRoutes(r) {
     const trec = _authOrReject(req, res);
     if (!trec) return;
     const body = req.body || {};
-    const namespace = String(body.namespace || 'default');
-    const start_ts = body.start_ts || null;
+    const namespace = _safeNamespace(body.namespace);
+    if (!namespace) {
+      return _json(res, 400, { ok: false, error: 'invalid_namespace', hint: 'namespace must match [A-Za-z0-9_.:-] and be <=128 chars' });
+    }
+    const start = _safeTimestamp(body.start_ts);
+    if (!start.ok) {
+      return _json(res, 400, { ok: false, error: 'invalid_start_ts', hint: 'start_ts must be an ISO-parseable timestamp' });
+    }
     try {
-      const env = await startBaselinePeriod({ tenant_id: trec.id, namespace, start_ts });
-      return res.json({ ok: true, ...env });
+      const env = await startBaselinePeriod({ tenant_id: trec.id, namespace, start_ts: start.value });
+      return res.json({ ok: true, route_contract_version: SAVINGS_ROUTES_CONTRACT_VERSION, ...env });
     } catch (e) {
-      return res.status(500).json({
+      return _json(res, 500, {
         ok: false,
         error: 'savings_baseline_start_error',
-        detail: String((e && e.message) || e),
+        detail: _errorDetail(e),
       });
     }
   });
@@ -103,22 +197,34 @@ export function registerSavingsRoutes(r) {
     const trec = _authOrReject(req, res);
     if (!trec) return;
     const body = req.body || {};
-    const provider = body.provider;
-    const model = body.model;
-    if (!provider) return res.status(400).json({ ok: false, error: 'provider_required' });
-    if (!model) return res.status(400).json({ ok: false, error: 'model_required' });
-    const namespace = String(body.namespace || 'default');
-    const input_tokens = Number(body.input_tokens) || 0;
-    const output_tokens = Number(body.output_tokens) || 0;
-    const ts = body.ts || null;
+    if (body.provider == null || body.provider === '') return _json(res, 400, { ok: false, error: 'provider_required' });
+    if (body.model == null || body.model === '') return _json(res, 400, { ok: false, error: 'model_required' });
+    const provider = _safeProvider(body.provider);
+    const model = _safeModel(body.model);
+    if (!provider) return _json(res, 400, { ok: false, error: 'invalid_provider', hint: 'provider must be <=64 chars and contain only safe identifier characters' });
+    if (!model) return _json(res, 400, { ok: false, error: 'invalid_model', hint: 'model must be <=128 chars and contain only safe model identifier characters' });
+    const namespace = _safeNamespace(body.namespace);
+    if (!namespace) {
+      return _json(res, 400, { ok: false, error: 'invalid_namespace', hint: 'namespace must match [A-Za-z0-9_.:-] and be <=128 chars' });
+    }
+    const input_tokens = _safeTokenCount(body.input_tokens);
+    const output_tokens = _safeTokenCount(body.output_tokens);
+    if (input_tokens == null || output_tokens == null) {
+      return _json(res, 400, { ok: false, error: 'invalid_token_count', hint: 'input_tokens and output_tokens must be integers in 0..50000000' });
+    }
+    const ts = _safeTimestamp(body.ts);
+    if (!ts.ok) {
+      return _json(res, 400, { ok: false, error: 'invalid_ts', hint: 'ts must be an ISO-parseable timestamp' });
+    }
     try {
       const ev = await recordTeacherSpend({
         tenant_id: trec.id,
         namespace, provider, model,
-        input_tokens, output_tokens, ts,
+        input_tokens, output_tokens, ts: ts.value,
       });
       return res.json({
         ok: true,
+        route_contract_version: SAVINGS_ROUTES_CONTRACT_VERSION,
         recorded: {
           event_id: ev.event_id,
           namespace: ev.namespace,
@@ -132,12 +238,12 @@ export function registerSavingsRoutes(r) {
     } catch (e) {
       const code = e && e.code;
       if (code === 'unknown_provider' || code === 'unknown_model') {
-        return res.status(400).json({ ok: false, error: code, detail: String(e.message || '') });
+        return _json(res, 400, { ok: false, error: code, detail: _errorDetail(e) });
       }
-      return res.status(500).json({
+      return _json(res, 500, {
         ok: false,
         error: 'savings_record_error',
-        detail: String((e && e.message) || e),
+        detail: _errorDetail(e),
       });
     }
   });
@@ -147,16 +253,19 @@ export function registerSavingsRoutes(r) {
   r.get('/v1/savings/summary', async (req, res) => {
     const trec = _authOrReject(req, res);
     if (!trec) return;
-    const namespace = String((req.query && req.query.namespace) || 'default');
+    const namespace = _safeNamespace(req.query && req.query.namespace);
+    if (!namespace) {
+      return _json(res, 400, { ok: false, error: 'invalid_namespace', hint: 'namespace must match [A-Za-z0-9_.:-] and be <=128 chars' });
+    }
     const period_days = _periodDays(req);
     if (period_days == null) {
-      return res.status(400).json({ ok: false, error: 'invalid_period_days', hint: 'period_days must be 1..365' });
+      return _json(res, 400, { ok: false, error: 'invalid_period_days', hint: 'period_days must be 1..365' });
     }
     let fee_rate = SAVINGS_FEE_RATE_DEFAULT;
     if (req.query && req.query.fee_rate != null) {
       const r2 = Number(req.query.fee_rate);
       if (!Number.isFinite(r2) || r2 < 0 || r2 > 1) {
-        return res.status(400).json({ ok: false, error: 'invalid_fee_rate', hint: 'fee_rate must be 0..1' });
+        return _json(res, 400, { ok: false, error: 'invalid_fee_rate', hint: 'fee_rate must be 0..1' });
       }
       fee_rate = r2;
     }
@@ -166,6 +275,7 @@ export function registerSavingsRoutes(r) {
       });
       return res.json({
         ok: true,
+        route_contract_version: SAVINGS_ROUTES_CONTRACT_VERSION,
         defaults: {
           min_baseline_days: MIN_BASELINE_DAYS,
           baseline_period_days_default: BASELINE_PERIOD_DAYS_DEFAULT,
@@ -174,10 +284,10 @@ export function registerSavingsRoutes(r) {
         ...env,
       });
     } catch (e) {
-      return res.status(500).json({
+      return _json(res, 500, {
         ok: false,
         error: 'savings_summary_error',
-        detail: String((e && e.message) || e),
+        detail: _errorDetail(e),
       });
     }
   });

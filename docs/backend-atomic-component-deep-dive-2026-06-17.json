@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 736,
-    "components_without_direct_test_reference": 93,
+    "test_referenced_components": 737,
+    "components_without_direct_test_reference": 92,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -28576,7 +28576,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave687-licensing-allowlist-contract.test.js"
+        "tests/wave687-licensing-allowlist-contract.test.js",
+        "tests/wave715-savings-routes-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -38782,12 +38783,12 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "7ea845cfbcdf9f3e36deff20267eb4ca6000d008adf90733241a7f1432c4ea3b",
+      "sha256": "2122794e66a01bf5b572f94a98356badae88c92f8cb7682f76bb399417e59b9d",
       "metrics": {
-        "bytes": 6638,
-        "lines": 189,
+        "bytes": 11540,
+        "lines": 299,
         "imports": 1,
-        "exports": 2,
+        "exports": 4,
         "routes": 4,
         "env_refs": 0,
         "fs_writes": 0,
@@ -38796,11 +38797,14 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave687-licensing-allowlist-contract.test.js",
+        "tests/wave715-savings-routes-contract.test.js"
+      ],
       "risk_signals": [
         "http_route_surface"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

@@ -44,7 +44,7 @@ test('W687 licensing allowlist pins bounded evidence controls and depth wiring',
   assert.match(source, /source_url host is private or loopback/);
 
   assert.equal(pkg.scripts['verify:licensing-allowlist'], 'node --test --test-concurrency=1 tests/wave687-licensing-allowlist-contract.test.js');
-  assert.match(pkg.scripts['verify:depth'], /verify:package-release && npm run verify:licensing-allowlist && node scripts\/audit-sota-readiness\.cjs/);
+  assert.match(pkg.scripts['verify:depth'], /verify:package-release && npm run verify:licensing-allowlist && npm run verify:savings-routes && node scripts\/audit-sota-readiness\.cjs/);
 });
 
 test('W687 license lists remain disjoint and normalize common SPDX aliases', () => {

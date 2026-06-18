@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 736,
-    "direct_test_reference_pct": 88.8,
-    "components_without_direct_test_reference": 93,
+    "direct_test_referenced_components": 737,
+    "direct_test_reference_pct": 88.9,
+    "components_without_direct_test_reference": 92,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -26063,7 +26063,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave687-licensing-allowlist-contract.test.js"
+          "tests/wave687-licensing-allowlist-contract.test.js",
+          "tests/wave715-savings-routes-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -34670,10 +34671,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 6638,
-          "lines": 189,
+          "bytes": 11540,
+          "lines": 299,
           "imports": 1,
-          "exports": 2,
+          "exports": 4,
           "routes": 4,
           "env_refs": 0,
           "fs_writes": 0,
@@ -34685,9 +34686,9 @@
         "risk_signals": [
           "http_route_surface"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "7ea845cfbcdf9f3e36deff20267eb4ca6000d008adf90733241a7f1432c4ea3b"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "2122794e66a01bf5b572f94a98356badae88c92f8cb7682f76bb399417e59b9d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -34695,7 +34696,10 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave687-licensing-allowlist-contract.test.js",
+          "tests/wave715-savings-routes-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
         "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
@@ -34704,10 +34708,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
     },
     {
       "path": "src/savings-tracker.js",
