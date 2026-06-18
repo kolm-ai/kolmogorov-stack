@@ -35198,6 +35198,23 @@ COMPLETION_SUBS.lingual = ['detect', 'distribution', 'synthesize', 'mixture'];
 COMPLETION_VERBS.push('autopilot');
 COMPLETION_SUBS.autopilot = ['start', 'stop', 'status', 'disable', 'savings', 'tick', 'plan', 'analyze', 'temporal'];
 
+// W939 - backfill top-level dispatcher verbs into completion/suggestion data.
+// These were already reachable from main(); this keeps shell completion,
+// extension shadowing, and unknown-command suggestions aligned with the real
+// dispatcher without changing command behavior.
+for (const verb of [
+  'ab', 'accelerate', 'active-learn', 'assistant', 'assurance', 'bundle',
+  'caiq', 'captures', 'carbon', 'copyright-scan', 'deploy', 'diagnose',
+  'drift-alert', 'email', 'experts', 'failure-modes', 'failure-to-capture-loop',
+  'fit', 'fleet', 'forge', 'gateway', 'hardware', 'huggingface', 'intent', 'its',
+  'load', 'menu', 'meta', 'passport', 'procurement', 'receipt', 'receipts',
+  'route', 'seasonal', 'setup', 'sig', 'sla', 'staleness', 'stat-sig', 'studio',
+  'synthetic', 'teacher', 'test-device', 'test-quants', 'vendor-pack', 'vertical',
+  'wizard', 'wrapper', 'yaml', 'yaml-diff',
+]) {
+  if (!COMPLETION_VERBS.includes(verb)) COMPLETION_VERBS.push(verb);
+}
+
 function emitBashCompletion() {
     const verbs = COMPLETION_VERBS.join(' ');
     const subLines = Object.entries(COMPLETION_SUBS)

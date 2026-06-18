@@ -23,9 +23,9 @@ test('W938 package wiring makes the auth boundary matrix a depth and control-fil
     pkg.scripts['verify:auth-boundary-matrix'],
     'node scripts/build-auth-boundary-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave938-auth-boundary-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:api-contract-matrix && npm run build:auth-boundary-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:api-contract-matrix && npm run verify:auth-boundary-matrix && npm run verify:file-ledger/);
-  assert.match(pkg.scripts['verify:depth'], /verify:router-contract && npm run verify:api-contract-matrix && npm run verify:auth-boundary-matrix && npm run verify:meta-routes/);
+  assert.match(pkg.scripts['build:control-files'], /build:api-contract-matrix && npm run build:auth-boundary-matrix && npm run build:cli-command-matrix && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:api-contract-matrix && npm run verify:auth-boundary-matrix && npm run verify:cli-command-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['verify:depth'], /verify:router-contract && npm run verify:api-contract-matrix && npm run verify:auth-boundary-matrix && npm run verify:cli-command-matrix && npm run verify:meta-routes/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');
   assert.match(ledgerBuilder, /build-auth-boundary-matrix\.cjs/);

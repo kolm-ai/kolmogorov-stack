@@ -11,8 +11,11 @@ const API_CONTRACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'api-contract-ma
 const API_CONTRACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave937-api-contract-matrix.test.js');
 const AUTH_BOUNDARY_MATRIX = path.join(ROOT, 'docs', 'internal', 'auth-boundary-matrix.json');
 const AUTH_BOUNDARY_MATRIX_TEST = path.join(ROOT, 'tests', 'wave938-auth-boundary-matrix.test.js');
+const CLI_COMMAND_MATRIX = path.join(ROOT, 'docs', 'internal', 'cli-command-matrix.json');
+const CLI_COMMAND_MATRIX_TEST = path.join(ROOT, 'tests', 'wave939-cli-command-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
+let cliCommandMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -133,6 +136,38 @@ function authBoundaryMatrixOk() {
     authBoundaryMatrixGreen = false;
   }
   return authBoundaryMatrixGreen;
+}
+
+function cliCommandMatrixOk() {
+  if (cliCommandMatrixGreen != null) return cliCommandMatrixGreen;
+  try {
+    if (!fs.existsSync(CLI_COMMAND_MATRIX) || !fs.existsSync(CLI_COMMAND_MATRIX_TEST)) {
+      cliCommandMatrixGreen = false;
+      return cliCommandMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(CLI_COMMAND_MATRIX, 'utf8'));
+    cliCommandMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.cli_command_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.dispatcher_case_count >= 100
+      && matrix.summary.command_function_count >= 150
+      && matrix.summary.product_graph_cli_commands === 64
+      && matrix.summary.missing_product_graph_verbs === 0
+      && matrix.summary.missing_product_graph_proof_verbs === 0
+      && matrix.summary.completion_without_dispatch === 0
+      && matrix.summary.dispatch_without_completion === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('cli/kolm.js')
+    );
+  } catch {
+    cliCommandMatrixGreen = false;
+  }
+  return cliCommandMatrixGreen;
 }
 
 function isTextComponent(abs) {
@@ -283,6 +318,7 @@ function improvementFor(domain, rel, metrics, tests) {
   const highRisk = riskSignals(rel, metrics).length >= 3;
   if (tests.length === 0 && highRisk) return 'add_targeted_contract_tests_for_high_risk_boundary';
   if (rel === 'src/auth.js' && authBoundaryMatrixOk()) return 'maintain_generated_auth_boundary_matrix_and_policy_as_data_contract';
+  if (rel === 'cli/kolm.js' && cliCommandMatrixOk()) return 'maintain_generated_cli_command_matrix_and_split_plan';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -303,7 +339,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (domain === 'training_model_optimization') return 'frontier_method_wiring_probe_harness_and_method_bakeoff';
   if (domain === 'runtime_serving_routing') return 'closed_loop_routing_outcome_learning_and_verified_cache';
   if (domain === 'infra_cloud_device') return 'capability_probe_attested_byoc_worker_and_deploy_readiness';
-  if (domain === 'developer_distribution') return 'generated_package_sdk_conformance_and_release_evidence';
+  if (domain === 'developer_distribution') return 'generated_cli_package_sdk_conformance_and_release_evidence';
   return 'maintain_contract_tests_and_claim_scope_mapping';
 }
 
@@ -319,7 +355,7 @@ function innovationFor(domain) {
     training_model_optimization: 'Wire ROPD/GKD/BoN/MoE-to-dense/FP4 decisions into a method bakeoff that records measured deltas per artifact.',
     runtime_serving_routing: 'Close the semantic routing flywheel by recording outcomes, training route stats, and emitting runtime passports.',
     infra_cloud_device: 'Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.',
-    developer_distribution: 'Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.',
+    developer_distribution: 'Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.',
     platform_support: 'Keep support modules small, pure, and linked to at least one owner test or product proof.',
   }[domain] || 'Keep the component covered by a local contract and promote repeated patterns into shared primitives.';
 }
@@ -336,7 +372,7 @@ function commandsFor(domain) {
     training_model_optimization: ['node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
     infra_cloud_device: ['npm run verify:platform', 'npm run verify:package-release'],
-    developer_distribution: ['npm run verify:package-release'],
+    developer_distribution: ['npm run verify:cli-command-matrix', 'npm run verify:package-release'],
     platform_support: ['npm run verify:codegraph'],
   };
   return map[domain] || ['npm run verify:codegraph'];

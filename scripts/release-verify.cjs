@@ -12,7 +12,7 @@
 // Gates, in order:
 //   1.  npm run lint:refs                (static-ref + href integrity + product-surface
 //                                         catalog vs api-routes.json contract)
-//   2.  control-files                    (W855/W937/W938: internal JSONs in docs/internal/
+//   2.  control-files                    (W855/W937/W938/W939: internal JSONs in docs/internal/
 //                                         parse + match expected schema strings +
 //                                         carry non-empty required arrays)
 //   3.  openapi-sync                     (W490: public/openapi.json covers every
@@ -275,6 +275,7 @@ async function gateControlFiles() {
     { file: 'docs/internal/catalog-manifest.json',     schema: 'kolm.catalog_manifest.v1',     requiredArrays: ['entries'] },
     { file: 'docs/internal/api-contract-matrix.json',  schema: 'kolm.api_contract_matrix.v1',  requiredArrays: ['routes', 'route_groups'] },
     { file: 'docs/internal/auth-boundary-matrix.json', schema: 'kolm.auth_boundary_matrix.v1', requiredArrays: ['public_pages', 'test_evidence'] },
+    { file: 'docs/internal/cli-command-matrix.json',   schema: 'kolm.cli_command_matrix.v1',   requiredArrays: ['dispatcher_cases', 'product_graph_cli_commands'] },
     { file: 'docs/internal/codebase-file-ledger.json', schema: 'kolm.codebase_file_ledger.v1', requiredArrays: ['paths'] },
     { file: 'docs/internal/design-cascade-ledger.json',schema: 'kolm.design_cascade_ledger.v1',requiredArrays: ['files'] },
     { file: 'docs/internal/product-media-proof.json',  schema: 'kolm.product_media_proof.v1',  requiredArrays: ['pages'] },

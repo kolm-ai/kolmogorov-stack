@@ -424,8 +424,9 @@
           "relation": "required"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
+      "next_best_action": "Execute the linked frontier track: maintain_generated_cli_command_matrix_and_split_plan.",
       "suggested_verification": [
+        "npm run verify:cli-command-matrix",
         "npm run verify:package-release"
       ]
     },
@@ -654,8 +655,9 @@
           "relation": "sampled"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: generated_package_sdk_conformance_and_release_evidence.",
+      "next_best_action": "Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence.",
       "suggested_verification": [
+        "npm run verify:cli-command-matrix",
         "npm run verify:package-release"
       ]
     },
@@ -2180,16 +2182,17 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: generated_package_sdk_conformance_and_release_evidence."
+      "next_best_action": "Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence."
     },
     {
       "path": "cli/kolm-ux.js",
@@ -2238,16 +2241,17 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: generated_package_sdk_conformance_and_release_evidence."
+      "next_best_action": "Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence."
     },
     {
       "path": "cli/kolm.js",
@@ -2257,8 +2261,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 2624461,
-          "lines": 57103,
+          "bytes": 2625432,
+          "lines": 57120,
           "imports": 541,
           "exports": 1,
           "routes": 0,
@@ -2280,7 +2284,7 @@
         ],
         "priority_score": 11,
         "priority_band": "high",
-        "sha256": "c57d5e197b30290ca41f98d72f03e49c76a685861a2313058de4b15b58f4f7f0"
+        "sha256": "be30fde921402d928aa78ff76d0427104a02a072ebaf5d8fd90a89cf44f32387"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -2324,16 +2328,17 @@
             "relation": "required"
           }
         ],
-        "improvement_track": "split_or_add_generated_contract_map_before_growth",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "maintain_generated_cli_command_matrix_and_split_plan",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_cli_command_matrix_and_split_plan."
     },
     {
       "path": "packages/apt/README.md",
@@ -2379,14 +2384,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/attestation/package.json",
@@ -2892,14 +2898,15 @@
           "tests/wave258-audit-fixes.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/browser-extension/manifest.json",
@@ -2946,14 +2953,15 @@
           "tests/finalized-c13-product-cohesion.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/browser-extension/popup.js",
@@ -2999,14 +3007,15 @@
           "tests/wave735-vision-capture-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/browser-extension/README.md",
@@ -3054,14 +3063,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/browser-extension/verifier.js",
@@ -3166,14 +3176,15 @@
           "tests/wave671-homebrew-formula-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/homebrew/README.md",
@@ -3220,14 +3231,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/langchain-kolm/example.js",
@@ -3274,14 +3286,15 @@
           "tests/agent-audit-routes.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/langchain-kolm/index.js",
@@ -3323,14 +3336,15 @@
           "tests/wave672-langchain-adapter-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/langchain-kolm/package.json",
@@ -3369,14 +3383,15 @@
           "tests/wave925-langchain-package-manifest-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/langchain-kolm/README.md",
@@ -3423,14 +3438,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/llamaindex-kolm/example.js",
@@ -3477,14 +3493,15 @@
           "tests/agent-audit-routes.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/llamaindex-kolm/index.js",
@@ -3526,14 +3543,15 @@
           "tests/wave673-llamaindex-adapter-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/llamaindex-kolm/package.json",
@@ -3572,14 +3590,15 @@
           "tests/wave926-llamaindex-package-manifest-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/llamaindex-kolm/README.md",
@@ -3626,14 +3645,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-langchain-kolm/example.py",
@@ -3680,14 +3700,15 @@
           "tests/agent-audit-routes.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-langchain-kolm/kolm_langchain/__init__.py",
@@ -3731,14 +3752,15 @@
           "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-langchain-kolm/kolm_langchain/llm.py",
@@ -3779,14 +3801,15 @@
           "tests/wave693-python-framework-adapters-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-langchain-kolm/pyproject.toml",
@@ -3827,14 +3850,15 @@
           "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-langchain-kolm/README.md",
@@ -3881,14 +3905,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-llamaindex-kolm/example.py",
@@ -3936,14 +3961,15 @@
           "tests/agent-audit-routes.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-llamaindex-kolm/kolm_llamaindex/__init__.py",
@@ -3987,14 +4013,15 @@
           "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-llamaindex-kolm/kolm_llamaindex/llm.py",
@@ -4035,14 +4062,15 @@
           "tests/wave693-python-framework-adapters-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-llamaindex-kolm/pyproject.toml",
@@ -4083,14 +4111,15 @@
           "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-llamaindex-kolm/README.md",
@@ -4137,14 +4166,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/runtime-rs/build.ps1",
@@ -5102,14 +5132,15 @@
           "tests/wave678-sdk-kotlin-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-kotlin/README.md",
@@ -5156,14 +5187,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-kotlin/src/main/kotlin/ai/kolm/Kolm.kt",
@@ -5203,14 +5235,15 @@
           "tests/wave678-sdk-kotlin-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-python/kolm/__init__.py",
@@ -5256,14 +5289,15 @@
           "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-python/kolm/runtimes/__init__.py",
@@ -5404,14 +5438,15 @@
           "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-python/README.md",
@@ -5458,14 +5493,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/android/src/main/java/ai/kolm/rn/KolmRNModule.kt",
@@ -5504,14 +5540,15 @@
           "tests/wave591-package-local-build-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/android/src/main/java/ai/kolm/rn/KolmRNPackage.kt",
@@ -5550,14 +5587,15 @@
           "tests/wave591-package-local-build-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/index.ts",
@@ -5597,14 +5635,15 @@
           "tests/wave679-sdk-rn-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/ios/KolmRN.swift",
@@ -5643,14 +5682,15 @@
           "tests/wave591-package-local-build-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/package.json",
@@ -5690,14 +5730,15 @@
           "tests/wave679-sdk-rn-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/react-native.config.js",
@@ -5736,14 +5777,15 @@
           "tests/wave591-package-local-build-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/README.md",
@@ -5789,14 +5831,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/tsconfig.json",
@@ -5835,14 +5878,15 @@
           "tests/wave591-package-local-build-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-rn/types.d.ts",
@@ -5881,14 +5925,15 @@
           "tests/wave591-package-local-build-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-swift/Package.swift",
@@ -5934,14 +5979,15 @@
           "tests/wave730-scim-provisioning-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-swift/README.md",
@@ -5988,14 +6034,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-swift/Sources/Kolm/Kolm.swift",
@@ -6035,14 +6082,15 @@
           "tests/wave680-sdk-swift-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-swift/Tests/KolmTests/KolmTests.swift",
@@ -6082,14 +6130,15 @@
           "tests/wave680-sdk-swift-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-ts/package.json",
@@ -6128,14 +6177,15 @@
           "tests/wave591-package-local-build-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-ts/README.md",
@@ -6209,16 +6259,17 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: generated_package_sdk_conformance_and_release_evidence."
+      "next_best_action": "Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence."
     },
     {
       "path": "packages/sdk-ts/src/index.ts",
@@ -6259,14 +6310,15 @@
           "tests/wave652-sdk-ts-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/sdk-ts/tsconfig.json",
@@ -6305,14 +6357,15 @@
           "tests/wave591-package-local-build-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/vscode-kolm-rag/package.json",
@@ -6351,14 +6404,15 @@
           "tests/wave929-distribution-manifests-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/vscode-kolm-rag/README.md",
@@ -6404,14 +6458,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/vscode-kolm-rag/src/capture-queue.ts",
@@ -6504,14 +6559,15 @@
           "tests/wave347-nl-seeds.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/vscode-kolm-rag/src/local-runtime.ts",
@@ -6600,14 +6656,15 @@
           "tests/wave819-vscode-extension.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/vscode-kolm-rag/src/pattern-detect.ts",
@@ -6647,14 +6704,15 @@
           "tests/wave819-vscode-extension.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/vscode-kolm-rag/src/routing.ts",
@@ -6747,14 +6805,15 @@
           "tests/wave819-vscode-extension.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/vscode-kolm-rag/tsconfig.json",
@@ -6793,14 +6852,15 @@
           "tests/wave591-package-local-build-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/winget/kolm.kolm.installer.yaml",
@@ -6839,14 +6899,15 @@
           "tests/wave929-distribution-manifests-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/winget/kolm.kolm.locale.en-US.yaml",
@@ -6885,14 +6946,15 @@
           "tests/wave929-distribution-manifests-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/winget/kolm.kolm.yaml",
@@ -6931,14 +6993,15 @@
           "tests/wave929-distribution-manifests-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/winget/README.md",
@@ -6985,14 +7048,15 @@
           "tests/wave482-sdk-catalog-honesty.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "server.js",
@@ -9123,16 +9187,17 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: generated_package_sdk_conformance_and_release_evidence."
+      "next_best_action": "Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence."
     },
     {
       "path": "src/assistant.js",
@@ -15564,14 +15629,15 @@
           "tests/connector-mcp.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "src/connectors/openai-agents.js",
@@ -17955,14 +18021,15 @@
           "tests/wave382-dev-agent.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "src/device-adapters/cerebras-adapter.js",
@@ -25121,14 +25188,15 @@
           "tests/finalized-c1-signed-artifact-packaging.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "src/kolm-pack/retrieval-index.js",
@@ -27654,7 +27722,8 @@
         "direct_test_refs": [
           "tests/wave710-meta-routes-contract.test.js",
           "tests/wave937-api-contract-matrix.test.js",
-          "tests/wave938-auth-boundary-matrix.test.js"
+          "tests/wave938-auth-boundary-matrix.test.js",
+          "tests/wave939-cli-command-matrix.test.js"
         ],
         "category_links": [
           {
@@ -29933,14 +30002,15 @@
           "tests/wave925-langchain-package-manifest-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "src/passport-builder.js",
@@ -33167,14 +33237,15 @@
           "tests/wave834-regulatory.test.js"
         ],
         "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
         "suggested_verification": [
+          "npm run verify:cli-command-matrix",
           "npm run verify:package-release"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "src/reg-grc-connectors.js",
