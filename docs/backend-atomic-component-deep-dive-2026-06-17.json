@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 721,
-    "components_without_direct_test_reference": 108,
+    "test_referenced_components": 722,
+    "components_without_direct_test_reference": 107,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -12499,6 +12499,7 @@
       },
       "test_refs": [
         "tests/wave665-router-boundary-contract.test.js",
+        "tests/wave700-failure-modes-w745-contract.test.js",
         "tests/wave783-chargeback.test.js"
       ],
       "risk_signals": [
@@ -19906,7 +19907,7 @@
         "tests/wave417-definition-of-done.test.js",
         "tests/wave426-import-seeds-tenant.test.js",
         "tests/wave438-rented-distill.test.js",
-        "tests/wave888c-devices.test.js"
+        "tests/wave700-failure-modes-w745-contract.test.js"
       ],
       "risk_signals": [],
       "priority_score": 0,
@@ -21340,7 +21341,8 @@
       "test_refs": [
         "tests/wave684-drift-alert-contract.test.js",
         "tests/wave685-eval-humaneval-contract.test.js",
-        "tests/wave699-drift-alert-w813-contract.test.js"
+        "tests/wave699-drift-alert-w813-contract.test.js",
+        "tests/wave700-failure-modes-w745-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -21399,7 +21401,8 @@
       "test_refs": [
         "tests/wave684-drift-alert-contract.test.js",
         "tests/wave685-eval-humaneval-contract.test.js",
-        "tests/wave699-drift-alert-w813-contract.test.js"
+        "tests/wave699-drift-alert-w813-contract.test.js",
+        "tests/wave700-failure-modes-w745-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -23749,25 +23752,30 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "c5f38404196617a924b37c382942674fac91990deab5d23c69d7e81f9bc72858",
+      "sha256": "0bc73d84ef3dabc330540562e8c9a05eff140d1c1f7670602a71c111fd8aba77",
       "metrics": {
-        "bytes": 17161,
-        "lines": 441,
-        "imports": 0,
-        "exports": 6,
+        "bytes": 14756,
+        "lines": 445,
+        "imports": 1,
+        "exports": 14,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 1,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave684-drift-alert-contract.test.js",
+        "tests/wave685-eval-humaneval-contract.test.js",
+        "tests/wave699-drift-alert-w813-contract.test.js",
+        "tests/wave700-failure-modes-w745-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -23819,6 +23827,10 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave684-drift-alert-contract.test.js",
+        "tests/wave685-eval-humaneval-contract.test.js",
+        "tests/wave699-drift-alert-w813-contract.test.js",
+        "tests/wave700-failure-modes-w745-contract.test.js",
         "tests/wave812-failure-modes.test.js",
         "tests/wave816-failure-to-capture-loop.test.js"
       ],
@@ -37498,10 +37510,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "8a2d4a47d0b302bd9950b21ff757aa3817cbda493a23df9f23ba58545cb8deae",
+      "sha256": "b8214cc6b90bc0f6ac7723ca4b7dd2ae632bca4de986444db5166f9de7268e71",
       "metrics": {
-        "bytes": 1468151,
-        "lines": 30785,
+        "bytes": 1467813,
+        "lines": 30776,
         "imports": 535,
         "exports": 8,
         "routes": 810,

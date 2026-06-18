@@ -44,7 +44,7 @@ test('W684 drift-alert source pins bounded sketch and envelope controls', () => 
 
   const pkg = readJson('package.json');
   assert.equal(pkg.scripts['verify:drift-alert'], 'node --test --test-concurrency=1 tests/wave684-drift-alert-contract.test.js');
-  assert.match(pkg.scripts['verify:depth'], /verify:finetune-frameworks && npm run verify:drift-alert && npm run verify:drift-alert-w813 && node --test/);
+  assert.match(pkg.scripts['verify:depth'], /verify:finetune-frameworks && npm run verify:drift-alert && npm run verify:drift-alert-w813 && npm run verify:failure-modes-w745 && node --test/);
 });
 
 test('W684 tokenization and sketching cap untrusted corpus size deterministically', () => {

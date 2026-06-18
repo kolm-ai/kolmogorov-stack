@@ -61,7 +61,7 @@ test('W699 source pins W813 alert wrapper controls and package wiring', () => {
     pkg.scripts['verify:drift-alert-w813'],
     'node --test --test-concurrency=1 tests/wave699-drift-alert-w813-contract.test.js',
   );
-  assert.match(pkg.scripts['verify:depth'], /npm run verify:drift-alert && npm run verify:drift-alert-w813 && node --test/);
+  assert.match(pkg.scripts['verify:depth'], /npm run verify:drift-alert && npm run verify:drift-alert-w813 && npm run verify:failure-modes-w745 && node --test/);
 });
 
 test('W699 emitDriftAlert dispatches drift_detected through unified notifications and persists digest-backed payload', async () => {

@@ -8572,16 +8572,7 @@ export function buildRouter() {
     // No persisted bakeoff registry yet → honest no_bakeoff_results_yet
     // envelope (NOT 404). Bridges to W741 via diagnostic_link so the caller
     // can pivot directly to the diagnostic UI.
-    return res.status(200).json({
-      ok: false,
-      error: 'no_bakeoff_results_yet',
-      failure_modes_version: mod.FAILURE_MODES_VERSION,
-      artifact_cid,
-      clustering: 'heuristic_keyword_v1',
-      hint: 'run `kolm bakeoff` first against this artifact_cid, then retry',
-      diagnostic_link: '/account/diagnose?cid=' + encodeURIComponent(artifact_cid),
-      generated_at: new Date().toISOString(),
-    });
+    return res.status(200).json(mod.generateFailureModeReport(artifact_cid, [], []));
   }
   // POST mirror - body carries artifact_cid.
   r.post('/v1/failure-modes', async (req, res) => {
