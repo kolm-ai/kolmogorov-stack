@@ -204,6 +204,8 @@ test('W960 distilled_model compile fails closed when neural worker only collects
   }));
   let receivedPairCount = null;
   let receivedHoldoutCount = null;
+  let receivedTrainFromPairs = null;
+  let receivedPortableExport = null;
   let receivedTrainPrompts = [];
   let receivedHoldoutPrompts = [];
   const job = createJob({
@@ -219,6 +221,8 @@ test('W960 distilled_model compile fails closed when neural worker only collects
     distill: async function* (opts) {
       receivedPairCount = opts.pairs_override.length;
       receivedHoldoutCount = Array.isArray(opts.holdout_override) ? opts.holdout_override.length : null;
+      receivedTrainFromPairs = opts.train_from_pairs;
+      receivedPortableExport = opts.portable_export;
       receivedTrainPrompts = opts.pairs_override.map((p) => p.prompt);
       receivedHoldoutPrompts = (opts.holdout_override || []).map((p) => p.prompt);
       yield {
@@ -247,6 +251,8 @@ test('W960 distilled_model compile fails closed when neural worker only collects
     'neural compile must feed only the pre-split train rows');
   assert.ok(receivedHoldoutCount > 0 && receivedHoldoutCount < examples.length,
     'neural compile must pass the pre-split holdout rows as eval-only rows');
+  assert.equal(receivedTrainFromPairs, true, 'neural compile must ask the Python worker to train from labeled pairs');
+  assert.equal(receivedPortableExport, 'gguf', 'neural compile must request a portable GGUF export attempt');
   assert.equal(receivedTrainPrompts.some((p) => receivedHoldoutPrompts.includes(p)), false,
     'neural compile train override and holdout override must be disjoint');
 });
@@ -306,12 +312,16 @@ test('W960 distilled_model compile packages portable worker weights with distill
   });
   let receivedTrainPrompts = [];
   let receivedHoldoutPrompts = [];
+  let receivedTrainFromPairs = null;
+  let receivedPortableExport = null;
   const ctx = {
     examples,
     synthesize: async () => { throw new Error('synthesize must not run for distilled_model compile'); },
     distill: async function* (opts) {
       receivedTrainPrompts = (opts.pairs_override || []).map((p) => p.prompt);
       receivedHoldoutPrompts = (opts.holdout_override || []).map((p) => p.prompt);
+      receivedTrainFromPairs = opts.train_from_pairs;
+      receivedPortableExport = opts.portable_export;
       yield {
         done: true,
         artifact_path: distillOut,
@@ -337,6 +347,8 @@ test('W960 distilled_model compile packages portable worker weights with distill
   assert.equal(fresh.manifest?.training?.ml_pipeline_run, true);
   assert.equal(fresh.manifest?.training?.student_holdout_accuracy, 1.0);
   assert.ok(receivedHoldoutPrompts.length > 0, 'success path must pass holdout rows to the distill worker');
+  assert.equal(receivedTrainFromPairs, true);
+  assert.equal(receivedPortableExport, 'gguf');
   assert.equal(receivedTrainPrompts.some((p) => receivedHoldoutPrompts.includes(p)), false,
     'success path train rows and holdout rows must be disjoint');
   assert.equal(fresh.neural_compile?.ml_pipeline_run, true);

@@ -72,7 +72,7 @@
       "environment_configuration_boundary": 367,
       "execution_or_subprocess_boundary": 312,
       "http_route_surface": 41,
-      "large_component_contract_risk": 43,
+      "large_component_contract_risk": 44,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 171,
       "open_marker_requires_owner_review": 9,
@@ -176,6 +176,20 @@
           "stateful_storage_boundary"
         ],
         "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
+      },
+      {
+        "path": "workers/distill/distill.mjs",
+        "domain": "training_model_optimization",
+        "priority_score": 10,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "distribution_or_worker_surface",
+          "environment_configuration_boundary",
+          "execution_or_subprocess_boundary",
+          "large_component_contract_risk",
+          "stateful_storage_boundary"
+        ],
+        "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
       },
       {
         "path": "src/airgap-distill.js",
@@ -461,18 +475,6 @@
           "network_or_provider_boundary"
         ],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
-      },
-      {
-        "path": "src/red-team.js",
-        "domain": "identity_access",
-        "priority_score": 8,
-        "risk_signals": [
-          "auth_or_tenant_boundary",
-          "cryptographic_or_proof_boundary",
-          "large_component_contract_risk",
-          "network_or_provider_boundary"
-        ],
-        "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests"
       }
     ]
   },
@@ -23011,14 +23013,14 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "be0713a6cb7e5624684940bc4da81f290cef8283253746e1e7a9e6d3ff005e58",
+      "sha256": "2697e72ceb547ffbbc09178ff63543865429e67e1b96ad188e4aa201ad57df16",
       "metrics": {
-        "bytes": 34840,
-        "lines": 854,
+        "bytes": 35360,
+        "lines": 862,
         "imports": 10,
         "exports": 6,
         "routes": 0,
-        "env_refs": 5,
+        "env_refs": 7,
         "fs_writes": 8,
         "subprocess_refs": 0,
         "network_refs": 1,
@@ -30056,10 +30058,10 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "ed76e0093d0a4b0bd25d81ac73ac9b55074a18fa2c6ebba377acef00fbc3ffe7",
+      "sha256": "5c4937f71f845fec4a4c2affa8662e91ec0a9f684e67fc72a041f1fb98dd6395",
       "metrics": {
-        "bytes": 78936,
-        "lines": 1609,
+        "bytes": 79848,
+        "lines": 1626,
         "imports": 18,
         "exports": 20,
         "routes": 0,
@@ -32866,10 +32868,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "42b2b7c64c2ff04d3820d8543ea11cd8428e54f8f7187019d3445b662699a38f",
+      "sha256": "ae56c661ce564d097fbc23425ac1c40eaf9b3f641070428e9290ebe39a8606db",
       "metrics": {
-        "bytes": 29876,
-        "lines": 712,
+        "bytes": 30260,
+        "lines": 717,
         "imports": 5,
         "exports": 13,
         "routes": 0,
@@ -57787,16 +57789,16 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "5ba9d1cf020927cd8cd779e505355adce54246bb26f79b6b926c0c9a7a1bdfad",
+      "sha256": "960f963daca2f995726af6f487a2594ddeea7ac48cb8cd301f5afeaa7824537f",
       "metrics": {
-        "bytes": 36325,
-        "lines": 763,
-        "imports": 10,
+        "bytes": 44198,
+        "lines": 984,
+        "imports": 11,
         "exports": 0,
         "routes": 0,
-        "env_refs": 1,
+        "env_refs": 4,
         "fs_writes": 5,
-        "subprocess_refs": 7,
+        "subprocess_refs": 8,
         "network_refs": 0,
         "crypto_refs": 20,
         "markers": 0
@@ -57816,9 +57818,10 @@
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
+        "large_component_contract_risk",
         "stateful_storage_boundary"
       ],
-      "priority_score": 7,
+      "priority_score": 10,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -58805,12 +58808,12 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "python",
-      "sha256": "7d8081baba709a7d36873693206b0da021facef7a3546e115f147fd89ead93a2",
+      "sha256": "ffeb840d3646fb4f752abd4eef7d9dd071e7ce84e04522223bc77a7a859c5370",
       "metrics": {
-        "bytes": 13928,
-        "lines": 318,
+        "bytes": 20726,
+        "lines": 474,
         "imports": 0,
-        "exports": 3,
+        "exports": 6,
         "routes": 0,
         "env_refs": 7,
         "fs_writes": 0,
@@ -58868,10 +58871,10 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "python",
-      "sha256": "23482fef4b105f9e5e8e6d9cdfeb5d97d40a3a11980aedf9e50b54e0acf377bf",
+      "sha256": "b6d00e9b0ec45f96162bedc00e07f99dd4ed31359e0bee09d7d4b729d67f790a",
       "metrics": {
-        "bytes": 47060,
-        "lines": 1031,
+        "bytes": 47130,
+        "lines": 1033,
         "imports": 0,
         "exports": 24,
         "routes": 1,

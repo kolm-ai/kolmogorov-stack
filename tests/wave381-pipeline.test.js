@@ -176,6 +176,9 @@ fs.writeFileSync(path.join(args.out, 'manifest.json'), JSON.stringify({
   training_pairs_collected: seeds.length,
   student_holdout_arg_seen: !!args['student-holdout'],
   student_holdout_rows_seen: holdout.length,
+  train_from_seeds_seen: args['train-from-seeds'] === true,
+  export_portable_seen: args['export-portable'] || null,
+  export_quant_seen: args['export-quant'] || null,
   seed_inputs: seeds.map((s) => s.input),
   holdout_inputs: holdout.map((h) => h.input),
 }, null, 2));
@@ -191,6 +194,9 @@ fs.writeFileSync(path.join(args.out, 'manifest.json'), JSON.stringify({
       holdout_override: [
         { event_id: 'holdout_a', prompt: 'holdout a', response: 'out holdout' },
       ],
+      train_from_pairs: true,
+      portable_export: 'gguf',
+      export_quant: 'Q4_K_M',
       worker_cmd: fakeWorker,
       max_steps: 2,
       emit_progress_every: 0,
@@ -198,9 +204,13 @@ fs.writeFileSync(path.join(args.out, 'manifest.json'), JSON.stringify({
       if (ev.done) { doneEv = ev; break; }
     }
     assert.ok(doneEv, 'distill must yield done');
+    assert.equal(doneEv.worker_mode, 'full');
     assert.equal(doneEv.holdout_eval_count, 1);
     assert.equal(doneEv.manifest.student_holdout_arg_seen, true);
     assert.equal(doneEv.manifest.student_holdout_rows_seen, 1);
+    assert.equal(doneEv.manifest.train_from_seeds_seen, true);
+    assert.equal(doneEv.manifest.export_portable_seen, 'gguf');
+    assert.equal(doneEv.manifest.export_quant_seen, 'Q4_K_M');
     assert.deepEqual(doneEv.manifest.seed_inputs, ['train a', 'train b']);
     assert.deepEqual(doneEv.manifest.holdout_inputs, ['holdout a']);
     assert.equal(doneEv.manifest.seed_inputs.includes('holdout a'), false,

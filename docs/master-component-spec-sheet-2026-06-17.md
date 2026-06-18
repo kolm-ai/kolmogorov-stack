@@ -32,7 +32,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | speculative-decoding | runtime | sota_review_complete_major_frontier_work_open | at=8 open=0/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | finetune-frameworks | training | sota_review_complete_major_frontier_work_open | at=10 open=0/1/4 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | synthetic-data-curation | data | sota_review_complete_major_frontier_work_open | at=8 open=0/3/1 | 3 | npm run verify:stack-sota<br>npm run verify:redaction-benchmark |
-| small-llm-students | model-registry | sota_review_complete_critical_frontier_work_open | at=8 open=1/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
+| small-llm-students | model-registry | sota_review_complete_critical_frontier_work_open | at=9 open=1/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | ondevice-inference | cross-device | sota_review_complete_major_frontier_work_open | at=6 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:platform |
 | llm-routing | gateway | sota_review_complete_major_frontier_work_open | at=7 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_major_frontier_work_open | at=11 open=0/1/2 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |
@@ -53,6 +53,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | `src/daemon-connector.js` | platform_support | 11 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_daemon_connector_matrix_and_privacy_proxy_contract. |
 | `apps/trainer/main.py` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `src/airgap-distill.js` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
+| `workers/distill/distill.mjs` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `workers/quantize/scripts/quantize.py` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_quantize_worker_matrix_and_frontier_method_contract. |
 | `src/deploy-generators.js` | infra_cloud_device | 9 | open_marker_requires_owner_review<br>linked_frontier_work_open | Resolve or explicitly owner-review the open TODO/FIXME marker. |
 | `apps/trainer/multinode_launch.py` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
@@ -65,7 +66,6 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | `src/otel.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_otel_matrix_and_privacy_safe_semconv_contract. |
 | `src/spec-compile.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract. |
 | `src/wrapper-cli.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract. |
-| `workers/distill/scripts/dedup_pairs.py` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 
 ## Machine Sheet
 

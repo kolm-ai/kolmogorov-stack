@@ -520,8 +520,13 @@ export async function exportGguf({
 
   // ----- Toolchain check -----
   const probe = probeGgufToolchain();
-  if (!probe.ok) {
-    return { ok: false, plan, error: 'toolchain_missing', missing: probe.missing, hint: probe.hint };
+  const requiredMissing = [];
+  if (!ggufBase && !probe.components.convert) requiredMissing.push('convert_hf_to_gguf.py');
+  const needsQuantizeBinary = !isFullPrecision || q !== 'F16';
+  if (needsQuantizeBinary && !probe.components.quantize) requiredMissing.push('llama-quantize');
+  if (!skipCoherence && !probe.components.cli) requiredMissing.push('llama-cli');
+  if (requiredMissing.length > 0) {
+    return { ok: false, plan, error: 'toolchain_missing', missing: requiredMissing, hint: probe.hint };
   }
   if (requiresImatrix && !probe.components.imatrix) {
     return { ok: false, plan, error: 'imatrix_tool_missing', hint: 'IQ quants need llama-imatrix' };

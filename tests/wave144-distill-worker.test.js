@@ -158,6 +158,44 @@ test('worker: collect mode without --teacher fails with hint', () => {
   }
 });
 
+test('worker: --train-from-seeds builds training pairs without a teacher', () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-distill-seedtrain-'));
+  try {
+    writeSpec(tmp, { job_id: 'seed_train' });
+    writeSeeds(tmp, [
+      { input: 'a', output: 'A' },
+      { input: 'b', output: 'B' },
+      { input: 'c', output: 'C' },
+      { input: 'd', output: 'D' },
+      { input: 'e', output: 'E' },
+      { input: 'f', output: 'F' },
+    ]);
+    const out = path.join(tmp, 'out');
+    const r = runWorker([
+      '--mode=collect',
+      '--train-from-seeds',
+      `--spec=${path.join(tmp, 'spec.json')}`,
+      `--seeds=${path.join(tmp, 'seeds.jsonl')}`,
+      `--out=${out}`,
+    ]);
+    assert.equal(r.status, 0, `seed-train exit; stderr=${r.stderr}`);
+    const pairs = fs.readFileSync(path.join(out, 'training-pairs.jsonl'), 'utf8')
+      .trim().split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line));
+    assert.ok(pairs.length > 0, 'train split should produce at least one pair');
+    assert.ok(pairs.every((row) => row.training_pair_source === 'seed_output'));
+    assert.ok(pairs.every((row) => row.teacher_output === row.seed_output));
+    const mf = JSON.parse(fs.readFileSync(path.join(out, 'manifest.json'), 'utf8'));
+    assert.equal(mf.teacher_vendor, null);
+    assert.equal(mf.teacher_model, null);
+    assert.equal(mf.redact, false);
+    assert.equal(mf.redact_class, 'none');
+    assert.equal(mf.training_pair_source, 'seed_output');
+    assert.equal(mf.training_pairs_collected, pairs.length);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
+
 test('worker: missing --spec / --seeds / --out fails fast', () => {
   const r = runWorker(['--mode=stub']);
   assert.notEqual(r.status, 0);

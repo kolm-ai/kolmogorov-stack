@@ -718,6 +718,10 @@ export async function* distill({
   pipeline_mode = 'kd_softmax',
   pairs_override = null,           // tests can inject pairs directly
   holdout_override = null,          // eval-only rows; never staged into training seeds
+  train_from_pairs = false,         // train directly from labeled pairs; no teacher calls
+  portable_export = null,           // full-mode post-train export target, currently gguf
+  export_quant = 'Q4_K_M',
+  export_skip_coherence = false,
   worker_cmd = null,
   emit_progress_every = 100,
   tenant_id = null,                // W422 P0-4 - canonical tenant scope
@@ -807,11 +811,13 @@ export async function* distill({
     ? holdout_override.map((p, i) => _normalizeHoldoutPair(p, i)).filter(Boolean)
     : [];
   // 2. Resolve mode + teacher list (W459 - fallback-aware).
-  const { mode: workerMode } = _resolveWorkerMode();
-  const teacherList = teacher_fallback ? _pickTeachers() : (() => {
+  let { mode: workerMode } = _resolveWorkerMode();
+  const trainFromPairs = train_from_pairs === true;
+  if (trainFromPairs && pairs.length > 0) workerMode = 'full';
+  const teacherList = trainFromPairs ? [] : (teacher_fallback ? _pickTeachers() : (() => {
     const one = _pickTeacher();
     return one ? [one] : [];
-  })();
+  })());
   // Stub mode has no teacher; preserve the historical [null] shape so the
   // attempt loop runs exactly once. teacher_fallback=false also collapses
   // to single-shot (operator opted out of retry).
@@ -902,6 +908,9 @@ export async function* distill({
       pair_count: pairs.length,
       holdout_eval_count: holdoutPairs.length,
       worker_mode: workerMode,
+      train_from_pairs: trainFromPairs,
+      portable_export: portable_export || null,
+      export_quant: portable_export ? export_quant : null,
       teacher: attemptList[0] || null,
       teacher_planned: attemptList,
       teacher_source,
@@ -1000,6 +1009,12 @@ export async function* distill({
       `--max-rows=${Math.min(max_steps, pairs.length || 200)}`,
     ];
     if (teacher) args.push(`--teacher=${teacher}`);
+    if (trainFromPairs) args.push('--train-from-seeds');
+    if (portable_export) {
+      args.push(`--export-portable=${portable_export}`);
+      if (export_quant) args.push(`--export-quant=${export_quant}`);
+      if (export_skip_coherence) args.push('--export-skip-coherence');
+    }
     if (pipeline_mode !== 'kd_softmax') args.push(`--distillation-method=${pipeline_mode}`);
     // C4 - forward the rejection_sampling knobs to the worker only for that mode.
     if (pipeline_mode === 'rejection_sampling' && rs && typeof rs === 'object') {
@@ -1235,6 +1250,8 @@ export async function* distill({
     teacher_attempted_count: teacher_attempts.length,
     pair_count: pairs.length,
     holdout_eval_count: holdoutPairs.length,
+    train_from_pairs: trainFromPairs,
+    portable_export: workerManifest?.portable_export || null,
     resumed_from: resume_from || null,
     resume_prior_steps: resumePriorSteps,
     // W411 P0 #8 - how many pairs the distill() boundary refused as

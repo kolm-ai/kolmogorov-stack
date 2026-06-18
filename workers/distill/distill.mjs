@@ -62,6 +62,13 @@
 //                                exact (default) | substring | jaccard
 //   --student-holdout <path>     eval-only JSONL for train_lora.py; never used
 //                                for training-pair collection.
+//   --train-from-seeds           build training-pairs.jsonl from split train
+//                                seed outputs instead of calling a teacher.
+//   --export-portable <gguf>     after successful full training, attempt a real
+//                                portable export; missing toolchains are
+//                                recorded honestly, never faked.
+//   --export-quant <Q4_K_M>      GGUF quant level for --export-portable.
+//   --export-skip-coherence      skip the llama-cli coherence probe.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -255,10 +262,14 @@ if (mode === 'stub') {
   process.exit(0);
 }
 
+const trainFromSeeds = args['train-from-seeds'] === true || String(args['train-from-seeds'] || '').toLowerCase() === 'true';
 const teacherSpec = args.teacher;
-if (!teacherSpec) fail('--teacher <vendor:model> required for collect/full mode (or use --mode=stub)');
-const { vendor, model } = parseTeacherSpec(teacherSpec);
-const redact = args['no-redact'] !== true; // default true
+if (!teacherSpec && !trainFromSeeds) {
+  fail('--teacher <vendor:model> required for collect/full mode (or use --mode=stub or --train-from-seeds)');
+}
+const parsedTeacher = teacherSpec ? parseTeacherSpec(teacherSpec) : { vendor: null, model: null };
+const { vendor, model } = parsedTeacher;
+const redact = !trainFromSeeds && args['no-redact'] !== true; // default true for teacher calls
 const maxRows = Number(args['max-rows'] || 200);
 
 // wave 157 — record the redactor profile applied to this run so verifier
@@ -269,7 +280,10 @@ let redactClass = args['redact-class'];
 if (redactClass && !VALID_REDACT_CLASSES.includes(redactClass)) {
   fail(`--redact-class must be one of [${VALID_REDACT_CLASSES.join(', ')}]; got ${redactClass}`);
 }
-if (!redactClass) redactClass = redact ? 'auto' : 'none';
+if (trainFromSeeds && redactClass && redactClass !== 'none') {
+  fail(`--train-from-seeds does not invoke the teacher redaction/reinjection path; use --redact-class=none`);
+}
+if (!redactClass) redactClass = trainFromSeeds ? 'none' : (redact ? 'auto' : 'none');
 if (!redact && redactClass !== 'none') {
   fail(`--no-redact conflicts with --redact-class=${redactClass}; pick one`);
 }
@@ -284,63 +298,81 @@ const reinjectOut = fs.createWriteStream(reinjectionLogPath, { flags: 'w' });
 let allMapHashes = [];
 let collected = 0;
 
-console.log(`[distill-worker] collecting ${Math.min(maxRows, split.train.length)} training pairs from teacher ${vendor}:${model}`);
-for (let i = 0; i < Math.min(maxRows, split.train.length); i++) {
-  const row = split.train[i];
-  const inputText = typeof row.input === 'string' ? row.input : JSON.stringify(row.input);
-  try {
-    const r = await callTeacher({
-      vendor, model,
-      input: inputText,
-      system: spec.system || '',
-      redact,
-      maxTokens: Number(args['max-tokens'] || 1024),
-      localEndpoint: args['local-endpoint'],
-      localApiKey: args['local-api-key'],
-    });
+if (trainFromSeeds) {
+  console.log(`[distill-worker] building ${Math.min(maxRows, split.train.length)} training pairs from labeled train seeds`);
+  for (let i = 0; i < Math.min(maxRows, split.train.length); i++) {
+    const row = split.train[i];
     pairsOut.write(JSON.stringify({
       id: row.id || `train_${i + 1}`,
       input: row.input,
-      teacher_output: r.response,
+      teacher_output: row.output,
       seed_output: row.output,
-      // W713 - carry the per-row complexity_proxy stamped by
-      // src/distill-pipeline.js so the Python trainer's SequentialSampler can
-      // order the rows simple->complex (only present when --curriculum was set
-      // on the staged seeds; absent rows fall back to neutral in the trainer).
+      training_pair_source: 'seed_output',
       ...(typeof row.complexity_proxy === 'number' ? { complexity_proxy: row.complexity_proxy } : {}),
     }) + '\n');
-    logOut.write(JSON.stringify(r.teacher_call_log_entry) + '\n');
+    collected++;
+    if (collected % 10 === 0) process.stderr.write(`  collected ${collected}\n`);
+  }
+} else {
+  console.log(`[distill-worker] collecting ${Math.min(maxRows, split.train.length)} training pairs from teacher ${vendor}:${model}`);
+  for (let i = 0; i < Math.min(maxRows, split.train.length); i++) {
+    const row = split.train[i];
+    const inputText = typeof row.input === 'string' ? row.input : JSON.stringify(row.input);
+    try {
+      const r = await callTeacher({
+        vendor, model,
+        input: inputText,
+        system: spec.system || '',
+        redact,
+        maxTokens: Number(args['max-tokens'] || 1024),
+        localEndpoint: args['local-endpoint'],
+        localApiKey: args['local-api-key'],
+      });
+      pairsOut.write(JSON.stringify({
+        id: row.id || `train_${i + 1}`,
+        input: row.input,
+        teacher_output: r.response,
+        seed_output: row.output,
+        // W713 - carry the per-row complexity_proxy stamped by
+        // src/distill-pipeline.js so the Python trainer's SequentialSampler can
+        // order the rows simple->complex (only present when --curriculum was set
+        // on the staged seeds; absent rows fall back to neutral in the trainer).
+        ...(typeof row.complexity_proxy === 'number' ? { complexity_proxy: row.complexity_proxy } : {}),
+      }) + '\n');
+      logOut.write(JSON.stringify(r.teacher_call_log_entry) + '\n');
     // wave 157 — capture per-row reinjection metadata so an auditor can replay
     // the substitution offline. Stores token counts + a preservation_ok flag
     // (the callTeacher path already reinjected — this log captures whether
     // every input token was echoed back, so a tampered or dropping teacher
     // surfaces in the log). Never stores raw PHI; only the [PHI_*_n] token
     // identifiers.
-    const inputTokens   = (r.teacher_call_log_entry.redacted_input || '').match(/\[PHI_[A-Z]+_\d+\]/g) || [];
-    const outputTokens  = (r.teacher_call_log_entry.redacted_response || '').match(/\[PHI_[A-Z]+_\d+\]/g) || [];
-    const inputUnique   = Array.from(new Set(inputTokens));
-    const outputUnique  = Array.from(new Set(outputTokens));
-    const preservationOk = inputUnique.every(t => outputUnique.includes(t));
-    reinjectOut.write(JSON.stringify({
-      row_index: i,
-      id: row.id || `train_${i + 1}`,
-      input_token_count: inputTokens.length,
-      output_token_count: outputTokens.length,
-      input_unique_tokens: inputUnique,
-      output_unique_tokens: outputUnique,
-      preservation_ok: preservationOk,
-    }) + '\n');
-    allMapHashes.push(r.redaction_map_hash);
-    collected++;
-    if (collected % 10 === 0) process.stderr.write(`  collected ${collected}\n`);
-  } catch (e) {
-    process.stderr.write(`  [skip ${i + 1}] ${e.message}\n`);
-    logOut.write(JSON.stringify({ error: e.message, row_index: i }) + '\n');
+      const inputTokens   = (r.teacher_call_log_entry.redacted_input || '').match(/\[PHI_[A-Z]+_\d+\]/g) || [];
+      const outputTokens  = (r.teacher_call_log_entry.redacted_response || '').match(/\[PHI_[A-Z]+_\d+\]/g) || [];
+      const inputUnique   = Array.from(new Set(inputTokens));
+      const outputUnique  = Array.from(new Set(outputTokens));
+      const preservationOk = inputUnique.every(t => outputUnique.includes(t));
+      reinjectOut.write(JSON.stringify({
+        row_index: i,
+        id: row.id || `train_${i + 1}`,
+        input_token_count: inputTokens.length,
+        output_token_count: outputTokens.length,
+        input_unique_tokens: inputUnique,
+        output_unique_tokens: outputUnique,
+        preservation_ok: preservationOk,
+      }) + '\n');
+      allMapHashes.push(r.redaction_map_hash);
+      collected++;
+      if (collected % 10 === 0) process.stderr.write(`  collected ${collected}\n`);
+    } catch (e) {
+      process.stderr.write(`  [skip ${i + 1}] ${e.message}\n`);
+      logOut.write(JSON.stringify({ error: e.message, row_index: i }) + '\n');
+    }
   }
 }
 pairsOut.end();
 logOut.end();
 reinjectOut.end();
+await Promise.all([waitForStreamFinish(pairsOut), waitForStreamFinish(logOut), waitForStreamFinish(reinjectOut)]);
 
 const combinedMapHash = 'sha256:' + crypto.createHash('sha256').update(allMapHashes.join('\n')).digest('hex');
 const trainingPairsHash = fileSha256(pairsPath);
@@ -352,6 +384,7 @@ const reinjectionLogHash = fileSha256(reinjectionLogPath);
 let mlRun = false;
 let mlReport = null;
 let trainerSummary = null;
+let portableExport = null;
 let rejectionRan = false;   // C4 - true ONLY when the real best-of-N trainer ran
 if (mode === 'full') {
   const ready = await doctor();
@@ -464,6 +497,17 @@ if (mode === 'full') {
     }
   }
   trainerSummary = readJsonMaybe(path.join(outDir, 'student', 'training-summary.json'));
+  if (mlRun) {
+    portableExport = await maybeRunPortableExport({
+      args,
+      outDir,
+      spec,
+      studentBaseArg: args['student-base'] || 'Qwen/Qwen2.5-0.5B',
+      trainerSummary,
+      studentHoldoutPath,
+      pairsPath,
+    });
+  }
 }
 
 // wave 145 — optional teacher-holdout pass. When --teacher-holdout is set
@@ -478,7 +522,7 @@ if (mode === 'full') {
 let teacherHoldoutAccuracy = null;
 let teacherHoldoutCount = null;
 let teacherHoldoutLogHash = null;
-if (args['teacher-holdout'] && split.holdout.length > 0) {
+if (args['teacher-holdout'] && split.holdout.length > 0 && !trainFromSeeds) {
   const thMax = Number(args['teacher-holdout-max'] || 50);
   const cap = Math.min(thMax, split.holdout.length);
   const comparator = (args['teacher-holdout-comparator'] || 'exact');
@@ -562,6 +606,11 @@ const manifest = {
   ml_pipeline_run: mlRun,
   ml_report: mlReport,
   trainer_summary: trainerSummary,
+  training_pair_source: trainFromSeeds ? 'seed_output' : 'teacher',
+  portable_export: portableExport,
+  portable_weight_path: portableExport && portableExport.ok && portableExport.output_path
+    ? portableExport.output_path
+    : null,
   student_holdout_accuracy: numberOrNull(
     trainerSummary && (
       trainerSummary.student_holdout_accuracy ??
@@ -671,6 +720,14 @@ function fileSha256(p) {
   return 'sha256:' + crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 }
 
+function waitForStreamFinish(stream) {
+  if (!stream || stream.writableFinished) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    stream.once('finish', resolve);
+    stream.once('error', reject);
+  });
+}
+
 function rowsHash(rows) {
   const lines = rows.map(r => JSON.stringify({ input: r.input, output: r.output })).join('\n');
   return 'sha256:' + crypto.createHash('sha256').update(lines).digest('hex');
@@ -732,6 +789,170 @@ async function doctor() {
       ? null
       : 'install Python 3.10+ then: pip install torch transformers peft bitsandbytes accelerate datasets sentencepiece',
   };
+}
+
+function pythonBin() {
+  return process.env.KOLM_PYTHON || process.env.KOLM_PYTHON_BIN || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+}
+
+function truthyArg(v) {
+  if (v === true) return true;
+  const s = String(v || '').trim().toLowerCase();
+  return ['1', 'true', 'yes', 'on'].includes(s);
+}
+
+function tailText(s, n = 2048) {
+  return String(s || '').slice(-n);
+}
+
+async function maybeRunPortableExport({
+  args,
+  outDir,
+  spec,
+  studentBaseArg,
+  trainerSummary,
+  studentHoldoutPath,
+  pairsPath,
+}) {
+  const requestedRaw = args['export-portable'];
+  if (requestedRaw == null || requestedRaw === false) return null;
+  const format = String(requestedRaw === true ? 'gguf' : requestedRaw).trim().toLowerCase();
+  if (!format || ['0', 'false', 'off', 'none', 'no'].includes(format)) return null;
+  if (format !== 'gguf') {
+    return {
+      requested: true,
+      ok: false,
+      format,
+      error: 'unsupported_portable_export_format',
+      supported_formats: ['gguf'],
+    };
+  }
+
+  const studentDir = path.join(outDir, 'student');
+  const mergedDir = path.join(outDir, 'student-merged-hf');
+  const quant = String(args['export-quant'] || 'Q4_K_M').toUpperCase();
+  const outputPath = path.join(studentDir, 'model.gguf');
+  const contextLength = Number.isFinite(Number(args['export-context-length']))
+    ? Number(args['export-context-length'])
+    : 8192;
+  const skipCoherence = truthyArg(args['export-skip-coherence']);
+  const startedAt = new Date().toISOString();
+
+  if (!fs.existsSync(studentDir)) {
+    return {
+      requested: true,
+      ok: false,
+      format,
+      quant,
+      error: 'student_dir_missing',
+      student_path: path.relative(outDir, studentDir),
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+    };
+  }
+
+  const mergeCode = [
+    'import json, sys',
+    `sys.path.insert(0, ${JSON.stringify(ROOT)})`,
+    'from apps.trainer.merge import merge_lora_to_base',
+    'merged = merge_lora_to_base(adapter_dir=sys.argv[1], base_model=(sys.argv[2] or None), out_dir=sys.argv[3])',
+    'print(json.dumps({"ok": True, "merged_dir": merged}))',
+  ].join('\n');
+  const merge = spawnSync(pythonBin(), ['-c', mergeCode, studentDir, String(studentBaseArg || ''), mergedDir], {
+    encoding: 'utf8',
+    timeout: 60 * 60 * 1000,
+    maxBuffer: 16 * 1024 * 1024,
+    windowsHide: true,
+  });
+  if (merge.status !== 0) {
+    return {
+      requested: true,
+      ok: false,
+      format,
+      quant,
+      step: 'merge_lora_to_base',
+      exit_code: merge.status,
+      signal: merge.signal || null,
+      stderr: tailText(merge.stderr),
+      stdout: tailText(merge.stdout),
+      install_hint: 'Install torch + transformers + peft and ensure the adapter has adapter_config.json.',
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+    };
+  }
+
+  let mergeEnvelope = null;
+  try {
+    mergeEnvelope = JSON.parse(String(merge.stdout || '').trim().split(/\r?\n/).pop() || '{}');
+  } catch (_) {
+    mergeEnvelope = { ok: true, merged_dir: mergedDir };
+  }
+
+  try {
+    const { exportGguf } = await import('../../src/export-gguf.js');
+    const kscore = trainerSummary && Number.isFinite(Number(
+      trainerSummary.student_holdout_accuracy ?? trainerSummary.holdout_accuracy ?? trainerSummary.eval_accuracy
+    ))
+      ? Number(trainerSummary.student_holdout_accuracy ?? trainerSummary.holdout_accuracy ?? trainerSummary.eval_accuracy)
+      : null;
+    const result = await exportGguf({
+      artifact: {
+        name: spec.job_id || 'kolm-distilled-student',
+        artifact_hash: null,
+        params_b: null,
+        passport: { kscore },
+        merged_dir: mergeEnvelope.merged_dir || mergedDir,
+      },
+      quant,
+      outputPath,
+      imatrixSource: studentHoldoutPath || pairsPath,
+      skipCoherence,
+      context_length: contextLength,
+    });
+    if (!result.ok) {
+      return {
+        requested: true,
+        ok: false,
+        format,
+        quant,
+        step: 'export_gguf',
+        merged_dir: path.relative(outDir, mergeEnvelope.merged_dir || mergedDir),
+        error: result.error,
+        detail: result.detail || null,
+        missing: result.missing || null,
+        hint: result.hint || null,
+        plan: result.plan || null,
+        started_at: startedAt,
+        finished_at: new Date().toISOString(),
+      };
+    }
+    return {
+      requested: true,
+      ok: true,
+      format,
+      quant,
+      merged_dir: path.relative(outDir, mergeEnvelope.merged_dir || mergedDir),
+      output_path: path.relative(outDir, result.output_path || outputPath),
+      runtime_passport: result.runtime_passport || null,
+      forge_version: result.forge_version || null,
+      skip_coherence: skipCoherence,
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+    };
+  } catch (e) {
+    return {
+      requested: true,
+      ok: false,
+      format,
+      quant,
+      step: 'export_gguf',
+      merged_dir: path.relative(outDir, mergeEnvelope.merged_dir || mergedDir),
+      error: 'export_exception',
+      detail: String(e && e.message || e),
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+    };
+  }
 }
 
 function parseArgs(argv) {

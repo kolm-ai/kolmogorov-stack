@@ -280,6 +280,8 @@ def _exec_unsloth_backend(args, backend_reason, neftune_alpha, trainer_optim):
         argv.extend(["--eval-steps", str(args.eval_steps)])
     if args.val_fraction and args.val_fraction > 0:
         argv.extend(["--val-fraction", str(args.val_fraction)])
+    if args.holdout:
+        argv.extend(["--holdout", args.holdout])
     if args.qlora:
         argv.append("--qlora")
     if trainer_optim and trainer_optim != "adamw_torch":

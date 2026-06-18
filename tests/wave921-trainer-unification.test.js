@@ -60,6 +60,9 @@ test('train_lora.py --help succeeds (GPU-free)', { skip: !HAVE_PY }, () => {
   assert.match((r.stdout || '').toString(), /--preflight-only/);
   assert.match((r.stdout || '').toString(), /--backend/);
   assert.match((r.stdout || '').toString(), /--holdout/);
+  const u = spawnSync(PY, [path.join(repoRoot, 'workers/distill/scripts/train_lora_unsloth.py'), '--help'], { stdio: 'pipe', timeout: 60000 });
+  assert.equal(u.status, 0);
+  assert.match((u.stdout || '').toString(), /--holdout/);
 });
 
 test('W961 train_lora.py loads eval-only holdout rows GPU-free', { skip: !HAVE_PY }, () => {
@@ -80,16 +83,21 @@ sys.path.insert(0, here)
 spec = importlib.util.spec_from_file_location("train_lora_holdout_probe", os.path.join(here, "train_lora.py"))
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
-print(json.dumps(mod.load_holdout_rows(holdout)))
+uspec = importlib.util.spec_from_file_location("train_lora_unsloth_holdout_probe", os.path.join(here, "train_lora_unsloth.py"))
+umod = importlib.util.module_from_spec(uspec)
+uspec.loader.exec_module(umod)
+print(json.dumps({"hf": mod.load_holdout_rows(holdout), "unsloth": umod.load_holdout_rows(holdout)}))
 `;
   const r = spawnSync(PY, ['-c', probe], { stdio: 'pipe', timeout: 60000 });
   assert.equal(r.status, 0, (r.stderr || '').toString());
-  const rows = JSON.parse((r.stdout || '').toString());
-  assert.deepEqual(rows, [
+  const got = JSON.parse((r.stdout || '').toString());
+  const expected = [
     { id: 'a', input: 'A', expected: 'OA' },
     { id: 'b', input: 'B', expected: 'EB' },
     { id: 'c', input: 'C', expected: 'TC' },
-  ]);
+  ];
+  assert.deepEqual(got.hf, expected);
+  assert.deepEqual(got.unsloth, expected);
 });
 
 test('train_lora.py backend selector helpers are GPU-free', { skip: !HAVE_PY }, () => {
@@ -218,6 +226,7 @@ test('W616 trainer backend wiring spans recipe, CLI, worker, and mirror', () => 
   assert.match(train, /UNSLOTH_FAMILIES/);
   assert.match(train, /def _exec_unsloth_backend/);
   assert.match(train, /_exec_unsloth_backend\(args, backend_plan\["reason"\]/);
+  assert.match(train, /if args\.holdout:[\s\S]+--holdout/);
   assert.match(train, /LIGER_KERNEL_APIS/);
   assert.match(train, /def _maybe_apply_liger/);
   assert.match(train, /_maybe_apply_liger\(args\.student_base, apply_patch=True\)/);

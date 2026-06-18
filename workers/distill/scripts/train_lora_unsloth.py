@@ -14,8 +14,8 @@
 #   train_lora.py --backend=unsloth  (forced; hard-exits 11 if missing)
 #
 # CLI contract: accepts the same flags train_lora.py forwards via
-# _exec_unsloth_backend, plus --backend-reason for the manifest. Reads the
-# same env vars (KOLM_PRECISION, KOLM_GRAD_CHECKPOINT, KOLM_EARLY_STOP*,
+# _exec_unsloth_backend, plus --backend-reason and --holdout for the manifest.
+# Reads the same env vars (KOLM_PRECISION, KOLM_GRAD_CHECKPOINT, KOLM_EARLY_STOP*,
 # KOLM_GIT_SHA, KOLM_RECIPE_HASH, KOLM_RECIPE_NAME, KOLM_SCRUBBER_VERSION,
 # KOLM_PAIRS_HASH, KOLM_VERSION).
 #
@@ -30,6 +30,7 @@
 
 import argparse
 import json
+import math
 import os
 import sys
 import time
@@ -44,6 +45,125 @@ def _require(mod_name, install_hint, code=3):
         sys.stderr.write(f"[train_lora_unsloth] missing dependency '{mod_name}'.\n")
         sys.stderr.write(f"                     install hint: {install_hint}\n")
         sys.exit(code)
+
+
+def _holdout_expected(row):
+    if not isinstance(row, dict):
+        return None
+    for key in ("teacher_output", "output", "expected", "response"):
+        val = row.get(key)
+        if val is not None:
+            return str(val)
+    return None
+
+
+def load_holdout_rows(path, limit=512):
+    """Load eval-only holdout rows. Mirrors train_lora.py so the Unsloth
+    backend preserves the same W961 compile-gate metric contract.
+    """
+    rows = []
+    if not path:
+        return rows
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                prompt = obj.get("input") if isinstance(obj, dict) else None
+                expected = _holdout_expected(obj)
+                if prompt is None or expected is None:
+                    continue
+                rows.append({
+                    "id": obj.get("id") or obj.get("event_id"),
+                    "input": str(prompt),
+                    "expected": str(expected),
+                })
+                if len(rows) >= limit:
+                    break
+    except FileNotFoundError:
+        sys.stderr.write(f"[train_lora_unsloth] --holdout file not found: {path}\n")
+    except OSError as e:
+        sys.stderr.write(f"[train_lora_unsloth] --holdout read failed: {path}: {e}\n")
+    return rows
+
+
+def evaluate_student_holdout(model, tok, holdout_path, max_length, torch_mod, limit=512):
+    rows = load_holdout_rows(holdout_path, limit=limit)
+    if not rows:
+        return {
+            "student_holdout_accuracy": None,
+            "holdout_accuracy": None,
+            "holdout_rows": 0,
+            "holdout_rows_scored": 0,
+            "holdout_token_count": 0,
+            "holdout_path": holdout_path,
+        }
+    try:
+        device = next(model.parameters()).device
+    except Exception:
+        device = None
+    model.eval()
+    total = 0
+    correct = 0
+    loss_sum = 0.0
+    rows_scored = 0
+    with torch_mod.no_grad():
+        for row in rows:
+            prompt_text = f"<|user|>\n{row['input']}\n<|assistant|>\n"
+            completion = row["expected"]
+            eos = tok.eos_token or ""
+            full_text = f"{prompt_text}{completion}{eos}"
+            prompt_ids = tok(prompt_text, truncation=True, max_length=max_length)["input_ids"]
+            enc = tok(full_text, truncation=True, max_length=max_length, return_tensors="pt")
+            input_ids = enc["input_ids"]
+            if input_ids.shape[1] <= 1:
+                continue
+            prompt_len = min(len(prompt_ids), input_ids.shape[1] - 1)
+            if prompt_len >= input_ids.shape[1]:
+                continue
+            labels = input_ids.clone()
+            labels[:, :prompt_len] = -100
+            if device is not None:
+                input_ids = input_ids.to(device)
+                labels = labels.to(device)
+                if "attention_mask" in enc:
+                    enc["attention_mask"] = enc["attention_mask"].to(device)
+            kwargs = {"input_ids": input_ids, "labels": labels}
+            if "attention_mask" in enc:
+                kwargs["attention_mask"] = enc["attention_mask"]
+            out = model(**kwargs)
+            logits = out.logits[0, prompt_len - 1:-1, :]
+            target = input_ids[0, prompt_len:]
+            if logits.shape[0] != target.shape[0] or target.numel() == 0:
+                continue
+            pred = logits.argmax(dim=-1)
+            n_tok = int(target.numel())
+            correct += int((pred == target).sum().item())
+            total += n_tok
+            rows_scored += 1
+            if getattr(out, "loss", None) is not None:
+                loss_sum += float(out.loss.detach().cpu().item()) * n_tok
+    acc = (correct / total) if total > 0 else None
+    eval_loss = (loss_sum / total) if total > 0 and loss_sum > 0 else None
+    return {
+        "student_holdout_accuracy": acc,
+        "holdout_accuracy": acc,
+        "eval_accuracy": acc,
+        "eval_loss": eval_loss,
+        "loss_final": eval_loss,
+        "ppl_eval": math.exp(min(20.0, eval_loss)) if eval_loss is not None else None,
+        "holdout_rows": len(rows),
+        "holdout_rows_scored": rows_scored,
+        "holdout_token_count": total,
+        "holdout_correct_tokens": correct,
+        "holdout_path": holdout_path,
+        "holdout_metric": "response_token_next_token_accuracy",
+    }
 
 
 def main():
@@ -63,6 +183,8 @@ def main():
     p.add_argument("--save-steps", type=int, default=0)
     p.add_argument("--eval-steps", type=int, default=0)
     p.add_argument("--val-fraction", type=float, default=0.0)
+    p.add_argument("--holdout", default=None,
+                   help="eval-only JSONL with {input, output|expected|teacher_output}; never used for training")
     p.add_argument("--max-grad-norm", type=float, default=1.0)
     p.add_argument("--warmup-ratio", type=float, default=0.03)
     p.add_argument("--save-total-limit", type=int, default=3)
@@ -239,6 +361,25 @@ def main():
     model.save_pretrained(args.out)
     tok.save_pretrained(args.out)
 
+    holdout_metrics = {}
+    if args.holdout:
+        try:
+            holdout_metrics = evaluate_student_holdout(model, tok, args.holdout, args.max_length, torch)
+            if holdout_metrics.get("student_holdout_accuracy") is not None:
+                print("[train_lora_unsloth] holdout student token accuracy: "
+                      f"{holdout_metrics['student_holdout_accuracy']:.4f} "
+                      f"over {holdout_metrics.get('holdout_token_count', 0)} tokens")
+            else:
+                sys.stderr.write("[train_lora_unsloth] holdout supplied but no scorable response tokens were found\n")
+        except Exception as e:
+            holdout_metrics = {
+                "student_holdout_accuracy": None,
+                "holdout_accuracy": None,
+                "holdout_path": args.holdout,
+                "holdout_eval_error": str(e),
+            }
+            sys.stderr.write(f"[train_lora_unsloth] holdout evaluation failed: {e}\n")
+
     _reproducibility = {
         "git_sha": os.environ.get("KOLM_GIT_SHA") or None,
         "recipe_hash": os.environ.get("KOLM_RECIPE_HASH") or None,
@@ -276,6 +417,21 @@ def main():
             "lr": args.lr,
             "max_length": args.max_length,
             "pairs": len(rows),
+            "student_holdout_accuracy": holdout_metrics.get("student_holdout_accuracy"),
+            "holdout_accuracy": holdout_metrics.get("holdout_accuracy"),
+            "eval_accuracy": holdout_metrics.get("eval_accuracy"),
+            "eval_loss": holdout_metrics.get("eval_loss"),
+            "loss_final": holdout_metrics.get("loss_final"),
+            "ppl_eval": holdout_metrics.get("ppl_eval"),
+            "holdout": {
+                "path": holdout_metrics.get("holdout_path") if args.holdout else None,
+                "metric": holdout_metrics.get("holdout_metric") if args.holdout else None,
+                "rows": holdout_metrics.get("holdout_rows") if args.holdout else 0,
+                "rows_scored": holdout_metrics.get("holdout_rows_scored") if args.holdout else 0,
+                "token_count": holdout_metrics.get("holdout_token_count") if args.holdout else 0,
+                "correct_tokens": holdout_metrics.get("holdout_correct_tokens") if args.holdout else 0,
+                "error": holdout_metrics.get("holdout_eval_error"),
+            },
             "reproducibility": _reproducibility,
             "efficiency": {
                 "precision": precision,

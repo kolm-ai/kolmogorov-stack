@@ -26,6 +26,8 @@
     "dp_steps",
     "early_stop_config",
     "emit_progress_every",
+    "export_quant",
+    "export_skip_coherence",
     "gradient_checkpointing",
     "holdout_override",
     "importance",
@@ -33,6 +35,7 @@
     "max_steps",
     "pairs_override",
     "pipeline_mode",
+    "portable_export",
     "precision_mode",
     "resume_from",
     "rs",
@@ -42,6 +45,7 @@
     "tenant",
     "tenant_id",
     "tokenizer_path",
+    "train_from_pairs",
     "worker_cmd"
   ],
   "exports": [
@@ -108,55 +112,55 @@
     {
       "async": false,
       "kind": "function",
-      "line": 1275,
+      "line": 1292,
       "name": "resolveDistillFinalLoss"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1293,
+      "line": 1310,
       "name": "resolveDistillFinalK"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1325,
+      "line": 1342,
       "name": "summarizeDistillTelemetry"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1351,
+      "line": 1368,
       "name": "listDistillRuns"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1412,
+      "line": 1429,
       "name": "readDistillRun"
     },
     {
       "async": false,
       "kind": "const",
-      "line": 1490,
+      "line": 1507,
       "name": "W808_REGRESSION_GATE_VERSION"
     },
     {
       "async": false,
       "kind": "const",
-      "line": 1491,
+      "line": 1508,
       "name": "W808_KSCORE_DROP_THRESHOLD"
     },
     {
       "async": false,
       "kind": "const",
-      "line": 1492,
+      "line": 1509,
       "name": "W808_CRITICAL_FAIL_RATE_INCREASE_THRESHOLD"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 1494,
+      "line": 1511,
       "name": "_w808RegressionGate"
     }
   ],
@@ -261,67 +265,67 @@
     {
       "async": false,
       "exported": true,
-      "line": 1275,
+      "line": 1292,
       "name": "resolveDistillFinalLoss"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1289,
+      "line": 1306,
       "name": "_finiteMetric"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1293,
+      "line": 1310,
       "name": "resolveDistillFinalK"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1310,
+      "line": 1327,
       "name": "_normalizeProgressEvent"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1325,
+      "line": 1342,
       "name": "summarizeDistillTelemetry"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1351,
+      "line": 1368,
       "name": "listDistillRuns"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1412,
+      "line": 1429,
       "name": "readDistillRun"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1449,
+      "line": 1466,
       "name": "_safeTail"
     },
     {
       "async": false,
       "exported": true,
-      "line": 1494,
+      "line": 1511,
       "name": "_w808RegressionGate"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1578,
+      "line": 1595,
       "name": "_w808ExtractKscoreFromRunDir"
     },
     {
       "async": false,
       "exported": false,
-      "line": 1595,
+      "line": 1612,
       "name": "_w808ExtractCriticalFailRate"
     }
   ],
@@ -442,7 +446,7 @@
         "synthetic_suppressed",
         "measured"
       ],
-      "line": 1200,
+      "line": 1215,
       "owner": "summarizeDistillTelemetry",
       "present": true,
       "stage": "telemetry_summary"
@@ -453,7 +457,7 @@
         "manifest_present",
         "runs.slice"
       ],
-      "line": 1265,
+      "line": 1282,
       "owner": "listDistillRuns",
       "present": true,
       "stage": "run_listing"
@@ -464,7 +468,7 @@
         "_safeTail",
         "tenant_id = 'local'"
       ],
-      "line": 1412,
+      "line": 1429,
       "owner": "readDistillRun",
       "present": true,
       "stage": "run_detail"
@@ -475,7 +479,7 @@
         "critical_fail_rate",
         "rollback"
       ],
-      "line": 1149,
+      "line": 1164,
       "owner": "_w808RegressionGate",
       "present": true,
       "stage": "regression_gate"
@@ -607,9 +611,9 @@
   "summary": {
     "corpus_stats_key_count": 13,
     "direct_test_evidence_count": 173,
-    "distill_bytes": 78936,
-    "distill_lines": 1609,
-    "distill_option_count": 28,
+    "distill_bytes": 79848,
+    "distill_lines": 1626,
+    "distill_option_count": 32,
     "export_count": 19,
     "failed_safety_guards": 0,
     "function_count": 27,
@@ -622,7 +626,7 @@
     "required_test_evidence_count": 11,
     "stage_count": 13,
     "teacher_classification_count": 10,
-    "worker_flag_count": 21
+    "worker_flag_count": 25
   },
   "teacher_classification": [
     {
@@ -1417,8 +1421,8 @@
       "_resolveOrderingPolicy_refs": 0,
       "_w808RegressionGate_refs": 0,
       "classifyTeacher_refs": 0,
-      "distill_refs": 23,
-      "distill_workflow_refs": 30,
+      "distill_refs": 24,
+      "distill_workflow_refs": 31,
       "listDistillRuns_refs": 0,
       "path": "tests/wave144-distill-worker.test.js",
       "prepareDistillCorpus_refs": 0,
@@ -1428,7 +1432,7 @@
       "selectStudentBackbone_refs": 0,
       "source_lock": false,
       "summarizeDistillTelemetry_refs": 0,
-      "total_symbol_refs": 23
+      "total_symbol_refs": 24
     },
     {
       "MODES_refs": 0,
@@ -4085,8 +4089,8 @@
       "_resolveOrderingPolicy_refs": 0,
       "_w808RegressionGate_refs": 0,
       "classifyTeacher_refs": 0,
-      "distill_refs": 21,
-      "distill_workflow_refs": 21,
+      "distill_refs": 22,
+      "distill_workflow_refs": 22,
       "listDistillRuns_refs": 0,
       "path": "tests/wave921-trainer-unification.test.js",
       "prepareDistillCorpus_refs": 0,
@@ -4096,7 +4100,7 @@
       "selectStudentBackbone_refs": 0,
       "source_lock": false,
       "summarizeDistillTelemetry_refs": 0,
-      "total_symbol_refs": 21
+      "total_symbol_refs": 22
     },
     {
       "MODES_refs": 0,
@@ -4655,7 +4659,7 @@
   "worker_flags": [
     {
       "flag": "--allow-unknown-student-base",
-      "line": 999
+      "line": 1008
     },
     {
       "flag": "--auto",
@@ -4667,47 +4671,59 @@
     },
     {
       "flag": "--distillation-method",
-      "line": 1003
+      "line": 1018
+    },
+    {
+      "flag": "--export-portable",
+      "line": 1014
+    },
+    {
+      "flag": "--export-quant",
+      "line": 1015
+    },
+    {
+      "flag": "--export-skip-coherence",
+      "line": 1016
     },
     {
       "flag": "--importance-weights",
-      "line": 1021
+      "line": 1036
     },
     {
       "flag": "--max-rows",
-      "line": 1000
-    },
-    {
-      "flag": "--mode",
-      "line": 997
-    },
-    {
-      "flag": "--out",
-      "line": 996
-    },
-    {
-      "flag": "--rs-n",
-      "line": 1006
-    },
-    {
-      "flag": "--rs-reward",
-      "line": 1010
-    },
-    {
-      "flag": "--rs-temperature",
-      "line": 1007
-    },
-    {
-      "flag": "--rs-threshold",
-      "line": 1008
-    },
-    {
-      "flag": "--rs-threshold-mode",
       "line": 1009
     },
     {
+      "flag": "--mode",
+      "line": 1006
+    },
+    {
+      "flag": "--out",
+      "line": 1005
+    },
+    {
+      "flag": "--rs-n",
+      "line": 1021
+    },
+    {
+      "flag": "--rs-reward",
+      "line": 1025
+    },
+    {
+      "flag": "--rs-temperature",
+      "line": 1022
+    },
+    {
+      "flag": "--rs-threshold",
+      "line": 1023
+    },
+    {
+      "flag": "--rs-threshold-mode",
+      "line": 1024
+    },
+    {
       "flag": "--seeds",
-      "line": 995
+      "line": 1004
     },
     {
       "flag": "--since-last-compile",
@@ -4715,19 +4731,19 @@
     },
     {
       "flag": "--spec",
-      "line": 994
+      "line": 1003
     },
     {
       "flag": "--student-base",
-      "line": 998
+      "line": 1007
     },
     {
       "flag": "--student-holdout",
-      "line": 1013
+      "line": 1028
     },
     {
       "flag": "--teacher",
-      "line": 1002
+      "line": 1011
     },
     {
       "flag": "--teachers",
@@ -4735,6 +4751,10 @@
     },
     {
       "flag": "--tokenizer-path",
+      "line": 1027
+    },
+    {
+      "flag": "--train-from-seeds",
       "line": 1012
     }
   ]
