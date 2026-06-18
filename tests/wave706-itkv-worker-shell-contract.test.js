@@ -50,7 +50,7 @@ test('W706 source pins ITKV worker shell constants and package depth wiring', ()
     pkg.scripts['verify:itkv-worker-shell'],
     'node --test --test-concurrency=1 tests/wave706-itkv-worker-shell-contract.test.js',
   );
-  assert.match(pkg.scripts['verify:depth'], /verify:kv-cache && npm run verify:itkv-worker-shell && npm run verify:llm-routing/);
+  assert.match(pkg.scripts['verify:depth'], /verify:kv-cache && npm run verify:itkv-worker-shell && npm run verify:tsac-worker-shell && npm run verify:llm-routing/);
 });
 
 test('W706 doctor output keeps readiness but does not disclose home path or secrets', () => {
