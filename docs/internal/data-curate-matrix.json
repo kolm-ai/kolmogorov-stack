@@ -1,0 +1,1179 @@
+{
+  "curation_stages": [
+    {
+      "evidence": [
+        "_scoreQualityLearned",
+        "_applyQualityThreshold",
+        "report.quality"
+      ],
+      "line": 9,
+      "owner": "qualityClassifier",
+      "present": true,
+      "stage": "quality_learned_classifier"
+    },
+    {
+      "evidence": [
+        "_runHeuristicQuality",
+        "scoreCandidateLocal",
+        "quality_filtered"
+      ],
+      "line": 219,
+      "owner": "_runHeuristicQuality",
+      "present": true,
+      "stage": "quality_heuristic_fallback"
+    },
+    {
+      "evidence": [
+        "minhashPredup(work",
+        "minhashThreshold",
+        "report.minhash"
+      ],
+      "line": 65,
+      "owner": "minhashPredup",
+      "present": true,
+      "stage": "minhash_predup"
+    },
+    {
+      "evidence": [
+        "semDedup(work",
+        "semdedupKeep",
+        "report.semdedup"
+      ],
+      "line": 66,
+      "owner": "semDedup",
+      "present": true,
+      "stage": "semdedup_semantic"
+    },
+    {
+      "evidence": [
+        "spawnSync(py, args",
+        "timeout: 5 * 60 * 1000",
+        "report.dedup = 'ok'"
+      ],
+      "line": 345,
+      "owner": "_dedupViaPython",
+      "present": true,
+      "stage": "python_semantic_dedup"
+    },
+    {
+      "evidence": [
+        "_embeddingNearDupFallback(work",
+        "embedding_near_dup",
+        "embedding-near-dup-js"
+      ],
+      "line": 409,
+      "owner": "_embeddingNearDupFallback",
+      "present": true,
+      "stage": "embedding_near_dup_fallback"
+    },
+    {
+      "evidence": [
+        "_clusterAndLabel({",
+        "report.topics",
+        "cluster_method"
+      ],
+      "line": 91,
+      "owner": "_clusterAndLabel",
+      "present": true,
+      "stage": "semantic_cluster_labels"
+    },
+    {
+      "evidence": [
+        "_bucketKeyFor(p)",
+        "cluster_method = 'fallback:3gram'",
+        "report.coverage"
+      ],
+      "line": 232,
+      "owner": "_bucketKeyFor",
+      "present": true,
+      "stage": "fallback_cluster_buckets"
+    },
+    {
+      "evidence": [
+        "_detectLabelErrors({",
+        "report.label_errors",
+        "_routeErrorsToReview"
+      ],
+      "line": 96,
+      "owner": "_detectLabelErrors",
+      "present": true,
+      "stage": "label_error_detection"
+    },
+    {
+      "evidence": [
+        "flagCot(_pairOutput(p))",
+        "cot_flagged",
+        "survivors.push(p)"
+      ],
+      "line": 130,
+      "owner": "flagCot",
+      "present": true,
+      "stage": "cot_filter"
+    },
+    {
+      "evidence": [
+        "flagPii(out)",
+        "redactPii(out)",
+        "pii_redacted"
+      ],
+      "line": 137,
+      "owner": "redactPii",
+      "present": true,
+      "stage": "pii_redaction"
+    },
+    {
+      "evidence": [
+        "valuePairsByInfluence({",
+        "holdout_disjointness_unattested",
+        "basis: 'influence'"
+      ],
+      "line": 67,
+      "owner": "valuePairsByInfluence",
+      "present": true,
+      "stage": "valuation_influence"
+    },
+    {
+      "evidence": [
+        "valuePairsByShapley({",
+        "shapleyVal",
+        "basis: 'shapley'"
+      ],
+      "line": 68,
+      "owner": "valuePairsByShapley",
+      "present": true,
+      "stage": "valuation_shapley"
+    },
+    {
+      "evidence": [
+        "_selectDiverse({",
+        "facility-location",
+        "strategy: 'diversity-' + method"
+      ],
+      "line": 90,
+      "owner": "_selectDiverse",
+      "present": true,
+      "stage": "diversity_select"
+    },
+    {
+      "evidence": [
+        "selectByDSIR({",
+        "_dsirRealEnabled()",
+        "strategy: 'dsir'"
+      ],
+      "line": 69,
+      "owner": "selectByDSIR",
+      "present": true,
+      "stage": "dsir_real_select"
+    },
+    {
+      "evidence": [
+        "selectInformativeSubset(work",
+        "dsir-lite",
+        "value_strategy"
+      ],
+      "line": 70,
+      "owner": "selectInformativeSubset",
+      "present": true,
+      "stage": "dsir_lite_or_default_select"
+    },
+    {
+      "evidence": [
+        "_writeJsonl(outFile, work)",
+        "wrote = true",
+        "write_error"
+      ],
+      "line": 302,
+      "owner": "_writeJsonl",
+      "present": true,
+      "stage": "jsonl_materialization"
+    },
+    {
+      "evidence": [
+        "CURATE_PROVENANCE_SUFFIX",
+        "eventStore.appendEvent",
+        "prompt_tokens: 0"
+      ],
+      "line": 320,
+      "owner": "_persist",
+      "present": true,
+      "stage": "provenance_persist"
+    },
+    {
+      "evidence": [
+        "ok: true",
+        "version: CURATE_VERSION",
+        "n_removed"
+      ],
+      "line": 522,
+      "owner": "curatePairs",
+      "present": true,
+      "stage": "public_envelope"
+    },
+    {
+      "evidence": [
+        "curateDefault NEVER spawns",
+        "dedup: false",
+        "target_size: 0"
+      ],
+      "line": 1125,
+      "owner": "curateDefault",
+      "present": true,
+      "stage": "curate_default_light_path"
+    }
+  ],
+  "env_refs": [
+    "KOLM_DATA_DIR",
+    "KOLM_DSIR_DISABLE",
+    "KOLM_PYTHON"
+  ],
+  "exports": [
+    {
+      "async": false,
+      "kind": "const",
+      "line": 98,
+      "name": "CURATE_VERSION"
+    },
+    {
+      "async": false,
+      "kind": "const",
+      "line": 99,
+      "name": "EMBEDDING_NEAR_DUP_VERSION"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 130,
+      "name": "flagCot"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 145,
+      "name": "flagPii"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 150,
+      "name": "redactPii"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 186,
+      "name": "scoreCandidateLocal"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 522,
+      "name": "curatePairs"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 1148,
+      "name": "curateDefault"
+    }
+  ],
+  "failed_safety_guards": [],
+  "functions": [
+    {
+      "async": false,
+      "exported": false,
+      "line": 79,
+      "name": "_dsirRealEnabled"
+    },
+    {
+      "async": false,
+      "exported": true,
+      "line": 130,
+      "name": "flagCot"
+    },
+    {
+      "async": false,
+      "exported": true,
+      "line": 145,
+      "name": "flagPii"
+    },
+    {
+      "async": false,
+      "exported": true,
+      "line": 150,
+      "name": "redactPii"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 173,
+      "name": "_wordsLower"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 177,
+      "name": "_tokenOverlapScore"
+    },
+    {
+      "async": false,
+      "exported": true,
+      "line": 186,
+      "name": "scoreCandidateLocal"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 219,
+      "name": "_runHeuristicQuality"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 232,
+      "name": "_bucketKeyFor"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 247,
+      "name": "_pairInput"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 254,
+      "name": "_pairOutput"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 262,
+      "name": "_appendBackend"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 271,
+      "name": "_setPairOutput"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 280,
+      "name": "_dataRoot"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 284,
+      "name": "_nsDir"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 288,
+      "name": "_readJsonl"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 302,
+      "name": "_writeJsonl"
+    },
+    {
+      "async": true,
+      "exported": false,
+      "line": 320,
+      "name": "_persist"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 345,
+      "name": "_dedupViaPython"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 409,
+      "name": "_embeddingNearDupFallback"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 515,
+      "name": "_findRepoRoot"
+    },
+    {
+      "async": true,
+      "exported": true,
+      "line": 522,
+      "name": "curatePairs"
+    },
+    {
+      "async": true,
+      "exported": true,
+      "line": 1148,
+      "name": "curateDefault"
+    }
+  ],
+  "gates": {
+    "failures": [],
+    "ok": true,
+    "warnings": []
+  },
+  "missing_required_exports": [],
+  "options": [
+    "cluster",
+    "cluster_labeler",
+    "cot",
+    "curateOpts",
+    "dedup",
+    "dedupThreshold",
+    "detectErrors",
+    "diversitySelect",
+    "diversity_tau",
+    "dsir_alpha",
+    "dsir_buckets",
+    "dsir_ngrams",
+    "dsir_seed",
+    "embeddingNearDup",
+    "embeddingNearDupThreshold",
+    "epsilon",
+    "errorAction",
+    "errorMethod",
+    "errorReflect",
+    "errorSample",
+    "errorThreshold",
+    "gradStoreDir",
+    "influenceMethod",
+    "keep_fraction",
+    "minQuality",
+    "minhash",
+    "minhashThreshold",
+    "n_clusters",
+    "namespace",
+    "out_path",
+    "pii",
+    "quality",
+    "qualityClassifier",
+    "quality_mode",
+    "quality_model",
+    "routeErrors",
+    "select_method",
+    "select_strategy",
+    "semanticCluster",
+    "semdedup",
+    "semdedupEmbedder",
+    "semdedupK",
+    "semdedupKeep",
+    "semdedupSeed",
+    "shapleyK",
+    "shapleyMethod",
+    "shapleyVal",
+    "target_items",
+    "target_size",
+    "tenant",
+    "valueStrategy"
+  ],
+  "public_return_shapes": {
+    "curateDefault": [
+      "ok",
+      "version",
+      "pairs",
+      "report",
+      "n_in",
+      "n_kept",
+      "n_removed",
+      "method",
+      "degraded"
+    ],
+    "curatePairs": [
+      "ok",
+      "version",
+      "n_in",
+      "n_kept",
+      "n_removed",
+      "in_path",
+      "out_path",
+      "wrote",
+      "write_error",
+      "report",
+      "persist"
+    ],
+    "scoreCandidateLocal": [
+      "score",
+      "components"
+    ]
+  },
+  "purpose": "Generated contract matrix for src/data-curate.js: default-on light curation, optional heavy curation, DSIR/value/selection frontiers, privacy filters, graceful degradation, provenance fencing, and direct evidence coverage.",
+  "required_exports": [
+    "CURATE_VERSION",
+    "EMBEDDING_NEAR_DUP_VERSION",
+    "flagCot",
+    "flagPii",
+    "redactPii",
+    "scoreCandidateLocal",
+    "curatePairs",
+    "curateDefault"
+  ],
+  "required_test_evidence": [
+    "tests/wave921-data-engine-modules.test.js",
+    "tests/wave921-data-curate-modules.test.js",
+    "tests/sota-capturedata.test.js",
+    "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js",
+    "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
+    "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
+    "tests/wave637-data-curate-neardup-fallback.test.js",
+    "tests/wave947-data-curate-matrix.test.js"
+  ],
+  "safety_guards": {
+    "all_expected_stage_rows_present": true,
+    "cot_filter_drops_not_redacts_reasoning": true,
+    "curate_default_keeps_heavy_stages_off": true,
+    "direct_evidence_covers_required_tests": true,
+    "embedding_fallback_records_python_less_boundary": true,
+    "env_surface_is_small_and_named": true,
+    "influence_refusal_does_not_fabricate_scores": true,
+    "ingest_raw_pairs_path_is_single_authority": true,
+    "label_error_review_is_default_not_drop": true,
+    "minhash_and_semdedup_default_on": true,
+    "option_surface_covers_frontier_stages": true,
+    "pii_redaction_preserves_pair_schema": true,
+    "provenance_is_audit_namespace_not_training_namespace": true,
+    "public_api_never_throws_curate_default": true,
+    "public_api_never_throws_curate_pairs": true,
+    "python_dedup_is_bounded_and_degrades": true,
+    "python_shell_only_for_windows_cmd_shim": true,
+    "python_tempdir_cleanup_is_best_effort": true,
+    "quality_classifier_default_on_and_degrades": true,
+    "real_dsir_is_default_and_disable_is_explicit": true,
+    "required_public_exports_present": true,
+    "selection_is_opt_in_by_target_size": true,
+    "versions_are_current": true
+  },
+  "schema": "kolm.data_curate_matrix.v1",
+  "sources": [
+    "src/data-curate.js",
+    "src/minhash-dedup.js",
+    "src/data-semdedup.js",
+    "src/data-dsir.js",
+    "src/data-select.js",
+    "src/data-quality-classifier.js",
+    "src/data-label-errors.js",
+    "tests/wave921-data-engine-modules.test.js",
+    "tests/wave921-data-curate-modules.test.js",
+    "tests/sota-capturedata.test.js",
+    "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js",
+    "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
+    "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
+    "tests/wave637-data-curate-neardup-fallback.test.js",
+    "tests/wave947-data-curate-matrix.test.js"
+  ],
+  "summary": {
+    "data_curate_bytes": 56418,
+    "data_curate_lines": 1226,
+    "direct_test_evidence_count": 42,
+    "env_ref_count": 3,
+    "export_count": 8,
+    "failed_safety_guards": 0,
+    "function_count": 23,
+    "missing_required_exports": 0,
+    "missing_test_evidence": 0,
+    "option_count": 51,
+    "present_stage_count": 20,
+    "required_test_evidence_count": 8,
+    "stage_count": 20
+  },
+  "test_evidence": [
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/agent-audit-trail-analyzer.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 7,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 3,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/finalized-c3-data-shapley-marginal-contribution-valuation.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 23,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/finalized-c3-measured-kscore-delta-attribution-and-budget-allocation.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 4,
+      "curation_workflow_refs": 47,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/finalized-c3-real-dsir-hashed-ngram-importance-resampling.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 4
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 5,
+      "curation_workflow_refs": 58,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 5
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 2,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/finalized-c5-calibration-set-construction.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 5,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/finalized-c6-transitive-holdout-disjointness-ledger.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 11,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 21,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/sota-capturedata.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 11
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 8,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/sota-compileartifact.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 5,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/sota-dashboard.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 3,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 9,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/sota-tui.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 3
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave164-external-adversarial.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 2,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave381-pipeline.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave417-definition-of-done.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 2,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave458-dod-12-step-e2e.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave603-whole-stack-sota-deep-dive.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 2,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 3,
+      "curation_workflow_refs": 19,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave637-data-curate-neardup-fallback.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 5
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 9,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave663-dsir-resample-worker-contract.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 10,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave664-minhash-dedup-worker-contract.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave667-distill-dedup-worker-contract.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave710-meta-routes-contract.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 27,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave921-data-curate-modules.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 10,
+      "curation_workflow_refs": 46,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave921-data-engine-modules.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 10
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 6,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave921-data-engine-orchestrator.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 0,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave921-preference-miner.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 7,
+      "source_lock": false,
+      "total_symbol_refs": 7
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 2,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave933-capture-data-contracts.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave934-provider-compliance-contracts.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave935-platform-monitoring-contracts.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 1,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave937-api-contract-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 3,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave938-auth-boundary-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 3,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave939-cli-command-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 3,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave940-daemon-connector-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 2,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave941-quantize-worker-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 3,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave942-binder-contract-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 3,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave943-intent-contract-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 3,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave944-wrapper-cli-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 3,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave945-distill-pipeline-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 3,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wave946-spec-compile-matrix.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0
+    },
+    {
+      "CURATE_VERSION_refs": 3,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 2,
+      "curateDefault_refs": 2,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 31,
+      "flagCot_refs": 3,
+      "flagPii_refs": 2,
+      "path": "tests/wave947-data-curate-matrix.test.js",
+      "redactPii_refs": 2,
+      "scoreCandidateLocal_refs": 3,
+      "source_lock": true,
+      "total_symbol_refs": 17
+    },
+    {
+      "CURATE_VERSION_refs": 0,
+      "EMBEDDING_NEAR_DUP_VERSION_refs": 0,
+      "curateDefault_refs": 0,
+      "curatePairs_refs": 0,
+      "curation_workflow_refs": 4,
+      "flagCot_refs": 0,
+      "flagPii_refs": 0,
+      "path": "tests/wc04-compile-pipeline.test.js",
+      "redactPii_refs": 0,
+      "scoreCandidateLocal_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0
+    }
+  ],
+  "updated_at": "2026-06-18"
+}

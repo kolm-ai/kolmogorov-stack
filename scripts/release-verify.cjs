@@ -283,6 +283,7 @@ async function gateControlFiles() {
     { file: 'docs/internal/wrapper-cli-matrix.json', schema: 'kolm.wrapper_cli_matrix.v1', requiredArrays: ['commands', 'command_families', 'test_evidence'] },
     { file: 'docs/internal/distill-pipeline-matrix.json', schema: 'kolm.distill_pipeline_matrix.v1', requiredArrays: ['pipeline_stages', 'worker_flags', 'test_evidence'] },
     { file: 'docs/internal/spec-compile-matrix.json', schema: 'kolm.spec_compile_matrix.v1', requiredArrays: ['compile_phases', 'build_and_zip_fields', 'test_evidence'] },
+    { file: 'docs/internal/data-curate-matrix.json', schema: 'kolm.data_curate_matrix.v1', requiredArrays: ['curation_stages', 'options', 'test_evidence'] },
     { file: 'docs/internal/codebase-file-ledger.json', schema: 'kolm.codebase_file_ledger.v1', requiredArrays: ['paths'] },
     { file: 'docs/internal/design-cascade-ledger.json',schema: 'kolm.design_cascade_ledger.v1',requiredArrays: ['files'] },
     { file: 'docs/internal/product-media-proof.json',  schema: 'kolm.product_media_proof.v1',  requiredArrays: ['pages'] },

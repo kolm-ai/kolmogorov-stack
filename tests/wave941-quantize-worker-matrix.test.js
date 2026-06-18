@@ -23,8 +23,8 @@ test('W941 package wiring makes the quantize worker matrix a depth and control-f
     pkg.scripts['verify:quantize-worker-matrix'],
     'node scripts/build-quantize-worker-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave941-quantize-worker-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:daemon-connector-matrix && npm run build:quantize-worker-matrix && npm run build:binder-contract-matrix && npm run build:intent-contract-matrix && npm run build:wrapper-cli-matrix && npm run build:distill-pipeline-matrix && npm run build:spec-compile-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:daemon-connector-matrix && npm run verify:quantize-worker-matrix && npm run verify:binder-contract-matrix && npm run verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['build:control-files'], /build:daemon-connector-matrix && npm run build:quantize-worker-matrix && npm run build:binder-contract-matrix && npm run build:intent-contract-matrix && npm run build:wrapper-cli-matrix && npm run build:distill-pipeline-matrix && npm run build:spec-compile-matrix && npm run build:data-curate-matrix && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:daemon-connector-matrix && npm run verify:quantize-worker-matrix && npm run verify:binder-contract-matrix && npm run verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:data-curate-matrix && npm run verify:file-ledger/);
   assert.match(pkg.scripts['verify:depth'], /verify:agent-security-eval && npm run verify:quant-oracle && npm run verify:quantize-worker-matrix && npm run verify:kv-cache/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');

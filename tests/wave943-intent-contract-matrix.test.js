@@ -30,9 +30,9 @@ test('W943 package wiring makes the intent contract matrix a depth and control-f
     pkg.scripts['verify:intent-contract-matrix'],
     'node scripts/build-intent-contract-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave943-intent-contract-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:binder-contract-matrix && npm run build:intent-contract-matrix && npm run build:wrapper-cli-matrix && npm run build:distill-pipeline-matrix && npm run build:spec-compile-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:binder-contract-matrix && npm run verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:file-ledger/);
-  assert.match(pkg.scripts['verify:depth'], /verify:binder-contract-matrix && npm run verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:meta-routes/);
+  assert.match(pkg.scripts['build:control-files'], /build:binder-contract-matrix && npm run build:intent-contract-matrix && npm run build:wrapper-cli-matrix && npm run build:distill-pipeline-matrix && npm run build:spec-compile-matrix && npm run build:data-curate-matrix && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:binder-contract-matrix && npm run verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:data-curate-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['verify:depth'], /verify:binder-contract-matrix && npm run verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:data-curate-matrix && npm run verify:meta-routes/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');
   assert.match(ledgerBuilder, /build-intent-contract-matrix\.cjs/);
