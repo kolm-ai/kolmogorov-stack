@@ -25306,7 +25306,13 @@ res.json({
       const result = await trend.summarizeTrends();
       res.json(result);
     } catch (e) {
-      res.status(500).json({ ok: false, error: 'lake_trends_error', detail: String(e && e.message || e) });
+      const detail = String(e && e.message || e);
+      res.status(500).json({
+        ok: false,
+        error: 'lake_trends_error',
+        contract_version: 'w731-trend-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
+      });
     }
   });
 

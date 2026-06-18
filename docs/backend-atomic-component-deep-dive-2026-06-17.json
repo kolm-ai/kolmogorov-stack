@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 738,
-    "components_without_direct_test_reference": 91,
+    "test_referenced_components": 740,
+    "components_without_direct_test_reference": 89,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -33036,7 +33036,8 @@
         "tests/wave659-pattern-lake-contract.test.js",
         "tests/wave701-forge-experts-contract.test.js",
         "tests/wave702-forge-fit-contract.test.js",
-        "tests/wave712-namespace-fingerprint-contract.test.js"
+        "tests/wave712-namespace-fingerprint-contract.test.js",
+        "tests/wave731-trend-extract-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -37576,10 +37577,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "7cb16a5a60d2103b99413ac2a751520c6f6d9b453ca9884a8010ba179234d172",
+      "sha256": "f68e4cb460f295d74e6e7b0834cc1fc134c136915bc07be2189103c84deac167",
       "metrics": {
-        "bytes": 1467952,
-        "lines": 30777,
+        "bytes": 1468111,
+        "lines": 30783,
         "imports": 535,
         "exports": 8,
         "routes": 810,
@@ -37587,7 +37588,7 @@
         "fs_writes": 1,
         "subprocess_refs": 44,
         "network_refs": 34,
-        "crypto_refs": 257,
+        "crypto_refs": 260,
         "markers": 0
       },
       "test_refs": [
@@ -38975,7 +38976,8 @@
       "test_refs": [
         "tests/wave687-licensing-allowlist-contract.test.js",
         "tests/wave715-savings-routes-contract.test.js",
-        "tests/wave730-scim-provisioning-contract.test.js"
+        "tests/wave730-scim-provisioning-contract.test.js",
+        "tests/wave731-trend-extract-contract.test.js"
       ],
       "risk_signals": [
         "auth_or_tenant_boundary"
@@ -44058,12 +44060,12 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "d7a6bff0b04362f8ccb64c18a819a3af2779bd62850bd3b26b06942d25f08b1f",
+      "sha256": "5e3519cbee5bf55e704887f105aed22b6e08af0778b705fac2362d631268702a",
       "metrics": {
-        "bytes": 8135,
-        "lines": 211,
+        "bytes": 11909,
+        "lines": 325,
         "imports": 2,
-        "exports": 3,
+        "exports": 5,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -44072,11 +44074,16 @@
         "crypto_refs": 1,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave687-licensing-allowlist-contract.test.js",
+        "tests/wave715-savings-routes-contract.test.js",
+        "tests/wave730-scim-provisioning-contract.test.js",
+        "tests/wave731-trend-extract-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -44738,11 +44745,13 @@
         "crypto_refs": 3,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave731-trend-extract-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

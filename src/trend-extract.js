@@ -21,18 +21,100 @@ import { listEvents } from './event-store.js';
 import { isOptedIn } from './pattern-lake.js';
 
 export const TREND_VERSION = 'w757-v1';
+export const TREND_EXTRACT_CONTRACT_VERSION = 'w731-trend-v1';
+export const TREND_EXTRACT_LIMITS = Object.freeze({
+  max_scan_rows: 50000,
+  max_feedback_chars: 1000000,
+  max_namespace_chars: 256,
+  max_hashes_per_row: 20000,
+  max_emerging_items: 50,
+  max_window_days: 365,
+  min_history_rows: 10,
+  min_growth_ratio: 1.01,
+  max_growth_ratio: 1000,
+});
 
 const PROVIDER_CONTRIBUTION = 'kolm_pattern_lake_contribution';
 const PROVIDER_OPTIN = 'kolm_pattern_lake_optin';
+const SHA256_HEX_RE = /^[a-f0-9]{64}$/;
 
 // Minimum number of rows required across BOTH windows before we trust the
 // emergent-pattern signal. Below this the envelope reports insufficient
 // history rather than emitting a noisy small-sample top-K.
-const MIN_HISTORY_ROWS = 10;
+const MIN_HISTORY_ROWS = TREND_EXTRACT_LIMITS.min_history_rows;
 
 function _parseRow(r) {
-  if (!r || !r.feedback) return null;
-  try { return JSON.parse(r.feedback); } catch { return null; }
+  return _parseFeedback(r);
+}
+
+function _boundedInt(value, fallback, min, max) {
+  const n = Math.trunc(Number(value));
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function _boundedNumber(value, fallback, min, max) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function _scanLimit(value) {
+  return _boundedInt(value, TREND_EXTRACT_LIMITS.max_scan_rows, 1, TREND_EXTRACT_LIMITS.max_scan_rows);
+}
+
+function _cleanNamespace(value) {
+  if (value == null) return null;
+  const s = String(value).replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  if (!s || s.length > TREND_EXTRACT_LIMITS.max_namespace_chars) return null;
+  return s;
+}
+
+function _parseFeedback(row) {
+  if (!row || typeof row.feedback !== 'string' || !row.feedback) return null;
+  if (row.feedback.length > TREND_EXTRACT_LIMITS.max_feedback_chars) return null;
+  try { return JSON.parse(row.feedback); } catch { return null; }
+}
+
+function _normalizeBigramHashes(values) {
+  if (!Array.isArray(values)) return [];
+  const out = [];
+  const seen = new Set();
+  for (const value of values) {
+    const h = String(value || '').toLowerCase();
+    if (!SHA256_HEX_RE.test(h)) continue;
+    if (seen.has(h)) continue;
+    seen.add(h);
+    out.push(h);
+    if (out.length >= TREND_EXTRACT_LIMITS.max_hashes_per_row) break;
+  }
+  return out;
+}
+
+function _parseContributionRow(row) {
+  if (!row || !row.tenant_id || !row.created_at) return null;
+  const payload = _parseFeedback(row);
+  const namespace = _cleanNamespace(payload && payload.namespace);
+  if (!payload || !namespace) return null;
+  const createdMs = Date.parse(row.created_at);
+  if (!Number.isFinite(createdMs)) return null;
+  const bigram_hashes = _normalizeBigramHashes(payload.bigram_hashes);
+  if (!bigram_hashes.length) return null;
+  return {
+    tenant_id: String(row.tenant_id),
+    namespace,
+    created_at: row.created_at,
+    created_ms: createdMs,
+    bigram_hashes,
+  };
+}
+
+async function _isStillOptedIn(row, cache) {
+  const key = `${row.tenant_id}\u0000${row.namespace}`;
+  if (!cache.has(key)) {
+    cache.set(key, await isOptedIn(row.tenant_id, row.namespace));
+  }
+  return cache.get(key);
 }
 
 // Build a hash→count Map from a contribution row list, applying the same
@@ -42,14 +124,12 @@ function _histogram(rows) {
   const seenPerContributor = new Map();
   const histogram = new Map();
   for (const row of rows) {
-    if (!row || !row.tenant_id) continue;
-    const payload = _parseRow(row);
-    if (!payload || !Array.isArray(payload.bigram_hashes)) continue;
-    const k = row.tenant_id + '|' + payload.namespace;
+    if (!row || !row.tenant_id || !row.namespace) continue;
+    const k = row.tenant_id + '|' + row.namespace;
     let seen = seenPerContributor.get(k);
     if (!seen) { seen = new Set(); seenPerContributor.set(k, seen); }
-    for (const h of payload.bigram_hashes) {
-      if (typeof h !== 'string' || !h) continue;
+    for (const h of row.bigram_hashes || []) {
+      if (!SHA256_HEX_RE.test(h)) continue;
       if (seen.has(h)) continue;
       seen.add(h);
       histogram.set(h, (histogram.get(h) || 0) + 1);
@@ -65,34 +145,40 @@ function _histogram(rows) {
 export async function emergingPatterns({
   window_days = 30,
   min_growth_ratio = 2.0,
+  max_scan_rows = TREND_EXTRACT_LIMITS.max_scan_rows,
+  now_ms = Date.now(),
 } = {}) {
-  const wDays = Math.max(1, Math.min(365, Math.trunc(Number(window_days)) || 30));
-  const ratio = Math.max(1.01, Math.min(1000, Number(min_growth_ratio) || 2.0));
-  const now = Date.now();
+  const wDays = _boundedInt(window_days, 30, 1, TREND_EXTRACT_LIMITS.max_window_days);
+  const ratio = _boundedNumber(
+    min_growth_ratio,
+    2.0,
+    TREND_EXTRACT_LIMITS.min_growth_ratio,
+    TREND_EXTRACT_LIMITS.max_growth_ratio,
+  );
+  const scanLimit = _scanLimit(max_scan_rows);
+  const now = Number.isFinite(Number(now_ms)) ? Number(now_ms) : Date.now();
   const ms = wDays * 24 * 3600 * 1000;
-  const recentSince = new Date(now - ms).toISOString();
-  const priorSince = new Date(now - 2 * ms).toISOString();
-  const priorUntil = new Date(now - ms).toISOString();
+  const recentSinceMs = now - ms;
+  const priorSinceMs = now - 2 * ms;
 
   const all = await listEvents({
     provider: PROVIDER_CONTRIBUTION,
-    limit: 0,
+    limit: scanLimit,
+    order: 'desc',
   });
 
   // W411 - apply opt-in re-fence per row INSIDE the loop so a row whose
   // opt-in was revoked never participates in the trend computation.
   const recent = [];
   const prior = [];
+  const optInCache = new Map();
   for (const r of all) {
-    if (!r || !r.tenant_id || !r.created_at) continue;
-    const payload = _parseRow(r);
-    if (!payload || !payload.namespace) continue;
-     
-    const opted = await isOptedIn(r.tenant_id, payload.namespace);
-     
+    const row = _parseContributionRow(r);
+    if (!row) continue;
+    const opted = await _isStillOptedIn(row, optInCache);
     if (!opted) continue;
-    if (r.created_at >= recentSince) recent.push(r);
-    else if (r.created_at >= priorSince && r.created_at < priorUntil) prior.push(r);
+    if (row.created_ms >= recentSinceMs) recent.push(row);
+    else if (row.created_ms >= priorSinceMs && row.created_ms < recentSinceMs) prior.push(row);
   }
 
   if (recent.length + prior.length < MIN_HISTORY_ROWS) {
@@ -103,6 +189,10 @@ export async function emergingPatterns({
       have_recent: recent.length,
       have_prior: prior.length,
       window_days: wDays,
+      max_scan_rows: scanLimit,
+      scan_rows: all.length,
+      scan_capped: all.length >= scanLimit,
+      contract_version: TREND_EXTRACT_CONTRACT_VERSION,
       version: TREND_VERSION,
     };
   }
@@ -120,18 +210,27 @@ export async function emergingPatterns({
       emerging.push({ hash, recent_count: rcount, prior_count: pcount, growth_ratio: r });
     }
   }
-  emerging.sort((a, b) => b.growth_ratio - a.growth_ratio);
+  emerging.sort((a, b) => (
+    b.growth_ratio - a.growth_ratio
+    || b.recent_count - a.recent_count
+    || a.hash.localeCompare(b.hash)
+  ));
+  const topEmerging = emerging.slice(0, TREND_EXTRACT_LIMITS.max_emerging_items);
 
   return {
     ok: true,
     version: TREND_VERSION,
+    contract_version: TREND_EXTRACT_CONTRACT_VERSION,
     window_days: wDays,
     min_growth_ratio: ratio,
+    max_scan_rows: scanLimit,
+    scan_rows: all.length,
+    scan_capped: all.length >= scanLimit,
     n_recent_rows: recent.length,
     n_prior_rows: prior.length,
     emerging_count: emerging.length,
-    emerging: emerging.slice(0, 50),
-    generated_at: new Date().toISOString(),
+    emerging: topEmerging,
+    generated_at: new Date(now).toISOString(),
   };
 }
 
@@ -144,30 +243,36 @@ export async function emergingPatterns({
 //                               the vertical id as a substring (matches the
 //                               aggregatePatterns vertical filter)
 //   - emerging_count:     count of emerging bigrams (without payload)
-export async function summarizeTrends() {
+export async function summarizeTrends({
+  max_scan_rows = TREND_EXTRACT_LIMITS.max_scan_rows,
+  window_days = 30,
+  min_growth_ratio = 2.0,
+  now_ms = Date.now(),
+} = {}) {
+  const scanLimit = _scanLimit(max_scan_rows);
+  const now = Number.isFinite(Number(now_ms)) ? Number(now_ms) : Date.now();
   const contributionRows = await listEvents({
     provider: PROVIDER_CONTRIBUTION,
-    limit: 0,
+    limit: scanLimit,
+    order: 'desc',
   });
   const contributors = new Set();
   const namespaces = new Set();
   const verticalCounts = new Map();
+  const optInCache = new Map();
   // Best-effort vertical id list - kept in-sync with src/verticals.js
   // canonical order. Importing the catalog would be cleaner but would couple
   // this module to the verticals module's loading cost on every summary call.
   const KNOWN_VERTICAL_IDS = ['legal', 'medical', 'code', 'finance', 'support'];
 
   for (const r of contributionRows) {
-    if (!r || !r.tenant_id) continue;
-    const payload = _parseRow(r);
-    if (!payload || !payload.namespace) continue;
-     
-    const opted = await isOptedIn(r.tenant_id, payload.namespace);
-     
+    const row = _parseContributionRow(r);
+    if (!row) continue;
+    const opted = await _isStillOptedIn(row, optInCache);
     if (!opted) continue;
-    contributors.add(r.tenant_id);
-    namespaces.add(r.tenant_id + '|' + payload.namespace);
-    const ns = String(payload.namespace).toLowerCase();
+    contributors.add(row.tenant_id);
+    namespaces.add(row.tenant_id + '|' + row.namespace);
+    const ns = row.namespace.toLowerCase();
     for (const vid of KNOWN_VERTICAL_IDS) {
       if (ns.includes(vid)) {
         verticalCounts.set(vid, (verticalCounts.get(vid) || 0) + 1);
@@ -177,19 +282,23 @@ export async function summarizeTrends() {
 
   // Count opt-in registry rows too so the summary distinguishes "tenants
   // opted in but not yet contributed" from "tenants currently contributing".
-  const optInRows = await listEvents({ provider: PROVIDER_OPTIN, limit: 0 });
+  const optInRows = await listEvents({ provider: PROVIDER_OPTIN, limit: scanLimit, order: 'desc' });
   const optInTenants = new Set();
   for (const r of optInRows) {
     if (!r || !r.tenant_id) continue;
     const payload = _parseRow(r);
-    if (!payload || payload.action !== 'opt_in' || !payload.namespace) continue;
-     
-    const still = await isOptedIn(r.tenant_id, payload.namespace);
-     
+    const namespace = _cleanNamespace(payload && payload.namespace);
+    if (!payload || payload.action !== 'opt_in' || !namespace) continue;
+    const still = await _isStillOptedIn({ tenant_id: String(r.tenant_id), namespace }, optInCache);
     if (still) optInTenants.add(r.tenant_id);
   }
 
-  const emerging = await emergingPatterns({});
+  const emerging = await emergingPatterns({
+    max_scan_rows: scanLimit,
+    window_days,
+    min_growth_ratio,
+    now_ms: now,
+  });
   const emerging_count = emerging.ok ? emerging.emerging_count : 0;
 
   const top_verticals_by_density = Array.from(verticalCounts.entries())
@@ -200,11 +309,16 @@ export async function summarizeTrends() {
   return {
     ok: true,
     version: TREND_VERSION,
+    contract_version: TREND_EXTRACT_CONTRACT_VERSION,
+    max_scan_rows: scanLimit,
+    contribution_scan_rows: contributionRows.length,
+    optin_scan_rows: optInRows.length,
+    scan_capped: contributionRows.length >= scanLimit || optInRows.length >= scanLimit,
     total_contributors: contributors.size,
     total_namespaces: namespaces.size,
     total_optin_tenants: optInTenants.size,
     top_verticals_by_density,
     emerging_count,
-    generated_at: new Date().toISOString(),
+    generated_at: new Date(now).toISOString(),
   };
 }
