@@ -10,6 +10,23 @@ import { buildFp4CalibPlan } from './fp4-calib-plan.js';
 import { detectMoE, recommendQuantPolicy } from './moe-support.js';
 import { getFamily } from './moe-registry.js';
 
+// W964 - FP4 quality is model-size sensitive. These are conservative planning
+// priors, not benchmark claims. The post-quant accuracy gate remains mandatory.
+// They encode the June-2026 FP4 frontier finding captured in the backend spec:
+// small models are materially more sensitive to FP4 than 30B/70B+ models.
+const FP4_MODEL_SIZE_QUALITY_CURVES = Object.freeze({
+  nvfp4: Object.freeze([
+    Object.freeze({ max_params_b: 14, quality_loss: 0.04, recovery_hint: '95-98% BF16 recovery band' }),
+    Object.freeze({ max_params_b: 34, quality_loss: 0.02, recovery_hint: '97-99% BF16 recovery band' }),
+    Object.freeze({ max_params_b: null, quality_loss: 0.01, recovery_hint: '~99% BF16 recovery band' }),
+  ]),
+  mxfp4: Object.freeze([
+    Object.freeze({ max_params_b: 14, quality_loss: 0.05, recovery_hint: 'small-model MXFP4 sensitivity band' }),
+    Object.freeze({ max_params_b: 34, quality_loss: 0.03, recovery_hint: 'medium-model MXFP4 sensitivity band' }),
+    Object.freeze({ max_params_b: null, quality_loss: 0.018, recovery_hint: 'large-model MXFP4 sensitivity band' }),
+  ]),
+});
+
 const METHOD_CATALOG = Object.freeze({
   fp16: {
     label: 'FP16/BF16 baseline',
@@ -93,6 +110,7 @@ const METHOD_CATALOG = Object.freeze({
     bits: 4,
     compression: 0.30,
     quality_loss: 0.018,
+    quality_loss_model_size_curve: FP4_MODEL_SIZE_QUALITY_CURVES.nvfp4,
     latency_gain: 2.85,
     calibration_required: true,
     runtimes: ['tensorrt', 'vllm'],
@@ -108,6 +126,7 @@ const METHOD_CATALOG = Object.freeze({
     bits: 4,
     compression: 0.29,
     quality_loss: 0.026,
+    quality_loss_model_size_curve: FP4_MODEL_SIZE_QUALITY_CURVES.mxfp4,
     latency_gain: 2.65,
     calibration_required: true,
     runtimes: ['tensorrt', 'vllm'],
@@ -403,12 +422,40 @@ function qualityFloorFor(task, floor) {
   return clamp(floor ?? defaultFloor, 0.7, 0.999);
 }
 
-function estimateQuality(method, task, calibrationRows, preferenceTuned) {
+function qualityLossForMethod(method, paramsB) {
+  const curve = method?.quality_loss_model_size_curve;
+  if (!Array.isArray(curve) || curve.length === 0) {
+    return {
+      quality_loss: method.quality_loss,
+      source: 'catalog_flat_quality_loss',
+      band: null,
+    };
+  }
+  const size = Number.isFinite(Number(paramsB)) && Number(paramsB) > 0 ? Number(paramsB) : Infinity;
+  const band = curve.find((row) => row.max_params_b == null || size <= Number(row.max_params_b)) || curve[curve.length - 1];
+  return {
+    quality_loss: Number.isFinite(Number(band.quality_loss)) ? Number(band.quality_loss) : method.quality_loss,
+    source: 'model_size_quality_curve',
+    band: {
+      max_params_b: band.max_params_b == null ? null : Number(band.max_params_b),
+      recovery_hint: band.recovery_hint || null,
+    },
+  };
+}
+
+function estimateQuality(method, task, calibrationRows, preferenceTuned, paramsB) {
   const sens = TASK_SENSITIVITY[normalizeTask(task)] || TASK_SENSITIVITY.chat;
-  let loss = method.quality_loss * sens;
+  const lossPrior = qualityLossForMethod(method, paramsB);
+  let loss = lossPrior.quality_loss * sens;
   if (method.calibration_required && calibrationRows < 64) loss += 0.035;
   if (method.training_required && !preferenceTuned) loss += 0.02;
-  return round(clamp(1 - loss, 0, 1), 4);
+  return {
+    quality: round(clamp(1 - loss, 0, 1), 4),
+    loss: round(loss, 4),
+    prior_loss: round(lossPrior.quality_loss, 4),
+    source: lossPrior.source,
+    band: lossPrior.band,
+  };
 }
 
 function estimateLatencyMs(method, device, paramsB) {
@@ -472,7 +519,8 @@ function buildMoeQuantPolicy(moeInfo, device) {
 }
 
 function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens, calibrationRows, qualityFloor, privacyMode, preferenceTuned, experimentalEnabled, moeInfo, moePolicy }) {
-  let quality = estimateQuality(method, task, calibrationRows, preferenceTuned);
+  const qualityEstimate = estimateQuality(method, task, calibrationRows, preferenceTuned, paramsB);
+  let quality = qualityEstimate.quality;
   let memory = estimateMemoryGb(method, paramsB, contextTokens);
   let latency = estimateLatencyMs(method, device, paramsB);
   const warnings = [];
@@ -566,6 +614,10 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
     estimates: {
       memory_gb: round(memory, 2),
       quality,
+      quality_loss: qualityEstimate.loss,
+      quality_loss_prior: qualityEstimate.prior_loss,
+      quality_loss_source: qualityEstimate.source,
+      quality_loss_band: qualityEstimate.band,
       latency_ms: latency,
       compression_ratio: method.compression,
       bits: method.bits,

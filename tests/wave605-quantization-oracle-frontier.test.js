@@ -21,10 +21,12 @@ test('1. catalog exposes Blackwell FP4 export methods and device presets', () =>
   assert.equal(catalog.methods.nvfp4.export_format, 'nvfp4');
   assert.equal(catalog.methods.nvfp4.export_quant, 'w4a8');
   assert.equal(catalog.methods.nvfp4.blackwell_required, true);
+  assert.deepEqual(catalog.methods.nvfp4.quality_loss_model_size_curve.map((row) => row.max_params_b), [14, 34, null]);
 
   assert.equal(catalog.methods.mxfp4.execution_status, 'export_nvfp4');
   assert.equal(catalog.methods.mxfp4.export_quant, 'w4a4');
   assert.equal(catalog.methods.mxfp4.blackwell_required, true);
+  assert.deepEqual(catalog.methods.mxfp4.quality_loss_model_size_curve.map((row) => row.max_params_b), [14, 34, null]);
 
   assert.equal(catalog.methods.moe_mixed_policy.execution_status, 'advisory_policy');
   assert.equal(catalog.methods.moe_mixed_policy.moe_only, true);
@@ -86,16 +88,56 @@ test('3. Hopper TensorRT and Ada CUDA targets do not get Blackwell-only FP4 reco
   assert.ok(adaNvfp4.warnings.includes('runtime_mismatch:cuda'));
 });
 
-test('4. backend spec records W605 and W613 closures while leaving FP4 export-fusion work open', () => {
+test('4. FP4 quality estimate is model-size aware before accuracy-gate promotion', () => {
+  const small = rankQuantizationStrategies({
+    task: 'medical',
+    device: 'b200-180gb',
+    params_b: 7,
+    context_tokens: 8192,
+    calibration_rows: 512,
+    quality_floor: 0.97,
+  });
+  const smallNvfp4 = small.candidates.find((c) => c.method === 'nvfp4');
+  assert.equal(small.recommendation.primary.method, 'awq');
+  assert.equal(smallNvfp4.estimates.quality_loss_source, 'model_size_quality_curve');
+  assert.equal(smallNvfp4.estimates.quality_loss_prior, 0.04);
+  assert.deepEqual(smallNvfp4.estimates.quality_loss_band, {
+    max_params_b: 14,
+    recovery_hint: '95-98% BF16 recovery band',
+  });
+  assert.equal(smallNvfp4.feasible, false);
+  assert.ok(smallNvfp4.warnings.some((w) => w.startsWith('quality_below_floor')));
+
+  const large = rankQuantizationStrategies({
+    task: 'medical',
+    device: 'b200-180gb',
+    params_b: 70,
+    context_tokens: 8192,
+    calibration_rows: 512,
+    quality_floor: 0.97,
+  });
+  const largeNvfp4 = large.candidates.find((c) => c.method === 'nvfp4');
+  assert.equal(large.recommendation.primary.method, 'nvfp4');
+  assert.equal(largeNvfp4.estimates.quality_loss_prior, 0.01);
+  assert.deepEqual(largeNvfp4.estimates.quality_loss_band, {
+    max_params_b: null,
+    recovery_hint: '~99% BF16 recovery band',
+  });
+  assert.ok(largeNvfp4.estimates.quality > smallNvfp4.estimates.quality);
+});
+
+test('5. backend spec records W605/W613/W964 closures while leaving FP4 export-fusion work open', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
 
   assert.match(spec, /W605/);
   assert.match(spec, /NVFP4\/MXFP4 oracle routing/);
   assert.match(spec, /W613/);
+  assert.match(spec, /W964/);
+  assert.match(spec, /quality_loss size-aware/);
   assert.match(spec, /Fuse the BATQuant calibration plan into the NVFP4 export/);
 });
 
-test('5. MoE input routes to router-fp16 advisory policy and names external expert methods', () => {
+test('6. MoE input routes to router-fp16 advisory policy and names external expert methods', () => {
   const plan = rankQuantizationStrategies({
     task: 'chat',
     runtime: 'vllm',
