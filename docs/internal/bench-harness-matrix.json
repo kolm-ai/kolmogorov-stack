@@ -1,0 +1,2708 @@
+{
+  "benchmark_phases": [
+    {
+      "evidence": [
+        "const suite = getSuite(suiteId)",
+        "unknown suite",
+        "validateSuite"
+      ],
+      "id": "suite_resolution",
+      "line": 34,
+      "owner": "getSuite",
+      "present": true
+    },
+    {
+      "evidence": [
+        "prompt_override, when present, must be a non-empty array",
+        "expected_traits"
+      ],
+      "id": "prompt_override_validation",
+      "line": 11,
+      "owner": "prompt_override",
+      "present": true
+    },
+    {
+      "evidence": [
+        "Number.isFinite(n)",
+        "suite.prompts.slice(0, n)"
+      ],
+      "id": "prompt_count_cap",
+      "line": 94,
+      "owner": "suite.prompts.slice",
+      "present": true
+    },
+    {
+      "evidence": [
+        "models.map((m) => resolveModelTarget",
+        "transport_factory"
+      ],
+      "id": "target_resolution",
+      "line": 17,
+      "owner": "resolveModelTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "for (const p of suite.prompts)",
+        "target.send(p.text)"
+      ],
+      "id": "sequential_suite_run",
+      "line": 107,
+      "owner": "runSuiteAgainstTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "buildMarkdownReport({ rows, suite",
+        "## Caveats"
+      ],
+      "id": "markdown_report",
+      "line": 14,
+      "owner": "buildMarkdownReport",
+      "present": true
+    },
+    {
+      "evidence": [
+        "spec: 'kolm-bench-compare-1'",
+        "fs.writeFileSync(comparison_json_path"
+      ],
+      "id": "json_artifact_write",
+      "line": 137,
+      "owner": "jsonPayload",
+      "present": true
+    },
+    {
+      "evidence": [
+        "sample_privacy",
+        "prompt_sha256",
+        "response_sha256"
+      ],
+      "id": "hash_only_sample_serialization",
+      "line": 134,
+      "owner": "serializeBenchSample",
+      "present": true
+    },
+    {
+      "evidence": [
+        "include_raw_samples = false",
+        "if (includeRaw)"
+      ],
+      "id": "raw_sample_opt_in",
+      "line": 64,
+      "owner": "include_raw_samples",
+      "present": true
+    },
+    {
+      "evidence": [
+        "fetchWithTimeout",
+        "AbortController",
+        "bench_request_timeout"
+      ],
+      "id": "bounded_provider_fetch",
+      "line": 406,
+      "owner": "fetchWithTimeout",
+      "present": true
+    },
+    {
+      "evidence": [
+        "spawnSync(bin, args",
+        "timeout: 120_000",
+        "maxBuffer: 16 * 1024 * 1024"
+      ],
+      "id": "bounded_local_gguf_spawn",
+      "line": 287,
+      "owner": "makeLocalGgufTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "/v1/gateway/dispatch",
+        "missing_kolm_api_key",
+        "receipt_id"
+      ],
+      "id": "gateway_dispatch",
+      "line": 390,
+      "owner": "runViaGateway",
+      "present": true
+    },
+    {
+      "evidence": [
+        "computeMetric",
+        "cost_per_1k_usd",
+        "estimateCostPer1k"
+      ],
+      "id": "metric_summary",
+      "line": 790,
+      "owner": "summarizeRow",
+      "present": true
+    },
+    {
+      "evidence": [
+        "BENCH_SECRET_VALUE_RE",
+        "redactBenchError",
+        "slice(0, 512)"
+      ],
+      "id": "error_redaction",
+      "line": 1061,
+      "owner": "redactBenchError",
+      "present": true
+    }
+  ],
+  "benchmark_suites": [
+    {
+      "description": "100 identical short prompts; measures wrapper tax (kolm gateway vs direct upstream)",
+      "id": "gateway-overhead-100",
+      "metric_count": 4,
+      "metrics": [
+        "mean_ms",
+        "p50_ms",
+        "p95_ms",
+        "cost_per_1k_usd"
+      ],
+      "n_prompts": 100,
+      "required_models": [],
+      "validation_errors": [],
+      "validation_ok": true
+    },
+    {
+      "description": "30 prompts that embed PII; verifies block-mode short-circuit + output redaction",
+      "id": "pii-redaction-30",
+      "metric_count": 4,
+      "metrics": [
+        "pii_blocked_in_input",
+        "pii_redacted_in_output",
+        "mean_ms",
+        "p50_ms"
+      ],
+      "n_prompts": 30,
+      "required_models": [],
+      "validation_errors": [],
+      "validation_ok": true
+    },
+    {
+      "description": "50 multi-step reasoning prompts; loose substring grade against canonical answer",
+      "id": "reasoning-deepseek-50",
+      "metric_count": 7,
+      "metrics": [
+        "correctness@1",
+        "mean_ms",
+        "p50_ms",
+        "p95_ms",
+        "mean_chars",
+        "chars_per_token",
+        "cost_per_1k_usd"
+      ],
+      "n_prompts": 50,
+      "required_models": [],
+      "validation_errors": [],
+      "validation_ok": true
+    },
+    {
+      "description": "57 ambiguous support requests; measures whether the model asks ONE clarifying question + stays on policy",
+      "id": "support-clarity-57",
+      "metric_count": 8,
+      "metrics": [
+        "mean_ms",
+        "p50_ms",
+        "p95_ms",
+        "mean_chars",
+        "asks_one_question_rate",
+        "judge_clarify_rate",
+        "judge_on_policy_rate",
+        "cost_per_1k_usd"
+      ],
+      "n_prompts": 57,
+      "required_models": [],
+      "validation_errors": [],
+      "validation_ok": true
+    }
+  ],
+  "env_refs": [
+    "ANTHROPIC_API_KEY",
+    "DEEPSEEK_API_KEY",
+    "GEMINI_API_KEY",
+    "KOLM_API_KEY",
+    "KOLM_BASE_URL",
+    "KOLM_BENCH_LOCAL_LLM_URL",
+    "KOLM_BENCH_VLLM_URL",
+    "KOLM_LOCAL_BASE",
+    "KOLM_UPSTREAM_ANTHROPIC_BASE",
+    "KOLM_UPSTREAM_DEEPSEEK_BASE",
+    "KOLM_UPSTREAM_GEMINI_BASE",
+    "KOLM_UPSTREAM_OPENAI_BASE",
+    "LLAMA_CPP_BIN",
+    "OPENAI_API_KEY"
+  ],
+  "exports": [
+    {
+      "async": false,
+      "kind": "const",
+      "line": 43,
+      "name": "listSuites"
+    },
+    {
+      "async": false,
+      "kind": "const",
+      "line": 44,
+      "name": "validateSuite"
+    },
+    {
+      "async": false,
+      "kind": "re-export",
+      "line": 45,
+      "name": "METRIC_REGISTRY"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 50,
+      "name": "runBench"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 165,
+      "name": "buildMarkdownReport"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 266,
+      "name": "resolveModelTarget"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 720,
+      "name": "runViaGateway"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 1036,
+      "name": "estimateCostAsync"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 1146,
+      "name": "cliCompareEntry"
+    }
+  ],
+  "failed_safety_guards": [],
+  "functions": [
+    {
+      "async": true,
+      "exported": true,
+      "line": 50,
+      "name": "runBench"
+    },
+    {
+      "async": false,
+      "exported": true,
+      "line": 165,
+      "name": "buildMarkdownReport"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 213,
+      "name": "formatMetricHeader"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 222,
+      "name": "alignFor"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 231,
+      "name": "formatMetricCell"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 245,
+      "name": "escapeMd"
+    },
+    {
+      "async": false,
+      "exported": true,
+      "line": 266,
+      "name": "resolveModelTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 319,
+      "name": "providerForBareModel"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 327,
+      "name": "materializeObjectSpec"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 355,
+      "name": "makeFakeTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 383,
+      "name": "makeGatewayTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 395,
+      "name": "makeAnthropicTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 437,
+      "name": "makeOpenAITarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 474,
+      "name": "makeDeepSeekTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 511,
+      "name": "makeGoogleTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 552,
+      "name": "makeOllamaTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 588,
+      "name": "makeVllmTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 624,
+      "name": "makeLocalKolmTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 660,
+      "name": "makeLocalGgufTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 703,
+      "name": "makeUnknownTarget"
+    },
+    {
+      "async": true,
+      "exported": true,
+      "line": 720,
+      "name": "runViaGateway"
+    },
+    {
+      "async": true,
+      "exported": false,
+      "line": 768,
+      "name": "runSuiteAgainstTarget"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 795,
+      "name": "synthDrySample"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 812,
+      "name": "sha256Text"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 816,
+      "name": "publicGgufId"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 822,
+      "name": "serializeBenchSample"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 848,
+      "name": "summarizeRow"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 876,
+      "name": "computeMetric"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 908,
+      "name": "defaultJudge"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 931,
+      "name": "asksOneQuestion"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 937,
+      "name": "isPiiRedactedInOutput"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 950,
+      "name": "extractObviousPii"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 972,
+      "name": "estimateCostPer1k"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 993,
+      "name": "inlineCostPer1k"
+    },
+    {
+      "async": true,
+      "exported": true,
+      "line": 1036,
+      "name": "estimateCostAsync"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1055,
+      "name": "errorEnvelope"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1066,
+      "name": "redactBenchError"
+    },
+    {
+      "async": true,
+      "exported": false,
+      "line": 1073,
+      "name": "fetchWithTimeout"
+    },
+    {
+      "async": true,
+      "exported": false,
+      "line": 1087,
+      "name": "safeJson"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1096,
+      "name": "nowMs"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1098,
+      "name": "sum"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1100,
+      "name": "mean"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1105,
+      "name": "percentile"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1112,
+      "name": "rate"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1118,
+      "name": "locateLlamaCli"
+    },
+    {
+      "async": true,
+      "exported": true,
+      "line": 1146,
+      "name": "cliCompareEntry"
+    }
+  ],
+  "gates": {
+    "failures": [],
+    "ok": true,
+    "warnings": []
+  },
+  "metric_registry": [
+    {
+      "id": "asks_one_question_rate",
+      "kind": "behavior",
+      "lower_is_better": false,
+      "unit": "rate"
+    },
+    {
+      "id": "chars_per_token",
+      "kind": "shape",
+      "lower_is_better": null,
+      "unit": "ratio"
+    },
+    {
+      "id": "correctness@1",
+      "kind": "correctness",
+      "lower_is_better": false,
+      "unit": "rate"
+    },
+    {
+      "id": "cost_per_1k_usd",
+      "kind": "cost",
+      "lower_is_better": true,
+      "unit": "usd"
+    },
+    {
+      "id": "judge_clarify_rate",
+      "kind": "behavior",
+      "lower_is_better": false,
+      "unit": "rate"
+    },
+    {
+      "id": "judge_on_policy_rate",
+      "kind": "behavior",
+      "lower_is_better": false,
+      "unit": "rate"
+    },
+    {
+      "id": "mean_chars",
+      "kind": "shape",
+      "lower_is_better": null,
+      "unit": "chars"
+    },
+    {
+      "id": "mean_ms",
+      "kind": "latency",
+      "lower_is_better": true,
+      "unit": "ms"
+    },
+    {
+      "id": "p50_ms",
+      "kind": "latency",
+      "lower_is_better": true,
+      "unit": "ms"
+    },
+    {
+      "id": "p95_ms",
+      "kind": "latency",
+      "lower_is_better": true,
+      "unit": "ms"
+    },
+    {
+      "id": "pii_blocked_in_input",
+      "kind": "safety",
+      "lower_is_better": false,
+      "unit": "rate"
+    },
+    {
+      "id": "pii_redacted_in_output",
+      "kind": "safety",
+      "lower_is_better": false,
+      "unit": "rate"
+    }
+  ],
+  "missing_required_exports": [],
+  "public_return_shapes": {
+    "comparisonJson": [
+      "spec",
+      "suite",
+      "ran_at",
+      "dry_run",
+      "sample_privacy",
+      "models",
+      "per_model_samples"
+    ],
+    "runBench": [
+      "suite",
+      "models",
+      "comparison_md",
+      "comparison_json_path",
+      "comparison_md_path",
+      "ran_at",
+      "dry_run",
+      "sample_privacy"
+    ],
+    "runViaGateway": [
+      "ms",
+      "text",
+      "in_tok",
+      "out_tok",
+      "receipt_id",
+      "raw",
+      "error"
+    ],
+    "serializedSample": [
+      "prompt_id",
+      "prompt_sha256",
+      "response_sha256",
+      "prompt_chars",
+      "response_chars",
+      "ms",
+      "in_tok",
+      "out_tok",
+      "error",
+      "receipt_id"
+    ]
+  },
+  "purpose": "Generated contract matrix for src/bench-harness.js: benchmark suites, metric registry, provider/local transports, gateway dispatch, hash-only report samples, bounded network/subprocess execution, cost estimation, markdown/JSON outputs, and benchmark-evidence gating.",
+  "report_fields": [
+    {
+      "field": "spec",
+      "present": true
+    },
+    {
+      "field": "suite",
+      "present": true
+    },
+    {
+      "field": "ran_at",
+      "present": true
+    },
+    {
+      "field": "dry_run",
+      "present": true
+    },
+    {
+      "field": "sample_privacy",
+      "present": true
+    },
+    {
+      "field": "models",
+      "present": true
+    },
+    {
+      "field": "per_model_samples",
+      "present": true
+    }
+  ],
+  "required_exports": [
+    "listSuites",
+    "validateSuite",
+    "METRIC_REGISTRY",
+    "runBench",
+    "buildMarkdownReport",
+    "resolveModelTarget",
+    "runViaGateway",
+    "estimateCostAsync",
+    "cliCompareEntry"
+  ],
+  "required_test_evidence": [
+    "tests/wrapper-s4.test.js",
+    "tests/wave589-benchmark-evidence-contract.test.js",
+    "tests/wave950-bench-harness-matrix.test.js"
+  ],
+  "safety_guards": {
+    "all_expected_phases_present": true,
+    "all_expected_transports_present": true,
+    "built_in_suites_are_complete_and_valid": true,
+    "direct_evidence_covers_required_tests": true,
+    "gateway_requires_bearer_and_carries_receipt_id": true,
+    "local_gguf_paths_are_public_ids_only": true,
+    "local_subprocess_is_bounded_and_hidden": true,
+    "metric_registry_covers_latency_cost_behavior_correctness_safety_shape": true,
+    "provider_env_surface_is_named": true,
+    "provider_errors_are_redacted_and_capped": true,
+    "provider_fetches_are_bounded": true,
+    "raw_prompt_and_response_are_explicit_opt_in_only": true,
+    "report_json_is_hash_only_by_default": true,
+    "report_payload_omits_tokens_and_bases": true,
+    "required_public_exports_present": true,
+    "serialized_samples_keep_hashes_and_measurement_columns": true,
+    "suite_registry_is_defensive_copy": true
+  },
+  "sample_fields": [
+    {
+      "field": "prompt_id",
+      "present": true
+    },
+    {
+      "field": "prompt_sha256",
+      "present": true
+    },
+    {
+      "field": "response_sha256",
+      "present": true
+    },
+    {
+      "field": "prompt_chars",
+      "present": true
+    },
+    {
+      "field": "response_chars",
+      "present": true
+    },
+    {
+      "field": "ms",
+      "present": true
+    },
+    {
+      "field": "in_tok",
+      "present": true
+    },
+    {
+      "field": "out_tok",
+      "present": true
+    },
+    {
+      "field": "error",
+      "present": true
+    },
+    {
+      "field": "receipt_id",
+      "present": true
+    }
+  ],
+  "schema": "kolm.bench_harness_matrix.v1",
+  "sources": [
+    "src/bench-harness.js",
+    "src/bench-eval-suites.js",
+    "src/benchmark-evidence.js",
+    "scripts/benchmark-evidence.mjs",
+    "tests/wrapper-s4.test.js",
+    "tests/wave589-benchmark-evidence-contract.test.js",
+    "tests/wave950-bench-harness-matrix.test.js"
+  ],
+  "summary": {
+    "bench_harness_bytes": 43843,
+    "bench_harness_lines": 1149,
+    "direct_test_evidence_count": 116,
+    "env_ref_count": 14,
+    "export_count": 9,
+    "failed_safety_guards": 0,
+    "function_count": 46,
+    "metric_count": 12,
+    "missing_required_exports": 0,
+    "missing_test_evidence": 0,
+    "phase_count": 14,
+    "present_phase_count": 14,
+    "present_report_field_count": 7,
+    "present_sample_field_count": 10,
+    "present_transport_count": 12,
+    "report_field_count": 7,
+    "required_test_evidence_count": 3,
+    "sample_field_count": 10,
+    "suite_count": 4,
+    "total_prompt_count": 237,
+    "transport_count": 12
+  },
+  "test_evidence": [
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 7,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/agent-attestation-report.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 6,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/artifact-end-to-end.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 8,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/finalized-c2-real-escape-probe-test-suite.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/finalized-c3-measured-kscore-delta-attribution-and-budget-allocation.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/generator-router.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/product-kernel-envelope.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 13,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/red-team.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/report-v2.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/saml-scim.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 12,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/server.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/synthesize-gated.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave-gkd-onpolicy-executor.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 11,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave144-bench-compare.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 7,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave144-bench-proof.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave144-distill-worker.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 4,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave144-predibase-demo.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave164-external-adversarial.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave191-moe-cli.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave192-rag-cli.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave199-seeds-new.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 4,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave235-amd-rocm-benchmarks.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 8,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave255-e2e-compile-distill.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave292-teacher-bridge-fail-closed.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave311-walkloop-parallel-fix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 19,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave345-eval-bench-parity.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave347-nl-seeds.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave379-team.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave381-pipeline.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave383-agent-telemetry.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave384-router-wiring.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave388-build-curated-via-examples.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave409a-canonical-event-store.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave409bb-test-hardening.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave409k-openai-compat-surface.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave411-migration-backfill.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave422-distill-tenant-fallback.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave438-rented-distill.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave442-blessed-test-command.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave470-suite-order-determinism.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave524-release-verify-helpers.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 22,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave529-release-verify-lockin-suite-honesty.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 10,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave581-redaction-benchmark.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 12,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave586-redaction-public-benchmark-contract.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 4,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave587-kscore-calibration-contract.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 2,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 2,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 9,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave589-benchmark-evidence-contract.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave593-invention-implementation-spec.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave595-product-frontier-map.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave598-product-invention-buildbook.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave599-readiness-gate-workorders.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave600-product-research-atlas.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave601-surface-readiness-smoke-contract.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave610-small-llm-frontier-registry.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave635-speculative-registry-sync.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave642-active-redteam-parity.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave646-adversarial-calibration.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 4,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave665-router-boundary-contract.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave686-kolmbench-contract.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave708-vertical-disclaimer.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave710-meta-routes-contract.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave720-self-improvement.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave721-tsac.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 9,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave723-streaming-load.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave724-memory-tier.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 8,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave725-preload-scheduler.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave726-bvl-kernels.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 19,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave727-accelerate.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 4,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 4,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 12,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave728-its.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave730-scim-provisioning-contract.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 8,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave814-speculative-teacher.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave826-runtime-placement.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 20,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave827-token-dpo.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 8,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave828-reasoning-v2.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave831-airgap.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 10,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave869-forge-personas.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave888d-deploy-pipeline.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave888i-gateway-overhead.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave888m-corpus-coverage.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 12,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave888o-compile-gate.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 8,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave890-13-deployment.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 5,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave890-16-final-verification.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 4,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave910-cli-fuzzy.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave921-autopilot-stats.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave921-compile-simulator.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave921-cost-optimizer.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave921-failure-analyst.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave921-fp4-calib-trust-remote.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave921-qad.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave921-ropd-cli.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave923-session-surfaces.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave930-eval-safety-harnesses-contract.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave933-capture-data-contracts.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave934-provider-compliance-contracts.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave935-platform-monitoring-contracts.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave936-training-runtime-governance-contracts.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave937-api-contract-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave938-auth-boundary-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave939-cli-command-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 4,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave940-daemon-connector-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 2,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave941-quantize-worker-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave942-binder-contract-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave943-intent-contract-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave944-wrapper-cli-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave945-distill-pipeline-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave946-spec-compile-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave947-data-curate-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave948-artifact-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 3,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave949-tui-workbench-matrix.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 35,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wave950-bench-harness-matrix.test.js",
+      "resolveModelTarget_refs": 2,
+      "runBench_refs": 4,
+      "runViaGateway_refs": 3,
+      "source_lock": true,
+      "total_symbol_refs": 9,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wc04-capture-analytics.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wrapper-email.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 4,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wrapper-integration.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wrapper-receipt-schema.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 14,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wrapper-s3.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 67,
+      "buildMarkdownReport_refs": 4,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 7,
+      "path": "tests/wrapper-s4.test.js",
+      "resolveModelTarget_refs": 6,
+      "runBench_refs": 15,
+      "runViaGateway_refs": 0,
+      "source_lock": true,
+      "total_symbol_refs": 44,
+      "validateSuite_refs": 12
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wrapper-s7.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    },
+    {
+      "METRIC_REGISTRY_refs": 0,
+      "bench_workflow_refs": 1,
+      "buildMarkdownReport_refs": 0,
+      "cliCompareEntry_refs": 0,
+      "estimateCostAsync_refs": 0,
+      "listSuites_refs": 0,
+      "path": "tests/wrapper-smoke.test.js",
+      "resolveModelTarget_refs": 0,
+      "runBench_refs": 0,
+      "runViaGateway_refs": 0,
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSuite_refs": 0
+    }
+  ],
+  "transport_targets": [
+    {
+      "evidence": [
+        "raw.startsWith('fake:')",
+        "makeFakeTarget",
+        "provider: 'fake'"
+      ],
+      "id": "fake",
+      "line": 279,
+      "owner": "makeFakeTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "raw.startsWith('gateway:')",
+        "makeGatewayTarget",
+        "runViaGateway"
+      ],
+      "id": "gateway",
+      "line": 283,
+      "owner": "makeGatewayTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "raw.startsWith('gguf:')",
+        "locateLlamaCli",
+        "spawnSync"
+      ],
+      "id": "local_gguf",
+      "line": 287,
+      "owner": "makeLocalGgufTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "raw.startsWith('ollama:')",
+        "KOLM_BENCH_LOCAL_LLM_URL",
+        "/api/chat"
+      ],
+      "id": "local_ollama",
+      "line": 291,
+      "owner": "makeOllamaTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "raw.startsWith('vllm:')",
+        "KOLM_BENCH_VLLM_URL",
+        "/v1/chat/completions"
+      ],
+      "id": "local_vllm",
+      "line": 295,
+      "owner": "makeVllmTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "raw.startsWith('local-kolm:')",
+        "KOLM_LOCAL_BASE",
+        "/v1/chat/completions"
+      ],
+      "id": "local_kolm",
+      "line": 299,
+      "owner": "makeLocalKolmTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "raw === 'trinity-500'",
+        "model: 'trinity-500'"
+      ],
+      "id": "trinity_alias",
+      "line": 7,
+      "owner": "trinity-500",
+      "present": true
+    },
+    {
+      "evidence": [
+        "ANTHROPIC_API_KEY",
+        "KOLM_UPSTREAM_ANTHROPIC_BASE",
+        "/v1/messages"
+      ],
+      "id": "anthropic_direct",
+      "line": 309,
+      "owner": "makeAnthropicTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "OPENAI_API_KEY",
+        "KOLM_UPSTREAM_OPENAI_BASE",
+        "/v1/chat/completions"
+      ],
+      "id": "openai_direct",
+      "line": 310,
+      "owner": "makeOpenAITarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "DEEPSEEK_API_KEY",
+        "KOLM_UPSTREAM_DEEPSEEK_BASE"
+      ],
+      "id": "deepseek_direct",
+      "line": 311,
+      "owner": "makeDeepSeekTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "GEMINI_API_KEY",
+        "KOLM_UPSTREAM_GEMINI_BASE",
+        ":generateContent"
+      ],
+      "id": "gemini_direct",
+      "line": 312,
+      "owner": "makeGoogleTarget",
+      "present": true
+    },
+    {
+      "evidence": [
+        "makeUnknownTarget",
+        "unresolvable_model"
+      ],
+      "id": "unknown_fallback",
+      "line": 316,
+      "owner": "makeUnknownTarget",
+      "present": true
+    }
+  ],
+  "updated_at": "2026-06-18"
+}

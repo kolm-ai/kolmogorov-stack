@@ -715,11 +715,12 @@
           "relation": "sampled"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards.",
+      "next_best_action": "Execute the linked frontier track: maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract.",
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -804,7 +805,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -1597,7 +1599,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -6672,7 +6675,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -8137,7 +8141,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -9778,7 +9783,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -10851,6 +10857,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave950-bench-harness-matrix.test.js",
           "tests/wrapper-s4.test.js"
         ],
         "category_links": [],
@@ -10859,7 +10866,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -10873,16 +10881,16 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 40998,
-          "lines": 1081,
+          "bytes": 43843,
+          "lines": 1149,
           "imports": 6,
           "exports": 8,
           "routes": 0,
           "env_refs": 17,
           "fs_writes": 0,
           "subprocess_refs": 4,
-          "network_refs": 8,
-          "crypto_refs": 8,
+          "network_refs": 1,
+          "crypto_refs": 11,
           "markers": 0
         },
         "risk_signals": [
@@ -10894,7 +10902,7 @@
         ],
         "priority_score": 9,
         "priority_band": "high",
-        "sha256": "a3c769db68cac9bc38cf6d2dd89daa30058e3a633ee939a2d9ce936a53489759"
+        "sha256": "218b75e5509d2d673b1aa3d735e5d5ab6eb7e6138f09a65d28695fc6f4faf60f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -10903,7 +10911,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wrapper-s4.test.js"
+          "tests/wave710-meta-routes-contract.test.js",
+          "tests/wave937-api-contract-matrix.test.js",
+          "tests/wave938-auth-boundary-matrix.test.js",
+          "tests/wave939-cli-command-matrix.test.js",
+          "tests/wave940-daemon-connector-matrix.test.js",
+          "tests/wave941-quantize-worker-matrix.test.js",
+          "tests/wave942-binder-contract-matrix.test.js",
+          "tests/wave943-intent-contract-matrix.test.js"
         ],
         "category_links": [
           {
@@ -10937,18 +10952,19 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
+        "improvement_track": "maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract",
         "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract."
     },
     {
       "path": "src/bench-report-md.js",
@@ -10992,7 +11008,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -11063,7 +11080,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [
@@ -11120,7 +11138,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -11176,7 +11195,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -11231,7 +11251,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -11958,7 +11979,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -12008,7 +12030,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -12054,7 +12077,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -12100,7 +12124,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -12196,7 +12221,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -12242,7 +12268,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -12289,7 +12316,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -12390,7 +12418,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -12447,7 +12476,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -12503,7 +12533,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -15810,7 +15841,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -16257,7 +16289,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -16751,7 +16784,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -16969,7 +17003,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17015,7 +17050,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17105,7 +17141,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [
@@ -17153,7 +17190,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17202,7 +17240,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17250,7 +17289,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17297,7 +17337,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17426,7 +17467,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [
@@ -17475,7 +17517,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17521,7 +17564,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17575,7 +17619,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [
@@ -17625,7 +17670,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17674,7 +17720,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17739,7 +17786,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [
@@ -17787,7 +17835,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17833,7 +17882,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17881,7 +17931,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17930,7 +17981,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -17976,7 +18028,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -18032,7 +18085,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -21495,7 +21549,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -21545,7 +21600,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -21593,7 +21649,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -21641,7 +21698,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -21689,7 +21747,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -22554,7 +22613,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -22863,7 +22923,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -24276,7 +24337,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -24752,7 +24814,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -25267,7 +25330,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -25916,7 +25980,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -26111,7 +26176,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -26689,7 +26755,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -33142,7 +33209,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -33189,7 +33257,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -33552,7 +33621,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -36175,7 +36245,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -36953,7 +37024,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -39159,7 +39231,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [
@@ -40216,7 +40289,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -40270,7 +40344,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -41366,7 +41441,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -41473,7 +41549,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -42875,7 +42952,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -42926,7 +43004,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -42977,7 +43056,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -43028,7 +43108,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -43079,7 +43160,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -43129,7 +43211,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -43179,7 +43262,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],
@@ -43712,7 +43796,8 @@
         "suggested_verification": [
           "npm run verify:redaction-benchmark",
           "npm run verify:quality-calibration",
-          "npm run verify:data-curate-matrix"
+          "npm run verify:data-curate-matrix",
+          "npm run verify:bench-harness-matrix"
         ]
       },
       "perfection_gaps": [],

@@ -36,6 +36,9 @@ import {
   METRIC_REGISTRY,
 } from './bench-eval-suites.js';
 
+const BENCH_SECRET_VALUE_RE = /\b(?:Bearer\s+[A-Za-z0-9._~+/-]{12,}|ks_[a-z0-9_]{12,}|sk-[a-z0-9_-]{12,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{20,})\b/gi;
+const BENCH_SECRET_PAIR_RE = /\b(?:api[_-]?key|key|token|authorization|access[_-]?token|secret)=([^&\s]+)/gi;
+
 // Re-export so callers have one entry point.
 export const listSuites = suitesList;
 export const validateSuite = suitesValidate;
@@ -57,6 +60,8 @@ export async function runBench(opts = {}) {
     judge,                   // optional injected judge function (for tests)
     transport_factory,       // optional override for unit tests
     timestamp,               // optional fixed ISO for deterministic golden output
+    timeout_ms = 120_000,    // per provider call; protects CI and live bench runs
+    include_raw_samples = false,
   } = opts;
 
   if (!suiteId || typeof suiteId !== 'string') {
@@ -91,7 +96,7 @@ export async function runBench(opts = {}) {
   const N = suite.prompts.length;
 
   // Resolve each model spec to a callable target.
-  const targets = models.map((m) => resolveModelTarget(m, { bearer, base, transport_factory }));
+  const targets = models.map((m) => resolveModelTarget(m, { bearer, base, transport_factory, timeout_ms }));
 
   // Run each target sequentially over the suite. Inter-target ordering
   // doesn't matter (no shared state), but per-target we walk the prompts
@@ -122,13 +127,21 @@ export async function runBench(opts = {}) {
     const stamp = ts.replace(/[:.]/g, '-');
     comparison_json_path = path.join(outDir, `${suite.id}-${stamp}.json`);
     comparison_md_path   = path.join(outDir, `${suite.id}-${stamp}.md`);
+    const sample_privacy = include_raw_samples ? 'raw-opt-in' : 'hash-only';
+    const serialized_samples = Object.fromEntries(
+      Object.entries(per_model_samples).map(([id, samples]) => [
+        id,
+        samples.map((sample) => serializeBenchSample(sample, { include_raw_samples })),
+      ]),
+    );
     const jsonPayload = {
       spec: 'kolm-bench-compare-1',
       suite: { id: suite.id, description: suite.description, n: N, metrics: suite.metrics },
       ran_at: ts,
       dry_run,
+      sample_privacy,
       models: rows,
-      per_model_samples,
+      per_model_samples: serialized_samples,
     };
     fs.writeFileSync(comparison_json_path, JSON.stringify(jsonPayload, null, 2) + '\n');
     fs.writeFileSync(comparison_md_path, comparison_md);
@@ -142,6 +155,7 @@ export async function runBench(opts = {}) {
     comparison_md_path,
     ran_at: ts,
     dry_run,
+    sample_privacy: include_raw_samples ? 'raw-opt-in' : 'hash-only',
   };
 }
 
@@ -270,7 +284,7 @@ export function resolveModelTarget(spec, ctx = {}) {
   }
   if (raw.startsWith('gguf:')) {
     const ggufPath = raw.slice('gguf:'.length);
-    return makeLocalGgufTarget({ id: raw, ggufPath });
+    return makeLocalGgufTarget({ id: publicGgufId(ggufPath), ggufPath });
   }
   if (raw.startsWith('ollama:')) {
     const model = raw.slice('ollama:'.length);
@@ -373,7 +387,7 @@ function makeGatewayTarget({ id, model, ctx }) {
     provider: 'kolm-gateway',
     model: model || id,
     async send(prompt) {
-      return runViaGateway(model || id, prompt, ctx.bearer, ctx.base);
+      return runViaGateway(model || id, prompt, ctx.bearer, ctx.base, ctx.timeout_ms);
     },
   };
 }
@@ -389,7 +403,7 @@ function makeAnthropicTarget({ id, model, ctx }) {
       if (!apiKey) return errorEnvelope('missing_anthropic_api_key');
       const t0 = nowMs();
       try {
-        const res = await fetch(`${process.env.KOLM_UPSTREAM_ANTHROPIC_BASE || 'https://api.anthropic.com'}/v1/messages`, {
+        const res = await fetchWithTimeout(`${process.env.KOLM_UPSTREAM_ANTHROPIC_BASE || 'https://api.anthropic.com'}/v1/messages`, {
           method: 'POST',
           headers: {
             'x-api-key': apiKey,
@@ -401,7 +415,7 @@ function makeAnthropicTarget({ id, model, ctx }) {
             max_tokens: 512,
             messages: [{ role: 'user', content: prompt }],
           }),
-        });
+        }, ctx.timeout_ms);
         const ms = nowMs() - t0;
         const json = await safeJson(res);
         if (!res.ok) return errorEnvelope(`http_${res.status}`, { ms, raw: json });
@@ -431,7 +445,7 @@ function makeOpenAITarget({ id, model, ctx }) {
       if (!apiKey) return errorEnvelope('missing_openai_api_key');
       const t0 = nowMs();
       try {
-        const res = await fetch(`${process.env.KOLM_UPSTREAM_OPENAI_BASE || 'https://api.openai.com'}/v1/chat/completions`, {
+        const res = await fetchWithTimeout(`${process.env.KOLM_UPSTREAM_OPENAI_BASE || 'https://api.openai.com'}/v1/chat/completions`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
           body: JSON.stringify({
@@ -439,7 +453,7 @@ function makeOpenAITarget({ id, model, ctx }) {
             messages: [{ role: 'user', content: prompt }],
             max_tokens: 512,
           }),
-        });
+        }, ctx.timeout_ms);
         const ms = nowMs() - t0;
         const json = await safeJson(res);
         if (!res.ok) return errorEnvelope(`http_${res.status}`, { ms, raw: json });
@@ -468,7 +482,7 @@ function makeDeepSeekTarget({ id, model, ctx }) {
       if (!apiKey) return errorEnvelope('missing_deepseek_api_key');
       const t0 = nowMs();
       try {
-        const res = await fetch(`${process.env.KOLM_UPSTREAM_DEEPSEEK_BASE || 'https://api.deepseek.com'}/v1/chat/completions`, {
+        const res = await fetchWithTimeout(`${process.env.KOLM_UPSTREAM_DEEPSEEK_BASE || 'https://api.deepseek.com'}/v1/chat/completions`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${apiKey}`, 'content-type': 'application/json' },
           body: JSON.stringify({
@@ -476,7 +490,7 @@ function makeDeepSeekTarget({ id, model, ctx }) {
             messages: [{ role: 'user', content: prompt }],
             max_tokens: 512,
           }),
-        });
+        }, ctx.timeout_ms);
         const ms = nowMs() - t0;
         const json = await safeJson(res);
         if (!res.ok) return errorEnvelope(`http_${res.status}`, { ms, raw: json });
@@ -507,14 +521,14 @@ function makeGoogleTarget({ id, model, ctx }) {
       try {
         const base = process.env.KOLM_UPSTREAM_GEMINI_BASE || 'https://generativelanguage.googleapis.com';
         const url = `${base}/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
-        const res = await fetch(url, {
+        const res = await fetchWithTimeout(url, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             generationConfig: { maxOutputTokens: 512 },
           }),
-        });
+        }, ctx.timeout_ms);
         const ms = nowMs() - t0;
         const json = await safeJson(res);
         if (!res.ok) return errorEnvelope(`http_${res.status}`, { ms, raw: json });
@@ -545,7 +559,7 @@ function makeOllamaTarget({ id, model, ctx }) {
     async send(prompt) {
       const t0 = nowMs();
       try {
-        const res = await fetch(`${endpoint}/api/chat`, {
+        const res = await fetchWithTimeout(`${endpoint}/api/chat`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
@@ -553,7 +567,7 @@ function makeOllamaTarget({ id, model, ctx }) {
             stream: false,
             messages: [{ role: 'user', content: prompt }],
           }),
-        });
+        }, ctx.timeout_ms);
         const ms = nowMs() - t0;
         const json = await safeJson(res);
         if (!res.ok) return errorEnvelope(`http_${res.status}`, { ms, raw: json });
@@ -581,7 +595,7 @@ function makeVllmTarget({ id, model, ctx }) {
     async send(prompt) {
       const t0 = nowMs();
       try {
-        const res = await fetch(`${endpoint}/v1/chat/completions`, {
+        const res = await fetchWithTimeout(`${endpoint}/v1/chat/completions`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
@@ -589,7 +603,7 @@ function makeVllmTarget({ id, model, ctx }) {
             messages: [{ role: 'user', content: prompt }],
             max_tokens: 512,
           }),
-        });
+        }, ctx.timeout_ms);
         const ms = nowMs() - t0;
         const json = await safeJson(res);
         if (!res.ok) return errorEnvelope(`http_${res.status}`, { ms, raw: json });
@@ -617,7 +631,7 @@ function makeLocalKolmTarget({ id, model, ctx }) {
     async send(prompt) {
       const t0 = nowMs();
       try {
-        const res = await fetch(`${endpoint}/v1/chat/completions`, {
+        const res = await fetchWithTimeout(`${endpoint}/v1/chat/completions`, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
@@ -625,7 +639,7 @@ function makeLocalKolmTarget({ id, model, ctx }) {
             messages: [{ role: 'user', content: prompt }],
             max_tokens: 512,
           }),
-        });
+        }, ctx.timeout_ms);
         const ms = nowMs() - t0;
         const json = await safeJson(res);
         if (!res.ok) return errorEnvelope(`http_${res.status}`, { ms, raw: json });
@@ -651,7 +665,7 @@ function makeLocalGgufTarget({ id, ggufPath }) {
     model: path.basename(ggufPath || ''),
     async send(prompt) {
       if (!ggufPath || !fs.existsSync(ggufPath)) {
-        return errorEnvelope(`gguf_not_found:${ggufPath || '(unset)'}`);
+        return errorEnvelope(`gguf_not_found:${publicGgufId(ggufPath)}`);
       }
       const bin = locateLlamaCli();
       if (!bin) return errorEnvelope('llama_cli_not_found');
@@ -703,13 +717,13 @@ function makeUnknownTarget({ id }) {
 // by makeGatewayTarget but exported so callers (and benchmarks) can dispatch
 // ad-hoc.
 // ---------------------------------------------------------------------------
-export async function runViaGateway(model, prompt, bearer, base) {
+export async function runViaGateway(model, prompt, bearer, base, timeout_ms) {
   const t0 = nowMs();
   const baseUrl = (base || process.env.KOLM_BASE_URL || 'https://kolm.ai').replace(/\/+$/, '');
   const token = bearer || process.env.KOLM_API_KEY || '';
   if (!token) return errorEnvelope('missing_kolm_api_key');
   try {
-    const res = await fetch(`${baseUrl}/v1/gateway/dispatch`, {
+    const res = await fetchWithTimeout(`${baseUrl}/v1/gateway/dispatch`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -720,7 +734,7 @@ export async function runViaGateway(model, prompt, bearer, base) {
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 512,
       }),
-    });
+    }, timeout_ms);
     const ms = nowMs() - t0;
     const json = await safeJson(res);
     if (!res.ok) return errorEnvelope(`gateway_http_${res.status}`, { ms, raw: json });
@@ -793,6 +807,39 @@ function synthDrySample(target, prompt) {
     error: null,
     receipt_id: null,
   };
+}
+
+function sha256Text(text) {
+  return crypto.createHash('sha256').update(String(text || '')).digest('hex');
+}
+
+function publicGgufId(ggufPath) {
+  if (!ggufPath) return 'gguf:unset';
+  const base = path.basename(String(ggufPath)) || 'model.gguf';
+  return `gguf:${base}:${sha256Text(ggufPath).slice(0, 12)}`;
+}
+
+function serializeBenchSample(sample, opts = {}) {
+  const includeRaw = !!opts.include_raw_samples;
+  const promptText = sample.prompt_text || '';
+  const responseText = sample.response_text || '';
+  const out = {
+    prompt_id: sample.prompt_id,
+    prompt_sha256: sha256Text(promptText),
+    response_sha256: sha256Text(responseText),
+    prompt_chars: String(promptText).length,
+    response_chars: String(responseText).length,
+    ms: Number(sample.ms || 0),
+    in_tok: Number(sample.in_tok || 0),
+    out_tok: Number(sample.out_tok || 0),
+    error: sample.error || null,
+    receipt_id: sample.receipt_id || null,
+  };
+  if (includeRaw) {
+    out.prompt_text = promptText;
+    out.response_text = responseText;
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -1011,9 +1058,30 @@ function errorEnvelope(err, extra = {}) {
     text: '',
     in_tok: 0,
     out_tok: 0,
-    error: String(err || 'error'),
+    error: redactBenchError(err),
     raw: extra.raw || null,
   };
+}
+
+function redactBenchError(err) {
+  return String(err || 'error')
+    .replace(BENCH_SECRET_PAIR_RE, (m) => `${m.split('=')[0]}=[redacted-secret]`)
+    .replace(BENCH_SECRET_VALUE_RE, '[redacted-secret]')
+    .slice(0, 512);
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 120_000) {
+  const n = Number(timeoutMs);
+  const boundedMs = Number.isFinite(n) && n > 0
+    ? Math.min(Math.max(Math.round(n), 1), 10 * 60 * 1000)
+    : 120_000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(new Error('bench_request_timeout')), boundedMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function safeJson(res) {

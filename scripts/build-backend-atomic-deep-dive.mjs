@@ -33,6 +33,8 @@ const ARTIFACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'artifact-matrix.jso
 const ARTIFACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave948-artifact-matrix.test.js');
 const TUI_WORKBENCH_MATRIX = path.join(ROOT, 'docs', 'internal', 'tui-workbench-matrix.json');
 const TUI_WORKBENCH_MATRIX_TEST = path.join(ROOT, 'tests', 'wave949-tui-workbench-matrix.test.js');
+const BENCH_HARNESS_MATRIX = path.join(ROOT, 'docs', 'internal', 'bench-harness-matrix.json');
+const BENCH_HARNESS_MATRIX_TEST = path.join(ROOT, 'tests', 'wave950-bench-harness-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
@@ -46,6 +48,7 @@ let specCompileMatrixGreen = null;
 let dataCurateMatrixGreen = null;
 let artifactMatrixGreen = null;
 let tuiWorkbenchMatrixGreen = null;
+let benchHarnessMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -518,6 +521,43 @@ function tuiWorkbenchMatrixOk() {
   return tuiWorkbenchMatrixGreen;
 }
 
+function benchHarnessMatrixOk() {
+  if (benchHarnessMatrixGreen != null) return benchHarnessMatrixGreen;
+  try {
+    if (!fs.existsSync(BENCH_HARNESS_MATRIX) || !fs.existsSync(BENCH_HARNESS_MATRIX_TEST)) {
+      benchHarnessMatrixGreen = false;
+      return benchHarnessMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(BENCH_HARNESS_MATRIX, 'utf8'));
+    benchHarnessMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.bench_harness_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.suite_count === 4
+      && matrix.summary.total_prompt_count === 237
+      && matrix.summary.metric_count === 12
+      && matrix.summary.phase_count === 14
+      && matrix.summary.present_phase_count === 14
+      && matrix.summary.transport_count === 12
+      && matrix.summary.present_transport_count === 12
+      && matrix.summary.report_field_count === 7
+      && matrix.summary.present_report_field_count === 7
+      && matrix.summary.sample_field_count === 10
+      && matrix.summary.present_sample_field_count === 10
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/bench-harness.js')
+    );
+  } catch {
+    benchHarnessMatrixGreen = false;
+  }
+  return benchHarnessMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -677,6 +717,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'src/data-curate.js' && dataCurateMatrixOk()) return 'maintain_generated_data_curate_matrix_and_frontier_curation_contract';
   if (rel === 'src/artifact.js' && artifactMatrixOk()) return 'maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract';
   if (rel === 'cli/kolm-tui.mjs' && tuiWorkbenchMatrixOk()) return 'maintain_generated_tui_workbench_matrix_and_cli_distribution_contract';
+  if (rel === 'src/bench-harness.js' && benchHarnessMatrixOk()) return 'maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -726,7 +767,7 @@ function commandsFor(domain) {
     trust_security_compliance: ['npm run verify:claims-scope', 'npm run verify:compliance-packet'],
     storage_state: ['node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js'],
     compile_artifact_runtime: ['npm run verify:inventions', 'npm run verify:benchmark-evidence', 'npm run verify:wrapper-cli-matrix', 'npm run verify:spec-compile-matrix', 'npm run verify:artifact-matrix'],
-    capture_data_eval: ['npm run verify:redaction-benchmark', 'npm run verify:quality-calibration', 'npm run verify:data-curate-matrix'],
+    capture_data_eval: ['npm run verify:redaction-benchmark', 'npm run verify:quality-calibration', 'npm run verify:data-curate-matrix', 'npm run verify:bench-harness-matrix'],
     training_model_optimization: ['npm run verify:quantize-worker-matrix', 'npm run verify:distill-pipeline-matrix', 'node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
     infra_cloud_device: ['npm run verify:platform', 'npm run verify:package-release'],

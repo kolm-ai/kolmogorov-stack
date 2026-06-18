@@ -241,6 +241,19 @@
         "improvement_track": "maintain_generated_data_curate_matrix_and_frontier_curation_contract"
       },
       {
+        "path": "src/bench-harness.js",
+        "domain": "capture_data_eval",
+        "priority_score": 9,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
+          "execution_or_subprocess_boundary",
+          "large_component_contract_risk",
+          "network_or_provider_boundary"
+        ],
+        "improvement_track": "maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract"
+      },
+      {
         "path": "cli/kolm-tui.mjs",
         "domain": "developer_distribution",
         "priority_score": 9,
@@ -252,19 +265,6 @@
           "network_or_provider_boundary"
         ],
         "improvement_track": "maintain_generated_tui_workbench_matrix_and_cli_distribution_contract"
-      },
-      {
-        "path": "src/bench-harness.js",
-        "domain": "capture_data_eval",
-        "priority_score": 9,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "environment_configuration_boundary",
-          "execution_or_subprocess_boundary",
-          "large_component_contract_risk",
-          "network_or_provider_boundary"
-        ],
-        "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
       },
       {
         "path": "src/otel.js",
@@ -6079,7 +6079,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -7804,7 +7805,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -9602,7 +9604,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -10823,6 +10826,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave950-bench-harness-matrix.test.js",
         "tests/wrapper-s4.test.js"
       ],
       "risk_signals": [
@@ -10858,7 +10862,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -10867,22 +10872,29 @@
       "surface": "core-backend",
       "domain": "capture_data_eval",
       "language": "javascript",
-      "sha256": "a3c769db68cac9bc38cf6d2dd89daa30058e3a633ee939a2d9ce936a53489759",
+      "sha256": "218b75e5509d2d673b1aa3d735e5d5ab6eb7e6138f09a65d28695fc6f4faf60f",
       "metrics": {
-        "bytes": 40998,
-        "lines": 1081,
+        "bytes": 43843,
+        "lines": 1149,
         "imports": 6,
         "exports": 8,
         "routes": 0,
         "env_refs": 17,
         "fs_writes": 0,
         "subprocess_refs": 4,
-        "network_refs": 8,
-        "crypto_refs": 8,
+        "network_refs": 1,
+        "crypto_refs": 11,
         "markers": 0
       },
       "test_refs": [
-        "tests/wrapper-s4.test.js"
+        "tests/wave710-meta-routes-contract.test.js",
+        "tests/wave937-api-contract-matrix.test.js",
+        "tests/wave938-auth-boundary-matrix.test.js",
+        "tests/wave939-cli-command-matrix.test.js",
+        "tests/wave940-daemon-connector-matrix.test.js",
+        "tests/wave941-quantize-worker-matrix.test.js",
+        "tests/wave942-binder-contract-matrix.test.js",
+        "tests/wave943-intent-contract-matrix.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -10916,12 +10928,13 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
+      "improvement_track": "maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract",
       "innovation_opportunity": "Add a shared boot-and-measure probe harness plus data-value scoring so eval, routing, and curation all use measured evidence.",
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -10980,7 +10993,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -11043,7 +11057,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -11109,7 +11124,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -11176,7 +11192,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -11242,7 +11259,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12105,7 +12123,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12166,7 +12185,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12223,7 +12243,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12280,7 +12301,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12398,7 +12420,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12455,7 +12478,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12513,7 +12537,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12636,7 +12661,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12704,7 +12730,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -12771,7 +12798,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -16550,7 +16578,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -17096,7 +17125,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -17700,7 +17730,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -17953,7 +17984,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18010,7 +18042,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18080,7 +18113,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18137,7 +18171,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18197,7 +18232,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18256,7 +18292,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18314,7 +18351,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18434,7 +18472,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18492,7 +18531,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18549,7 +18589,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18607,7 +18648,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18666,7 +18708,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18726,7 +18769,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18789,7 +18833,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18846,7 +18891,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18903,7 +18949,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -18962,7 +19009,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -19022,7 +19070,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -19079,7 +19128,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -19146,7 +19196,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -23088,7 +23139,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -23149,7 +23201,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -23208,7 +23261,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -23267,7 +23321,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -23326,7 +23381,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -24369,7 +24425,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -24744,7 +24801,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -26436,7 +26494,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -27011,7 +27070,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -27576,7 +27636,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -28353,7 +28414,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -28592,7 +28654,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -29211,7 +29274,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -36801,7 +36865,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -36859,7 +36924,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -37290,7 +37356,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -40419,7 +40486,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -41282,7 +41350,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -43839,7 +43908,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -45125,7 +45195,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -45190,7 +45261,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -46449,7 +46521,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -46578,7 +46651,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -48133,7 +48207,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -48195,7 +48270,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -48257,7 +48333,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -48319,7 +48396,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -48381,7 +48459,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -48442,7 +48521,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -48503,7 +48583,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
@@ -49020,7 +49101,8 @@
       "suggested_verification": [
         "npm run verify:redaction-benchmark",
         "npm run verify:quality-calibration",
-        "npm run verify:data-curate-matrix"
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {

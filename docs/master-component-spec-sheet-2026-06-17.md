@@ -50,7 +50,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | `workers/quantize/scripts/quantize.py` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_quantize_worker_matrix_and_frontier_method_contract. |
 | `src/deploy-generators.js` | infra_cloud_device | 9 | open_marker_requires_owner_review<br>linked_frontier_work_open | Resolve or explicitly owner-review the open TODO/FIXME marker. |
 | `cli/kolm-tui.mjs` | developer_distribution | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_tui_workbench_matrix_and_cli_distribution_contract. |
-| `src/bench-harness.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards. |
+| `src/bench-harness.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract. |
 | `src/binder.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_binder_contract_matrix_and_verifier_failure_taxonomy. |
 | `src/data-curate.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_data_curate_matrix_and_frontier_curation_contract. |
 | `src/distill-pipeline.js` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract. |

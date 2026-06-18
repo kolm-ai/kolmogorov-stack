@@ -114,6 +114,7 @@ const GENERATED_BY = [
   { gen: 'scripts/build-data-curate-matrix.cjs', match: /^docs\/internal\/data-curate-matrix\.json$/ },
   { gen: 'scripts/build-artifact-matrix.cjs', match: /^docs\/internal\/artifact-matrix\.json$/ },
   { gen: 'scripts/build-tui-workbench-matrix.cjs', match: /^docs\/internal\/tui-workbench-matrix\.json$/ },
+  { gen: 'scripts/build-bench-harness-matrix.cjs', match: /^docs\/internal\/bench-harness-matrix\.json$/ },
 ];
 
 function generatedBy(p) {
@@ -254,6 +255,7 @@ function main() {
     'docs/internal/data-curate-matrix.json',
     'docs/internal/artifact-matrix.json',
     'docs/internal/tui-workbench-matrix.json',
+    'docs/internal/bench-harness-matrix.json',
   ]);
   for (const sp of SELF_PATHS) all.delete(sp);
 
