@@ -17,11 +17,14 @@ const DAEMON_CONNECTOR_MATRIX = path.join(ROOT, 'docs', 'internal', 'daemon-conn
 const DAEMON_CONNECTOR_MATRIX_TEST = path.join(ROOT, 'tests', 'wave940-daemon-connector-matrix.test.js');
 const QUANTIZE_WORKER_MATRIX = path.join(ROOT, 'docs', 'internal', 'quantize-worker-matrix.json');
 const QUANTIZE_WORKER_MATRIX_TEST = path.join(ROOT, 'tests', 'wave941-quantize-worker-matrix.test.js');
+const BINDER_CONTRACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'binder-contract-matrix.json');
+const BINDER_CONTRACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave942-binder-contract-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
 let daemonConnectorMatrixGreen = null;
 let quantizeWorkerMatrixGreen = null;
+let binderContractMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -240,6 +243,37 @@ function quantizeWorkerMatrixOk() {
   return quantizeWorkerMatrixGreen;
 }
 
+function binderContractMatrixOk() {
+  if (binderContractMatrixGreen != null) return binderContractMatrixGreen;
+  try {
+    if (!fs.existsSync(BINDER_CONTRACT_MATRIX) || !fs.existsSync(BINDER_CONTRACT_MATRIX_TEST)) {
+      binderContractMatrixGreen = false;
+      return binderContractMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(BINDER_CONTRACT_MATRIX, 'utf8'));
+    binderContractMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.binder_contract_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.export_count === 5
+      && matrix.summary.verification_check_family_count >= 31
+      && matrix.summary.structured_reason_count === 6
+      && matrix.summary.render_section_count >= 10
+      && matrix.summary.bundled_hash_slot_count >= 8
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/binder.js')
+    );
+  } catch {
+    binderContractMatrixGreen = false;
+  }
+  return binderContractMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -391,6 +425,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'cli/kolm.js' && cliCommandMatrixOk()) return 'maintain_generated_cli_command_matrix_and_split_plan';
   if (rel === 'src/daemon-connector.js' && daemonConnectorMatrixOk()) return 'maintain_generated_daemon_connector_matrix_and_privacy_proxy_contract';
   if (rel === 'workers/quantize/scripts/quantize.py' && quantizeWorkerMatrixOk()) return 'maintain_generated_quantize_worker_matrix_and_frontier_method_contract';
+  if (rel === 'src/binder.js' && binderContractMatrixOk()) return 'maintain_generated_binder_contract_matrix_and_verifier_failure_taxonomy';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -428,7 +463,7 @@ function innovationFor(domain) {
     runtime_serving_routing: 'Close the semantic routing flywheel by recording outcomes, training route stats, and emitting runtime passports.',
     infra_cloud_device: 'Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.',
     developer_distribution: 'Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.',
-    platform_support: 'Keep support modules behind generated lifecycle, provider, privacy, storage, and claim-scope contracts before adding more daemon or orchestration behavior.',
+    platform_support: 'Keep support modules behind generated lifecycle, verifier, provider, privacy, storage, and claim-scope contracts before adding more daemon, binder, or orchestration behavior.',
   }[domain] || 'Keep the component covered by a local contract and promote repeated patterns into shared primitives.';
 }
 
@@ -445,7 +480,7 @@ function commandsFor(domain) {
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
     infra_cloud_device: ['npm run verify:platform', 'npm run verify:package-release'],
     developer_distribution: ['npm run verify:cli-command-matrix', 'npm run verify:package-release'],
-    platform_support: ['npm run verify:daemon-connector-matrix', 'npm run verify:codegraph'],
+    platform_support: ['npm run verify:daemon-connector-matrix', 'npm run verify:binder-contract-matrix', 'npm run verify:codegraph'],
   };
   return map[domain] || ['npm run verify:codegraph'];
 }

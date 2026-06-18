@@ -51,7 +51,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | `src/deploy-generators.js` | infra_cloud_device | 9 | open_marker_requires_owner_review<br>linked_frontier_work_open | Resolve or explicitly owner-review the open TODO/FIXME marker. |
 | `cli/kolm-tui.mjs` | developer_distribution | 9 | linked_frontier_work_open | Execute the linked frontier track: generated_cli_package_sdk_conformance_and_release_evidence. |
 | `src/bench-harness.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards. |
-| `src/binder.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
+| `src/binder.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_binder_contract_matrix_and_verifier_failure_taxonomy. |
 | `src/data-curate.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/distill-pipeline.js` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/intent.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |

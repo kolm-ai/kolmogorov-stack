@@ -84,7 +84,7 @@ test('W710 meta routes expose a bounded, versioned contract and depth verifier',
     pkg.scripts['verify:meta-routes'],
     'node --test --test-concurrency=1 tests/wave710-meta-routes-contract.test.js',
   );
-  assert.match(pkg.scripts['verify:depth'], /verify:router-contract && npm run verify:api-contract-matrix && npm run verify:auth-boundary-matrix && npm run verify:cli-command-matrix && npm run verify:daemon-connector-matrix && npm run verify:meta-routes && npm run verify:governance-packets/);
+  assert.match(pkg.scripts['verify:depth'], /verify:router-contract && npm run verify:api-contract-matrix && npm run verify:auth-boundary-matrix && npm run verify:cli-command-matrix && npm run verify:daemon-connector-matrix && npm run verify:binder-contract-matrix && npm run verify:meta-routes && npm run verify:governance-packets/);
 
   const redacted = redactMetaRouteDetail(`failed at ${process.cwd()}\\secret\\meta-model.json\nwith stack`);
   assert.doesNotMatch(redacted, /secret\\meta-model\.json/);

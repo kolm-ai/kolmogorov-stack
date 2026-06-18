@@ -1,0 +1,1501 @@
+{
+  "bundled_hash_slots": [
+    {
+      "manifest_hash_key": "attestation_report",
+      "zip_entry": "attestation_report.json"
+    },
+    {
+      "manifest_hash_key": "evals_json",
+      "zip_entry": "evals.json"
+    },
+    {
+      "manifest_hash_key": "index_bin",
+      "zip_entry": "index.sqlite-vec"
+    },
+    {
+      "manifest_hash_key": "lora_bin",
+      "zip_entry": "lora.bin"
+    },
+    {
+      "manifest_hash_key": "model_pointer",
+      "zip_entry": "model.gguf"
+    },
+    {
+      "manifest_hash_key": "recipe_bundle_mjs",
+      "zip_entry": "recipe.bundle.mjs"
+    },
+    {
+      "manifest_hash_key": "recipes_json",
+      "zip_entry": "recipes.json"
+    },
+    {
+      "manifest_hash_key": "workflow_ir",
+      "zip_entry": "workflow_ir.json"
+    }
+  ],
+  "exports": [
+    {
+      "async": false,
+      "kind": "const",
+      "line": 2701,
+      "name": "BINDER"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 2343,
+      "name": "buildBinder"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 2680,
+      "name": "recordFingerprintShare"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 2472,
+      "name": "verifyArtifactStructured"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 2384,
+      "name": "writeBinder"
+    }
+  ],
+  "failed_safety_guards": [],
+  "gates": {
+    "failures": [],
+    "ok": true,
+    "warnings": []
+  },
+  "imports": [
+    {
+      "category": "proof_policy_validator",
+      "from": "./artifact-lineage.js",
+      "line": 52,
+      "spec": "{ validateCapability, validateLineage }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./artifact-provenance-verify.js",
+      "line": 57,
+      "spec": "{ verifyArtifactProvenanceSidecarsAsync }"
+    },
+    {
+      "category": "artifact_loader_or_env",
+      "from": "./artifact-runner.js",
+      "line": 48,
+      "spec": "{ loadArtifact, isArtifactPathCloudTrusted, SUPPORTED_RUNTIME_TARGETS }"
+    },
+    {
+      "category": "audit_chain",
+      "from": "./audit.js",
+      "line": 77,
+      "spec": "{ appendAudit, AUDIT_OPS }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./auditor-attestation.js",
+      "line": 62,
+      "spec": "{ validateAuditorAttestationBlock, crossCheckAttestation, AUDITOR_ATTESTATION_SPEC_VERSION }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./cid.js",
+      "line": 49,
+      "spec": "{ cidFromManifestHashes, parseCid, shortCid }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./confidential-compute.js",
+      "line": 54,
+      "spec": "{ verifyAttestation, STATES as CC_STATES }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./drift-supersession.js",
+      "line": 63,
+      "spec": "{ validateSupersessionBlock, validateDriftReport, SUPERSESSION_SPEC_VERSION, DRIFT_REPORT_SPEC_VERSION, SUPERSESSION_REASONS, }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./ed25519.js",
+      "line": 55,
+      "spec": "{ verifySignatureBlock as verifyEd25519Block }"
+    },
+    {
+      "category": "artifact_loader_or_env",
+      "from": "./env.js",
+      "line": 51,
+      "spec": "{ effectiveReceiptSecret, verificationSecrets }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./export-provenance.js",
+      "line": 59,
+      "spec": "{ validateExportBlock }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./external-holdout.js",
+      "line": 60,
+      "spec": "{ validateExternalHoldoutBlock, hashHoldoutFile, resolveHoldoutPath, findInCatalog }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./licensing-allowlist.js",
+      "line": 70,
+      "spec": "{ checkCorpusLicensing }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./provenance.js",
+      "line": 50,
+      "spec": "{ verifyCredential }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./recipe-class.js",
+      "line": 58,
+      "spec": "{ validateArtifactClass, classBadge }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./sigstore.js",
+      "line": 56,
+      "spec": "{ verifySigstoreBundle }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./tenant-holdout.js",
+      "line": 61,
+      "spec": "{ validateTenantShadowBlock, reAnchorTenantShadowBlock, TENANT_SHADOW_SPEC_VERSION }"
+    },
+    {
+      "category": "proof_policy_validator",
+      "from": "./workflow-ir.js",
+      "line": 53,
+      "spec": "{ hashIr }"
+    },
+    {
+      "category": "zip_parser_dependency",
+      "from": "adm-zip",
+      "line": 71,
+      "spec": "AdmZip"
+    },
+    {
+      "category": "node_builtin",
+      "from": "node:crypto",
+      "line": 47,
+      "spec": "crypto"
+    },
+    {
+      "category": "node_builtin",
+      "from": "node:fs",
+      "line": 45,
+      "spec": "fs"
+    },
+    {
+      "category": "node_builtin",
+      "from": "node:path",
+      "line": 46,
+      "spec": "path"
+    }
+  ],
+  "internal_functions": [
+    {
+      "async": false,
+      "line": 81,
+      "name": "canonicalJson"
+    },
+    {
+      "async": false,
+      "line": 88,
+      "name": "hmacHex"
+    },
+    {
+      "async": false,
+      "line": 92,
+      "name": "esc"
+    },
+    {
+      "async": false,
+      "line": 102,
+      "name": "fmtBytes"
+    },
+    {
+      "async": false,
+      "line": 109,
+      "name": "fmtMicros"
+    },
+    {
+      "async": false,
+      "line": 116,
+      "name": "fmtCost"
+    },
+    {
+      "async": false,
+      "line": 128,
+      "name": "chainStructuralIntegrityOk"
+    },
+    {
+      "async": false,
+      "line": 154,
+      "name": "credentialStructuralIntegrityOk"
+    },
+    {
+      "async": true,
+      "line": 180,
+      "name": "verifyArtifact"
+    },
+    {
+      "async": false,
+      "line": 2009,
+      "name": "renderHead"
+    },
+    {
+      "async": false,
+      "line": 2073,
+      "name": "renderSummary"
+    },
+    {
+      "async": false,
+      "line": 2101,
+      "name": "renderIdentity"
+    },
+    {
+      "async": false,
+      "line": 2123,
+      "name": "renderKScore"
+    },
+    {
+      "async": false,
+      "line": 2188,
+      "name": "renderHashes"
+    },
+    {
+      "async": false,
+      "line": 2228,
+      "name": "renderChain"
+    },
+    {
+      "async": false,
+      "line": 2249,
+      "name": "renderCredential"
+    },
+    {
+      "async": false,
+      "line": 2278,
+      "name": "renderEvals"
+    },
+    {
+      "async": false,
+      "line": 2305,
+      "name": "renderReproduction"
+    },
+    {
+      "async": false,
+      "line": 2325,
+      "name": "renderFooter"
+    },
+    {
+      "async": false,
+      "line": 2447,
+      "name": "translateCheck"
+    },
+    {
+      "async": false,
+      "line": 2609,
+      "name": "recheckBundledFileHashes"
+    }
+  ],
+  "missing_required_check_families": [],
+  "missing_required_exports": [],
+  "public_return_shapes": {
+    "buildBinder": [
+      "html",
+      "checks",
+      "verdict",
+      "manifest",
+      "receipt",
+      "credential"
+    ],
+    "verifyArtifactStructured_error": [
+      "ok",
+      "reason",
+      "detail",
+      "failing_field"
+    ],
+    "verifyArtifactStructured_ok": [
+      "ok",
+      "manifest",
+      "receipt",
+      "credential",
+      "checks"
+    ],
+    "writeBinder": [
+      "html",
+      "checks",
+      "verdict",
+      "manifest",
+      "receipt",
+      "credential",
+      "out_path",
+      "bytes"
+    ]
+  },
+  "purpose": "Generated contract matrix for the binder verifier boundary: public exports, artifact verification check families, structured failure taxonomy, render sections, manifest hash slots, safety guards, and direct test evidence.",
+  "render_sections": [
+    {
+      "line": 2009,
+      "name": "renderHead",
+      "section": "head"
+    },
+    {
+      "line": 2073,
+      "name": "renderSummary",
+      "section": "summary"
+    },
+    {
+      "line": 2101,
+      "name": "renderIdentity",
+      "section": "identity"
+    },
+    {
+      "line": 2123,
+      "name": "renderKScore",
+      "section": "k_score"
+    },
+    {
+      "line": 2188,
+      "name": "renderHashes",
+      "section": "hashes"
+    },
+    {
+      "line": 2228,
+      "name": "renderChain",
+      "section": "chain"
+    },
+    {
+      "line": 2249,
+      "name": "renderCredential",
+      "section": "credential"
+    },
+    {
+      "line": 2278,
+      "name": "renderEvals",
+      "section": "evals"
+    },
+    {
+      "line": 2305,
+      "name": "renderReproduction",
+      "section": "reproduction"
+    },
+    {
+      "line": 2325,
+      "name": "renderFooter",
+      "section": "footer"
+    }
+  ],
+  "required_check_families": [
+    "Manifest signature (legacy HMAC)",
+    "Content identifier (CID) round-trip",
+    "Artifact class consistency (honest taxonomy)",
+    "Runtime target consistency",
+    "Audit chain (HMAC receipt)",
+    "Receipt signature (Ed25519, public-key)",
+    "Receipt signature (Sigstore bundle)",
+    "Provenance sidecars (SLSA/OMS, signer-derived)",
+    "K-score gate",
+    "Seed gate (train/holdout independence)",
+    "Attestation state",
+    "Native binary integrity",
+    "Build reproducibility",
+    "Export targets (model files)",
+    "External / adversarial holdouts",
+    "Tenant shadow corpus",
+    "Third-party auditor attestation",
+    "Supersession chain",
+    "Drift report",
+    "Corpus URL licensing gate"
+  ],
+  "required_exports": [
+    "buildBinder",
+    "writeBinder",
+    "verifyArtifactStructured",
+    "recordFingerprintShare",
+    "BINDER"
+  ],
+  "required_test_evidence": [
+    "tests/finalized-c7-artifact-provenance-repro.test.js",
+    "tests/wave144-native-compile.test.js",
+    "tests/wave144-seeds-gate.test.js",
+    "tests/wave144-verifier-states.test.js",
+    "tests/wave149-ed25519-default.test.js",
+    "tests/wave150-sigstore.test.js",
+    "tests/wave157-redactor-receipt.test.js",
+    "tests/wave158-cross-vendor.test.js",
+    "tests/wave160-teacher-delta.test.js",
+    "tests/wave161-ed25519-policy.test.js",
+    "tests/wave162-sigstore-rekor.test.js",
+    "tests/wave163-export-binder.test.js",
+    "tests/wave164-external-adversarial.test.js",
+    "tests/wave165-tenant-shadow.test.js",
+    "tests/wave166-auditor-attestation.test.js",
+    "tests/wave167-drift-supersession.test.js",
+    "tests/wave409aa-verify-hardening.test.js",
+    "tests/wave409d-runtime-dispatch.test.js",
+    "tests/wave409q-c-rust-wasm-verify.test.js",
+    "tests/wave417-definition-of-done.test.js",
+    "tests/wave445-verify-hardening.test.js",
+    "tests/wave890-6-security.test.js"
+  ],
+  "safety_guards": {
+    "attestation_honest_scope_present": true,
+    "auditor_drift_and_supersession_present": true,
+    "binder_spec_constant_exported": true,
+    "bundled_file_hash_recheck_present": true,
+    "canonical_loader_used_with_invalid_signature_reporting": true,
+    "cloud_trusted_mode_structural_only": true,
+    "corpus_license_gate_present": true,
+    "deterministic_canonical_json_for_signatures": true,
+    "eval_seed_and_holdout_gates_present": true,
+    "fingerprint_share_audit_only_payload": true,
+    "hmac_multi_secret_verification": true,
+    "html_escape_covers_core_entities": true,
+    "no_subprocess_or_live_network_side_effects": true,
+    "production_ready_crosscheck_present": true,
+    "public_key_and_transparency_layers": true,
+    "renderer_has_no_script_tag": true,
+    "required_public_exports_present": true,
+    "runtime_target_consistency_gate": true,
+    "signature_policy_and_rekor_policy_present": true,
+    "structured_failure_translation_present": true,
+    "structured_reason_enum_closed": true
+  },
+  "schema": "kolm.binder_contract_matrix.v1",
+  "sources": [
+    "src/binder.js",
+    "tests/finalized-c7-artifact-provenance-repro.test.js",
+    "tests/wave144-native-compile.test.js",
+    "tests/wave144-seeds-gate.test.js",
+    "tests/wave144-verifier-states.test.js",
+    "tests/wave149-ed25519-default.test.js",
+    "tests/wave150-sigstore.test.js",
+    "tests/wave157-redactor-receipt.test.js",
+    "tests/wave158-cross-vendor.test.js",
+    "tests/wave160-teacher-delta.test.js",
+    "tests/wave161-ed25519-policy.test.js",
+    "tests/wave162-sigstore-rekor.test.js",
+    "tests/wave163-export-binder.test.js",
+    "tests/wave164-external-adversarial.test.js",
+    "tests/wave165-tenant-shadow.test.js",
+    "tests/wave166-auditor-attestation.test.js",
+    "tests/wave167-drift-supersession.test.js",
+    "tests/wave409aa-verify-hardening.test.js",
+    "tests/wave409d-runtime-dispatch.test.js",
+    "tests/wave409q-c-rust-wasm-verify.test.js",
+    "tests/wave417-definition-of-done.test.js",
+    "tests/wave445-verify-hardening.test.js",
+    "tests/wave890-6-security.test.js"
+  ],
+  "structured_failure_taxonomy": {
+    "mappings": [
+      {
+        "failing_field": "signature.sig",
+        "pattern": "/^Manifest signature/i",
+        "reason": "signature_invalid"
+      },
+      {
+        "failing_field": "receipt.signature_ed25519",
+        "pattern": "/^Receipt signature \\(Ed25519/i",
+        "reason": "signature_invalid"
+      },
+      {
+        "failing_field": "receipt.signature_sigstore",
+        "pattern": "/^Receipt signature \\(Sigstore/i",
+        "reason": "signature_invalid"
+      },
+      {
+        "failing_field": "provenance.intoto.dsse.json",
+        "pattern": "/^Provenance sidecars/i",
+        "reason": "signature_invalid"
+      },
+      {
+        "failing_field": "receipt.chain",
+        "pattern": "/^Audit chain/i",
+        "reason": "signature_invalid"
+      },
+      {
+        "failing_field": "manifest.cid",
+        "pattern": "/^Content identifier \\(CID\\)/i",
+        "reason": "manifest_hash_mismatch"
+      },
+      {
+        "failing_field": "manifest.hashes",
+        "pattern": "/^Manifest hashes/i",
+        "reason": "manifest_hash_mismatch"
+      },
+      {
+        "failing_field": "manifest.artifact_class",
+        "pattern": "/^Artifact class consistency/i",
+        "reason": "manifest_hash_mismatch"
+      },
+      {
+        "failing_field": "manifest.runtime_target",
+        "pattern": "/^Runtime target/i",
+        "reason": "native_binary_missing"
+      },
+      {
+        "failing_field": "manifest.entrypoint.binary",
+        "pattern": "/^Native binary/i",
+        "reason": "native_binary_missing"
+      },
+      {
+        "failing_field": "manifest.seed_provenance",
+        "pattern": "/^Seed gate/i",
+        "reason": "train_holdout_leakage"
+      },
+      {
+        "failing_field": "credential.json",
+        "pattern": "/^Credential/i",
+        "reason": "signature_invalid"
+      }
+    ],
+    "stable_reasons": [
+      "manifest_hash_mismatch",
+      "native_binary_missing",
+      "production_check_failed_on_install",
+      "signature_invalid",
+      "synthetic_only_in_production",
+      "train_holdout_leakage"
+    ]
+  },
+  "summary": {
+    "binder_bytes": 138729,
+    "binder_lines": 2702,
+    "bundled_hash_slot_count": 8,
+    "direct_test_evidence_count": 24,
+    "export_count": 5,
+    "failed_safety_guards": 0,
+    "import_count": 22,
+    "internal_function_count": 21,
+    "missing_required_check_families": 0,
+    "missing_required_exports": 0,
+    "missing_test_evidence": 0,
+    "render_section_count": 10,
+    "required_test_evidence_count": 22,
+    "structured_check_mapping_count": 12,
+    "structured_reason_count": 6,
+    "verification_check_family_count": 31,
+    "verification_check_push_count": 104
+  },
+  "test_evidence": [
+    {
+      "build_binder_refs": 0,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/finalized-c7-artifact-provenance-repro.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 2
+    },
+    {
+      "build_binder_refs": 8,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave144-native-compile.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 8,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave144-seeds-gate.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 15,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave144-verifier-states.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 3,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave149-ed25519-default.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 5,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave150-sigstore.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 9,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave157-redactor-receipt.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 6,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave158-cross-vendor.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 12,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave160-teacher-delta.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 14,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave161-ed25519-policy.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 7,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave162-sigstore-rekor.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 7,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave163-export-binder.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 6,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave164-external-adversarial.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 5,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave165-tenant-shadow.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 6,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave166-auditor-attestation.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 5,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave167-drift-supersession.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 0,
+      "direct_import": false,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave192-rag-cli.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 1,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave409aa-verify-hardening.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 8
+    },
+    {
+      "build_binder_refs": 5,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave409d-runtime-dispatch.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 8,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave409q-c-rust-wasm-verify.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 0
+    },
+    {
+      "build_binder_refs": 0,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave417-definition-of-done.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 5
+    },
+    {
+      "build_binder_refs": 0,
+      "direct_import": true,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave445-verify-hardening.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 4
+    },
+    {
+      "build_binder_refs": 0,
+      "direct_import": false,
+      "fingerprint_share_refs": 0,
+      "path": "tests/wave890-6-security.test.js",
+      "source_lock": true,
+      "structured_verifier_refs": 1
+    },
+    {
+      "build_binder_refs": 1,
+      "direct_import": false,
+      "fingerprint_share_refs": 1,
+      "path": "tests/wave942-binder-contract-matrix.test.js",
+      "source_lock": false,
+      "structured_verifier_refs": 1
+    }
+  ],
+  "updated_at": "2026-06-18",
+  "verification_check_families": [
+    {
+      "branch_count": 1,
+      "category": "artifact_integrity_and_signatures",
+      "first_line": 196,
+      "name": "Manifest signature (legacy HMAC)"
+    },
+    {
+      "branch_count": 2,
+      "category": "artifact_integrity_and_signatures",
+      "first_line": 213,
+      "name": "Content identifier (CID) round-trip"
+    },
+    {
+      "branch_count": 1,
+      "category": "artifact_integrity_and_signatures",
+      "first_line": 239,
+      "name": "Artifact class consistency (honest taxonomy)"
+    },
+    {
+      "branch_count": 1,
+      "category": "artifact_integrity_and_signatures",
+      "first_line": 312,
+      "name": "Runtime target consistency"
+    },
+    {
+      "branch_count": 4,
+      "category": "artifact_integrity_and_signatures",
+      "first_line": 327,
+      "name": "Audit chain (HMAC receipt)"
+    },
+    {
+      "branch_count": 2,
+      "category": "artifact_integrity_and_signatures",
+      "first_line": 348,
+      "name": "Receipt signature (Ed25519, public-key)"
+    },
+    {
+      "branch_count": 4,
+      "category": "artifact_integrity_and_signatures",
+      "first_line": 376,
+      "name": "Receipt signature (Sigstore bundle)"
+    },
+    {
+      "branch_count": 3,
+      "category": "artifact_integrity_and_signatures",
+      "first_line": 407,
+      "name": "Provenance sidecars (SLSA/OMS, signer-derived)"
+    },
+    {
+      "branch_count": 3,
+      "category": "eval_data_and_license_governance",
+      "first_line": 486,
+      "name": "K-score gate"
+    },
+    {
+      "branch_count": 4,
+      "category": "artifact_integrity_and_signatures",
+      "first_line": 517,
+      "name": "Provenance credential"
+    },
+    {
+      "branch_count": 3,
+      "category": "eval_data_and_license_governance",
+      "first_line": 574,
+      "name": "Eval coverage"
+    },
+    {
+      "branch_count": 9,
+      "category": "eval_data_and_license_governance",
+      "first_line": 607,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "branch_count": 2,
+      "category": "capability_lineage_workflow",
+      "first_line": 675,
+      "name": "Capability contract"
+    },
+    {
+      "branch_count": 2,
+      "category": "capability_lineage_workflow",
+      "first_line": 703,
+      "name": "Lineage block"
+    },
+    {
+      "branch_count": 4,
+      "category": "capability_lineage_workflow",
+      "first_line": 732,
+      "name": "Workflow IR recompute"
+    },
+    {
+      "branch_count": 9,
+      "category": "attestation_transparency_and_drift",
+      "first_line": 779,
+      "name": "Attestation state"
+    },
+    {
+      "branch_count": 2,
+      "category": "runtime_export_and_reproducibility",
+      "first_line": 898,
+      "name": "Native binary integrity"
+    },
+    {
+      "branch_count": 2,
+      "category": "runtime_export_and_reproducibility",
+      "first_line": 954,
+      "name": "binaries integrity"
+    },
+    {
+      "branch_count": 4,
+      "category": "runtime_export_and_reproducibility",
+      "first_line": 1009,
+      "name": "Build reproducibility"
+    },
+    {
+      "branch_count": 4,
+      "category": "training_and_domain_provenance",
+      "first_line": 1106,
+      "name": "PHI redactor receipt integrity"
+    },
+    {
+      "branch_count": 2,
+      "category": "training_and_domain_provenance",
+      "first_line": 1196,
+      "name": "Cross-vendor distillation provenance"
+    },
+    {
+      "branch_count": 4,
+      "category": "eval_data_and_license_governance",
+      "first_line": 1249,
+      "name": "K-score teacher-delta (A/T)"
+    },
+    {
+      "branch_count": 5,
+      "category": "attestation_transparency_and_drift",
+      "first_line": 1309,
+      "name": "Signature policy (Ed25519)"
+    },
+    {
+      "branch_count": 7,
+      "category": "attestation_transparency_and_drift",
+      "first_line": 1376,
+      "name": "Transparency policy (Rekor)"
+    },
+    {
+      "branch_count": 3,
+      "category": "runtime_export_and_reproducibility",
+      "first_line": 1443,
+      "name": "Export targets (model files)"
+    },
+    {
+      "branch_count": 3,
+      "category": "eval_data_and_license_governance",
+      "first_line": 1556,
+      "name": "External / adversarial holdouts"
+    },
+    {
+      "branch_count": 3,
+      "category": "eval_data_and_license_governance",
+      "first_line": 1663,
+      "name": "Tenant shadow corpus"
+    },
+    {
+      "branch_count": 3,
+      "category": "attestation_transparency_and_drift",
+      "first_line": 1754,
+      "name": "Third-party auditor attestation"
+    },
+    {
+      "branch_count": 3,
+      "category": "attestation_transparency_and_drift",
+      "first_line": 1872,
+      "name": "Supersession chain"
+    },
+    {
+      "branch_count": 4,
+      "category": "attestation_transparency_and_drift",
+      "first_line": 1931,
+      "name": "Drift report"
+    },
+    {
+      "branch_count": 1,
+      "category": "eval_data_and_license_governance",
+      "first_line": 1996,
+      "name": "Corpus URL licensing gate"
+    }
+  ],
+  "verification_check_pushes": [
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 196,
+      "name": "Manifest signature (legacy HMAC)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 213,
+      "name": "Content identifier (CID) round-trip"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 221,
+      "name": "Content identifier (CID) round-trip"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 239,
+      "name": "Artifact class consistency (honest taxonomy)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 312,
+      "name": "Runtime target consistency"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 327,
+      "name": "Audit chain (HMAC receipt)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 348,
+      "name": "Receipt signature (Ed25519, public-key)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 356,
+      "name": "Receipt signature (Ed25519, public-key)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 376,
+      "name": "Receipt signature (Sigstore bundle)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 384,
+      "name": "Receipt signature (Sigstore bundle)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 391,
+      "name": "Receipt signature (Sigstore bundle)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 398,
+      "name": "Receipt signature (Sigstore bundle)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 407,
+      "name": "Provenance sidecars (SLSA/OMS, signer-derived)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 413,
+      "name": "Provenance sidecars (SLSA/OMS, signer-derived)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 419,
+      "name": "Provenance sidecars (SLSA/OMS, signer-derived)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 433,
+      "name": "Audit chain (HMAC receipt)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 441,
+      "name": "Audit chain (HMAC receipt)"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 473,
+      "name": "Audit chain (HMAC receipt)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 486,
+      "name": "K-score gate"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 492,
+      "name": "K-score gate"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 498,
+      "name": "K-score gate"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 517,
+      "name": "Provenance credential"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 531,
+      "name": "Provenance credential"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 539,
+      "name": "Provenance credential"
+    },
+    {
+      "category": "artifact_integrity_and_signatures",
+      "line": 555,
+      "name": "Provenance credential"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 574,
+      "name": "Eval coverage"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 580,
+      "name": "Eval coverage"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 586,
+      "name": "Eval coverage"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 607,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 613,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 619,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 625,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 631,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 637,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 644,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 650,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 656,
+      "name": "Seed gate (train/holdout independence)"
+    },
+    {
+      "category": "capability_lineage_workflow",
+      "line": 675,
+      "name": "Capability contract"
+    },
+    {
+      "category": "capability_lineage_workflow",
+      "line": 681,
+      "name": "Capability contract"
+    },
+    {
+      "category": "capability_lineage_workflow",
+      "line": 703,
+      "name": "Lineage block"
+    },
+    {
+      "category": "capability_lineage_workflow",
+      "line": 709,
+      "name": "Lineage block"
+    },
+    {
+      "category": "capability_lineage_workflow",
+      "line": 732,
+      "name": "Workflow IR recompute"
+    },
+    {
+      "category": "capability_lineage_workflow",
+      "line": 741,
+      "name": "Workflow IR recompute"
+    },
+    {
+      "category": "capability_lineage_workflow",
+      "line": 751,
+      "name": "Workflow IR recompute"
+    },
+    {
+      "category": "capability_lineage_workflow",
+      "line": 759,
+      "name": "Workflow IR recompute"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 779,
+      "name": "Attestation state"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 785,
+      "name": "Attestation state"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 791,
+      "name": "Attestation state"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 810,
+      "name": "Attestation state"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 816,
+      "name": "Attestation state"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 822,
+      "name": "Attestation state"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 828,
+      "name": "Attestation state"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 835,
+      "name": "Attestation state"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 845,
+      "name": "Attestation state"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 898,
+      "name": "Native binary integrity"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 904,
+      "name": "Native binary integrity"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 954,
+      "name": "binaries integrity"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 964,
+      "name": "binaries integrity"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 1009,
+      "name": "Build reproducibility"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 1063,
+      "name": "Build reproducibility"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 1069,
+      "name": "Build reproducibility"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 1075,
+      "name": "Build reproducibility"
+    },
+    {
+      "category": "training_and_domain_provenance",
+      "line": 1106,
+      "name": "PHI redactor receipt integrity"
+    },
+    {
+      "category": "training_and_domain_provenance",
+      "line": 1149,
+      "name": "PHI redactor receipt integrity"
+    },
+    {
+      "category": "training_and_domain_provenance",
+      "line": 1155,
+      "name": "PHI redactor receipt integrity"
+    },
+    {
+      "category": "training_and_domain_provenance",
+      "line": 1164,
+      "name": "PHI redactor receipt integrity"
+    },
+    {
+      "category": "training_and_domain_provenance",
+      "line": 1196,
+      "name": "Cross-vendor distillation provenance"
+    },
+    {
+      "category": "training_and_domain_provenance",
+      "line": 1218,
+      "name": "Cross-vendor distillation provenance"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1249,
+      "name": "K-score teacher-delta (A/T)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1259,
+      "name": "K-score teacher-delta (A/T)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1267,
+      "name": "K-score teacher-delta (A/T)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1275,
+      "name": "K-score teacher-delta (A/T)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1309,
+      "name": "Signature policy (Ed25519)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1315,
+      "name": "Signature policy (Ed25519)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1321,
+      "name": "Signature policy (Ed25519)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1328,
+      "name": "Signature policy (Ed25519)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1334,
+      "name": "Signature policy (Ed25519)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1376,
+      "name": "Transparency policy (Rekor)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1385,
+      "name": "Transparency policy (Rekor)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1394,
+      "name": "Transparency policy (Rekor)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1400,
+      "name": "Transparency policy (Rekor)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1408,
+      "name": "Transparency policy (Rekor)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1414,
+      "name": "Transparency policy (Rekor)"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1420,
+      "name": "Transparency policy (Rekor)"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 1443,
+      "name": "Export targets (model files)"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 1511,
+      "name": "Export targets (model files)"
+    },
+    {
+      "category": "runtime_export_and_reproducibility",
+      "line": 1522,
+      "name": "Export targets (model files)"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1556,
+      "name": "External / adversarial holdouts"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1624,
+      "name": "External / adversarial holdouts"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1632,
+      "name": "External / adversarial holdouts"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1663,
+      "name": "Tenant shadow corpus"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1717,
+      "name": "Tenant shadow corpus"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1725,
+      "name": "Tenant shadow corpus"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1754,
+      "name": "Third-party auditor attestation"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1840,
+      "name": "Third-party auditor attestation"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1848,
+      "name": "Third-party auditor attestation"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1872,
+      "name": "Supersession chain"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1899,
+      "name": "Supersession chain"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1906,
+      "name": "Supersession chain"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1931,
+      "name": "Drift report"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1953,
+      "name": "Drift report"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1959,
+      "name": "Drift report"
+    },
+    {
+      "category": "attestation_transparency_and_drift",
+      "line": 1967,
+      "name": "Drift report"
+    },
+    {
+      "category": "eval_data_and_license_governance",
+      "line": 1996,
+      "name": "Corpus URL licensing gate"
+    }
+  ]
+}

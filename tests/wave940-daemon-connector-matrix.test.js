@@ -23,9 +23,9 @@ test('W940 package wiring makes the daemon connector matrix a depth and control-
     pkg.scripts['verify:daemon-connector-matrix'],
     'node scripts/build-daemon-connector-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave940-daemon-connector-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:cli-command-matrix && npm run build:daemon-connector-matrix && npm run build:quantize-worker-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:cli-command-matrix && npm run verify:daemon-connector-matrix && npm run verify:quantize-worker-matrix && npm run verify:file-ledger/);
-  assert.match(pkg.scripts['verify:depth'], /verify:cli-command-matrix && npm run verify:daemon-connector-matrix && npm run verify:meta-routes/);
+  assert.match(pkg.scripts['build:control-files'], /build:cli-command-matrix && npm run build:daemon-connector-matrix && npm run build:quantize-worker-matrix && npm run build:binder-contract-matrix && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:cli-command-matrix && npm run verify:daemon-connector-matrix && npm run verify:quantize-worker-matrix && npm run verify:binder-contract-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['verify:depth'], /verify:cli-command-matrix && npm run verify:daemon-connector-matrix && npm run verify:binder-contract-matrix && npm run verify:meta-routes/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');
   assert.match(ledgerBuilder, /build-daemon-connector-matrix\.cjs/);
