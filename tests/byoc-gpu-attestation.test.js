@@ -11,6 +11,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
@@ -41,6 +42,10 @@ function validNrasReport() {
     cert_chain: ['-----BEGIN CERTIFICATE-----AAAA-----END CERTIFICATE-----'],
     nonce: 'deadbeefcafebabe',
   };
+}
+
+function sha256hex(s) {
+  return crypto.createHash('sha256').update(String(s), 'utf8').digest('hex');
 }
 
 function withServer(app, fn) {
@@ -224,4 +229,119 @@ test('BYOC GPU #9 - /v1/byoc/attestation ignores caller-supplied gpu state witho
 
   const stored = byoc.getDeployment(deployment.id);
   assert.equal(stored.attestation.gpu, null);
+});
+
+test('BYOC GPU #10 - verified /v1/byoc/attestation emits and persists a Proven-Compute Receipt', async () => {
+  freshEnv();
+  const byoc = await import('../src/byoc.js');
+  const cc = await import('../src/confidential-compute.js');
+  const { nonceBinding } = await import('../src/nras-verifier.js');
+  const { verifyProvenComputeReceipt } = await import('../src/proven-compute-receipt.js');
+  const express = (await import('express')).default;
+  const { buildRouter } = await import('../src/router.js');
+
+  const inputDigest = sha256hex('byoc input');
+  const outputDigest = sha256hex('byoc output');
+  const artifactHash = sha256hex('artifact');
+  const expectedNonce = nonceBinding(inputDigest, outputDigest);
+
+  try {
+    cc.registerAttestationVerifier('nras', async () => ({
+      ok: true,
+      verifier: 'nras',
+      trust_root: 'pinned-nvidia-root',
+      report_hash: sha256hex('report'),
+      eat_nonce: expectedNonce,
+      expected_nonce: expectedNonce,
+      nonce_binding_alg: 'sha256(input_digest||output_digest)',
+    }));
+
+    const { deployment } = byoc.createDeployment({
+      tenantId: 't1', tenantName: 'Acme', target: 'docker', artifactId: 'art-1',
+    });
+    const app = express();
+    app.use(express.json({ limit: '4mb' }));
+    app.use(buildRouter());
+
+    await withServer(app, async (base) => {
+      const r = await fetch(base + '/v1/byoc/attestation', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          enroll_token: deployment.enroll_token,
+          public_url: 'http://1.2.3.4:8080',
+          measurement: 'sha256:' + 'e'.repeat(64),
+          gpu_attestation: validNrasReport(),
+          artifact_hash: artifactHash,
+          input_digest: inputDigest,
+          output_digest: outputDigest,
+          require_proven_compute: true,
+        }),
+      });
+      assert.equal(r.status, 200, `expected 200; got ${r.status}`);
+      const j = await r.json();
+      assert.equal(j.ok, true);
+      assert.equal(j.gpu.verified, true);
+      assert.equal(j.proven_compute_receipt.proof_scope, 'proven_compute');
+      const verified = verifyProvenComputeReceipt(j.proven_compute_receipt, { requireProvenCompute: true });
+      assert.equal(verified.ok, true, JSON.stringify(verified));
+    });
+
+    const stored = byoc.getDeployment(deployment.id);
+    assert.equal(stored.attestation.gpu.verified, true);
+    assert.equal(stored.attestation.proven_compute_receipt.proof_scope, 'proven_compute');
+  } finally {
+    cc.clearAttestationVerifier('nras');
+  }
+});
+
+test('BYOC GPU #11 - require_proven_compute fails closed without artifact identity', async () => {
+  freshEnv();
+  const byoc = await import('../src/byoc.js');
+  const cc = await import('../src/confidential-compute.js');
+  const { nonceBinding } = await import('../src/nras-verifier.js');
+  const express = (await import('express')).default;
+  const { buildRouter } = await import('../src/router.js');
+
+  const inputDigest = sha256hex('byoc input missing artifact');
+  const outputDigest = sha256hex('byoc output missing artifact');
+  const expectedNonce = nonceBinding(inputDigest, outputDigest);
+
+  try {
+    cc.registerAttestationVerifier('nras', async () => ({
+      ok: true,
+      verifier: 'nras',
+      eat_nonce: expectedNonce,
+      expected_nonce: expectedNonce,
+      nonce_binding_alg: 'sha256(input_digest||output_digest)',
+    }));
+    const { deployment } = byoc.createDeployment({
+      tenantId: 't1', tenantName: 'Acme', target: 'docker', artifactId: 'art-1',
+    });
+    const app = express();
+    app.use(express.json({ limit: '4mb' }));
+    app.use(buildRouter());
+
+    await withServer(app, async (base) => {
+      const r = await fetch(base + '/v1/byoc/attestation', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          enroll_token: deployment.enroll_token,
+          public_url: 'http://1.2.3.4:8080',
+          measurement: 'sha256:' + 'f'.repeat(64),
+          gpu_attestation: validNrasReport(),
+          input_digest: inputDigest,
+          output_digest: outputDigest,
+          require_proven_compute: true,
+        }),
+      });
+      assert.equal(r.status, 400);
+      const j = await r.json();
+      assert.equal(j.error, 'proven_compute_receipt_unavailable');
+      assert.equal(j.reason, 'missing_artifact_hash_or_cid');
+    });
+  } finally {
+    cc.clearAttestationVerifier('nras');
+  }
 });

@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2020,
+          "js_family": 2022,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -88,7 +88,7 @@
           "c_cpp": 4,
           "go": 8,
           "shell": 41,
-          "other": 1715
+          "other": 1716
         },
         "safety_guards": {
           "js_heavy_state_is_explicit": true,
@@ -305,7 +305,7 @@
       "id": "verifiable-inference",
       "stack_area": "trust",
       "status": "sota_review_complete_critical_frontier_work_open",
-      "already_at_frontier_count": 9,
+      "already_at_frontier_count": 10,
       "improvement_count": 2,
       "critical_gaps": 1,
       "major_gaps": 1,
@@ -19762,26 +19762,27 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 18900,
-          "lines": 489,
-          "imports": 7,
-          "exports": 8,
+          "bytes": 22281,
+          "lines": 563,
+          "imports": 9,
+          "exports": 9,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 5,
-          "subprocess_refs": 0,
+          "subprocess_refs": 1,
           "network_refs": 1,
-          "crypto_refs": 14,
+          "crypto_refs": 15,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
+          "execution_or_subprocess_boundary",
           "network_or_provider_boundary",
           "stateful_storage_boundary"
         ],
-        "priority_score": 5,
+        "priority_score": 6,
         "priority_band": "medium",
-        "sha256": "0145eb03bd6ab8cb97fa4ca35c8fde529e5745eeabbfecb46b407e1fca93ff53"
+        "sha256": "8d66166a20b7218126cf6ea765343bfe0472a426e13be17e71f64422713c3561"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -38156,6 +38157,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/byoc-gpu-attestation.test.js",
           "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
           "tests/nras-verifier.test.js",
           "tests/wave968-proven-compute-receipt.test.js"
@@ -40305,6 +40307,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/byoc-gpu-attestation.test.js",
           "tests/wave968-proven-compute-receipt.test.js"
         ],
         "category_links": [],
@@ -42953,8 +42956,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1471320,
-          "lines": 30851,
+          "bytes": 1471982,
+          "lines": 30869,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -42976,7 +42979,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "dd74024507f8e2de9f04745a6f99681993670d6dd2b3463881aa09f0ea8a7ca6"
+        "sha256": "df45f2a5e870818535d8209fe1a741a0182e346ad2a96da8cd12dd7306ff85f9"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

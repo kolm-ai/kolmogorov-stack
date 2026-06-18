@@ -19948,9 +19948,27 @@ export function buildRouter() {
     const gpu = gpuReport
       ? await byoc.verifyGpuAttestation(gpuReport, byoc.gpuAttestationVerifyOptions(body))
       : null;
-    const result = byoc.recordAttestation(enroll_token, { public_url, measurement, attestation, gpu });
+    const provenCompute = gpuReport
+      ? byoc.buildProvenComputeReceiptForAttestation(enroll_token, { body, gpu })
+      : { ok: false, reason: 'no_gpu_attestation_report' };
+    if (body.require_proven_compute === true && !provenCompute.ok) {
+      return res.status(400).json({ ok: false, error: 'proven_compute_receipt_unavailable', reason: provenCompute.reason });
+    }
+    const result = byoc.recordAttestation(enroll_token, {
+      public_url,
+      measurement,
+      attestation,
+      gpu,
+      proven_compute_receipt: provenCompute.ok ? provenCompute.receipt : null,
+    });
     if (!result.ok) return res.status(404).json({ error: result.error });
-    res.json({ ok: true, registered_at: new Date().toISOString(), gpu: result.gpu || null });
+    res.json({
+      ok: true,
+      registered_at: new Date().toISOString(),
+      gpu: result.gpu || null,
+      proven_compute_receipt: result.proven_compute_receipt || null,
+      proven_compute_receipt_error: provenCompute.ok ? null : provenCompute.reason,
+    });
   });
 
   // BYOC targets - lists supported deploy targets for the public form and CLI.

@@ -70,7 +70,7 @@
       "cryptographic_or_proof_boundary": 474,
       "distribution_or_worker_surface": 306,
       "environment_configuration_boundary": 367,
-      "execution_or_subprocess_boundary": 312,
+      "execution_or_subprocess_boundary": 313,
       "http_route_surface": 41,
       "large_component_contract_risk": 45,
       "money_or_entitlement_path": 17,
@@ -20753,18 +20753,18 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "0145eb03bd6ab8cb97fa4ca35c8fde529e5745eeabbfecb46b407e1fca93ff53",
+      "sha256": "8d66166a20b7218126cf6ea765343bfe0472a426e13be17e71f64422713c3561",
       "metrics": {
-        "bytes": 18900,
-        "lines": 489,
-        "imports": 7,
-        "exports": 8,
+        "bytes": 22281,
+        "lines": 563,
+        "imports": 9,
+        "exports": 9,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 5,
-        "subprocess_refs": 0,
+        "subprocess_refs": 1,
         "network_refs": 1,
-        "crypto_refs": 14,
+        "crypto_refs": 15,
         "markers": 0
       },
       "test_refs": [
@@ -20772,10 +20772,11 @@
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
+        "execution_or_subprocess_boundary",
         "network_or_provider_boundary",
         "stateful_storage_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 6,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -42332,6 +42333,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/byoc-gpu-attestation.test.js",
         "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
         "tests/nras-verifier.test.js",
         "tests/wave968-proven-compute-receipt.test.js"
@@ -44889,6 +44891,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/byoc-gpu-attestation.test.js",
         "tests/wave968-proven-compute-receipt.test.js"
       ],
       "risk_signals": [
@@ -48093,10 +48096,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "dd74024507f8e2de9f04745a6f99681993670d6dd2b3463881aa09f0ea8a7ca6",
+      "sha256": "df45f2a5e870818535d8209fe1a741a0182e346ad2a96da8cd12dd7306ff85f9",
       "metrics": {
-        "bytes": 1471320,
-        "lines": 30851,
+        "bytes": 1471982,
+        "lines": 30869,
         "imports": 535,
         "exports": 8,
         "routes": 810,

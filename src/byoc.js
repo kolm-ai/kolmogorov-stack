@@ -17,6 +17,11 @@ import { id, insert, find, findOne, update, all } from './store.js';
 import { effectiveReceiptSecret } from './env.js';
 import { parseAttestation } from '../packages/attestation/src/index.js';
 import { verifyAttestation as verifyCcAttestation, KINDS as CC_KINDS, STATES as CC_STATES } from './confidential-compute.js';
+import { isValidCidFormat } from './cid.js';
+import {
+  buildAndSignProvenComputeReceipt,
+  verifyProvenComputeReceipt,
+} from './proven-compute-receipt.js';
 
 const TARGETS = ['fly', 'aws-nitro', 'gcp-cvm', 'azure-cvm', 'docker'];
 
@@ -157,7 +162,75 @@ export function gpuAttestationVerifyOptions(body) {
   };
 }
 
-export function recordAttestation(enrollToken, { public_url, attestation, measurement, gpu = null }) {
+function _sha256FromPrefixed(value) {
+  const raw = _firstString(value);
+  if (!raw) return null;
+  const m = /^sha256:([0-9a-f]{64})$/i.exec(raw);
+  if (m) return m[1].toLowerCase();
+  if (/^[0-9a-f]{64}$/i.test(raw)) return raw.toLowerCase();
+  return null;
+}
+
+function _artifactIdentityForProvenCompute(deployment, body) {
+  const b = body && typeof body === 'object' && !Array.isArray(body) ? body : {};
+  const artifact_hash = _sha256FromPrefixed(
+    b.artifact_hash,
+    b.artifactHash,
+    b.artifact_sha256,
+    b.artifactSha256,
+    b.kolm_artifact_hash,
+  );
+  const cidCandidate = _firstString(
+    b.cid,
+    b.artifact_cid,
+    b.artifactCid,
+    b.kolm_cid,
+    deployment && deployment.artifact_id,
+  );
+  return {
+    artifact_hash,
+    cid: cidCandidate && isValidCidFormat(cidCandidate) ? cidCandidate : null,
+  };
+}
+
+// Build a signed Proven-Compute Receipt for a BYOC attestation callback. This
+// is intentionally fail-closed and additive: callers get { ok:false, reason }
+// unless the GPU state is cryptographically verified, input/output digests are
+// present, and the callback supplies an explicit artifact hash or CID. Shape-only
+// BYOC callbacks still persist gpu state but do not get a proof receipt.
+export function buildProvenComputeReceiptForAttestation(enrollToken, { body = {}, gpu = null, signer = null, transparencyLog = null } = {}) {
+  const d = getDeployment(enrollToken);
+  if (!d) return { ok: false, reason: 'deployment_not_found' };
+  if (!gpu || gpu.verified !== true) return { ok: false, reason: 'gpu_attestation_not_verified' };
+  const digests = gpuAttestationVerifyOptions(body);
+  if (!digests.input_digest || !digests.output_digest) {
+    return { ok: false, reason: 'missing_input_or_output_digest' };
+  }
+  const artifact = _artifactIdentityForProvenCompute(d, body);
+  if (!artifact.artifact_hash && !artifact.cid) {
+    return { ok: false, reason: 'missing_artifact_hash_or_cid' };
+  }
+  let receipt;
+  try {
+    receipt = buildAndSignProvenComputeReceipt({
+      artifact_hash: artifact.artifact_hash,
+      cid: artifact.cid,
+      model_weight_artifact_manifest_hash: _sha256FromPrefixed(body.model_weight_artifact_manifest_hash || body.modelWeightArtifactManifestHash),
+      signature_key_fingerprint: _firstString(body.signature_key_fingerprint, body.signatureKeyFingerprint),
+      input_digest: digests.input_digest,
+      output_digest: digests.output_digest,
+      attestation_state: gpu,
+      runtime_target: _firstString(body.runtime_target, body.runtimeTarget, d.target),
+    }, { signer: signer || undefined, transparencyLog: transparencyLog || undefined });
+  } catch (e) {
+    return { ok: false, reason: `receipt_build_failed:${e && e.message ? e.message : 'unknown'}` };
+  }
+  const verified = verifyProvenComputeReceipt(receipt, { requireProvenCompute: true });
+  if (!verified.ok) return { ok: false, reason: `receipt_verify_failed:${verified.reason}` };
+  return { ok: true, receipt, receipt_digest: verified.receipt_digest };
+}
+
+export function recordAttestation(enrollToken, { public_url, attestation, measurement, gpu = null, proven_compute_receipt = null }) {
   const d = getDeployment(enrollToken);
   if (!d) return { ok: false, error: 'deployment not found' };
   const now = new Date().toISOString();
@@ -197,6 +270,7 @@ export function recordAttestation(enrollToken, { public_url, attestation, measur
     vendor,
     parsed,
     gpu: gpuState,
+    proven_compute_receipt: (proven_compute_receipt && typeof proven_compute_receipt === 'object') ? proven_compute_receipt : null,
     raw: typeof attestation === 'string' ? attestation.slice(0, 8192) : null,
     received_at: now,
   };
@@ -206,7 +280,7 @@ export function recordAttestation(enrollToken, { public_url, attestation, measur
     attestation: att,
     last_attested_at: now,
   });
-  return { ok: true, vendor, measurement: att.measurement, gpu: gpuState };
+  return { ok: true, vendor, measurement: att.measurement, gpu: gpuState, proven_compute_receipt: att.proven_compute_receipt };
 }
 
 export function teardownDeployment(deployId, byTenantId) {
