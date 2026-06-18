@@ -175,6 +175,16 @@ export const PACKAGE_RELEASE_TARGETS = [
     requirement_ids: ['sdk-depth'],
     checks: ['node scripts/build-browser-extension.mjs --dry-run --json'],
   },
+  {
+    id: 'vscode-kolm-rag',
+    label: 'VS Code RAG extension',
+    channel: 'vscode-marketplace',
+    root: 'packages/vscode-kolm-rag',
+    manifests: ['package.json', 'tsconfig.json'],
+    docs: ['README.md'],
+    requirement_ids: ['sdk-depth'],
+    checks: ['npm pack --dry-run'],
+  },
 ];
 
 function exists(root, rel) {
@@ -456,8 +466,85 @@ function validateWinget(root, target, failures, blockers, releaseVersion) {
   if (!installer.includes('InstallerUrl:')) failures.push('winget_missing_installer_url');
   if (releaseVersion && !installer.includes(`/v${releaseVersion}/kolm-${releaseVersion}-win-x64.zip`)) failures.push(`winget_x64_url_version_mismatch:${releaseVersion}`);
   if (releaseVersion && !installer.includes(`/v${releaseVersion}/kolm-${releaseVersion}-win-arm64.zip`)) failures.push(`winget_arm64_url_version_mismatch:${releaseVersion}`);
-  if (hasZeroSha(installer)) blockers.push('winget_installer_sha256_placeholder');
-  return { placeholder_sha: hasZeroSha(installer) };
+  const placeholderSha = hasZeroSha(installer);
+  if (placeholderSha && !/Placeholder until signed GitHub release artifacts are attached/i.test(installer)) {
+    failures.push('winget_placeholder_sha_missing_release_comment');
+  }
+  if (/^\s*-\s*(?:hipaa|sr-11-7)\s*$/gim.test(locale)) {
+    failures.push('winget_locale_regulated_claim_tag');
+  }
+  if (releaseVersion && !locale.includes(`ReleaseNotesUrl: https://github.com/kolm-ai/kolm/releases/tag/v${releaseVersion}`)) {
+    failures.push(`winget_release_notes_url_mismatch:${releaseVersion}`);
+  }
+  if (placeholderSha) blockers.push('winget_installer_sha256_placeholder');
+  return { placeholder_sha: placeholderSha };
+}
+
+function collectStringValues(value, out = []) {
+  if (typeof value === 'string') {
+    out.push(value);
+    return out;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) collectStringValues(item, out);
+    return out;
+  }
+  if (value && typeof value === 'object') {
+    for (const item of Object.values(value)) collectStringValues(item, out);
+  }
+  return out;
+}
+
+function validateVsCodeExtension(root, target, failures, _blockers, releaseVersion) {
+  const pkg = parseJson(root, path.join(target.root, 'package.json'), failures);
+  if (!pkg) return null;
+  for (const key of ['name', 'displayName', 'description', 'version', 'publisher', 'license', 'main']) {
+    if (!nonEmpty(pkg[key])) failures.push(`vscode_missing_${key}`);
+  }
+  if (pkg.preview !== true) failures.push('vscode_preview_flag_missing');
+  if (pkg.qna !== false) failures.push('vscode_qna_must_be_disabled_until_public_support_ready');
+  if (releaseVersion && pkg.version !== releaseVersion) failures.push(`vscode_version_mismatch:${pkg.version || 'missing'}!=${releaseVersion}`);
+  if (!pkg.engines || !nonEmpty(pkg.engines.vscode)) failures.push('vscode_missing_engine_range');
+  if (!String(pkg.main || '').startsWith('./dist/')) failures.push('vscode_main_must_point_to_dist');
+  if (!pkg.repository || !String(pkg.repository.url || '').includes('github.com/kolm-ai/kolm')) failures.push('vscode_repository_url_missing');
+  if (pkg.repository?.directory !== target.root) failures.push(`vscode_repository_directory_mismatch:${pkg.repository?.directory || 'missing'}`);
+  if (!Array.isArray(pkg.extensionKind) || !pkg.extensionKind.includes('workspace')) failures.push('vscode_extension_kind_workspace_missing');
+  if (pkg.capabilities?.untrustedWorkspaces?.supported !== false) failures.push('vscode_untrusted_workspace_must_be_disabled');
+  if (pkg.capabilities?.virtualWorkspaces?.supported !== false) failures.push('vscode_virtual_workspace_must_be_disabled');
+  if (!Array.isArray(pkg.activationEvents) || !pkg.activationEvents.includes('onStartupFinished')) failures.push('vscode_activation_event_missing');
+  const commands = Array.isArray(pkg.contributes?.commands) ? pkg.contributes.commands : [];
+  if (commands.length < 3) failures.push('vscode_commands_missing');
+  const properties = pkg.contributes?.configuration?.properties || {};
+  for (const setting of [
+    'kolm.cluster.threshold',
+    'kolm.teacher.preference',
+    'kolm.namespace',
+    'kolm.routing.enabled',
+    'kolm.routing.jaccardThreshold',
+    'kolm.passiveMonitor.enabled',
+    'kolm.passiveMonitor.minBlockChars',
+  ]) {
+    if (!properties[setting]) failures.push(`vscode_setting_missing:${setting}`);
+  }
+  const userFacing = [
+    pkg.displayName,
+    pkg.description,
+    ...(commands.map((command) => command.title)),
+    pkg.contributes?.configuration?.title,
+    ...Object.values(properties).flatMap((property) => [
+      property?.description,
+      property?.markdownDescription,
+    ]),
+  ].filter(Boolean);
+  if (/\bW\d{3}(?:-\d+)?\b/.test(userFacing.join('\n'))) failures.push('vscode_user_facing_wave_label');
+  if (/\bsneaky-hippo\b/i.test(collectStringValues(pkg).join('\n'))) failures.push('vscode_legacy_repository_name');
+  return {
+    package_name: pkg.name || null,
+    version: pkg.version || null,
+    preview: pkg.preview === true,
+    trusted_workspace_required: pkg.capabilities?.untrustedWorkspaces?.supported === false,
+    virtual_workspace_supported: pkg.capabilities?.virtualWorkspaces?.supported !== false,
+  };
 }
 
 function validateInstallScripts(root, target, failures) {
@@ -499,6 +586,7 @@ function validateByChannel(root, target, failures, blockers, version) {
     case 'winget': return validateWinget(root, target, failures, blockers, version);
     case 'direct-download': return validateInstallScripts(root, target, failures, blockers);
     case 'browser-extension': return validateBrowserExtension(root, target, failures, blockers, version);
+    case 'vscode-marketplace': return validateVsCodeExtension(root, target, failures, blockers, version);
     default:
       failures.push(`unknown_channel:${target.channel}`);
       return null;

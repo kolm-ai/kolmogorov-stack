@@ -1,7 +1,7 @@
 # Winget installer manifest for kolm.
 # Schema: https://aka.ms/winget-manifest.installer.1.5.0.schema.json
 #
-# Submitted to winget-pkgs as a per-version manifest under
+# Submission target for winget-pkgs as a per-version manifest under
 # manifests/k/kolm/kolm/0.2.6/. See ./README.md for the submission workflow.
 
 PackageIdentifier: kolm.kolm
@@ -25,9 +25,11 @@ Dependencies:
 Installers:
   - Architecture: x64
     InstallerUrl: https://github.com/kolm-ai/kolm/releases/download/v0.2.6/kolm-0.2.6-win-x64.zip
+    # Placeholder until signed GitHub release artifacts are attached; package-release readiness must keep winget_installer_sha256_placeholder open.
     InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
   - Architecture: arm64
     InstallerUrl: https://github.com/kolm-ai/kolm/releases/download/v0.2.6/kolm-0.2.6-win-arm64.zip
+    # Placeholder until signed GitHub release artifacts are attached; package-release readiness must keep winget_installer_sha256_placeholder open.
     InstallerSha256: 0000000000000000000000000000000000000000000000000000000000000000
 ManifestType: installer
 ManifestVersion: 1.5.0

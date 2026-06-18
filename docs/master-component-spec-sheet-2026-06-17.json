@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 94.8,
-    "frontier_product_score": 70.8,
+    "local_engineering_score": 95,
+    "frontier_product_score": 70.9,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -32,12 +32,12 @@
     }
   },
   "summary": {
-    "component_count": 829,
-    "atomic_deep_dive_complete": 829,
+    "component_count": 830,
+    "atomic_deep_dive_complete": 830,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 756,
-    "direct_test_reference_pct": 91.2,
-    "components_without_direct_test_reference": 73,
+    "direct_test_referenced_components": 761,
+    "direct_test_reference_pct": 91.7,
+    "components_without_direct_test_reference": 69,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -65,7 +65,7 @@
       "billing_marketplace": 22,
       "capture_data_eval": 74,
       "compile_artifact_runtime": 102,
-      "developer_distribution": 67,
+      "developer_distribution": 68,
       "identity_access": 31,
       "infra_cloud_device": 69,
       "platform_support": 199,
@@ -78,7 +78,7 @@
       "api-http": 31,
       "cli": 3,
       "core-backend": 626,
-      "package-distribution": 91,
+      "package-distribution": 92,
       "service": 3,
       "worker": 75
     },
@@ -6311,8 +6311,8 @@
       "language": "json",
       "composition": {
         "metrics": {
-          "bytes": 3147,
-          "lines": 83,
+          "bytes": 3644,
+          "lines": 128,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -6326,9 +6326,9 @@
         "risk_signals": [
           "distribution_or_worker_surface"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "a1a4dd6e776915633afe15e5a2b7231e917e4b844ee205dc2590ab9cf0172e04"
+        "sha256": "17d05da6eb198bbe46f7f847cd9532b9dd1e3ae01e1e4b321594b0923eb289de"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -6336,7 +6336,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave929-distribution-manifests-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
@@ -6344,10 +6346,61 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+    },
+    {
+      "path": "packages/vscode-kolm-rag/README.md",
+      "id": "packages-vscode-kolm-rag-readme-md",
+      "surface": "package-distribution",
+      "domain": "developer_distribution",
+      "language": "markdown",
+      "composition": {
+        "metrics": {
+          "bytes": 1200,
+          "lines": 27,
+          "imports": 0,
+          "exports": 0,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 0,
+          "markers": 0
+        },
+        "risk_signals": [
+          "distribution_or_worker_surface"
+        ],
+        "priority_score": 1,
+        "priority_band": "normal",
+        "sha256": "68efaa7f79cca1405852108931b3e3545026d827a813cf5c833896d329295248"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/path-to-100-w2-truth-in-labeling.test.js",
+          "tests/r4-deploy-generators.test.js",
+          "tests/research-docs.test.js",
+          "tests/site.test.js",
+          "tests/wave195-quantize-worker.test.js",
+          "tests/wave238-init-agent.test.js",
+          "tests/wave442-blessed-test-command.test.js",
+          "tests/wave482-sdk-catalog-honesty.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "suggested_verification": [
+          "npm run verify:package-release"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/vscode-kolm-rag/src/capture-queue.ts",
@@ -6746,7 +6799,53 @@
       "language": "yaml",
       "composition": {
         "metrics": {
-          "bytes": 1136,
+          "bytes": 1441,
+          "lines": 36,
+          "imports": 0,
+          "exports": 0,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 0,
+          "markers": 0
+        },
+        "risk_signals": [
+          "distribution_or_worker_surface"
+        ],
+        "priority_score": 1,
+        "priority_band": "normal",
+        "sha256": "df4e5991564d414c7b80425cbfb6b07ce3793737c1748a974100cf81e03a27cd"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave929-distribution-manifests-contract.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+        "suggested_verification": [
+          "npm run verify:package-release"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
+    },
+    {
+      "path": "packages/winget/kolm.kolm.locale.en-US.yaml",
+      "id": "packages-winget-kolm-kolm-locale-en-us-yaml",
+      "surface": "package-distribution",
+      "domain": "developer_distribution",
+      "language": "yaml",
+      "composition": {
+        "metrics": {
+          "bytes": 1010,
           "lines": 34,
           "imports": 0,
           "exports": 0,
@@ -6761,9 +6860,9 @@
         "risk_signals": [
           "distribution_or_worker_surface"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "379cc16f3aa265df1ee87f6b9a68d85c1dc2c342158d2c4ecb443306ba9daaa1"
+        "sha256": "b62a43fe2d13149524e13cc69521355aeeb0d9b7c05a37e6950a1b170cab5183"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -6771,53 +6870,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [],
-        "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
-        "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
-        "suggested_verification": [
-          "npm run verify:package-release"
-        ]
-      },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
-    },
-    {
-      "path": "packages/winget/kolm.kolm.locale.en-US.yaml",
-      "id": "packages-winget-kolm-kolm-locale-en-us-yaml",
-      "surface": "package-distribution",
-      "domain": "developer_distribution",
-      "language": "yaml",
-      "composition": {
-        "metrics": {
-          "bytes": 925,
-          "lines": 32,
-          "imports": 0,
-          "exports": 0,
-          "routes": 0,
-          "env_refs": 0,
-          "fs_writes": 0,
-          "subprocess_refs": 0,
-          "network_refs": 0,
-          "crypto_refs": 0,
-          "markers": 0
-        },
-        "risk_signals": [
-          "distribution_or_worker_surface"
+        "direct_test_refs": [
+          "tests/wave929-distribution-manifests-contract.test.js"
         ],
-        "priority_score": 2,
-        "priority_band": "normal",
-        "sha256": "c078fdcd1c65d20fe3bea4facfa6a93818846c0071894bc1036cedba43553bca"
-      },
-      "target_state": {
-        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
-        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
-      },
-      "current_state": {
-        "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
@@ -6825,10 +6880,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/winget/kolm.kolm.yaml",
@@ -6853,7 +6906,7 @@
         "risk_signals": [
           "distribution_or_worker_surface"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
         "sha256": "a0e2b99767b37755edb4ff28659e8d9939613e7fffaf7f4da3f9de3a1a7f12ec"
       },
@@ -6863,7 +6916,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave929-distribution-manifests-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
@@ -6871,10 +6926,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/winget/README.md",
@@ -29778,8 +29831,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 25549,
-          "lines": 612,
+          "bytes": 30003,
+          "lines": 700,
           "imports": 2,
           "exports": 8,
           "routes": 0,
@@ -29795,7 +29848,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "b4783b83b1fd3398fb52a7be784497de81d48bb5bd8486745c9f3650e65e96c4"
+        "sha256": "f7c769a4fedc96fa17b3237922bad70cb89859b393f065b7de563f9dd19a2f72"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

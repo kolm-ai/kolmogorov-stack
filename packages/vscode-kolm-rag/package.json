@@ -1,30 +1,70 @@
 {
   "name": "vscode-kolm-rag",
-  "displayName": "Kolm RAG: passive monitor + distill workflow",
-  "description": "W819 - Passive Copilot/Cursor/Claude-Code suggestion-acceptance monitor, repetition-cluster detection, and post-distill local-student routing for VS Code.",
-  "version": "0.1.0",
+  "displayName": "Kolm RAG",
+  "description": "Passive suggestion-acceptance monitoring, repetition-cluster detection, and local distill-routing controls for VS Code.",
+  "version": "0.2.6",
   "publisher": "kolm",
   "license": "Apache-2.0",
   "homepage": "https://kolm.ai",
+  "preview": true,
+  "qna": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kolm-ai/kolm.git",
     "directory": "packages/vscode-kolm-rag"
   },
+  "bugs": {
+    "url": "https://github.com/kolm-ai/kolm/issues"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
-  "categories": ["AI", "Other", "Programming Languages"],
-  "keywords": ["kolm", "rag", "copilot", "claude-code", "cursor", "distill", "passive-monitor"],
+  "categories": [
+    "AI",
+    "Other",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "kolm",
+    "rag",
+    "copilot",
+    "claude-code",
+    "cursor",
+    "distill",
+    "passive-monitor",
+    "local-ai"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "Kolm RAG observes accepted editor text and requires a trusted workspace."
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "Kolm RAG shells out to the local kolm CLI and requires a local workspace."
+    }
+  },
   "activationEvents": [
     "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
-      { "command": "kolm.rag.openDistillDialog", "title": "Kolm RAG: open distill dialog" },
-      { "command": "kolm.rag.viewClusters",      "title": "Kolm RAG: view detected clusters" },
-      { "command": "kolm.rag.toggleRouting",     "title": "Kolm RAG: toggle post-distill routing" }
+      {
+        "command": "kolm.rag.openDistillDialog",
+        "title": "Kolm RAG: Open Distill Dialog"
+      },
+      {
+        "command": "kolm.rag.viewClusters",
+        "title": "Kolm RAG: View Detected Clusters"
+      },
+      {
+        "command": "kolm.rag.toggleRouting",
+        "title": "Kolm RAG: Toggle Local Routing"
+      }
     ],
     "configuration": {
       "title": "Kolm RAG",
@@ -33,40 +73,45 @@
           "type": "number",
           "default": 3,
           "minimum": 1,
-          "description": "W819-3 - minimum cluster count before the status-bar 'ready to distill' CTA lights up."
+          "description": "Minimum cluster count before the status-bar distill action becomes available."
         },
         "kolm.teacher.preference": {
           "type": "string",
           "default": "auto",
-          "enum": ["auto", "anthropic", "openai", "kolm"],
-          "description": "W819-5 - preferred teacher model for distill jobs. 'auto' lets the kolm runtime choose."
+          "enum": [
+            "auto",
+            "anthropic",
+            "openai",
+            "kolm"
+          ],
+          "description": "Preferred teacher model for distill jobs. Use auto to let the kolm runtime choose."
         },
         "kolm.namespace": {
           "type": "string",
           "default": "vscode-rag",
-          "description": "W819-5 - namespace used for captures + downstream distill artifacts."
+          "description": "Namespace used for captures and downstream distill artifacts."
         },
         "kolm.routing.enabled": {
           "type": "boolean",
           "default": false,
-          "description": "W819-4 - after a distill job completes, route matching completion requests (Jaccard > 0.7) to the local student."
+          "description": "After a distill job completes, route matching completion requests to the local student."
         },
         "kolm.routing.jaccardThreshold": {
           "type": "number",
           "default": 0.7,
           "minimum": 0,
           "maximum": 1,
-          "description": "W819-4 - Jaccard similarity required against cluster fingerprints before routing to the local student."
+          "description": "Jaccard similarity required against cluster fingerprints before routing to the local student."
         },
         "kolm.passiveMonitor.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "W819-1 - watch document changes for large-block insertions (Copilot/Cursor/Claude-Code suggestion-acceptance signals)."
+          "description": "Watch document changes for large-block insertions that look like accepted suggestions."
         },
         "kolm.passiveMonitor.minBlockChars": {
           "type": "number",
           "default": 80,
-          "description": "W819-1 - minimum inserted-block size (chars) for the passive monitor to treat a change as a suggestion-acceptance."
+          "description": "Minimum inserted-block size in characters for the passive monitor to treat a change as an accepted suggestion."
         }
       }
     }

@@ -38,16 +38,16 @@
     "frontier_improvement_or_invention"
   ],
   "summary": {
-    "component_count": 829,
-    "test_referenced_components": 756,
-    "components_without_direct_test_reference": 73,
+    "component_count": 830,
+    "test_referenced_components": 761,
+    "components_without_direct_test_reference": 69,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
       "capture_data_eval": 74,
       "compile_artifact_runtime": 102,
-      "developer_distribution": 67,
+      "developer_distribution": 68,
       "identity_access": 31,
       "infra_cloud_device": 69,
       "platform_support": 199,
@@ -60,14 +60,14 @@
       "api-http": 31,
       "cli": 3,
       "core-backend": 626,
-      "package-distribution": 91,
+      "package-distribution": 92,
       "service": 3,
       "worker": 75
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 414,
-      "distribution_or_worker_surface": 169,
+      "distribution_or_worker_surface": 170,
       "environment_configuration_boundary": 315,
       "execution_or_subprocess_boundary": 235,
       "http_route_surface": 36,
@@ -5733,10 +5733,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "json",
-      "sha256": "a1a4dd6e776915633afe15e5a2b7231e917e4b844ee205dc2590ab9cf0172e04",
+      "sha256": "17d05da6eb198bbe46f7f847cd9532b9dd1e3ae01e1e4b321594b0923eb289de",
       "metrics": {
-        "bytes": 3147,
-        "lines": 83,
+        "bytes": 3644,
+        "lines": 128,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -5747,11 +5747,77 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave929-distribution-manifests-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
+      "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
+      "suggested_verification": [
+        "npm run verify:package-release"
+      ]
+    },
+    {
+      "path": "packages/vscode-kolm-rag/README.md",
+      "id": "packages-vscode-kolm-rag-readme-md",
+      "surface": "package-distribution",
+      "domain": "developer_distribution",
+      "language": "markdown",
+      "sha256": "68efaa7f79cca1405852108931b3e3545026d827a813cf5c833896d329295248",
+      "metrics": {
+        "bytes": 1200,
+        "lines": 27,
+        "imports": 0,
+        "exports": 0,
+        "routes": 0,
+        "env_refs": 0,
+        "fs_writes": 0,
+        "subprocess_refs": 0,
+        "network_refs": 0,
+        "crypto_refs": 0,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/path-to-100-w2-truth-in-labeling.test.js",
+        "tests/r4-deploy-generators.test.js",
+        "tests/research-docs.test.js",
+        "tests/site.test.js",
+        "tests/wave195-quantize-worker.test.js",
+        "tests/wave238-init-agent.test.js",
+        "tests/wave442-blessed-test-command.test.js",
+        "tests/wave482-sdk-catalog-honesty.test.js"
+      ],
+      "risk_signals": [
+        "distribution_or_worker_surface"
+      ],
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -6265,10 +6331,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "yaml",
-      "sha256": "379cc16f3aa265df1ee87f6b9a68d85c1dc2c342158d2c4ecb443306ba9daaa1",
+      "sha256": "df4e5991564d414c7b80425cbfb6b07ce3793737c1748a974100cf81e03a27cd",
       "metrics": {
-        "bytes": 1136,
-        "lines": 34,
+        "bytes": 1441,
+        "lines": 36,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -6279,11 +6345,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave929-distribution-manifests-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -6320,10 +6388,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "yaml",
-      "sha256": "c078fdcd1c65d20fe3bea4facfa6a93818846c0071894bc1036cedba43553bca",
+      "sha256": "b62a43fe2d13149524e13cc69521355aeeb0d9b7c05a37e6950a1b170cab5183",
       "metrics": {
-        "bytes": 925,
-        "lines": 32,
+        "bytes": 1010,
+        "lines": 34,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -6334,11 +6402,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave929-distribution-manifests-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -6389,11 +6459,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave929-distribution-manifests-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -32939,10 +33011,10 @@
       "surface": "core-backend",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "b4783b83b1fd3398fb52a7be784497de81d48bb5bd8486745c9f3650e65e96c4",
+      "sha256": "f7c769a4fedc96fa17b3237922bad70cb89859b393f065b7de563f9dd19a2f72",
       "metrics": {
-        "bytes": 25549,
-        "lines": 612,
+        "bytes": 30003,
+        "lines": 700,
         "imports": 2,
         "exports": 8,
         "routes": 0,
