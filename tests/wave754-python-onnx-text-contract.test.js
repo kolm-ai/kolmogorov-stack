@@ -41,7 +41,7 @@ test('W754 Python ONNX text runtime is wired into direct depth verification', ()
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:zip-large && npm run verify:python-onnx-text && npm run verify:fal-backend && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:zip-large && npm run verify:python-onnx-text && npm run verify:fal-backend && npm run verify:vast-backend && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /ONNX_TEXT_CONTRACT_VERSION = "w754-onnx-text-v1"/);
   assert.match(source, /ONNX_TEXT_LIMITS = MappingProxyType/);

@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 748,
-    "components_without_direct_test_reference": 81,
+    "test_referenced_components": 749,
+    "components_without_direct_test_reference": 80,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 413,
+      "cryptographic_or_proof_boundary": 414,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 315,
       "execution_or_subprocess_boundary": 235,
@@ -15307,26 +15307,29 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "6297bb03e9519ba347c1e4c3650dab289c5ef44bef40728905858a06b83023bc",
+      "sha256": "0ab2e654b79df15e8bfa242853deb1f50c27c0158405b96be5890b49198812e1",
       "metrics": {
-        "bytes": 4114,
-        "lines": 97,
-        "imports": 4,
-        "exports": 4,
+        "bytes": 7217,
+        "lines": 225,
+        "imports": 5,
+        "exports": 6,
         "routes": 0,
         "env_refs": 3,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 2,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave789-vast-backend-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

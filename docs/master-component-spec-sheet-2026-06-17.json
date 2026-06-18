@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 748,
-    "direct_test_reference_pct": 90.2,
-    "components_without_direct_test_reference": 81,
+    "direct_test_referenced_components": 749,
+    "direct_test_reference_pct": 90.3,
+    "components_without_direct_test_reference": 80,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -14696,25 +14696,26 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 4114,
-          "lines": 97,
-          "imports": 4,
-          "exports": 4,
+          "bytes": 7217,
+          "lines": 225,
+          "imports": 5,
+          "exports": 6,
           "routes": 0,
           "env_refs": 3,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 2,
-          "crypto_refs": 0,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "environment_configuration_boundary",
           "network_or_provider_boundary"
         ],
-        "priority_score": 3,
-        "priority_band": "normal",
-        "sha256": "6297bb03e9519ba347c1e4c3650dab289c5ef44bef40728905858a06b83023bc"
+        "priority_score": 5,
+        "priority_band": "medium",
+        "sha256": "0ab2e654b79df15e8bfa242853deb1f50c27c0158405b96be5890b49198812e1"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -14722,7 +14723,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave789-vast-backend-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -14731,10 +14734,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/compute/backends/vllm.js",
