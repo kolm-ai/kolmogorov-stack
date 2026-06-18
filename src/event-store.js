@@ -542,17 +542,20 @@ export async function getEvent(eventId) {
   return _jsonlAll().find(ev => ev.event_id === eventId) || null;
 }
 
-// purgeEvents({before, namespace, dryRun}). Returns {deleted, would_delete}.
+// purgeEvents({before, namespace, tenant_id|tenant, dryRun}).
+// Returns {deleted, would_delete}. Any supplied selector narrows the purge.
 export async function purgeEvents(opts = {}) {
   const drv = _ensureDriver();
   const dryRun = !!opts.dryRun;
   const before = opts.before ? new Date(opts.before).toISOString() : null;
+  const tenantFilter = opts.tenant_id || opts.tenant || null;
   if (drv === 'sqlite') {
     const db = _openSqlite();
     const where = [];
     const args = [];
     if (before) { where.push('created_at < ?'); args.push(before); }
     if (opts.namespace) { where.push('namespace = ?'); args.push(opts.namespace); }
+    if (tenantFilter) { where.push('tenant_id = ?'); args.push(tenantFilter); }
     if (!where.length) return { deleted: 0, would_delete: 0 };
     const whereSql = 'WHERE ' + where.join(' AND ');
     const count = db.prepare(`SELECT COUNT(*) AS n FROM events ${whereSql}`).get(...args).n || 0;
@@ -567,7 +570,8 @@ export async function purgeEvents(opts = {}) {
     let drop = true;
     if (before && new Date(ev.created_at).getTime() >= new Date(before).getTime()) drop = false;
     if (opts.namespace && ev.namespace !== opts.namespace) drop = false;
-    if (drop && (before || opts.namespace)) { dropped++; continue; }
+    if (tenantFilter && ev.tenant_id !== tenantFilter) drop = false;
+    if (drop && (before || opts.namespace || tenantFilter)) { dropped++; continue; }
     keep.push(ev);
   }
   if (dryRun) return { deleted: 0, would_delete: dropped };

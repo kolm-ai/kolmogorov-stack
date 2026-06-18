@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 93.1,
+    "local_engineering_score": 93.2,
     "frontier_product_score": 69.8,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 716,
-    "direct_test_reference_pct": 86.4,
-    "components_without_direct_test_reference": 113,
+    "direct_test_referenced_components": 717,
+    "direct_test_reference_pct": 86.5,
+    "components_without_direct_test_reference": 112,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -3924,24 +3924,15 @@
           "tests/agent-audit-routes-errorpaths.test.js",
           "tests/agent-audit-routes.test.js"
         ],
-        "category_links": [
-          {
-            "id": "mcp-tool-gateway-receipts",
-            "stack_area": "agent-integrations",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          }
-        ],
+        "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
         "innovation_opportunity": "Generate SDK/package conformance proofs from one package matrix and attach signed release artifacts before publish.",
         "suggested_verification": [
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: generated_package_sdk_conformance_and_release_evidence."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "packages/python-llamaindex-kolm/kolm_llamaindex/__init__.py",
@@ -9732,26 +9723,27 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 15096,
-          "lines": 423,
-          "imports": 1,
-          "exports": 8,
+          "bytes": 21536,
+          "lines": 626,
+          "imports": 2,
+          "exports": 9,
           "routes": 0,
           "env_refs": 3,
           "fs_writes": 0,
           "subprocess_refs": 1,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 6,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "environment_configuration_boundary",
           "execution_or_subprocess_boundary",
           "stateful_storage_boundary"
         ],
-        "priority_score": 4,
+        "priority_score": 6,
         "priority_band": "medium",
-        "sha256": "444febc4ecd0f8c5e165b1b4721f96828ca2fc2f7afd85f08c602961bbf3cb6b"
+        "sha256": "b7b677119cc982639e26eba1c148a7b1c7c42abec4d4d3f162fdf0b6f00b59a8"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -9759,9 +9751,36 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
-        "category_links": [],
-        "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+        "direct_test_refs": [
+          "tests/wave696-audit-retention-contract.test.js"
+        ],
+        "category_links": [
+          {
+            "id": "mcp-tool-gateway-receipts",
+            "stack_area": "agent-integrations",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "verifiable-inference",
+            "stack_area": "trust",
+            "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "model-signing-standards",
+            "stack_area": "trust",
+            "status": "sota_review_complete_external_or_release_gate_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "agent-security-eval",
+            "stack_area": "enterprise",
+            "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "sampled"
+          }
+        ],
+        "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
         "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
         "suggested_verification": [
           "npm run verify:claims-scope",
@@ -9769,9 +9788,9 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing"
+        "linked_frontier_work_open"
       ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
     },
     {
       "path": "src/audit-routes.js",
@@ -10627,12 +10646,6 @@
             "id": "llm-routing",
             "stack_area": "gateway",
             "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "agent-security-eval",
-            "stack_area": "enterprise",
-            "status": "sota_review_complete_critical_frontier_work_open",
             "relation": "sampled"
           }
         ],
@@ -20248,12 +20261,6 @@
             "stack_area": "trust",
             "status": "sota_review_complete_critical_frontier_work_open",
             "relation": "sampled"
-          },
-          {
-            "id": "model-signing-standards",
-            "stack_area": "trust",
-            "status": "sota_review_complete_external_or_release_gate_open",
-            "relation": "sampled"
           }
         ],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -21038,8 +21045,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 31595,
-          "lines": 707,
+          "bytes": 31884,
+          "lines": 711,
           "imports": 8,
           "exports": 12,
           "routes": 0,
@@ -21057,7 +21064,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "fb6286f2b84dae69149c6b99220417088a041cfcdedce3b5a57718a67d5e54f9"
+        "sha256": "c32e844d5bac412e252f3a36b65d45697712680abc3c8607b8149a2779c3ae39"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -28849,12 +28856,6 @@
             "id": "kv-cache",
             "stack_area": "runtime",
             "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "verifiable-inference",
-            "stack_area": "trust",
-            "status": "sota_review_complete_critical_frontier_work_open",
             "relation": "sampled"
           }
         ],

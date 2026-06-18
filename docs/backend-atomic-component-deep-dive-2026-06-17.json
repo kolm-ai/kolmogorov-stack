@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 716,
-    "components_without_direct_test_reference": 113,
+    "test_referenced_components": 717,
+    "components_without_direct_test_reference": 112,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 404,
+      "cryptographic_or_proof_boundary": 405,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 313,
       "execution_or_subprocess_boundary": 233,
@@ -9594,27 +9594,30 @@
       "surface": "core-backend",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "444febc4ecd0f8c5e165b1b4721f96828ca2fc2f7afd85f08c602961bbf3cb6b",
+      "sha256": "b7b677119cc982639e26eba1c148a7b1c7c42abec4d4d3f162fdf0b6f00b59a8",
       "metrics": {
-        "bytes": 15096,
-        "lines": 423,
-        "imports": 1,
-        "exports": 8,
+        "bytes": 21536,
+        "lines": 626,
+        "imports": 2,
+        "exports": 9,
         "routes": 0,
         "env_refs": 3,
         "fs_writes": 0,
         "subprocess_refs": 1,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 6,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave696-audit-retention-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
         "stateful_storage_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 6,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -9639,7 +9642,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "add_targeted_contract_tests_for_high_risk_boundary",
+      "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
       "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
       "suggested_verification": [
         "npm run verify:claims-scope",
@@ -22612,10 +22615,10 @@
       "surface": "core-backend",
       "domain": "storage_state",
       "language": "javascript",
-      "sha256": "fb6286f2b84dae69149c6b99220417088a041cfcdedce3b5a57718a67d5e54f9",
+      "sha256": "c32e844d5bac412e252f3a36b65d45697712680abc3c8607b8149a2779c3ae39",
       "metrics": {
-        "bytes": 31595,
-        "lines": 707,
+        "bytes": 31884,
+        "lines": 711,
         "imports": 8,
         "exports": 12,
         "routes": 0,

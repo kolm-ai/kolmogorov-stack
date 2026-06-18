@@ -27,17 +27,26 @@
 //     count is re-filtered by tenant_id inside the helper even if the caller
 //     already passed tenant_id as a query parameter.
 //
+// W696 hardening:
+//   - every status/dry-run/live eviction envelope carries proof_version,
+//     event_set_sha256, manifest_sha256, and a deterministic as_of seam
+//     (opts.now / opts.now_ms / opts.now_iso) for audit replay.
+//   - live eviction calls purgeEvents({tenant_id,before}) and caps reported
+//     evicted_count to the tenant-fenced candidate set.
+//   - event-store/persist errors are redacted before they leave the module.
+//
 // DI seam (test injection): the public functions accept an `opts.eventStore`
-// and `opts.storeMod` to override the default imports. Tests pass an
-// in-memory fake; production code passes nothing and falls through to the
-// real modules.
+// to override the default import. Tests pass an in-memory fake; production
+// code passes nothing and falls through to the real module.
 //
 // W604 anti-brittleness: version stamp matches /^w767-/ - callers MUST
 // regex-match. Never literal-compare 'w767-v1'.
 
+import crypto from 'node:crypto';
 import * as defaultEventStore from './event-store.js';
 
 export const AUDIT_RETENTION_VERSION = 'w767-v1';
+export const AUDIT_RETENTION_PROOF_VERSION = 'w696-v1';
 
 // SOC 2 Type II evidence window.
 export const DEFAULT_RETENTION_DAYS = 365;
@@ -58,6 +67,137 @@ const PROVIDER_TAG = 'kolm_audit_retention';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
+const SECRET_PATTERNS = Object.freeze([
+  /\b(?:sk|ghp|gho|ghs|ghu|ghr|xai|ya29|AIza)[_-][A-Za-z0-9_.-]{12,}\b/g,
+  /\bks_[A-Za-z0-9_.-]{12,}\b/g,
+  /\bBearer\s+[A-Za-z0-9._~+/=-]{12,}\b/gi,
+  /([?&](?:api[_-]?key|access[_-]?token|auth[_-]?token|secret|token|password)=)[^&#\s]+/gi,
+  /\b(?:api[_-]?key|access[_-]?token|auth[_-]?token|secret|password)\s*[:=]\s*["']?[A-Za-z0-9._~+/=-]{8,}/gi,
+]);
+
+function _sha256(value) {
+  return crypto.createHash('sha256').update(String(value), 'utf8').digest('hex');
+}
+
+function _canonicalJson(value) {
+  const seen = new WeakSet();
+  const sort = (v) => {
+    if (v == null || typeof v !== 'object') return v;
+    if (seen.has(v)) return '[Circular]';
+    seen.add(v);
+    if (Array.isArray(v)) return v.map(sort);
+    const out = {};
+    for (const key of Object.keys(v).sort()) out[key] = sort(v[key]);
+    return out;
+  };
+  return JSON.stringify(sort(value));
+}
+
+function _sha256Json(value) {
+  return _sha256(_canonicalJson(value));
+}
+
+function _safeText(value, maxChars = 240) {
+  let s = String(value == null ? '' : value)
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '');
+  for (const pattern of SECRET_PATTERNS) {
+    s = s.replace(pattern, (match, prefix) => {
+      if (typeof prefix === 'string' && prefix.length > 0 && match.startsWith(prefix)) {
+        return `${prefix}[redacted_secret]`;
+      }
+      return '[redacted_secret]';
+    });
+  }
+  return s.slice(0, maxChars);
+}
+
+function _tenantId(value) {
+  return (typeof value === 'string' && value.trim()) ? value.trim() : null;
+}
+
+function _nowMs(opts = {}) {
+  const raw = opts.now_ms ?? opts.now ?? opts.now_iso;
+  if (raw != null) {
+    const asNum = Number(raw);
+    if (Number.isFinite(asNum) && asNum > 0) return asNum;
+    const parsed = Date.parse(String(raw));
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return Date.now();
+}
+
+function _eventProofRows(rows) {
+  return (Array.isArray(rows) ? rows : [])
+    .filter((r) => r && typeof r === 'object')
+    .map((r) => ({
+      event_id: r.event_id || r.id || null,
+      tenant_id: r.tenant_id || null,
+      namespace: r.namespace || null,
+      provider: r.provider || null,
+      created_at: r.created_at || null,
+      request_hash: r.request_hash || null,
+    }))
+    .sort((a, b) => {
+      const at = String(a.created_at || '').localeCompare(String(b.created_at || ''));
+      if (at !== 0) return at;
+      return String(a.event_id || '').localeCompare(String(b.event_id || ''));
+    });
+}
+
+function _proofFields(kind, {
+  tenant_id,
+  days_configured,
+  cutoff_at = null,
+  as_of,
+  rows = [],
+  dry_run = null,
+  evicted_count = null,
+  would_evict_count = null,
+  oldest_kept_at = null,
+  remaining_candidate_count = null,
+}) {
+  const proofRows = _eventProofRows(rows);
+  const event_set_sha256 = _sha256Json(proofRows);
+  const manifest = {
+    kind,
+    version: AUDIT_RETENTION_VERSION,
+    proof_version: AUDIT_RETENTION_PROOF_VERSION,
+    tenant_id_sha256: _sha256(tenant_id),
+    days_configured,
+    cutoff_at,
+    as_of,
+    event_count: proofRows.length,
+    event_set_sha256,
+    dry_run,
+    evicted_count,
+    would_evict_count,
+    oldest_kept_at,
+    remaining_candidate_count,
+  };
+  const manifest_sha256 = _sha256Json(manifest);
+  return {
+    proof_version: AUDIT_RETENTION_PROOF_VERSION,
+    event_set_sha256,
+    manifest_sha256,
+    proof: {
+      algorithm: 'sha256',
+      manifest,
+      manifest_sha256,
+      event_set_sha256,
+    },
+  };
+}
+
+function _errorEnvelope(error, extra = {}) {
+  return {
+    ok: false,
+    error,
+    version: AUDIT_RETENTION_VERSION,
+    proof_version: AUDIT_RETENTION_PROOF_VERSION,
+    ...extra,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Read the runtime-effective retention floor from env. Returns DEFAULT when
 // unset. Rejects (falls through to DEFAULT with a console.error in debug mode)
@@ -73,14 +213,12 @@ export function getCurrentRetentionDays() {
   }
   if (n < MIN_RETENTION_DAYS) {
     if (process.env.KOLM_AUDIT_DEBUG === '1') {
-       
       console.error(`[audit-retention] KOLM_AUDIT_RETENTION_DAYS=${n} below MIN=${MIN_RETENTION_DAYS}; ignoring`);
     }
     return DEFAULT_RETENTION_DAYS;
   }
   if (n > MAX_RETENTION_DAYS) {
     if (process.env.KOLM_AUDIT_DEBUG === '1') {
-       
       console.error(`[audit-retention] KOLM_AUDIT_RETENTION_DAYS=${n} above MAX=${MAX_RETENTION_DAYS}; clamping`);
     }
     return MAX_RETENTION_DAYS;
@@ -101,42 +239,30 @@ export function getCurrentRetentionDays() {
 //   - days must be an integer in [MIN, MAX].
 // ---------------------------------------------------------------------------
 export async function setRetentionDays(tenant_id, days, opts = {}) {
-  if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_required',
-      version: AUDIT_RETENTION_VERSION,
-    };
+  const tenant = _tenantId(tenant_id);
+  if (!tenant) {
+    return _errorEnvelope('tenant_required');
   }
   const n = Number(days);
   if (!Number.isFinite(n) || !Number.isInteger(n)) {
-    return {
-      ok: false,
-      error: 'days_invalid',
+    return _errorEnvelope('days_invalid', {
       hint: `days must be an integer in [${MIN_RETENTION_DAYS}, ${MAX_RETENTION_DAYS}]`,
-      version: AUDIT_RETENTION_VERSION,
-    };
+    });
   }
   if (n < MIN_RETENTION_DAYS) {
-    return {
-      ok: false,
-      error: 'days_below_min',
+    return _errorEnvelope('days_below_min', {
       hint: `days=${n} below MIN_RETENTION_DAYS=${MIN_RETENTION_DAYS} (SOC 2 Type I floor)`,
-      version: AUDIT_RETENTION_VERSION,
-    };
+    });
   }
   if (n > MAX_RETENTION_DAYS) {
-    return {
-      ok: false,
-      error: 'days_above_max',
+    return _errorEnvelope('days_above_max', {
       hint: `days=${n} above MAX_RETENTION_DAYS=${MAX_RETENTION_DAYS} (~7y HIPAA/GDPR ceiling)`,
-      version: AUDIT_RETENTION_VERSION,
-    };
+    });
   }
   const es = opts.eventStore || defaultEventStore;
   try {
     const ev = await es.appendEvent({
-      tenant_id,
+      tenant_id: tenant,
       namespace: 'system',
       provider: PROVIDER_TAG,
       model: 'config',
@@ -155,17 +281,15 @@ export async function setRetentionDays(tenant_id, days, opts = {}) {
     return {
       ok: true,
       version: AUDIT_RETENTION_VERSION,
-      tenant_id,
+      proof_version: AUDIT_RETENTION_PROOF_VERSION,
+      tenant_id: tenant,
       days_configured: n,
       event_id: ev && ev.event_id,
     };
   } catch (e) {
-    return {
-      ok: false,
-      error: 'persist_failed',
-      detail: String(e && e.message || e),
-      version: AUDIT_RETENTION_VERSION,
-    };
+    return _errorEnvelope('persist_failed', {
+      detail: _safeText(e && e.message || e),
+    });
   }
 }
 
@@ -177,16 +301,17 @@ export async function setRetentionDays(tenant_id, days, opts = {}) {
 // the result rows by tenant_id (defense-in-depth W411).
 // ---------------------------------------------------------------------------
 async function _resolveTenantDays(tenant_id, es) {
-  if (!tenant_id) return getCurrentRetentionDays();
+  const tenant = _tenantId(tenant_id);
+  if (!tenant) return getCurrentRetentionDays();
   try {
     const rows = await es.listEvents({
-      tenant_id,
+      tenant_id: tenant,
       provider: PROVIDER_TAG,
       limit: 50,
       order: 'desc',
     });
-    for (const ev of rows || []) {
-      if (!ev || ev.tenant_id !== tenant_id) continue;
+    for (const ev of Array.isArray(rows) ? rows : []) {
+      if (!ev || ev.tenant_id !== tenant) continue;
       if (!ev.request_hash || typeof ev.request_hash !== 'string') continue;
       const m = /^retention_days=(\d+)$/.exec(ev.request_hash);
       if (!m) continue;
@@ -227,33 +352,35 @@ async function _resolveTenantDays(tenant_id, es) {
 // per-tenant.
 // ---------------------------------------------------------------------------
 export async function getRetentionStatus(tenant_id, opts = {}) {
-  if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_required',
-      version: AUDIT_RETENTION_VERSION,
-    };
+  const tenant = _tenantId(tenant_id);
+  if (!tenant) {
+    return _errorEnvelope('tenant_required');
   }
   const es = opts.eventStore || defaultEventStore;
-  const days_configured = await _resolveTenantDays(tenant_id, es);
+  const nowMs = _nowMs(opts);
+  const as_of = new Date(nowMs).toISOString();
+  const days_configured = await _resolveTenantDays(tenant, es);
   const days_default = DEFAULT_RETENTION_DAYS;
-  const sinceMs = Date.now() - days_configured * MS_PER_DAY;
+  const sinceMs = nowMs - days_configured * MS_PER_DAY;
   const sinceISO = new Date(sinceMs).toISOString();
 
   let rowsInWindow = [];
+  let status_warning = null;
   try {
     rowsInWindow = await es.listEvents({
-      tenant_id,
+      tenant_id: tenant,
       since: sinceISO,
       limit: 0,
       order: 'asc',
     });
-  } catch (_) {
+  } catch (e) {
     rowsInWindow = [];
+    status_warning = 'event_store_unavailable';
   }
   // Defense in depth - re-filter by tenant_id even though listEvents already
   // accepted the filter (W411).
-  rowsInWindow = (rowsInWindow || []).filter((r) => r && r.tenant_id === tenant_id);
+  rowsInWindow = (Array.isArray(rowsInWindow) ? rowsInWindow : [])
+    .filter((r) => r && r.tenant_id === tenant);
 
   let oldest = null;
   let newest = null;
@@ -264,10 +391,21 @@ export async function getRetentionStatus(tenant_id, opts = {}) {
     if (newest === null || t > Date.parse(newest)) newest = r.created_at;
   }
 
+  const proof = _proofFields('audit_retention_status', {
+    tenant_id: tenant,
+    days_configured,
+    cutoff_at: sinceISO,
+    as_of,
+    rows: rowsInWindow,
+    oldest_kept_at: oldest,
+  });
+
   return {
     ok: true,
     version: AUDIT_RETENTION_VERSION,
-    tenant_id,
+    proof_version: AUDIT_RETENTION_PROOF_VERSION,
+    tenant_id: tenant,
+    as_of,
     days_configured,
     days_default,
     days_min: MIN_RETENTION_DAYS,
@@ -277,6 +415,8 @@ export async function getRetentionStatus(tenant_id, opts = {}) {
     oldest_event_at: oldest,
     newest_event_at: newest,
     compliance_floor_met: days_configured >= DEFAULT_RETENTION_DAYS,
+    status_warning,
+    ...proof,
   };
 }
 
@@ -307,47 +447,51 @@ export async function getRetentionStatus(tenant_id, opts = {}) {
 //     require BOTH flags so an accidental confirm cannot trigger destruction.
 // ---------------------------------------------------------------------------
 export async function enforceRetentionPolicy(tenant_id, opts = {}) {
-  if (!tenant_id || typeof tenant_id !== 'string') {
-    return {
-      ok: false,
-      error: 'tenant_required',
-      version: AUDIT_RETENTION_VERSION,
-    };
+  const tenant = _tenantId(tenant_id);
+  if (!tenant) {
+    return _errorEnvelope('tenant_required');
   }
   const es = opts.eventStore || defaultEventStore;
   // The default must be a dry run. Live mode is opt-in.
   const dry_run = opts.dry_run === false ? false : true;
   const confirm = opts.confirm === true;
 
-  const days = await _resolveTenantDays(tenant_id, es);
-  const cutoffMs = Date.now() - days * MS_PER_DAY;
+  const nowMs = _nowMs(opts);
+  const as_of = new Date(nowMs).toISOString();
+  const days = await _resolveTenantDays(tenant, es);
+  const cutoffMs = nowMs - days * MS_PER_DAY;
   const cutoffISO = new Date(cutoffMs).toISOString();
 
   let rows = [];
   try {
     rows = await es.listEvents({
-      tenant_id,
+      tenant_id: tenant,
       until: cutoffISO,
       limit: 0,
       order: 'asc',
     });
-  } catch (_) {
-    rows = [];
+  } catch (e) {
+    return _errorEnvelope('candidate_read_failed', {
+      detail: _safeText(e && e.message || e),
+      dry_run,
+      cutoff_at: cutoffISO,
+      days_configured: days,
+    });
   }
   // Defense in depth - re-filter by tenant_id. NEVER trust the upstream
   // alone.
-  rows = (rows || []).filter((r) => r && r.tenant_id === tenant_id);
+  rows = (Array.isArray(rows) ? rows : []).filter((r) => r && r.tenant_id === tenant);
 
   // Re-compute oldest_kept_at: the earliest row that is INSIDE the window.
   let oldest_kept_at = null;
   try {
     const insideWindow = await es.listEvents({
-      tenant_id,
+      tenant_id: tenant,
       since: cutoffISO,
       limit: 0,
       order: 'asc',
     });
-    for (const r of (insideWindow || []).filter((x) => x && x.tenant_id === tenant_id)) {
+    for (const r of (Array.isArray(insideWindow) ? insideWindow : []).filter((x) => x && x.tenant_id === tenant)) {
       const t = r && r.created_at ? Date.parse(r.created_at) : NaN;
       if (!Number.isFinite(t)) continue;
       if (oldest_kept_at === null || t < Date.parse(oldest_kept_at)) oldest_kept_at = r.created_at;
@@ -356,16 +500,33 @@ export async function enforceRetentionPolicy(tenant_id, opts = {}) {
     oldest_kept_at = null;
   }
 
+  const baseProof = {
+    tenant_id: tenant,
+    days_configured: days,
+    cutoff_at: cutoffISO,
+    as_of,
+    rows,
+    oldest_kept_at,
+    would_evict_count: rows.length,
+  };
+
   if (dry_run) {
+    const proof = _proofFields('audit_retention_dry_run', {
+      ...baseProof,
+      dry_run: true,
+    });
     return {
       ok: true,
       version: AUDIT_RETENTION_VERSION,
-      tenant_id,
+      proof_version: AUDIT_RETENTION_PROOF_VERSION,
+      tenant_id: tenant,
       dry_run: true,
       cutoff_at: cutoffISO,
+      as_of,
       days_configured: days,
       would_evict_count: rows.length,
       oldest_kept_at,
+      ...proof,
     };
   }
 
@@ -373,50 +534,92 @@ export async function enforceRetentionPolicy(tenant_id, opts = {}) {
   // dropping to a dry run - that would be a different failure mode operators
   // could miss in noisy logs.
   if (!confirm) {
-    return {
-      ok: false,
-      error: 'confirm_required',
+    return _errorEnvelope('confirm_required', {
       hint: 'pass {confirm:true, dry_run:false} to perform a live eviction; default is dry_run:true',
-      version: AUDIT_RETENTION_VERSION,
-    };
+      dry_run: false,
+      cutoff_at: cutoffISO,
+      as_of,
+      days_configured: days,
+      would_evict_count: rows.length,
+      ..._proofFields('audit_retention_confirm_required', {
+        ...baseProof,
+        dry_run: false,
+      }),
+    });
   }
 
   // Best-effort live eviction. We attempt purgeEvents if the event-store
   // exposes one; if it does not, return an honest envelope that explains
   // the store driver does not yet support eviction.
   if (typeof es.purgeEvents !== 'function') {
-    return {
-      ok: false,
-      error: 'eviction_not_supported',
+    return _errorEnvelope('eviction_not_supported', {
       hint: 'the configured event-store driver does not expose purgeEvents()',
-      version: AUDIT_RETENTION_VERSION,
       would_evict_count: rows.length,
-    };
+      ..._proofFields('audit_retention_eviction_not_supported', {
+        ...baseProof,
+        dry_run: false,
+      }),
+    });
   }
   let evicted_count = 0;
   try {
     const result = await es.purgeEvents({
-      tenant_id,
-      until: cutoffISO,
+      tenant_id: tenant,
+      before: cutoffISO,
     });
-    evicted_count = Number.isFinite(Number(result && result.purged)) ? Number(result.purged) :
-      Number.isFinite(Number(result)) ? Number(result) : rows.length;
+    const rawCount = result && typeof result === 'object'
+      ? (result.purged ?? result.deleted ?? result.evicted_count)
+      : result;
+    if (!Number.isFinite(Number(rawCount))) {
+      return _errorEnvelope('eviction_result_bad_shape', {
+        detail: 'purgeEvents must return a finite deleted/purged count',
+        would_evict_count: rows.length,
+      });
+    }
+    evicted_count = Math.max(0, Math.min(rows.length, Math.trunc(Number(rawCount))));
   } catch (e) {
-    return {
-      ok: false,
-      error: 'eviction_failed',
-      detail: String(e && e.message || e),
-      version: AUDIT_RETENTION_VERSION,
-    };
+    return _errorEnvelope('eviction_failed', {
+      detail: _safeText(e && e.message || e),
+      would_evict_count: rows.length,
+    });
   }
+
+  let remaining_candidate_count = null;
+  try {
+    const remaining = await es.listEvents({
+      tenant_id: tenant,
+      until: cutoffISO,
+      limit: 0,
+      order: 'asc',
+    });
+    remaining_candidate_count = (Array.isArray(remaining) ? remaining : [])
+      .filter((r) => r && r.tenant_id === tenant).length;
+  } catch (_) {
+    remaining_candidate_count = null;
+  }
+
+  const proof = _proofFields('audit_retention_live_eviction', {
+    ...baseProof,
+    dry_run: false,
+    evicted_count,
+    remaining_candidate_count,
+  });
   return {
     ok: true,
     version: AUDIT_RETENTION_VERSION,
-    tenant_id,
+    proof_version: AUDIT_RETENTION_PROOF_VERSION,
+    tenant_id: tenant,
     dry_run: false,
     cutoff_at: cutoffISO,
+    as_of,
     days_configured: days,
+    would_evict_count: rows.length,
     evicted_count,
+    remaining_candidate_count,
+    verification_status: remaining_candidate_count === null
+      ? 'not_verified'
+      : remaining_candidate_count === 0 ? 'cleared' : 'partial',
     oldest_kept_at,
+    ...proof,
   };
 }

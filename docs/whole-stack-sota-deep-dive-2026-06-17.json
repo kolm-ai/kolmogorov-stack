@@ -4917,6 +4917,21 @@
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           },
           {
+            "path": "src/audit-retention.js",
+            "domain": "trust_security_compliance",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave696-audit-retention-contract.test.js"
+            ],
+            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
+          },
+          {
             "path": "src/ed25519.js",
             "domain": "trust_security_compliance",
             "priority_score": 6,
@@ -5021,22 +5036,6 @@
               "tests/path-to-100-w2-truth-in-labeling.test.js",
               "tests/r4-deploy-generators.test.js",
               "tests/research-docs.test.js"
-            ],
-            "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
-          },
-          {
-            "path": "packages/python-llamaindex-kolm/example.py",
-            "domain": "developer_distribution",
-            "priority_score": 5,
-            "risk_signals": [
-              "distribution_or_worker_surface",
-              "environment_configuration_boundary",
-              "http_route_surface"
-            ],
-            "test_refs": [
-              "tests/active-redteam.test.js",
-              "tests/agent-attestation-report.test.js",
-              "tests/agent-audit-delta-badge-routes.test.js"
             ],
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           }
@@ -5474,6 +5473,21 @@
             "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           },
           {
+            "path": "src/audit-retention.js",
+            "domain": "trust_security_compliance",
+            "priority_score": 6,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave696-audit-retention-contract.test.js"
+            ],
+            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
+          },
+          {
             "path": "src/dsl.js",
             "domain": "compile_artifact_runtime",
             "priority_score": 6,
@@ -5517,23 +5531,6 @@
               "tests/wave921-intoto-attestation.test.js"
             ],
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
-          },
-          {
-            "path": "src/native-compile.js",
-            "domain": "compile_artifact_runtime",
-            "priority_score": 6,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave144-native-compile.test.js",
-              "tests/wave409q-c-rust-wasm-verify.test.js",
-              "tests/wave438-real-compile.test.js"
-            ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
           }
         ],
         "count": 194,
@@ -6041,19 +6038,19 @@
             "improvement_track": "generated_package_sdk_conformance_and_release_evidence"
           },
           {
-            "path": "src/dsl.js",
-            "domain": "compile_artifact_runtime",
+            "path": "src/audit-retention.js",
+            "domain": "trust_security_compliance",
             "priority_score": 6,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
-              "large_component_contract_risk"
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave144-dsl-codegen.test.js",
-              "tests/wave144-native-compile.test.js",
-              "tests/wave438-real-compile.test.js"
+              "tests/wave696-audit-retention-contract.test.js"
             ],
-            "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag"
+            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           }
         ],
         "count": 242,
@@ -7002,20 +6999,19 @@
             "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix"
           },
           {
-            "path": "src/benchmark-compare.js",
-            "domain": "capture_data_eval",
+            "path": "src/audit-retention.js",
+            "domain": "trust_security_compliance",
             "priority_score": 6,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
-              "network_or_provider_boundary"
+              "stateful_storage_boundary"
             ],
             "test_refs": [
-              "tests/wave144-bench-compare.test.js",
-              "tests/wave144-predibase-demo.test.js"
+              "tests/wave696-audit-retention-contract.test.js"
             ],
-            "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
+            "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports"
           }
         ],
         "count": 180,
