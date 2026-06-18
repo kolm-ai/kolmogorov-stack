@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 751,
-    "components_without_direct_test_reference": 78,
+    "test_referenced_components": 752,
+    "components_without_direct_test_reference": 77,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -2385,10 +2385,10 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "json",
-      "sha256": "87eed85f96db87d977a117572e153eba8b25b58ffc1358363274d7691cf9a13a",
+      "sha256": "7d2598f341c0ec14e846952af3b8cfe2fc3708e088d3c3df7a3d82e8493f7bd7",
       "metrics": {
-        "bytes": 955,
-        "lines": 47,
+        "bytes": 1028,
+        "lines": 51,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -2399,11 +2399,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave926-llamaindex-package-manifest-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

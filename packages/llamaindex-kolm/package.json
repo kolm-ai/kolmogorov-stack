@@ -5,6 +5,7 @@
   "license": "Apache-2.0",
   "type": "module",
   "main": "./index.js",
+  "sideEffects": false,
   "exports": {
     ".": "./index.js"
   },
@@ -33,6 +34,9 @@
   },
   "peerDependenciesMeta": {
     "llamaindex": { "optional": true }
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "homepage": "https://kolm.ai/integrations",
   "repository": {
