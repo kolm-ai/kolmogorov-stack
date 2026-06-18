@@ -68,6 +68,24 @@ const ROLE_NAMES = Object.values(ROLES); // ['owner','admin','member','billing']
 // itself must survive (a Group only governs the GRANT, not seat lifecycle).
 const DEMOTE_ROLE = ROLES.MEMBER;
 
+export const SCIM_PROVISIONING_CONTRACT_VERSION = 'w730-scim-v1';
+export const SCIM_PROVISIONING_LIMITS = Object.freeze({
+  max_tenant_id_chars: 160,
+  max_scim_id_chars: 160,
+  max_external_id_chars: 256,
+  max_display_name_chars: 160,
+  max_email_chars: 320,
+  max_user_emails: 16,
+  max_name_field_chars: 120,
+  max_patch_operations: 32,
+  max_group_members: 256,
+  max_filter_chars: 256,
+});
+
+const SAFE_SCIM_ID_RE = /^[A-Za-z0-9._:@+-]+$/;
+const EMAIL_RE = /^[A-Za-z0-9.!#$%&*+=?^_`{|}~-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+const NAME_FIELDS = ['formatted', 'familyName', 'givenName', 'middleName', 'honorificPrefix', 'honorificSuffix'];
+
 // ── Typed error → SCIM Error envelope (RFC 7644 §3.12) ──────────────────────
 export class ScimError extends Error {
   constructor(status, detail, scimType) {
@@ -104,11 +122,126 @@ function coerceBool(v, dflt = true) {
   return Boolean(v);
 }
 
+function cleanText(value, field, max, { required = false } = {}) {
+  if (value == null) {
+    if (required) throw scimError(400, `${field} is required`, 'invalidValue');
+    return null;
+  }
+  if (typeof value === 'object') {
+    throw scimError(400, `${field} must be a string`, 'invalidValue');
+  }
+  const text = String(value).replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  if (!text) {
+    if (required) throw scimError(400, `${field} is required`, 'invalidValue');
+    return null;
+  }
+  if (text.length > max) {
+    throw scimError(400, `${field} exceeds maximum length`, 'invalidValue');
+  }
+  return text;
+}
+
+function requireSafeId(value, field, max = SCIM_PROVISIONING_LIMITS.max_scim_id_chars) {
+  const text = cleanText(value, field, max, { required: true });
+  if (!SAFE_SCIM_ID_RE.test(text)) {
+    throw scimError(400, `${field} must be a safe SCIM identifier`, 'invalidValue');
+  }
+  return text;
+}
+
+function requireTenantId(tenantId) {
+  if (!tenantId) throw scimError(401, 'auth_required');
+  return requireSafeId(tenantId, 'tenant_id', SCIM_PROVISIONING_LIMITS.max_tenant_id_chars);
+}
+
+function requireScimId(scimId) {
+  if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
+  return requireSafeId(scimId, 'id', SCIM_PROVISIONING_LIMITS.max_scim_id_chars);
+}
+
+function normalizeEmail(value, field = 'email') {
+  const text = cleanText(value, field, SCIM_PROVISIONING_LIMITS.max_email_chars, { required: true }).toLowerCase();
+  if (!EMAIL_RE.test(text)) {
+    throw scimError(400, `${field} must be a valid email address`, 'invalidValue');
+  }
+  return text;
+}
+
+function normalizeOptionalText(value, field, max) {
+  return cleanText(value, field, max, { required: false });
+}
+
+function normalizeDisplayName(value, { required = false } = {}) {
+  return cleanText(value, 'displayName', SCIM_PROVISIONING_LIMITS.max_display_name_chars, { required });
+}
+
+function normalizeExternalId(value) {
+  return normalizeOptionalText(value, 'externalId', SCIM_PROVISIONING_LIMITS.max_external_id_chars);
+}
+
+function normalizeName(value) {
+  if (value == null) return {};
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    throw scimError(400, 'name must be an object', 'invalidValue');
+  }
+  const out = {};
+  for (const field of NAME_FIELDS) {
+    if (value[field] != null) {
+      const clean = normalizeOptionalText(value[field], `name.${field}`, SCIM_PROVISIONING_LIMITS.max_name_field_chars);
+      if (clean) out[field] = clean;
+    }
+  }
+  return out;
+}
+
+function normalizeEmails(emails) {
+  if (emails == null) return [];
+  if (!Array.isArray(emails)) throw scimError(400, 'emails must be an array', 'invalidValue');
+  if (emails.length > SCIM_PROVISIONING_LIMITS.max_user_emails) {
+    throw scimError(400, 'emails exceeds maximum entries', 'tooMany');
+  }
+  const seen = new Set();
+  const out = [];
+  for (const entry of emails) {
+    const value = typeof entry === 'string' ? entry : entry && entry.value;
+    const email = normalizeEmail(value, 'emails.value');
+    if (seen.has(email)) continue;
+    seen.add(email);
+    const normalized = { value: email };
+    if (entry && typeof entry === 'object') {
+      if (entry.primary != null) normalized.primary = coerceBool(entry.primary, false);
+      if (entry.type != null) {
+        const type = normalizeOptionalText(entry.type, 'emails.type', 64);
+        if (type) normalized.type = type;
+      }
+    }
+    out.push(normalized);
+  }
+  return out;
+}
+
+function assertPatchOperationCount(operations) {
+  if (operations.length > SCIM_PROVISIONING_LIMITS.max_patch_operations) {
+    throw scimError(400, 'PatchOp exceeds maximum Operations entries', 'tooMany');
+  }
+}
+
+function normalizeMemberValue(value) {
+  const text = cleanText(value, 'members.value', SCIM_PROVISIONING_LIMITS.max_email_chars, { required: true });
+  if (text.includes('@')) return normalizeEmail(text, 'members.value');
+  if (text.length > SCIM_PROVISIONING_LIMITS.max_scim_id_chars || !SAFE_SCIM_ID_RE.test(text)) {
+    throw scimError(400, 'members.value must be a safe SCIM identifier or email', 'invalidValue');
+  }
+  return text;
+}
+
 // Strip the optional schema-URN prefix Okta/Azure AD sometimes put on a PATCH
 // path (e.g. "urn:...:User:active" -> "active").
 function normalizePath(p) {
   if (!p) return '';
-  return String(p)
+  const text = cleanText(p, 'path', 256, { required: false });
+  if (!text) return '';
+  return text
     .replace(/^urn:ietf:params:scim:schemas:core:2\.0:(User|Group):/i, '')
     .trim();
 }
@@ -209,8 +342,8 @@ function revokeUserAccess(tenantId, row) {
 
 // GET /v1/scim/v2/Users/:id
 export function getUser(tenantId, scimId, host) {
-  if (!tenantId) throw scimError(401, 'auth_required');
-  if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
+  tenantId = requireTenantId(tenantId);
+  scimId = requireScimId(scimId);
   const row = getUserRow(tenantId, scimId);
   if (!row) throw scimError(404, `User ${scimId} not found`);
   return userResource(row, host);
@@ -222,12 +355,13 @@ export function getUser(tenantId, scimId, host) {
 //   { Operations: [{ op:"replace", path:"active", value:false }] }
 //   { Operations: [{ op:"replace", value:{ active:false } }] }   (no path)
 export function patchUser(tenantId, scimId, ops, host) {
-  if (!tenantId) throw scimError(401, 'auth_required');
-  if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
+  tenantId = requireTenantId(tenantId);
+  scimId = requireScimId(scimId);
 
   const body = ops || {};
   const operations = Array.isArray(body.Operations) ? body.Operations : [];
   if (!operations.length) throw scimError(400, 'PatchOp requires a non-empty Operations array', 'invalidValue');
+  assertPatchOperationCount(operations);
 
   const row = getUserRow(tenantId, scimId);
   if (!row) throw scimError(404, `User ${scimId} not found`);
@@ -255,11 +389,11 @@ export function patchUser(tenantId, scimId, ops, host) {
       // No-path add/replace: value is a partial User resource.
       if (value && typeof value === 'object') {
         if ('active' in value) patch.active = coerceBool(value.active);
-        if ('userName' in value) patch.userName = value.userName;
-        if ('externalId' in value) patch.externalId = value.externalId || null;
-        if ('name' in value) patch.name = value.name || {};
-        if ('displayName' in value) patch.displayName = value.displayName || null;
-        if ('emails' in value) patch.emails = Array.isArray(value.emails) ? value.emails : [];
+        if ('userName' in value) patch.userName = normalizeEmail(value.userName, 'userName');
+        if ('externalId' in value) patch.externalId = normalizeExternalId(value.externalId);
+        if ('name' in value) patch.name = normalizeName(value.name);
+        if ('displayName' in value) patch.displayName = normalizeDisplayName(value.displayName);
+        if ('emails' in value) patch.emails = normalizeEmails(value.emails);
       }
       continue;
     }
@@ -269,19 +403,19 @@ export function patchUser(tenantId, scimId, ops, host) {
         patch.active = coerceBool(value);
         break;
       case 'userName':
-        patch.userName = value;
+        patch.userName = normalizeEmail(value, 'userName');
         break;
       case 'externalId':
-        patch.externalId = value || null;
+        patch.externalId = normalizeExternalId(value);
         break;
       case 'name':
-        patch.name = value || {};
+        patch.name = normalizeName(value);
         break;
       case 'displayName':
-        patch.displayName = value || null;
+        patch.displayName = normalizeDisplayName(value);
         break;
       case 'emails':
-        patch.emails = Array.isArray(value) ? value : [];
+        patch.emails = normalizeEmails(value);
         break;
       default:
         // Unknown attribute - accept silently (forward-compatible).
@@ -304,26 +438,22 @@ export function patchUser(tenantId, scimId, ops, host) {
 
 // PUT /v1/scim/v2/Users/:id  (full replace, RFC 7644 §3.5.1)
 export function replaceUser(tenantId, scimId, resource, host) {
-  if (!tenantId) throw scimError(401, 'auth_required');
-  if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
+  tenantId = requireTenantId(tenantId);
+  scimId = requireScimId(scimId);
 
   const body = resource || {};
   const row = getUserRow(tenantId, scimId);
   if (!row) throw scimError(404, `User ${scimId} not found`);
 
-  if (body.userName != null && typeof body.userName === 'string' && !body.userName.includes('@')) {
-    throw scimError(400, 'userName must be a valid email address', 'invalidValue');
-  }
-
   const activeBefore = row.active !== false;
   const activeAfter = coerceBool(body.active, true); // absent => active (RFC 7643 §4.1.1)
 
   const patch = {
-    userName: body.userName != null ? body.userName : row.userName,
-    externalId: 'externalId' in body ? (body.externalId || null) : row.externalId,
-    name: 'name' in body ? (body.name || {}) : row.name,
-    displayName: 'displayName' in body ? (body.displayName || null) : row.displayName,
-    emails: 'emails' in body ? (Array.isArray(body.emails) ? body.emails : []) : row.emails,
+    userName: body.userName != null ? normalizeEmail(body.userName, 'userName') : row.userName,
+    externalId: 'externalId' in body ? normalizeExternalId(body.externalId) : row.externalId,
+    name: 'name' in body ? normalizeName(body.name) : row.name,
+    displayName: 'displayName' in body ? normalizeDisplayName(body.displayName) : row.displayName,
+    emails: 'emails' in body ? normalizeEmails(body.emails) : row.emails,
     active: activeAfter,
     updated_at: nowIso(),
     // id, tenant_id, created_at are immutable (RFC 7644 §3.5.1).
@@ -342,8 +472,8 @@ export function replaceUser(tenantId, scimId, resource, host) {
 
 // DELETE /v1/scim/v2/Users/:id  (hard deprovision, RFC 7644 §3.6)
 export function deleteUser(tenantId, scimId) {
-  if (!tenantId) throw scimError(401, 'auth_required');
-  if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
+  tenantId = requireTenantId(tenantId);
+  scimId = requireScimId(scimId);
 
   const row = getUserRow(tenantId, scimId);
   if (!row) throw scimError(404, `User ${scimId} not found`);
@@ -398,13 +528,25 @@ function groupResource(row, host) {
 
 function normalizeMembers(members) {
   if (!Array.isArray(members)) return [];
-  return members
-    .map((m) => {
-      const value = m && (m.value || m);
-      if (!value) return null;
-      return { value: String(value), display: (m && m.display) || undefined };
-    })
-    .filter(Boolean);
+  if (members.length > SCIM_PROVISIONING_LIMITS.max_group_members) {
+    throw scimError(400, 'members exceeds maximum entries', 'tooMany');
+  }
+  const seen = new Set();
+  const out = [];
+  for (const m of members) {
+    const value = m && (m.value || m);
+    if (!value) continue;
+    const normalizedValue = normalizeMemberValue(value);
+    if (seen.has(normalizedValue)) continue;
+    seen.add(normalizedValue);
+    const normalized = { value: normalizedValue };
+    if (m && typeof m === 'object' && m.display != null) {
+      const display = normalizeOptionalText(m.display, 'members.display', SCIM_PROVISIONING_LIMITS.max_display_name_chars);
+      if (display) normalized.display = display;
+    }
+    out.push(normalized);
+  }
+  return out;
 }
 
 // Resolve a member ref (a SCIM User id) to a seat email for role binding.
@@ -469,13 +611,16 @@ function removeUserFromAllGroups(tenantId, userRow) {
 
 // GET /v1/scim/v2/Groups  (RFC 7644 §3.4.2 ListResponse)
 export function listGroups(tenantId, { startIndex = 1, count = 100, filter } = {}, host) {
-  if (!tenantId) throw scimError(401, 'auth_required');
+  tenantId = requireTenantId(tenantId);
   let rows = findByField(GROUPS, 'tenant_id', tenantId);
   if (filter) {
-    const m = String(filter).match(/(\w+)\s+eq\s+"([^"]*)"/i);
+    const filterText = cleanText(filter, 'filter', SCIM_PROVISIONING_LIMITS.max_filter_chars, { required: false });
+    const m = filterText && filterText.match(/(\w+)\s+eq\s+"([^"]*)"/i);
     if (m) {
       const field = m[1];
-      rows = rows.filter((g) => String(g[field] || '') === m[2]);
+      if (['id', 'displayName', 'externalId'].includes(field)) {
+        rows = rows.filter((g) => String(g[field] || '') === m[2]);
+      }
     }
   }
   rows.sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
@@ -493,8 +638,8 @@ export function listGroups(tenantId, { startIndex = 1, count = 100, filter } = {
 
 // GET /v1/scim/v2/Groups/:id
 export function getGroup(tenantId, scimId, host) {
-  if (!tenantId) throw scimError(401, 'auth_required');
-  if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
+  tenantId = requireTenantId(tenantId);
+  scimId = requireScimId(scimId);
   const row = getGroupRow(tenantId, scimId);
   if (!row) throw scimError(404, `Group ${scimId} not found`);
   return groupResource(row, host);
@@ -502,12 +647,13 @@ export function getGroup(tenantId, scimId, host) {
 
 // POST /v1/scim/v2/Groups
 export function createGroup(tenantId, resource, host) {
-  if (!tenantId) throw scimError(401, 'auth_required');
+  tenantId = requireTenantId(tenantId);
   const body = resource || {};
-  if (!body.displayName) throw scimError(400, 'displayName is required', 'invalidValue');
+  const displayName = normalizeDisplayName(body.displayName, { required: true });
+  const externalId = normalizeExternalId(body.externalId);
 
   const existing = findByField(GROUPS, 'tenant_id', tenantId)
-    .find((g) => String(g.displayName || '').toLowerCase() === String(body.displayName).toLowerCase());
+    .find((g) => String(g.displayName || '').toLowerCase() === displayName.toLowerCase());
   if (existing) throw scimError(409, 'a Group with this displayName already exists for this tenant', 'uniqueness');
 
   const members = normalizeMembers(body.members);
@@ -515,9 +661,9 @@ export function createGroup(tenantId, resource, host) {
   const row = {
     id: storeId('scim_group'),
     tenant_id: tenantId,
-    displayName: body.displayName,
-    externalId: body.externalId || null,
-    role: roleForDisplayName(body.displayName),
+    displayName,
+    externalId,
+    role: roleForDisplayName(displayName),
     members,
     created_at: now,
     updated_at: now,
@@ -529,18 +675,22 @@ export function createGroup(tenantId, resource, host) {
 
 // PATCH /v1/scim/v2/Groups/:id  (member add/remove/replace; displayName replace)
 export function patchGroup(tenantId, scimId, ops, host) {
-  if (!tenantId) throw scimError(401, 'auth_required');
-  if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
+  tenantId = requireTenantId(tenantId);
+  scimId = requireScimId(scimId);
   const body = ops || {};
   const operations = Array.isArray(body.Operations) ? body.Operations : [];
   if (!operations.length) throw scimError(400, 'PatchOp requires a non-empty Operations array', 'invalidValue');
+  assertPatchOperationCount(operations);
 
   const row = getGroupRow(tenantId, scimId);
   if (!row) throw scimError(404, `Group ${scimId} not found`);
 
-  let members = Array.isArray(row.members) ? row.members.slice() : [];
+  const oldMembers = Array.isArray(row.members) ? row.members.slice() : [];
+  const oldRole = row.role;
+  let members = oldMembers.slice();
   let displayName = row.displayName;
   let role = row.role;
+  let roleChanged = false;
   const granted = [];
   const revoked = [];
 
@@ -551,17 +701,22 @@ export function patchGroup(tenantId, scimId, ops, host) {
     const pathHead = normalizePath(op.path);
     const value = op.value;
 
+    if (verb !== 'add' && verb !== 'replace' && verb !== 'remove') {
+      throw scimError(400, `unsupported op: ${op.op}`, 'invalidValue');
+    }
+
     // displayName replace also re-binds the role.
     if (pathHead === 'displayName' && verb === 'replace') {
-      displayName = value;
-      role = roleForDisplayName(value);
+      displayName = normalizeDisplayName(value, { required: true });
+      role = roleForDisplayName(displayName);
+      roleChanged = role !== oldRole;
       continue;
     }
 
     // members[value eq "<id>"] filtered removal (Azure AD style).
     const filterMatch = pathRaw.match(/members\[\s*value\s+eq\s+"([^"]+)"\s*\]/i);
     if (verb === 'remove' && filterMatch) {
-      const target = filterMatch[1];
+      const target = normalizeMemberValue(filterMatch[1]);
       members = members.filter((m) => {
         const keep = String(m.value || m) !== target;
         if (!keep) revoked.push(m);
@@ -607,7 +762,10 @@ export function patchGroup(tenantId, scimId, ops, host) {
   });
 
   // Reconcile role bindings.
-  if (role) {
+  if (roleChanged) {
+    if (oldRole) applyRole(tenantId, oldRole, oldMembers, false);
+    if (role) applyRole(tenantId, role, members, true);
+  } else if (role) {
     if (granted.length) applyRole(tenantId, role, granted, true);
     if (revoked.length) applyRole(tenantId, role, revoked, false);
   }
@@ -617,21 +775,21 @@ export function patchGroup(tenantId, scimId, ops, host) {
 
 // PUT /v1/scim/v2/Groups/:id  (full replace)
 export function replaceGroup(tenantId, scimId, resource, host) {
-  if (!tenantId) throw scimError(401, 'auth_required');
-  if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
+  tenantId = requireTenantId(tenantId);
+  scimId = requireScimId(scimId);
   const body = resource || {};
   const row = getGroupRow(tenantId, scimId);
   if (!row) throw scimError(404, `Group ${scimId} not found`);
 
   const oldMembers = Array.isArray(row.members) ? row.members : [];
   const oldRole = row.role;
-  const newDisplay = body.displayName != null ? body.displayName : row.displayName;
+  const newDisplay = body.displayName != null ? normalizeDisplayName(body.displayName, { required: true }) : row.displayName;
   const newRole = roleForDisplayName(newDisplay);
   const newMembers = normalizeMembers(body.members);
 
   update(GROUPS, (g) => g.id === scimId && g.tenant_id === tenantId, {
     displayName: newDisplay,
-    externalId: 'externalId' in body ? (body.externalId || null) : row.externalId,
+    externalId: 'externalId' in body ? normalizeExternalId(body.externalId) : row.externalId,
     role: newRole,
     members: newMembers,
     updated_at: nowIso(),
@@ -646,8 +804,8 @@ export function replaceGroup(tenantId, scimId, resource, host) {
 
 // DELETE /v1/scim/v2/Groups/:id
 export function deleteGroup(tenantId, scimId) {
-  if (!tenantId) throw scimError(401, 'auth_required');
-  if (!scimId) throw scimError(400, 'missing id', 'invalidValue');
+  tenantId = requireTenantId(tenantId);
+  scimId = requireScimId(scimId);
   const row = getGroupRow(tenantId, scimId);
   if (!row) throw scimError(404, `Group ${scimId} not found`);
 

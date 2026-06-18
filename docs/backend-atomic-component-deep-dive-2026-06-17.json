@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 737,
-    "components_without_direct_test_reference": 92,
+    "test_referenced_components": 738,
+    "components_without_direct_test_reference": 91,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -5235,7 +5235,8 @@
         "tests/wave591-package-local-build-contract.test.js",
         "tests/wave661-sbom-emit-contract.test.js",
         "tests/wave671-homebrew-formula-contract.test.js",
-        "tests/wave680-sdk-swift-contract.test.js"
+        "tests/wave680-sdk-swift-contract.test.js",
+        "tests/wave730-scim-provisioning-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -38799,7 +38800,8 @@
       },
       "test_refs": [
         "tests/wave687-licensing-allowlist-contract.test.js",
-        "tests/wave715-savings-routes-contract.test.js"
+        "tests/wave715-savings-routes-contract.test.js",
+        "tests/wave730-scim-provisioning-contract.test.js"
       ],
       "risk_signals": [
         "http_route_surface"
@@ -38956,12 +38958,12 @@
       "surface": "core-backend",
       "domain": "identity_access",
       "language": "javascript",
-      "sha256": "b29e3e3f7d1d22c5d1a83f2c10b7399227d60ebb7bc5cef77239ac3acf2dbd8f",
+      "sha256": "7ccdf8da2628ed061b82785c87f7c711da9070670c48a077bb0f9c7decd05d4a",
       "metrics": {
-        "bytes": 26344,
-        "lines": 662,
+        "bytes": 32054,
+        "lines": 820,
         "imports": 2,
-        "exports": 11,
+        "exports": 13,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -38970,11 +38972,15 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave687-licensing-allowlist-contract.test.js",
+        "tests/wave715-savings-routes-contract.test.js",
+        "tests/wave730-scim-provisioning-contract.test.js"
+      ],
       "risk_signals": [
         "auth_or_tenant_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
