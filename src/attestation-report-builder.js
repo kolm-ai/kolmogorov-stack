@@ -32,7 +32,7 @@ import {
   keyFingerprint,
 } from './ed25519.js';
 import { ASR_CONTROLS } from './control-mapper.js';
-import { BENCHMARK_CROSSWALK_NOTE, benchmarkRefsForProbe, runRedTeam } from './red-team.js';
+import { BENCHMARK_CROSSWALK_NOTE, BENCHMARK_EXECUTION_NOTE, benchmarkRefsForProbe, runRedTeam } from './red-team.js';
 import { buildAgentPassport } from './passport-builder.js';
 import { buildSubprocessorInventory } from './subprocessor-inventory.js';
 import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
@@ -467,6 +467,7 @@ export function buildRedTeamBlock(auditResult) {
     exposed: sum.exposed ?? 0,
     untested: sum.untested ?? 0,
     benchmark_crosswalk_note: sum.benchmark_crosswalk_note || BENCHMARK_CROSSWALK_NOTE,
+    benchmark_execution_note: sum.benchmark_execution_note || BENCHMARK_EXECUTION_NOTE,
     note: sum.note,
   };
   if (sum.active && typeof sum.active === 'object') {
@@ -474,6 +475,22 @@ export function buildRedTeamBlock(auditResult) {
       probes_merged: Number.isFinite(sum.active.probes_merged) ? sum.active.probes_merged : 0,
       endpoint_digest: typeof sum.active.endpoint_digest === 'string' ? sum.active.endpoint_digest : null,
       consent_recorded: sum.active.consent_recorded === true,
+    };
+  }
+  if (sum.benchmark_execution && typeof sum.benchmark_execution === 'object') {
+    const b = sum.benchmark_execution;
+    summary.benchmark_execution = {
+      adapter_version: typeof b.adapter_version === 'string' ? b.adapter_version : null,
+      tasks_run: Number.isFinite(b.tasks_run) ? b.tasks_run : 0,
+      valid_tasks: Number.isFinite(b.valid_tasks) ? b.valid_tasks : 0,
+      attack_success_rate: b.attack_success_rate == null ? null : Number(b.attack_success_rate),
+      benign_utility_rate: b.benign_utility_rate == null ? null : Number(b.benign_utility_rate),
+      suites: Array.isArray(b.suites) ? b.suites.slice(0, 12) : [],
+      public_suites: Array.isArray(b.public_suites) ? b.public_suites.slice(0, 12) : [],
+      fixture_only: b.fixture_only === true,
+      task_digest: typeof b.task_digest === 'string' ? b.task_digest : null,
+      probes_merged: Number.isFinite(b.probes_merged) ? b.probes_merged : 0,
+      consent_recorded: b.consent_recorded === true,
     };
   }
   return {

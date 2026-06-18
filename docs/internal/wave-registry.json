@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 405,
+    "orphan_tests": 406,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 408,
+    "state_local_green": 409,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 583,
-    "test_only_waves": 405,
-    "waves": 421
+    "test_files": 584,
+    "test_only_waves": 406,
+    "waves": 422
   },
-  "generated_at": "2026-06-18T17:29:13.857Z",
+  "generated_at": "2026-06-18T17:46:54.002Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -485,7 +485,8 @@
       "W951",
       "W952",
       "W953",
-      "W954"
+      "W954",
+      "W955"
     ],
     "plan_only_waves": [
       "W850",
@@ -899,7 +900,8 @@
       "W951",
       "W952",
       "W953",
-      "W954"
+      "W954",
+      "W955"
     ]
   },
   "schema": "kolm.wave_registry.v1",
@@ -4603,7 +4605,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js",
+          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js tests/wave955-agent-benchmark-adapter.test.js",
           "script": "npm:verify:agent-security-eval"
         }
       ],
@@ -4622,7 +4624,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js",
+          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js tests/wave955-agent-benchmark-adapter.test.js",
           "script": "npm:verify:agent-security-eval"
         }
       ],
@@ -4679,7 +4681,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js",
+          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js tests/wave955-agent-benchmark-adapter.test.js",
           "script": "npm:verify:agent-security-eval"
         }
       ],
@@ -7931,6 +7933,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave954-learned-embedding-provider.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W955",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/red-team.test.js tests/active-redteam.test.js tests/wave642-active-redteam-parity.test.js tests/wave643-active-redteam-report-route.test.js tests/wave646-adversarial-calibration.test.js tests/agent-attestation-report.test.js tests/wave955-agent-benchmark-adapter.test.js",
+          "script": "npm:verify:agent-security-eval"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave955-agent-benchmark-adapter.test.js"
       ],
       "test_letter_suffixes": []
     }
