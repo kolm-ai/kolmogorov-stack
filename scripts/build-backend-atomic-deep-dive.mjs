@@ -29,6 +29,8 @@ const SPEC_COMPILE_MATRIX = path.join(ROOT, 'docs', 'internal', 'spec-compile-ma
 const SPEC_COMPILE_MATRIX_TEST = path.join(ROOT, 'tests', 'wave946-spec-compile-matrix.test.js');
 const DATA_CURATE_MATRIX = path.join(ROOT, 'docs', 'internal', 'data-curate-matrix.json');
 const DATA_CURATE_MATRIX_TEST = path.join(ROOT, 'tests', 'wave947-data-curate-matrix.test.js');
+const ARTIFACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'artifact-matrix.json');
+const ARTIFACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave948-artifact-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
@@ -40,6 +42,7 @@ let wrapperCliMatrixGreen = null;
 let distillPipelineMatrixGreen = null;
 let specCompileMatrixGreen = null;
 let dataCurateMatrixGreen = null;
+let artifactMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -441,6 +444,38 @@ function dataCurateMatrixOk() {
   return dataCurateMatrixGreen;
 }
 
+function artifactMatrixOk() {
+  if (artifactMatrixGreen != null) return artifactMatrixGreen;
+  try {
+    if (!fs.existsSync(ARTIFACT_MATRIX) || !fs.existsSync(ARTIFACT_MATRIX_TEST)) {
+      artifactMatrixGreen = false;
+      return artifactMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(ARTIFACT_MATRIX, 'utf8'));
+    artifactMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.artifact_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.phase_count === 35
+      && matrix.summary.present_phase_count === 35
+      && matrix.summary.artifact_hash_slot_count >= 35
+      && matrix.summary.build_payload_field_count >= 61
+      && matrix.summary.build_and_zip_field_count >= 57
+      && matrix.summary.env_ref_count === 9
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/artifact.js')
+    );
+  } catch {
+    artifactMatrixGreen = false;
+  }
+  return artifactMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -598,6 +633,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'src/distill-pipeline.js' && distillPipelineMatrixOk()) return 'maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract';
   if (rel === 'src/spec-compile.js' && specCompileMatrixOk()) return 'maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract';
   if (rel === 'src/data-curate.js' && dataCurateMatrixOk()) return 'maintain_generated_data_curate_matrix_and_frontier_curation_contract';
+  if (rel === 'src/artifact.js' && artifactMatrixOk()) return 'maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -646,7 +682,7 @@ function commandsFor(domain) {
     billing_marketplace: ['node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js'],
     trust_security_compliance: ['npm run verify:claims-scope', 'npm run verify:compliance-packet'],
     storage_state: ['node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js'],
-    compile_artifact_runtime: ['npm run verify:inventions', 'npm run verify:benchmark-evidence', 'npm run verify:wrapper-cli-matrix', 'npm run verify:spec-compile-matrix'],
+    compile_artifact_runtime: ['npm run verify:inventions', 'npm run verify:benchmark-evidence', 'npm run verify:wrapper-cli-matrix', 'npm run verify:spec-compile-matrix', 'npm run verify:artifact-matrix'],
     capture_data_eval: ['npm run verify:redaction-benchmark', 'npm run verify:quality-calibration', 'npm run verify:data-curate-matrix'],
     training_model_optimization: ['npm run verify:quantize-worker-matrix', 'npm run verify:distill-pipeline-matrix', 'node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],

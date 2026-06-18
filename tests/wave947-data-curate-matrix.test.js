@@ -55,9 +55,9 @@ test('W947 package wiring makes the data curate matrix a depth and control-file 
     pkg.scripts['verify:data-curate-matrix'],
     'node scripts/build-data-curate-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave947-data-curate-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:spec-compile-matrix && npm run build:data-curate-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:spec-compile-matrix && npm run verify:data-curate-matrix && npm run verify:file-ledger/);
-  assert.match(pkg.scripts['verify:depth'], /verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:data-curate-matrix && npm run verify:meta-routes/);
+  assert.match(pkg.scripts['build:control-files'], /build:spec-compile-matrix && npm run build:data-curate-matrix && npm run build:artifact-matrix && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:spec-compile-matrix && npm run verify:data-curate-matrix && npm run verify:artifact-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['verify:depth'], /verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:data-curate-matrix && npm run verify:artifact-matrix && npm run verify:meta-routes/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');
   assert.match(ledgerBuilder, /build-data-curate-matrix\.cjs/);

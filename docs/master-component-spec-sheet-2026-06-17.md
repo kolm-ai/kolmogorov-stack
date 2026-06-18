@@ -61,7 +61,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | `workers/distill/scripts/dedup_pairs.py` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `workers/distill/scripts/train_preference.py` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `server.js` | api_surface | 8 | linked_frontier_work_open | Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix. |
-| `src/artifact.js` | compile_artifact_runtime | 8 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
+| `src/artifact.js` | compile_artifact_runtime | 8 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract. |
 | `src/attestation-report-builder.js` | trust_security_compliance | 8 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 
 ## Machine Sheet
