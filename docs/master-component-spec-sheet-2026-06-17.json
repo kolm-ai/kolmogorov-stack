@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 93.5,
+    "local_engineering_score": 93.6,
     "frontier_product_score": 70,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 725,
-    "direct_test_reference_pct": 87.5,
-    "components_without_direct_test_reference": 104,
+    "direct_test_referenced_components": 726,
+    "direct_test_reference_pct": 87.6,
+    "components_without_direct_test_reference": 103,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -25444,6 +25444,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave704-kscore-per-language-contract.test.js",
           "tests/wave810-kscore-calibration.test.js"
         ],
         "category_links": [],
@@ -25510,24 +25511,24 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 13234,
-          "lines": 343,
-          "imports": 2,
-          "exports": 4,
+          "bytes": 15040,
+          "lines": 462,
+          "imports": 3,
+          "exports": 7,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 1,
+          "crypto_refs": 7,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "8a9571b37418997870655e21cc7bbcb034dda4ad1207d4e29a11b70afdeea59e"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "7ae386c5ef12bd8b0af0ca792336c10b34b56d40c4673b69457f9731bcedfde6"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -25535,7 +25536,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave704-kscore-per-language-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
@@ -25544,10 +25547,8 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/kscore-timeseries.js",
@@ -31959,7 +31960,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave588-quality-calibration-contract.test.js",
-          "tests/wave665-router-boundary-contract.test.js"
+          "tests/wave665-router-boundary-contract.test.js",
+          "tests/wave704-kscore-per-language-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",

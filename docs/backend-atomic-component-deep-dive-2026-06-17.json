@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 725,
-    "components_without_direct_test_reference": 104,
+    "test_referenced_components": 726,
+    "components_without_direct_test_reference": 103,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -27809,6 +27809,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave704-kscore-per-language-contract.test.js",
         "tests/wave810-kscore-calibration.test.js"
       ],
       "risk_signals": [
@@ -27908,25 +27909,27 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "8a9571b37418997870655e21cc7bbcb034dda4ad1207d4e29a11b70afdeea59e",
+      "sha256": "7ae386c5ef12bd8b0af0ca792336c10b34b56d40c4673b69457f9731bcedfde6",
       "metrics": {
-        "bytes": 13234,
-        "lines": 343,
-        "imports": 2,
-        "exports": 4,
+        "bytes": 15040,
+        "lines": 462,
+        "imports": 3,
+        "exports": 7,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 1,
+        "crypto_refs": 7,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave704-kscore-per-language-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -35491,7 +35494,8 @@
       },
       "test_refs": [
         "tests/wave588-quality-calibration-contract.test.js",
-        "tests/wave665-router-boundary-contract.test.js"
+        "tests/wave665-router-boundary-contract.test.js",
+        "tests/wave704-kscore-per-language-contract.test.js"
       ],
       "risk_signals": [],
       "priority_score": 0,

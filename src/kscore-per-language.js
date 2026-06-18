@@ -1,152 +1,256 @@
-// W760 - Per-language K-Score breakdown.
+// W760 / W704 - Per-language K-Score breakdown.
 //
-// Spec (KOLM_W707_SYSTEM_UPGRADE_PLAN.md lines 549-553):
-//   [W760-1] Per-language K-Score reporting → language detect + axis split
-//   [W760-3] Per-language confidence thresholds for fallback
-//
-// Why: a compiled student that scores 0.91 K-Score on a pooled English+
-// Spanish mix can hide a 0.42 on Spanish. The pooled composite isn't
-// honest about per-language quality. perLanguageKScore() partitions rows
-// by detected lang and reports a K-Score per partition.
-//
-// Design contract:
-//   - SIBLING of src/kscore.js - DO NOT mutate kscore.js. We import
-//     computeKScore() read-only and fan it out across language buckets.
-//   - Wilson 95% CI gated at n>=30 PER LANGUAGE. Below 30 the bucket
-//     reports k_score=null AND ci=null (honesty floor, mirrors W741).
-//   - INSUFFICIENT envelope when no language has >=30 rows - we don't
-//     silently substitute a tiny-n estimate.
-//   - perLanguageConfidenceThreshold() returns the W709 fallback
-//     threshold scaled per language. Lower-quality languages get a LOWER
-//     threshold so more requests route to the teacher.
+// A pooled K-Score can hide weak language partitions. This module partitions
+// capture/eval rows by detected language and reports an honest per-language
+// score only when a bucket has enough valid scoring basis rows.
 //
 // Public surface:
 //   - KSCORE_PER_LANG_VERSION
-//   - perLanguageKScore({rows, lang_filter})
-//   - perLanguageConfidenceThreshold({lang, by_lang_kscore, default_threshold})
+//   - KSCORE_PER_LANG_CONTRACT_VERSION
+//   - KSCORE_PER_LANG_LIMITS
+//   - perLanguageKScore({ rows, lang_filter })
+//   - perLanguageConfidenceThreshold({ lang, by_lang_kscore, default_threshold })
+
+import crypto from 'node:crypto';
 
 import * as kscore from './kscore.js';
 import { detectLang, SUPPORTED_LANGS } from './lang-detect.js';
 
-export const KSCORE_PER_LANG_VERSION = 'w760-v1';
+export const KSCORE_PER_LANG_VERSION = 'w760-v2';
+export const KSCORE_PER_LANG_CONTRACT_VERSION = 'w704-v1';
 
-// Wilson CI floor - same threshold as src/diagnostic.js. Below 30 rows
-// per language we report point estimate as null because a confidence
-// band drawn from <30 samples is a number-shaped lie.
-const MIN_N_FOR_PER_LANG_CI = 30;
+export const KSCORE_PER_LANG_LIMITS = Object.freeze({
+  MAX_ROWS: 5000,
+  MAX_TEXT_CHARS: 8192,
+  MAX_LANG_FILTERS: 32,
+  MIN_N_FOR_PER_LANG_CI: 30,
+  MIN_N_FOR_PER_LANG_ANY: 30,
+  DEFAULT_THRESHOLD_RATIO_LO: 0.5,
+  DEFAULT_THRESHOLD_RATIO_HI: 1.5,
+});
 
-// Minimum rows-per-language for ANY estimate (pooled vs per-lang). Below
-// this we surface insufficient_per_lang_samples and hint to W760-2
-// (synthetic augmentation).
-const MIN_N_FOR_PER_LANG_ANY = 30;
+const LANG_SET = new Set(SUPPORTED_LANGS);
+const HEX64_RE = /^[a-f0-9]{64}$/;
 
-// W709 fallback default threshold - confidence below this routes to
-// teacher. Per-lang ratio is clamped [0.5, 1.5] so a single very-weak
-// language can't push the threshold to zero (and a very-strong language
-// can't push it to 1.0 = always-fallback).
-const DEFAULT_THRESHOLD_RATIO_LO = 0.5;
-const DEFAULT_THRESHOLD_RATIO_HI = 1.5;
+function sha256(value) {
+  return crypto.createHash('sha256').update(value).digest('hex');
+}
 
-// =============================================================================
-// perLanguageKScore
-//
-// Partition rows by detected language, compute K-Score per partition.
-//
-// Input:
-//   rows: array of {input, output, accuracy?, coverage?, ...kscore inputs,
-//                   k_score? (precomputed)}
-//   opts.lang_filter: optional ISO list to restrict the partition
-//
-// Output:
-//   { ok:true, version, by_lang:{<iso>:{n, k_score, k_axes:{F,R,E,...},
-//                                       wilson_ci_lo, wilson_ci_hi}},
-//     pooled:{n, k_score, k_axes, wilson_ci_lo, wilson_ci_hi},
-//     n_total, n_unknown }
-//
-// On failure: honest envelope. The two shapes are:
-//   - kscore_module_signature_mismatch: imported kscore.js doesn't expose
-//     computeKScore. Should never fire in practice but keeps us honest if
-//     the parent module is rewritten.
-//   - insufficient_per_lang_samples: no language has enough rows. Returns
-//     by_lang_counts so the caller can see WHICH languages need more
-//     captures, and a hint pointing at W760-2 synthetic augmentation.
-// =============================================================================
+function stableJson(value) {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map((v) => stableJson(v)).join(',')}]`;
+  return `{${Object.keys(value).sort().map((key) => `${JSON.stringify(key)}:${stableJson(value[key])}`).join(',')}}`;
+}
 
-export function perLanguageKScore(opts) {
-  const o = opts || {};
-  const rows = Array.isArray(o.rows) ? o.rows : [];
-  const langFilter = Array.isArray(o.lang_filter)
-    ? o.lang_filter.filter((l) => SUPPORTED_LANGS.includes(l))
-    : null;
+function finiteNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
 
-  // Defensive signature check against the parent module. If src/kscore.js
-  // ever drops computeKScore (or renames it) we want to fail loud, not
-  // silently return zeros.
-  if (typeof kscore.computeKScore !== 'function') {
+function clamp01(n) {
+  return Math.max(0, Math.min(1, n));
+}
+
+function sanitizeLang(lang) {
+  if (typeof lang !== 'string') return null;
+  const clean = lang.trim().toLowerCase();
+  if (!/^[a-z]{2}$/.test(clean)) return null;
+  return LANG_SET.has(clean) ? clean : null;
+}
+
+function normalizeLangFilter(raw) {
+  const source = Array.isArray(raw)
+    ? raw
+    : (typeof raw === 'string' ? raw.split(',') : []);
+  const accepted = [];
+  const rejected = [];
+  for (const item of source.slice(0, KSCORE_PER_LANG_LIMITS.MAX_LANG_FILTERS)) {
+    const lang = sanitizeLang(item);
+    if (!lang) {
+      if (item != null) rejected.push(String(item).slice(0, 32));
+      continue;
+    }
+    if (!accepted.includes(lang)) accepted.push(lang);
+  }
+  return {
+    langs: accepted.length > 0 ? accepted : null,
+    rejected,
+    truncated: source.length > KSCORE_PER_LANG_LIMITS.MAX_LANG_FILTERS,
+  };
+}
+
+function boundedTextFromRow(row) {
+  const candidates = [row.input, row.prompt, row.output, row.response];
+  for (const candidate of candidates) {
+    if (typeof candidate !== 'string') continue;
+    if (candidate.trim() === '') continue;
+    if (candidate.length > KSCORE_PER_LANG_LIMITS.MAX_TEXT_CHARS) {
+      return { text: candidate.slice(0, KSCORE_PER_LANG_LIMITS.MAX_TEXT_CHARS), truncated: true };
+    }
+    return { text: candidate, truncated: false };
+  }
+  return { text: '', truncated: false };
+}
+
+function detectRowLang(row) {
+  const text = boundedTextFromRow(row);
+  if (!text.text) return { lang: null, fallback: true, text_truncated: false };
+  try {
+    const detected = detectLang(text.text);
     return {
-      ok: false,
-      error: 'kscore_module_signature_mismatch',
-      hint: 'src/kscore.js no longer exports computeKScore - update kscore-per-language.js',
-      version: KSCORE_PER_LANG_VERSION,
+      lang: sanitizeLang(detected && detected.lang),
+      fallback: !detected || detected.fallback === true || !detected.lang,
+      text_truncated: text.truncated,
     };
+  } catch {
+    return { lang: null, fallback: true, text_truncated: text.truncated };
   }
+}
 
-  // Partition rows by detected language. For each row, the input field
-  // is the load-bearing signal; output falls back when input is empty.
-  const buckets = new Map(); // lang -> [rows]
+function hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function hasPrecomputedKScore(row) {
+  return row && typeof row === 'object' && hasOwn(row, 'k_score');
+}
+
+function validKScoreValue(row) {
+  if (!hasPrecomputedKScore(row)) return null;
+  const n = finiteNumber(row.k_score);
+  if (n == null || n < 0 || n > 1) return null;
+  return n;
+}
+
+function scoreBasisCount(rows) {
+  const withPrecomputed = rows.filter(hasPrecomputedKScore);
+  if (withPrecomputed.length > 0) return withPrecomputed.filter((row) => validKScoreValue(row) != null).length;
+  return rows.length;
+}
+
+function envelopeDigest(payload) {
+  return sha256(stableJson(payload));
+}
+
+function finalizeEnvelope(out) {
+  out.report_sha256 = envelopeDigest({
+    ok: out.ok,
+    error: out.error || null,
+    version: out.version,
+    contract_version: out.contract_version,
+    by_lang: out.by_lang || null,
+    pooled: out.pooled || null,
+    by_lang_counts: out.by_lang_counts || null,
+    by_lang_score_counts: out.by_lang_score_counts || null,
+    n_total: out.n_total,
+    n_unknown: out.n_unknown,
+    stats: out.stats || null,
+  });
+  return out;
+}
+
+function signatureMismatchEnvelope() {
+  return finalizeEnvelope({
+    ok: false,
+    error: 'kscore_module_signature_mismatch',
+    hint: 'src/kscore.js no longer exports computeKScore; update kscore-per-language.js',
+    version: KSCORE_PER_LANG_VERSION,
+    contract_version: KSCORE_PER_LANG_CONTRACT_VERSION,
+    n_total: 0,
+    n_unknown: 0,
+  });
+}
+
+export function perLanguageKScore(opts = {}) {
+  if (typeof kscore.computeKScore !== 'function') return signatureMismatchEnvelope();
+
+  const inputRows = Array.isArray(opts.rows) ? opts.rows : [];
+  const rows = inputRows.slice(0, KSCORE_PER_LANG_LIMITS.MAX_ROWS);
+  const filter = normalizeLangFilter(opts.lang_filter);
+  const filterSet = filter.langs ? new Set(filter.langs) : null;
+  const stats = {
+    input_rows: inputRows.length,
+    processed_rows: rows.length,
+    rows_truncated: Math.max(0, inputRows.length - rows.length),
+    text_truncated_rows: 0,
+    invalid_rows: 0,
+    filtered_rows: 0,
+    lang_filter_rejected: filter.rejected,
+    lang_filter_truncated: filter.truncated,
+  };
+
+  const buckets = new Map();
   let nUnknown = 0;
-  for (const r of rows) {
-    if (!r || typeof r !== 'object') { nUnknown += 1; continue; }
-    const text = r.input || r.prompt || r.output || r.response || '';
-    if (!text || typeof text !== 'string') { nUnknown += 1; continue; }
-    const d = detectLang(text);
-    if (d.fallback || !d.lang) { nUnknown += 1; continue; }
-    if (langFilter && !langFilter.includes(d.lang)) { nUnknown += 1; continue; }
-    if (!buckets.has(d.lang)) buckets.set(d.lang, []);
-    buckets.get(d.lang).push(r);
+  for (const row of rows) {
+    if (!row || typeof row !== 'object' || Array.isArray(row)) {
+      stats.invalid_rows += 1;
+      nUnknown += 1;
+      continue;
+    }
+    const detected = detectRowLang(row);
+    if (detected.text_truncated) stats.text_truncated_rows += 1;
+    if (detected.fallback || !detected.lang) {
+      nUnknown += 1;
+      continue;
+    }
+    if (filterSet && !filterSet.has(detected.lang)) {
+      stats.filtered_rows += 1;
+      continue;
+    }
+    if (!buckets.has(detected.lang)) buckets.set(detected.lang, []);
+    buckets.get(detected.lang).push(row);
   }
 
-  // Counts for the insufficient envelope.
   const byLangCounts = {};
-  for (const [lang, arr] of buckets.entries()) byLangCounts[lang] = arr.length;
+  const byLangScoreCounts = {};
+  for (const lang of [...buckets.keys()].sort()) {
+    const arr = buckets.get(lang);
+    byLangCounts[lang] = arr.length;
+    byLangScoreCounts[lang] = scoreBasisCount(arr);
+  }
 
-  // If NO language has >=MIN_N_FOR_PER_LANG_ANY rows, return honest envelope.
-  const anyBigEnough = Object.values(byLangCounts).some((c) => c >= MIN_N_FOR_PER_LANG_ANY);
+  const anyBigEnough = Object.values(byLangScoreCounts)
+    .some((count) => count >= KSCORE_PER_LANG_LIMITS.MIN_N_FOR_PER_LANG_ANY);
   if (!anyBigEnough) {
-    return {
+    return finalizeEnvelope({
       ok: false,
       error: 'insufficient_per_lang_samples',
-      need_min: MIN_N_FOR_PER_LANG_ANY,
+      need_min: KSCORE_PER_LANG_LIMITS.MIN_N_FOR_PER_LANG_ANY,
       by_lang_counts: byLangCounts,
+      by_lang_score_counts: byLangScoreCounts,
       n_total: rows.length,
       n_unknown: nUnknown,
-      hint: 'Add more captures for the underrepresented languages or enable W760-2 synthetic augmentation',
+      stats,
+      hint: 'Add captures with valid scoring basis for underrepresented languages or enable synthetic augmentation',
       version: KSCORE_PER_LANG_VERSION,
-    };
+      contract_version: KSCORE_PER_LANG_CONTRACT_VERSION,
+    });
   }
 
-  // ── Compute per-lang K-Score ──────────────────────────────────────────────
   const byLang = {};
-  for (const [lang, arr] of buckets.entries()) {
-    const n = arr.length;
-    if (n < MIN_N_FOR_PER_LANG_ANY) {
-      // Honest floor - we have rows for this language but not enough to
-      // report a K-Score. Caller sees the count + null score.
+  for (const lang of [...buckets.keys()].sort()) {
+    const arr = buckets.get(lang);
+    const basisN = scoreBasisCount(arr);
+    if (basisN < KSCORE_PER_LANG_LIMITS.MIN_N_FOR_PER_LANG_ANY) {
       byLang[lang] = {
-        n,
+        n: arr.length,
+        score_n: basisN,
+        invalid_score_rows: Math.max(0, arr.length - basisN),
         k_score: null,
         k_axes: null,
         wilson_ci_lo: null,
         wilson_ci_hi: null,
         floor_hit: true,
-        floor_hint: 'need >=' + MIN_N_FOR_PER_LANG_ANY + ' rows per language for honest K-Score',
+        floor_hint: `need >=${KSCORE_PER_LANG_LIMITS.MIN_N_FOR_PER_LANG_ANY} valid scored rows per language for honest K-Score`,
       };
       continue;
     }
     const env = _computeBucketKScore(arr);
-    const ciReady = n >= MIN_N_FOR_PER_LANG_CI;
+    const ciReady = env.score_n >= KSCORE_PER_LANG_LIMITS.MIN_N_FOR_PER_LANG_CI;
     byLang[lang] = {
-      n,
+      n: arr.length,
+      score_n: env.score_n,
+      invalid_score_rows: env.invalid_score_rows,
       k_score: env.composite == null ? null : _round4(env.composite),
       k_axes: env.axes,
       wilson_ci_lo: ciReady ? _round4(env.wilson.lo) : null,
@@ -155,170 +259,174 @@ export function perLanguageKScore(opts) {
     };
   }
 
-  // ── Compute pooled K-Score over ALL rows (including any with fallback
-  // langs / unknown - the pooled estimate is what kscore.js would give if
-  // you ignored language). This is the comparison point that lets callers
-  // see how much per-language variance the pooled number is hiding.
-  let pooled = null;
-  if (rows.length >= MIN_N_FOR_PER_LANG_ANY) {
-    const env = _computeBucketKScore(rows);
-    const ciReady = rows.length >= MIN_N_FOR_PER_LANG_CI;
-    pooled = {
-      n: rows.length,
-      k_score: env.composite == null ? null : _round4(env.composite),
-      k_axes: env.axes,
-      wilson_ci_lo: ciReady ? _round4(env.wilson.lo) : null,
-      wilson_ci_hi: ciReady ? _round4(env.wilson.hi) : null,
-    };
-  }
+  const pooledEnv = rows.length >= KSCORE_PER_LANG_LIMITS.MIN_N_FOR_PER_LANG_ANY
+    ? _computeBucketKScore(rows)
+    : null;
+  const pooled = pooledEnv && pooledEnv.score_n >= KSCORE_PER_LANG_LIMITS.MIN_N_FOR_PER_LANG_ANY
+    ? {
+        n: rows.length,
+        score_n: pooledEnv.score_n,
+        invalid_score_rows: pooledEnv.invalid_score_rows,
+        k_score: pooledEnv.composite == null ? null : _round4(pooledEnv.composite),
+        k_axes: pooledEnv.axes,
+        wilson_ci_lo: pooledEnv.score_n >= KSCORE_PER_LANG_LIMITS.MIN_N_FOR_PER_LANG_CI ? _round4(pooledEnv.wilson.lo) : null,
+        wilson_ci_hi: pooledEnv.score_n >= KSCORE_PER_LANG_LIMITS.MIN_N_FOR_PER_LANG_CI ? _round4(pooledEnv.wilson.hi) : null,
+      }
+    : null;
 
-  return {
+  return finalizeEnvelope({
     ok: true,
     version: KSCORE_PER_LANG_VERSION,
+    contract_version: KSCORE_PER_LANG_CONTRACT_VERSION,
     by_lang: byLang,
+    by_lang_counts: byLangCounts,
+    by_lang_score_counts: byLangScoreCounts,
     pooled,
     n_total: rows.length,
     n_unknown: nUnknown,
-  };
+    stats,
+  });
 }
 
-// =============================================================================
-// perLanguageConfidenceThreshold
-//
-// Returns the W709 fallback threshold to use for a given language. Lower-
-// quality languages get a LOWER threshold so the runtime router falls
-// back to the teacher more often for them.
-//
-//   threshold = default_threshold * clamp(k_lang / k_pooled, 0.5, 1.5)
-//
-// Examples (default_threshold=0.7):
-//   k_lang=0.91, k_pooled=0.85 → ratio 1.07 → threshold 0.75
-//   k_lang=0.42, k_pooled=0.85 → ratio 0.49 → clamped 0.5 → threshold 0.35
-//
-// Honest envelope when by_lang_kscore is missing the requested lang OR
-// the pooled value is null - never silently return the default.
-// =============================================================================
-
-export function perLanguageConfidenceThreshold(opts) {
-  const o = opts || {};
-  const lang = typeof o.lang === 'string' ? o.lang : null;
-  const byLang = (o.by_lang_kscore && typeof o.by_lang_kscore === 'object') ? o.by_lang_kscore : null;
-  const defaultThreshold = Number.isFinite(o.default_threshold) ? o.default_threshold : 0.7;
+export function perLanguageConfidenceThreshold(opts = {}) {
+  const lang = sanitizeLang(opts.lang);
+  const byLang = (opts.by_lang_kscore && typeof opts.by_lang_kscore === 'object') ? opts.by_lang_kscore : null;
+  const defaultThreshold = opts.default_threshold == null ? 0.7 : finiteNumber(opts.default_threshold);
 
   if (!lang) {
-    return {
-      ok: false,
-      error: 'lang_required',
-      hint: 'pass {lang: "<iso>"} naming the language to compute a threshold for',
-      version: KSCORE_PER_LANG_VERSION,
-    };
+    return _thresholdError('lang_required', { hint: 'pass {lang:"<supported iso>"} naming the language to compute a threshold for' });
+  }
+  if (defaultThreshold == null || defaultThreshold < 0 || defaultThreshold > 1) {
+    return _thresholdError('default_threshold_invalid', { lang });
   }
   if (!byLang) {
-    return {
-      ok: false,
-      error: 'no_per_lang_kscore',
-      hint: 'pass {by_lang_kscore} - the by_lang block from perLanguageKScore()',
-      version: KSCORE_PER_LANG_VERSION,
-    };
+    return _thresholdError('no_per_lang_kscore', { lang, hint: 'pass {by_lang_kscore} from perLanguageKScore()' });
   }
-  const langRow = byLang.by_lang ? byLang.by_lang[lang] : byLang[lang];
+
+  const table = byLang.by_lang && typeof byLang.by_lang === 'object' ? byLang.by_lang : byLang;
+  const langRow = hasOwn(table, lang) ? table[lang] : null;
   const pooled = byLang.pooled || null;
   if (!langRow || langRow.k_score == null) {
-    return {
-      ok: false,
-      error: 'no_data_for_lang',
+    return _thresholdError('no_data_for_lang', {
       lang,
-      hint: 'per-lang K-Score missing or null for ' + lang + ' - add captures or enable synthetic augmentation',
-      version: KSCORE_PER_LANG_VERSION,
-    };
+      hint: `per-language K-Score missing or null for ${lang}; add captures or enable synthetic augmentation`,
+    });
   }
   if (!pooled || pooled.k_score == null) {
-    return {
-      ok: false,
-      error: 'no_pooled_kscore',
-      hint: 'pooled K-Score is null - compute pooled estimate before requesting per-lang threshold',
-      version: KSCORE_PER_LANG_VERSION,
-    };
+    return _thresholdError('no_pooled_kscore', {
+      lang,
+      hint: 'pooled K-Score is null; compute pooled estimate before requesting per-language threshold',
+    });
   }
-  const kLang = langRow.k_score;
-  const kPooled = pooled.k_score;
-  if (!Number.isFinite(kLang) || !Number.isFinite(kPooled) || kPooled <= 0) {
-    return {
-      ok: false,
-      error: 'invalid_kscore',
-      hint: 'k_score values must be finite positive numbers',
-      version: KSCORE_PER_LANG_VERSION,
-    };
+
+  const kLang = finiteNumber(langRow.k_score);
+  const kPooled = finiteNumber(pooled.k_score);
+  if (kLang == null || kPooled == null || kLang < 0 || kLang > 1 || kPooled <= 0 || kPooled > 1) {
+    return _thresholdError('invalid_kscore', { lang, hint: 'k_score values must be finite numbers in [0,1]' });
   }
+
   const rawRatio = kLang / kPooled;
-  const ratio = Math.max(DEFAULT_THRESHOLD_RATIO_LO, Math.min(DEFAULT_THRESHOLD_RATIO_HI, rawRatio));
-  const threshold = Math.max(0, Math.min(1, defaultThreshold * ratio));
-  return {
+  const ratio = Math.max(
+    KSCORE_PER_LANG_LIMITS.DEFAULT_THRESHOLD_RATIO_LO,
+    Math.min(KSCORE_PER_LANG_LIMITS.DEFAULT_THRESHOLD_RATIO_HI, rawRatio),
+  );
+  const threshold = clamp01(defaultThreshold * ratio);
+  const out = {
     ok: true,
     lang,
     default_threshold: defaultThreshold,
-    k_lang: kLang,
-    k_pooled: kPooled,
+    k_lang: _round4(kLang),
+    k_pooled: _round4(kPooled),
     raw_ratio: _round4(rawRatio),
     clamped_ratio: _round4(ratio),
     threshold: _round4(threshold),
     version: KSCORE_PER_LANG_VERSION,
+    contract_version: KSCORE_PER_LANG_CONTRACT_VERSION,
   };
+  out.threshold_sha256 = envelopeDigest(out);
+  return out;
 }
 
-// =============================================================================
-// _computeBucketKScore (private)
-//
-// Average per-row k_score across the bucket. When rows lack precomputed
-// k_score, fall back to averaging accuracy/coverage and asking
-// kscore.computeKScore for a composite. Returns:
-//   { composite, axes, wilson:{lo,hi} }
-// =============================================================================
+function _thresholdError(error, patch = {}) {
+  const out = {
+    ok: false,
+    error,
+    version: KSCORE_PER_LANG_VERSION,
+    contract_version: KSCORE_PER_LANG_CONTRACT_VERSION,
+    ...patch,
+  };
+  out.threshold_sha256 = envelopeDigest(out);
+  return out;
+}
 
 function _computeBucketKScore(rows) {
-  // If rows carry precomputed k_score, average those.
-  const withKscore = rows.filter((r) => r && Number.isFinite(Number(r.k_score)));
-  if (withKscore.length === rows.length && withKscore.length > 0) {
-    const ks = withKscore.map((r) => Number(r.k_score));
-    const mean = ks.reduce((s, k) => s + k, 0) / ks.length;
-    const wilson = _wilson95(mean, ks.length);
+  const precomputedRows = rows.filter(hasPrecomputedKScore);
+  if (precomputedRows.length > 0) {
+    const scores = precomputedRows
+      .map(validKScoreValue)
+      .filter((value) => value != null);
+    const mean = scores.length > 0
+      ? scores.reduce((sum, value) => sum + value, 0) / scores.length
+      : null;
     return {
       composite: mean,
       axes: null,
-      wilson,
+      score_n: scores.length,
+      invalid_score_rows: precomputedRows.length - scores.length,
+      wilson: _wilson95(mean, scores.length),
     };
   }
-  // Otherwise, aggregate inputs + ask kscore.computeKScore.
-  // Average accuracy + coverage; sum size + cost; min latency.
+
   const inputs = {
-    accuracy: _meanField(rows, 'accuracy', 0),
-    coverage: _meanField(rows, 'coverage', 0),
-    size_bytes: _meanField(rows, 'size_bytes', 0),
-    p50_latency_us: _meanField(rows, 'p50_latency_us', null),
-    cost_usd_per_call: _meanField(rows, 'cost_usd_per_call', 0),
+    accuracy: _meanField(rows, 'accuracy', 0, { clamp: true }),
+    coverage: _meanField(rows, 'coverage', 0, { clamp: true }),
+    size_bytes: _meanField(rows, 'size_bytes', 0, { min: 0 }),
+    p50_latency_us: _meanField(rows, 'p50_latency_us', null, { min: 0 }),
+    cost_usd_per_call: _meanField(rows, 'cost_usd_per_call', 0, { min: 0 }),
   };
   const env = kscore.computeKScore(inputs);
-  const wilson = _wilson95(env.composite, rows.length);
+  const composite = finiteNumber(env && env.composite);
   const axes = {};
-  for (const k of ['accuracy', 'coverage', 'size_score', 'latency_score', 'cost_score',
-                    'robustness_score', 'fairness_score', 'energy_score', 'drift_score',
-                    'teacher_fidelity_score']) {
-    if (env[k] != null) axes[k] = env[k];
+  for (const key of [
+    'accuracy',
+    'coverage',
+    'size_score',
+    'latency_score',
+    'cost_score',
+    'robustness_score',
+    'fairness_score',
+    'energy_score',
+    'drift_score',
+    'teacher_fidelity_score',
+  ]) {
+    const value = finiteNumber(env && env[key]);
+    if (value != null) axes[key] = _round4(clamp01(value));
   }
-  return { composite: env.composite, axes, wilson };
+  return {
+    composite: composite == null ? null : clamp01(composite),
+    axes,
+    score_n: rows.length,
+    invalid_score_rows: 0,
+    wilson: _wilson95(composite, rows.length),
+  };
 }
 
-function _meanField(rows, field, fallback) {
-  const xs = rows
-    .map((r) => (r && r[field] != null) ? Number(r[field]) : null)
-    .filter((v) => Number.isFinite(v));
-  if (xs.length === 0) return fallback;
-  return xs.reduce((s, v) => s + v, 0) / xs.length;
+function _meanField(rows, field, fallback, options = {}) {
+  const values = [];
+  for (const row of rows) {
+    if (!row || row[field] == null) continue;
+    let value = finiteNumber(row[field]);
+    if (value == null) continue;
+    if (options.clamp) value = clamp01(value);
+    if (Number.isFinite(options.min)) value = Math.max(options.min, value);
+    values.push(value);
+  }
+  if (values.length === 0) return fallback;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-// Wilson 95% CI on a 0..1 proportion. Caller must enforce n>=30.
 function _wilson95(p, n) {
-  if (n < 1 || !Number.isFinite(p)) return { lo: 0, hi: 0 };
+  if (n < 1 || !Number.isFinite(p) || p < 0 || p > 1) return { lo: null, hi: null };
   const z = 1.96;
   const z2 = z * z;
   const denom = 1 + z2 / n;
@@ -330,13 +438,24 @@ function _wilson95(p, n) {
   };
 }
 
-function _round4(x) {
-  if (!Number.isFinite(x)) return 0;
-  return Math.round(x * 10000) / 10000;
+function _round4(value) {
+  if (!Number.isFinite(value)) return null;
+  return Math.round(value * 10000) / 10000;
 }
+
+export const _internal = Object.freeze({
+  HEX64_RE,
+  boundedTextFromRow,
+  normalizeLangFilter,
+  sanitizeLang,
+  scoreBasisCount,
+  stableJson,
+});
 
 export default {
   KSCORE_PER_LANG_VERSION,
+  KSCORE_PER_LANG_CONTRACT_VERSION,
+  KSCORE_PER_LANG_LIMITS,
   perLanguageKScore,
   perLanguageConfidenceThreshold,
 };
