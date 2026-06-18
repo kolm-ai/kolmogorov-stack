@@ -32,10 +32,135 @@
 
 import crypto from 'node:crypto';
 
-export const TEACHER_HMAC_VERSION = 'w761-v1';
+export const TEACHER_HMAC_VERSION = 'w761-v2';
 export const HMAC_ALGORITHM = 'sha256';
 export const TEACHER_HMAC_KEY_ENV = 'KOLM_TEACHER_HMAC_KEY';
 export const MIN_KEY_BYTES = 32;
+export const TEACHER_HMAC_LIMITS = Object.freeze({
+  MAX_TEACHER_ID_CHARS: 256,
+  MAX_RESPONSE_BODY_CHARS: 2_000_000,
+  MAX_HEADER_KEYS: 64,
+  MAX_HEADER_KEY_CHARS: 128,
+  MAX_HEADER_VALUE_CHARS: 2048,
+});
+
+const SHA256_HEX_RE = /^[a-f0-9]{64}$/i;
+const HMAC_HEX_RE = /^[a-f0-9]{64}$/i;
+const CANONICALIZATION = 'kolm.teacher_response_hmac.v2';
+
+function _sha256Hex(value) {
+  return crypto.createHash('sha256').update(String(value), 'utf8').digest('hex');
+}
+
+function _stableJson(value) {
+  const sortRecursive = (v) => {
+    if (Array.isArray(v)) return v.map(sortRecursive);
+    if (v && typeof v === 'object') {
+      const out = {};
+      for (const key of Object.keys(v).sort()) out[key] = sortRecursive(v[key]);
+      return out;
+    }
+    return v;
+  };
+  return JSON.stringify(sortRecursive(value));
+}
+
+function _cleanScalar(value, maxChars) {
+  if (value == null) return { ok: false, error: 'required' };
+  if (typeof value !== 'string') return { ok: false, error: 'must_be_string' };
+  const trimmed = value.trim();
+  if (!trimmed) return { ok: false, error: 'required' };
+  if (/[\u0000-\u001f\u007f]/.test(value)) return { ok: false, error: 'control_chars' };
+  if (trimmed.length > maxChars) return { ok: false, error: 'too_long' };
+  return { ok: true, value: trimmed };
+}
+
+function _canonicalResponseBody(response_body) {
+  if (response_body == null) {
+    return { ok: false, error: 'missing_field', field: 'response_body' };
+  }
+  const body = typeof response_body === 'string'
+    ? response_body
+    : _stableJson(response_body);
+  if (body.length > TEACHER_HMAC_LIMITS.MAX_RESPONSE_BODY_CHARS) {
+    return {
+      ok: false,
+      error: 'response_body_too_large',
+      response_chars: body.length,
+      max_response_chars: TEACHER_HMAC_LIMITS.MAX_RESPONSE_BODY_CHARS,
+    };
+  }
+  return {
+    ok: true,
+    body,
+    response_sha256: _sha256Hex(body),
+    response_chars: body.length,
+  };
+}
+
+function _normaliseTeacherId(teacher_id) {
+  const clean = _cleanScalar(teacher_id, TEACHER_HMAC_LIMITS.MAX_TEACHER_ID_CHARS);
+  if (!clean.ok) return { ok: false, error: `teacher_id_${clean.error}`, field: 'teacher_id' };
+  return clean;
+}
+
+function _normaliseRequestHash(request_hash) {
+  const clean = _cleanScalar(request_hash, 128);
+  if (!clean.ok) return { ok: false, error: `request_hash_${clean.error}`, field: 'request_hash' };
+  if (!SHA256_HEX_RE.test(clean.value)) {
+    return { ok: false, error: 'request_hash_must_be_sha256_hex', field: 'request_hash' };
+  }
+  return { ok: true, value: clean.value.toLowerCase() };
+}
+
+function _normaliseTimestampMs(timestamp_ms) {
+  if (timestamp_ms == null) return { ok: true, value: Date.now() };
+  const n = Number(timestamp_ms);
+  if (!Number.isFinite(n) || Math.abs(n) > 8.64e15) {
+    return { ok: false, error: 'timestamp_ms_invalid', field: 'timestamp_ms' };
+  }
+  return { ok: true, value: Math.trunc(n) };
+}
+
+function _headersHash(response_headers) {
+  if (response_headers == null) return { ok: true, value: null, header_count: 0 };
+  if (typeof response_headers !== 'object' || Array.isArray(response_headers)) {
+    return { ok: false, error: 'response_headers_must_be_object', field: 'response_headers' };
+  }
+  const keys = Object.keys(response_headers).sort();
+  if (keys.length > TEACHER_HMAC_LIMITS.MAX_HEADER_KEYS) {
+    return { ok: false, error: 'response_headers_too_many', field: 'response_headers' };
+  }
+  const normalized = {};
+  for (const rawKey of keys) {
+    const key = _cleanScalar(rawKey, TEACHER_HMAC_LIMITS.MAX_HEADER_KEY_CHARS);
+    if (!key.ok) return { ok: false, error: `response_header_key_${key.error}`, field: 'response_headers' };
+    const rawValue = response_headers[rawKey];
+    const value = Array.isArray(rawValue)
+      ? rawValue.map((v) => String(v == null ? '' : v)).join(',')
+      : String(rawValue == null ? '' : rawValue);
+    if (/[\u0000-\u001f\u007f]/.test(value)) {
+      return { ok: false, error: 'response_header_value_control_chars', field: 'response_headers' };
+    }
+    if (value.length > TEACHER_HMAC_LIMITS.MAX_HEADER_VALUE_CHARS) {
+      return { ok: false, error: 'response_header_value_too_long', field: 'response_headers' };
+    }
+    const normalizedKey = key.value.toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(normalized, normalizedKey)) {
+      return { ok: false, error: 'response_header_key_duplicate', field: 'response_headers' };
+    }
+    normalized[normalizedKey] = value;
+  }
+  return {
+    ok: true,
+    value: _sha256Hex(_stableJson(normalized)),
+    header_count: keys.length,
+  };
+}
+
+function _isLegacyBindingVersion(version) {
+  return String(version || '').startsWith('w761-v1');
+}
 
 // -----------------------------------------------------------------------------
 // Key loader - honest envelopes for misconfiguration.
@@ -84,7 +209,7 @@ export function _keyFingerprint(keyBuf) {
 // minimal: only fields the verifier will replay. response_body is hashed
 // separately so the binding can carry a fixed-length token regardless of body
 // size - the verifier rehashes the body and compares.
-function _hashChainMessage({ teacher_id, request_hash, response_body, timestamp_ms }) {
+function _legacyHashChainMessage({ teacher_id, request_hash, response_body, timestamp_ms }) {
   const bodyHash = crypto.createHash('sha256')
     .update(String(response_body == null ? '' : response_body))
     .digest('hex');
@@ -92,6 +217,32 @@ function _hashChainMessage({ teacher_id, request_hash, response_body, timestamp_
     + String(request_hash) + ':'
     + bodyHash + ':'
     + String(timestamp_ms);
+}
+
+function _v2HashChainMessage({ teacher_id, request_hash, response_sha256, timestamp_ms }) {
+  return _stableJson({
+    algorithm: HMAC_ALGORITHM,
+    canonicalization: CANONICALIZATION,
+    request_hash,
+    response_sha256,
+    teacher_id,
+    timestamp_ms,
+    version: TEACHER_HMAC_VERSION,
+  });
+}
+
+function _bindingPublicDigest(binding) {
+  return _sha256Hex(_stableJson({
+    algorithm: binding.algorithm || HMAC_ALGORITHM,
+    canonicalization: binding.canonicalization || null,
+    key_fingerprint: binding.key_fingerprint,
+    request_hash: binding.request_hash,
+    response_hmac: binding.response_hmac,
+    response_sha256: binding.response_sha256 || null,
+    teacher_id: binding.teacher_id,
+    timestamp_ms: binding.timestamp_ms,
+    version: binding.version || null,
+  }));
 }
 
 // Bind a teacher response. Returns either an honest envelope on missing/short
@@ -104,69 +255,90 @@ function _hashChainMessage({ teacher_id, request_hash, response_body, timestamp_
 //   { ok:false, error:'hmac_key_not_configured'|'hmac_key_too_short', hint }
 //   { ok:false, error:'missing_field', field:<name> }
 export function bindTeacherResponse({ teacher_id, request_hash, response_body, response_headers, timestamp_ms } = {}) {
-  if (!teacher_id) {
+  const teacher = _normaliseTeacherId(teacher_id);
+  if (!teacher.ok) {
     return {
       ok: false,
-      error: 'missing_field',
-      field: 'teacher_id',
+      error: teacher.error === 'teacher_id_required' ? 'missing_field' : teacher.error,
+      field: teacher.field,
       hint: 'pass {teacher_id: "<provider:model>"}',
       version: TEACHER_HMAC_VERSION,
     };
   }
-  if (!request_hash) {
+  const request = _normaliseRequestHash(request_hash);
+  if (!request.ok) {
     return {
       ok: false,
-      error: 'missing_field',
-      field: 'request_hash',
+      error: request.error === 'request_hash_required' ? 'missing_field' : request.error,
+      field: request.field,
       hint: 'pass {request_hash: sha256(canonical_request_body)} - the same value capture-store uses for dedupe',
       version: TEACHER_HMAC_VERSION,
     };
   }
-  if (response_body == null) {
+  const body = _canonicalResponseBody(response_body);
+  if (!body.ok) {
     return {
       ok: false,
-      error: 'missing_field',
-      field: 'response_body',
+      error: body.error,
+      field: body.field || 'response_body',
+      response_chars: body.response_chars,
+      max_response_chars: body.max_response_chars,
       hint: 'pass {response_body: "<raw body string or canonical JSON>"} - empty string is acceptable if the upstream really returned no body',
       version: TEACHER_HMAC_VERSION,
     };
   }
-  const ts = Number.isFinite(Number(timestamp_ms)) ? Number(timestamp_ms) : Date.now();
+  const ts = _normaliseTimestampMs(timestamp_ms);
+  if (!ts.ok) {
+    return {
+      ok: false,
+      error: ts.error,
+      field: ts.field,
+      hint: 'timestamp_ms must be a finite JavaScript epoch millisecond value',
+      version: TEACHER_HMAC_VERSION,
+    };
+  }
+  const headers = _headersHash(response_headers);
+  if (!headers.ok) {
+    return {
+      ok: false,
+      error: headers.error,
+      field: headers.field,
+      version: TEACHER_HMAC_VERSION,
+    };
+  }
 
   let key;
   try { key = _loadKeyOrThrow(); }
   catch (e) {
     return { ok: false, error: e.code, hint: e.hint, version: TEACHER_HMAC_VERSION };
   }
-  const msg = _hashChainMessage({ teacher_id, request_hash, response_body, timestamp_ms: ts });
+  const msg = _v2HashChainMessage({
+    teacher_id: teacher.value,
+    request_hash: request.value,
+    response_sha256: body.response_sha256,
+    timestamp_ms: ts.value,
+  });
   const response_hmac = crypto.createHmac(HMAC_ALGORITHM, key).update(msg).digest('hex');
   const key_fingerprint = _keyFingerprint(key);
-
-  // response_headers is intentionally NOT covered by the HMAC - middleware
-  // routinely adds / strips headers (CDN, gateway, observability) and a
-  // header-binding would force a rebind on every hop. We record a HASH of
-  // the headers so callers can detect header tampering as a SEPARATE
-  // signal without invalidating the body-binding contract.
-  let headers_hash = null;
-  if (response_headers && typeof response_headers === 'object') {
-    const sorted = Object.keys(response_headers).sort()
-      .map((k) => k + '=' + String(response_headers[k] == null ? '' : response_headers[k]))
-      .join('\n');
-    headers_hash = crypto.createHash('sha256').update(sorted).digest('hex');
-  }
-
-  return {
+  const binding = {
     ok: true,
     version: TEACHER_HMAC_VERSION,
-    teacher_id: String(teacher_id),
-    request_hash: String(request_hash),
+    teacher_id: teacher.value,
+    request_hash: request.value,
+    response_sha256: body.response_sha256,
+    response_chars: body.response_chars,
     response_hmac,
-    signed_at: new Date(ts).toISOString(),
-    timestamp_ms: ts,
+    message_sha256: _sha256Hex(msg),
+    signed_at: new Date(ts.value).toISOString(),
+    timestamp_ms: ts.value,
     key_fingerprint,
-    headers_hash,
+    headers_hash: headers.value,
+    header_count: headers.header_count,
     algorithm: HMAC_ALGORITHM,
+    canonicalization: CANONICALIZATION,
   };
+  binding.binding_sha256 = _bindingPublicDigest(binding);
+  return binding;
 }
 
 // Verify a previously-bound capture's response body still matches the HMAC.
@@ -204,13 +376,68 @@ export function verifyTeacherResponse({ binding, response_body } = {}) {
       };
     }
   }
+  if (!HMAC_HEX_RE.test(String(binding.response_hmac))) {
+    return {
+      ok: true,
+      valid: false,
+      reason: 'signature_mismatch',
+      detail: 'binding.response_hmac must be a 64-character sha256 HMAC hex string',
+      version: TEACHER_HMAC_VERSION,
+    };
+  }
+  const legacy = _isLegacyBindingVersion(binding.version);
+  const legacyBody = legacy ? String(response_body == null ? '' : response_body) : null;
+  if (legacy && legacyBody.length > TEACHER_HMAC_LIMITS.MAX_RESPONSE_BODY_CHARS) {
+    return {
+      ok: false,
+      valid: false,
+      reason: 'response_body_too_large',
+      detail: 'legacy response body exceeds verification limit',
+      response_chars: legacyBody.length,
+      max_response_chars: TEACHER_HMAC_LIMITS.MAX_RESPONSE_BODY_CHARS,
+      version: TEACHER_HMAC_VERSION,
+    };
+  }
+  const body = legacy
+    ? null
+    : _canonicalResponseBody(response_body == null ? '' : response_body);
+  if (body && !body.ok) {
+    return {
+      ok: false,
+      valid: false,
+      reason: body.error,
+      detail: 'response body could not be canonicalized for HMAC verification',
+      response_chars: body.response_chars,
+      max_response_chars: body.max_response_chars,
+      version: TEACHER_HMAC_VERSION,
+    };
+  }
+  let teacher = null;
+  let request = null;
+  let ts = null;
+  if (!legacy) {
+    teacher = _normaliseTeacherId(binding.teacher_id);
+    request = _normaliseRequestHash(binding.request_hash);
+    ts = _normaliseTimestampMs(binding.timestamp_ms);
+    const invalid = !teacher.ok ? teacher : (!request.ok ? request : (!ts.ok ? ts : null));
+    if (invalid) {
+      return {
+        ok: false,
+        valid: false,
+        reason: 'binding_invalid_fields',
+        detail: invalid.error,
+        missing_field: invalid.field || null,
+        version: TEACHER_HMAC_VERSION,
+      };
+    }
+  }
   let key;
   try { key = _loadKeyOrThrow(); }
   catch (e) {
     return {
       ok: false,
       valid: false,
-      reason: e.code === 'hmac_key_not_configured' ? 'hmac_key_not_configured' : 'binding_missing_fields',
+      reason: e.code || 'hmac_key_unavailable',
       detail: e.message,
       hint: e.hint,
       version: TEACHER_HMAC_VERSION,
@@ -232,12 +459,19 @@ export function verifyTeacherResponse({ binding, response_body } = {}) {
       version: TEACHER_HMAC_VERSION,
     };
   }
-  const msg = _hashChainMessage({
-    teacher_id: binding.teacher_id,
-    request_hash: binding.request_hash,
-    response_body: response_body == null ? '' : response_body,
-    timestamp_ms: binding.timestamp_ms,
-  });
+  const msg = legacy
+    ? _legacyHashChainMessage({
+        teacher_id: binding.teacher_id,
+        request_hash: binding.request_hash,
+        response_body: legacyBody,
+        timestamp_ms: binding.timestamp_ms,
+      })
+    : _v2HashChainMessage({
+        teacher_id: teacher.value,
+        request_hash: request.value,
+        response_sha256: body.response_sha256,
+        timestamp_ms: ts.value,
+      });
   const expected = crypto.createHmac(HMAC_ALGORITHM, key).update(msg).digest('hex');
 
   // CONSTANT-TIME COMPARE (W761 INVARIANT). Buffer.from(hex) yields equal-
@@ -273,6 +507,9 @@ export function verifyTeacherResponse({ binding, response_body } = {}) {
       valid: true,
       reason: 'valid_signature',
       teacher_id: binding.teacher_id,
+      response_sha256: legacy ? _sha256Hex(legacyBody) : body.response_sha256,
+      message_sha256: _sha256Hex(msg),
+      binding_sha256: _bindingPublicDigest(binding),
       verified_at: new Date().toISOString(),
       version: TEACHER_HMAC_VERSION,
     };
@@ -308,12 +545,18 @@ export function attachBindingToCapture(capture_row, binding) {
     version: binding.version,
     teacher_id: binding.teacher_id,
     request_hash: binding.request_hash,
+    response_sha256: binding.response_sha256 || null,
+    response_chars: Number.isFinite(Number(binding.response_chars)) ? Number(binding.response_chars) : null,
     response_hmac: binding.response_hmac,
+    message_sha256: binding.message_sha256 || null,
+    binding_sha256: binding.binding_sha256 || _bindingPublicDigest(binding),
     signed_at: binding.signed_at,
     timestamp_ms: binding.timestamp_ms,
     key_fingerprint: binding.key_fingerprint,
     headers_hash: binding.headers_hash || null,
+    header_count: Number.isFinite(Number(binding.header_count)) ? Number(binding.header_count) : null,
     algorithm: binding.algorithm || HMAC_ALGORITHM,
+    canonicalization: binding.canonicalization || null,
   };
   return capture_row;
 }
@@ -342,7 +585,7 @@ export function verifyCaptureBinding(capture_row) {
     };
   }
   const body = capture_row.response != null
-    ? (typeof capture_row.response === 'string' ? capture_row.response : JSON.stringify(capture_row.response))
+    ? capture_row.response
     : (capture_row.response_redacted != null
         ? capture_row.response_redacted
         : (capture_row.output != null ? capture_row.output : ''));
@@ -354,6 +597,7 @@ export default {
   HMAC_ALGORITHM,
   TEACHER_HMAC_KEY_ENV,
   MIN_KEY_BYTES,
+  TEACHER_HMAC_LIMITS,
   bindTeacherResponse,
   verifyTeacherResponse,
   attachBindingToCapture,

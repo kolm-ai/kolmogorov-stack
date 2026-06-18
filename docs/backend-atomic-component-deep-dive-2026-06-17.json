@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 710,
-    "components_without_direct_test_reference": 119,
+    "test_referenced_components": 711,
+    "components_without_direct_test_reference": 118,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -42441,26 +42441,28 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "46ee82a2855af6f5b8e1eb4bec95e84151c3e247afa94c5aaec4a4db9ea95fb5",
+      "sha256": "8a40d15b076d7bc8b3e39b10868009e93485d1195e88436b2b06ac866b7ae3cc",
       "metrics": {
-        "bytes": 14258,
-        "lines": 362,
+        "bytes": 22691,
+        "lines": 606,
         "imports": 1,
-        "exports": 10,
+        "exports": 11,
         "routes": 0,
         "env_refs": 1,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 24,
+        "crypto_refs": 25,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave691-teacher-response-hmac-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "environment_configuration_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
