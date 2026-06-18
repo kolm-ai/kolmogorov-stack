@@ -43,9 +43,9 @@ test('W948 package wiring makes the artifact matrix a depth and control-file gat
     pkg.scripts['verify:artifact-matrix'],
     'node scripts/build-artifact-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave948-artifact-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:data-curate-matrix && npm run build:artifact-matrix && npm run build:tui-workbench-matrix && npm run build:bench-harness-matrix && npm run build:otel-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:data-curate-matrix && npm run verify:artifact-matrix && npm run verify:tui-workbench-matrix && npm run verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:file-ledger/);
-  assert.match(pkg.scripts['verify:depth'], /verify:spec-compile-matrix && npm run verify:data-curate-matrix && npm run verify:artifact-matrix && npm run verify:tui-workbench-matrix && npm run verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:meta-routes/);
+  assert.match(pkg.scripts['build:control-files'], /build:data-curate-matrix && npm run build:artifact-matrix && npm run build:tui-workbench-matrix && npm run build:bench-harness-matrix && npm run build:otel-matrix && npm run build:readiness-proof-matrix && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:data-curate-matrix && npm run verify:artifact-matrix && npm run verify:tui-workbench-matrix && npm run verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['verify:depth'], /verify:spec-compile-matrix && npm run verify:data-curate-matrix && npm run verify:artifact-matrix && npm run verify:tui-workbench-matrix && npm run verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:meta-routes/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');
   assert.match(ledgerBuilder, /build-artifact-matrix\.cjs/);

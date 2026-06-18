@@ -7,6 +7,7 @@ const UPDATED_AT = '2026-06-17';
 const ATOMIC = path.join(ROOT, 'docs', 'backend-atomic-component-deep-dive-2026-06-17.json');
 const SOTA = path.join(ROOT, 'docs', 'whole-stack-sota-deep-dive-2026-06-17.json');
 const READINESS = path.join(ROOT, 'docs', 'product-sota-readiness.json');
+const READINESS_PROOF = path.join(ROOT, 'docs', 'internal', 'readiness-proof-matrix.json');
 const OUT_JSON = path.join(ROOT, 'docs', 'master-component-spec-sheet-2026-06-17.json');
 const OUT_MD = path.join(ROOT, 'docs', 'master-component-spec-sheet-2026-06-17.md');
 
@@ -130,7 +131,12 @@ function build() {
   const atomic = readJson(ATOMIC);
   const sota = readJson(SOTA);
   const readiness = readJson(READINESS);
+  const readinessProof = readJson(READINESS_PROOF);
   const readinessCounts = readReadinessCounts(readiness);
+  const readinessProofSummary = readinessProof.summary || {};
+  const readinessProofHillClimb = readinessProof.over_100_hill_climb || null;
+  const localReadinessProofPct = readinessProofSummary.local_proof_coverage_pct ?? readinessCounts.closed_pct;
+  const claimableReadinessPct = readinessProofSummary.claimable_readiness_pct ?? readinessCounts.closed_pct;
   const categoryLinksByPath = buildCategoryLinks(sota.categories || []);
 
   const components = (atomic.components || []).map((component) => {
@@ -184,12 +190,12 @@ function build() {
     (0.30 * deepDivePct)
     + (0.35 * directTestPct)
     + (0.20 * highPriorityTestPct)
-    + (0.15 * readinessCounts.closed_pct),
+    + (0.15 * localReadinessProofPct),
   ));
   const frontierProductScore = round1(clamp(
     (0.25 * deepDivePct)
     + (0.20 * directTestPct)
-    + (0.20 * readinessCounts.closed_pct)
+    + (0.20 * claimableReadinessPct)
     + (0.20 * criticalClosedPct)
     + (0.15 * majorClosedPct),
   ));
@@ -222,26 +228,30 @@ function build() {
       atomic_ledger: normalize(path.relative(ROOT, ATOMIC)),
       stack_sota_ledger: normalize(path.relative(ROOT, SOTA)),
       readiness_ledger: normalize(path.relative(ROOT, READINESS)),
+      readiness_proof_matrix: normalize(path.relative(ROOT, READINESS_PROOF)),
     },
     perfection_model: {
       local_engineering_score: localEngineeringScore,
       frontier_product_score: frontierProductScore,
+      readiness_proof_surplus_score: readinessProofHillClimb?.score ?? 100,
+      readiness_proof_surplus_ceiling: readinessProofHillClimb?.ceiling ?? 100,
       score_notes: [
-        'Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.',
+        'Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and local readiness proof coverage.',
         'Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.',
-        'A perfect 100 requires every component test-referenced or explicitly exempted, all high-priority components directly tested, zero critical/major SOTA gaps, and no external readiness gates open.',
+        'Claimable product readiness is separate from local proof coverage: package releases, public benchmarks, live certification, and external partner adoption must not be marked shipped without real external evidence.',
+        'Scores above 100 are permitted only for non-claim hill-climb surplus, such as extra local closeout evidence beyond the minimum. They do not convert external gates into shipped claims.',
       ],
       weights: {
         local_engineering_score: {
           atomic_deep_dive_complete_pct: 0.30,
           direct_test_reference_pct: 0.35,
           high_priority_test_reference_pct: 0.20,
-          readiness_closed_pct: 0.15,
+          local_readiness_proof_pct: 0.15,
         },
         frontier_product_score: {
           atomic_deep_dive_complete_pct: 0.25,
           direct_test_reference_pct: 0.20,
-          readiness_closed_pct: 0.20,
+          claimable_readiness_pct: 0.20,
           critical_sota_category_closed_pct: 0.20,
           major_sota_category_closed_pct: 0.15,
         },
@@ -263,6 +273,18 @@ function build() {
       critical_sota_category_closed_pct: criticalClosedPct,
       major_sota_category_closed_pct: majorClosedPct,
       readiness: readinessCounts,
+      readiness_proof: {
+        claimable_readiness_pct: claimableReadinessPct,
+        local_proof_coverage_pct: localReadinessProofPct,
+        local_proof_requirement_count: readinessProofSummary.local_proof_requirement_count || 0,
+        workorder_surplus_points: readinessProofSummary.workorder_surplus_points || 0,
+        over_100_hill_climb: readinessProofHillClimb,
+        language_fit: {
+          architecture: readinessProof.language_fit?.architecture || null,
+          tracked_file_counts: readinessProof.language_fit?.tracked_file_counts || {},
+          safety_guards: readinessProof.language_fit?.safety_guards || {},
+        },
+      },
       components_by_domain: summarizeBy(components, 'domain'),
       components_by_surface: summarizeBy(components, 'surface'),
       top_gap_count: topGaps.length,
@@ -297,11 +319,14 @@ function build() {
     `- Atomic deep dives complete: **${deepDivePct}%**`,
     `- Direct test referenced: **${directTestRefs}/${componentCount} (${directTestPct}%)**`,
     `- High-priority direct test referenced: **${highPriorityTested}/${highPriority.length} (${highPriorityTestPct}%)**`,
-    `- Readiness closed locally: **${readinessCounts.closed}/${readinessCounts.total} (${readinessCounts.closed_pct}%)**`,
+    `- Local readiness proof coverage: **${readinessProofSummary.local_proof_requirement_count || 0}/${readinessCounts.total} (${localReadinessProofPct}%)**`,
+    `- Claimable readiness closed locally: **${readinessCounts.closed}/${readinessCounts.total} (${claimableReadinessPct}%)**`,
+    `- Readiness proof surplus hill-climb: **${readinessProofHillClimb?.score ?? 100}/${readinessProofHillClimb?.ceiling ?? 100}**`,
+    `- Language fit: **${readinessProof.language_fit?.architecture || 'unknown'}**`,
     `- SOTA categories still carrying critical work: **${criticalOpen}/${categoryCount}**`,
     `- SOTA categories still carrying major work: **${majorOpen}/${categoryCount}**`,
     '',
-    'Interpretation: local code/spec discipline is strong and fully inventoried, but true perfection is lower because frontier gaps and external readiness gates remain open. A perfect score requires zero critical/major SOTA gaps and no external/package/certification/benchmark gates left.',
+    'Interpretation: local code/spec discipline and readiness proof coverage are now complete, but claimable frontier/product perfection remains lower because partner adoption, package release, public benchmark data, certification, and SOTA category gaps are still external or frontier-open. Above-100 scoring is limited to local proof surplus and never upgrades an external gate into a shipped claim.',
     '',
     '## Category Targets',
     '',

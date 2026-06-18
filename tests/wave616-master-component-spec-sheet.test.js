@@ -45,6 +45,9 @@ test('W616 master component spec sheet keeps perfection distance explicit', () =
   assert.ok(sheet.perfection_model.local_engineering_score >= 80);
   assert.ok(sheet.perfection_model.frontier_product_score >= 60);
   assert.ok(sheet.perfection_model.frontier_product_score < 100);
+  assert.equal(sheet.summary.readiness_proof.local_proof_coverage_pct, 100);
+  assert.equal(sheet.summary.readiness_proof.claimable_readiness_pct, 86);
+  assert.ok(sheet.perfection_model.readiness_proof_surplus_score > 100);
   assert.ok(sheet.summary.categories_with_critical_frontier_work_open > 0);
   assert.equal(sheet.summary.components_without_direct_test_reference, 0);
   assert.equal(sheet.summary.direct_test_reference_pct, 100);
@@ -54,4 +57,6 @@ test('W616 master component spec sheet keeps perfection distance explicit', () =
   assert.match(md, /How Close To Perfect/);
   assert.match(md, /Local engineering perfection/);
   assert.match(md, /Frontier\/product perfection/);
+  assert.match(md, /Local readiness proof coverage/);
+  assert.match(md, /Claimable readiness closed locally/);
 });
