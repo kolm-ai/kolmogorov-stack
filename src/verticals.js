@@ -33,6 +33,45 @@
 import { registerArtifact, getListingByCid } from './marketplace-store.js';
 
 export const VERTICALS_VERSION = 'w751-v1';
+export const VERTICALS_CONTRACT_VERSION = 'w732-verticals-v1';
+export const VERTICALS_DEFAULT_PUBLISHER_ID = 'kolm.ai-foundation';
+export const VERTICALS_LIMITS = Object.freeze({
+  max_vertical_id_chars: 64,
+  max_publisher_id_chars: 128,
+  max_common_tasks: 8,
+  min_catalog_rows: 5,
+});
+
+const SAFE_VERTICAL_ID_RE = /^[a-z][a-z0-9-]{0,63}$/;
+const SAFE_PUBLISHER_ID_RE = /^[A-Za-z0-9._:@-]{1,128}$/;
+
+function _cleanText(value, maxChars) {
+  const s = String(value == null ? '' : value)
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!s || s.length > maxChars) return null;
+  return s;
+}
+
+export function normalizeVerticalId(id) {
+  const cleaned = _cleanText(id, VERTICALS_LIMITS.max_vertical_id_chars);
+  if (!cleaned) return null;
+  const normalized = cleaned.toLowerCase();
+  return SAFE_VERTICAL_ID_RE.test(normalized) ? normalized : null;
+}
+
+export function verticalIdForEnvelope(id) {
+  return normalizeVerticalId(id) || 'unknown';
+}
+
+export function normalizeVerticalPublisherId(publisher) {
+  const cleaned = _cleanText(
+    publisher == null || publisher === '' ? VERTICALS_DEFAULT_PUBLISHER_ID : publisher,
+    VERTICALS_LIMITS.max_publisher_id_chars,
+  );
+  return cleaned && SAFE_PUBLISHER_ID_RE.test(cleaned) ? cleaned : VERTICALS_DEFAULT_PUBLISHER_ID;
+}
 
 // VERTICALS - frozen catalog of the 5 W751-W755 verticals.
 //
@@ -151,8 +190,8 @@ function _mapTaskToW737Facet(task) {
 // /v1/verticals/legal. Returns null (NOT throws) for an unknown id so the
 // route handler can map to a 404 + honest envelope.
 export function getVertical(id) {
-  if (!id || typeof id !== 'string') return null;
-  const want = id.toLowerCase().trim();
+  const want = normalizeVerticalId(id);
+  if (!want) return null;
   return VERTICALS.find((v) => v.id === want) || null;
 }
 
@@ -182,17 +221,22 @@ export function listVerticals() {
 //
 // Returns the persisted listing row from src/marketplace-store.js.
 export async function registerVerticalArtifact(vertical_id, publisher = 'kolm.ai-foundation') {
-  const vertical = getVertical(vertical_id);
+  const requestedId = normalizeVerticalId(vertical_id);
+  const vertical = getVertical(requestedId);
   if (!vertical) {
-    const e = new Error('unknown_vertical: ' + vertical_id);
+    const e = new Error('unknown_vertical');
     e.code = 'UNKNOWN_VERTICAL';
+    e.vertical_id = requestedId || 'unknown';
     throw e;
   }
+  const publisherId = normalizeVerticalPublisherId(publisher);
   const manifest = {
     name: vertical.model_slug,
     description:
       'Foundation student for ' + vertical.name +
       ' - pending W751-W755 compilation (W757 fingerprinting required)',
+    contract_version: VERTICALS_CONTRACT_VERSION,
+    catalog_version: VERTICALS_VERSION,
     vertical: vertical.id,
     common_tasks: vertical.common_tasks.slice(),
     target_kscore: vertical.target_kscore,
@@ -205,7 +249,7 @@ export async function registerVerticalArtifact(vertical_id, publisher = 'kolm.ai
   };
   const listing = await registerArtifact({
     cid: 'pending_' + vertical.id,
-    publisher_id: publisher,
+    publisher_id: publisherId,
     vertical: vertical.id,
     task_type: _mapTaskToW737Facet(vertical.common_tasks[0]),
     hardware_target: 'rtx',
@@ -226,6 +270,7 @@ export async function registerVerticalArtifact(vertical_id, publisher = 'kolm.ai
 export async function registerAllVerticalStubs(publisher = 'kolm.ai-foundation') {
   const registered = [];
   const skipped = [];
+  const publisherId = normalizeVerticalPublisherId(publisher);
   for (const v of VERTICALS) {
     const cid = 'pending_' + v.id;
     const existing = await getListingByCid(cid);
@@ -233,12 +278,13 @@ export async function registerAllVerticalStubs(publisher = 'kolm.ai-foundation')
       skipped.push(v.model_slug);
       continue;
     }
-    await registerVerticalArtifact(v.id, publisher);
+    await registerVerticalArtifact(v.id, publisherId);
     registered.push(v.model_slug);
   }
   return {
     ok: true,
     version: VERTICALS_VERSION,
+    contract_version: VERTICALS_CONTRACT_VERSION,
     registered,
     skipped,
     total: VERTICALS.length,
@@ -267,20 +313,21 @@ export async function registerAllVerticalStubs(publisher = 'kolm.ai-foundation')
 // this sync stub for backward compatibility.
 export function verticalFingerprintStub(vertical_id) {
   const v = getVertical(vertical_id);
-  // Even unknown verticals return the same not-yet-shipped envelope when the
-  // route exists. The handler maps unknown-id to 404 BEFORE calling this fn,
-  // so we trust the id is valid here. Defensive: surface the id verbatim.
+  // Even unknown verticals return the same not-yet-shipped envelope when this
+  // helper is called directly. The route maps unknown-id to 404 first; direct
+  // callers still get a bounded, non-leaky identifier.
   return {
     ok: false,
     error: 'w757_not_shipped',
     blocked_by: 'W757',
-    vertical: v ? v.id : String(vertical_id || ''),
+    vertical: v ? v.id : verticalIdForEnvelope(vertical_id),
     hint:
       'vertical fingerprint extraction requires W757 - coming in plan. ' +
       'Until then, capture per-namespace via /v1/capture/log and distill ' +
       'through /v1/distill. For the W757-wired async surface, call ' +
       'extractVerticalFingerprint(id) from src/pattern-lake.js.',
     version: VERTICALS_VERSION,
+    contract_version: VERTICALS_CONTRACT_VERSION,
     // W757 sub-envelope (additive; pre-W757 callers see {ok,error,blocked_by,
     // vertical,hint,version} verbatim). The async lake surface is the canonical
     // path; this hint helps a consumer discover it.

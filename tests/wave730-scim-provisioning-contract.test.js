@@ -94,7 +94,7 @@ test('W730 SCIM provisioning exposes a direct depth verifier and bounded contrac
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:savings-routes && npm run verify:scim-provisioning && npm run verify:trend-extract && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:savings-routes && npm run verify:scim-provisioning && npm run verify:trend-extract && npm run verify:verticals && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(source, /SCIM_PROVISIONING_CONTRACT_VERSION/);
   assert.match(source, /requireTenantId/);

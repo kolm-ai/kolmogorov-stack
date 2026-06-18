@@ -22514,11 +22514,18 @@ res.json({
       res.json({
         ok: true,
         version: verticals.VERTICALS_VERSION,
+        contract_version: verticals.VERTICALS_CONTRACT_VERSION,
         total: verticals.VERTICALS.length,
         verticals: verticals.listVerticals(),
       });
     } catch (e) {
-      res.status(500).json({ ok: false, error: 'verticals_list_error', detail: e && e.message });
+      const detail = String((e && e.message) || e || 'verticals_list_error');
+      res.status(500).json({
+        ok: false,
+        error: 'verticals_list_error',
+        contract_version: 'w732-verticals-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
+      });
     }
   });
 
@@ -22530,18 +22537,26 @@ res.json({
         return res.status(404).json({
           ok: false,
           error: 'unknown_vertical',
-          id: String(req.params.id || ''),
+          id: verticals.verticalIdForEnvelope(req.params.id),
           known: verticals.VERTICALS.map((row) => row.id),
           version: verticals.VERTICALS_VERSION,
+          contract_version: verticals.VERTICALS_CONTRACT_VERSION,
         });
       }
       res.json({
         ok: true,
         version: verticals.VERTICALS_VERSION,
+        contract_version: verticals.VERTICALS_CONTRACT_VERSION,
         vertical: v,
       });
     } catch (e) {
-      res.status(500).json({ ok: false, error: 'vertical_show_error', detail: e && e.message });
+      const detail = String((e && e.message) || e || 'vertical_show_error');
+      res.status(500).json({
+        ok: false,
+        error: 'vertical_show_error',
+        contract_version: 'w732-verticals-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
+      });
     }
   });
 
@@ -22558,16 +22573,23 @@ res.json({
         return res.status(404).json({
           ok: false,
           error: 'unknown_vertical',
-          id: String(req.params.id || ''),
+          id: verticals.verticalIdForEnvelope(req.params.id),
           known: verticals.VERTICALS.map((row) => row.id),
           version: verticals.VERTICALS_VERSION,
+          contract_version: verticals.VERTICALS_CONTRACT_VERSION,
         });
       }
       // HTTP 200 because the call succeeded; the FEATURE is what's not
       // shipped. Envelope error code is the machine-readable signal.
       res.json(verticals.verticalFingerprintStub(req.params.id));
     } catch (e) {
-      res.status(500).json({ ok: false, error: 'vertical_fingerprint_error', detail: e && e.message });
+      const detail = String((e && e.message) || e || 'vertical_fingerprint_error');
+      res.status(500).json({
+        ok: false,
+        error: 'vertical_fingerprint_error',
+        contract_version: 'w732-verticals-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
+      });
     }
   });
 
@@ -22598,7 +22620,13 @@ res.json({
       const result = await verticals.registerAllVerticalStubs(publisher);
       res.json(result);
     } catch (e) {
-      res.status(500).json({ ok: false, error: 'vertical_register_error', detail: e && e.message });
+      const detail = String((e && e.message) || e || 'vertical_register_error');
+      res.status(500).json({
+        ok: false,
+        error: 'vertical_register_error',
+        contract_version: 'w732-verticals-v1',
+        error_sha256: crypto.createHash('sha256').update(detail).digest('hex'),
+      });
     }
   });
 
