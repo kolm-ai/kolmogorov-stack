@@ -111,6 +111,9 @@ export async function verifyGpuAttestation(report, opts = {}) {
     state: state.state || null,
     reason: state.reason || null,
     trust_root: state.trust_root || null,
+    nonce: state.nonce || state.eat_nonce || null,
+    expected_nonce: state.expected_nonce || null,
+    nonce_binding_alg: state.nonce_binding_alg || null,
     timestamp: state.timestamp || new Date().toISOString(),
   };
 }

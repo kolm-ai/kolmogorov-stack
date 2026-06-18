@@ -249,6 +249,9 @@ export async function verifyAttestation(kind, report, opts = {}) {
         not_after: crypto_result.not_after || null,
         revocation_checked_at: crypto_result.revocation_checked_at || null,
         cert_chain_length: crypto_result.cert_chain_length || null,
+        nonce: crypto_result.eat_nonce || crypto_result.nonce || null,
+        expected_nonce: crypto_result.expected_nonce || null,
+        nonce_binding_alg: crypto_result.nonce_binding_alg || null,
       };
     }
     return { ...baseState, crypto_attempted: true, crypto_reason: crypto_result?.reason || 'verifier_returned_falsy' };

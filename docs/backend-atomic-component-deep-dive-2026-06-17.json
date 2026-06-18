@@ -39,8 +39,8 @@
     "frontier_improvement_or_invention"
   ],
   "summary": {
-    "component_count": 968,
-    "test_referenced_components": 968,
+    "component_count": 969,
+    "test_referenced_components": 969,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 65,
     "domains": {
@@ -55,19 +55,19 @@
       "runtime_serving_routing": 26,
       "storage_state": 28,
       "training_model_optimization": 173,
-      "trust_security_compliance": 63
+      "trust_security_compliance": 64
     },
     "surfaces": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 628,
+      "core-backend": 629,
       "package-distribution": 92,
       "service": 3,
       "worker": 211
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 473,
+      "cryptographic_or_proof_boundary": 474,
       "distribution_or_worker_surface": 306,
       "environment_configuration_boundary": 367,
       "execution_or_subprocess_boundary": 312,
@@ -20753,10 +20753,10 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "b9f731d7c96ab738fc95a486b82176767f0e16298d8800b5257a239af9c2873a",
+      "sha256": "0145eb03bd6ab8cb97fa4ca35c8fde529e5745eeabbfecb46b407e1fca93ff53",
       "metrics": {
-        "bytes": 18743,
-        "lines": 486,
+        "bytes": 18900,
+        "lines": 489,
         "imports": 7,
         "exports": 8,
         "routes": 0,
@@ -25147,10 +25147,10 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "5ba65ab8a1a3f8d98c62be7ea57932fc6c2d6587eab10876c61536e41b0ede9a",
+      "sha256": "05da6bd3e41aa2fe198f3ddc65640ebfd34de59e97b4ff7548c88e9864bdd0ee",
       "metrics": {
-        "bytes": 19176,
-        "lines": 474,
+        "bytes": 19377,
+        "lines": 477,
         "imports": 1,
         "exports": 20,
         "routes": 0,
@@ -25169,7 +25169,7 @@
         "tests/wave409v-confidential-compute.test.js",
         "tests/wave445-verify-hardening.test.js",
         "tests/wave460-attestation-embed.test.js",
-        "tests/wave603-whole-stack-sota-deep-dive.test.js"
+        "tests/wave968-proven-compute-receipt.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -42317,10 +42317,10 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "71e9544efea59455863a648f9664ea6c23aae8200c22094cc8a67719e5bff071",
+      "sha256": "2e7d2bb2a146be654b6d4ac7c744b04732efaee3234dbe7c588e58fa3310ca3c",
       "metrics": {
-        "bytes": 9346,
-        "lines": 200,
+        "bytes": 9485,
+        "lines": 203,
         "imports": 6,
         "exports": 7,
         "routes": 0,
@@ -42328,12 +42328,13 @@
         "fs_writes": 0,
         "subprocess_refs": 4,
         "network_refs": 0,
-        "crypto_refs": 14,
+        "crypto_refs": 15,
         "markers": 0
       },
       "test_refs": [
         "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
-        "tests/nras-verifier.test.js"
+        "tests/nras-verifier.test.js",
+        "tests/wave968-proven-compute-receipt.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -44831,6 +44832,64 @@
       },
       "test_refs": [
         "tests/wave934-provider-compliance-contracts.test.js"
+      ],
+      "risk_signals": [
+        "cryptographic_or_proof_boundary"
+      ],
+      "priority_score": 3,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
+      "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
+      "suggested_verification": [
+        "npm run verify:claims-scope",
+        "npm run verify:compliance-packet"
+      ]
+    },
+    {
+      "path": "src/proven-compute-receipt.js",
+      "id": "src-proven-compute-receipt-js",
+      "surface": "core-backend",
+      "domain": "trust_security_compliance",
+      "language": "javascript",
+      "sha256": "437cfecdf828419145a7c4728a227bc0e5ff8ddf4e9545ec1ec3d44ae191462e",
+      "metrics": {
+        "bytes": 16766,
+        "lines": 430,
+        "imports": 7,
+        "exports": 11,
+        "routes": 0,
+        "env_refs": 0,
+        "fs_writes": 0,
+        "subprocess_refs": 0,
+        "network_refs": 0,
+        "crypto_refs": 12,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/wave968-proven-compute-receipt.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -54709,9 +54768,9 @@
         "tests/offline-inclusion-proof.test.js",
         "tests/wave168-tlog-verify-and-vault-perms.test.js",
         "tests/wave921-govern-receipts-compliance.test.js",
+        "tests/wave968-proven-compute-receipt.test.js",
         "tests/site.test.js",
-        "tests/wave2-integration.test.js",
-        "tests/wave3-integration.test.js"
+        "tests/wave2-integration.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",

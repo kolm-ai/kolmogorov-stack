@@ -139,6 +139,9 @@ export function makeNrasVerifier(opts = {}) {
       cert_chain_length: worker.cert_chain_length || null,
       revocation_checked_at: worker.revocation_checked_at || null,
       report_hash: worker.report_hash || null,
+      eat_nonce: worker.eat_nonce || expected_nonce,
+      expected_nonce,
+      nonce_binding_alg: 'sha256(input_digest||output_digest)',
     };
   };
 }
