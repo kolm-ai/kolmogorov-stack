@@ -63,7 +63,7 @@ test('W742 website status is wired into direct depth verification and mounted pu
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:vlm-bakeoff && npm run verify:website-status && npm run verify:zip-large && npm run verify:python-onnx-text && npm run verify:fal-backend && npm run verify:vast-backend && npm run verify:browser-extension-popup && npm run verify:langchain-package-manifest && npm run verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:vlm-bakeoff && npm run verify:website-status && npm run verify:zip-large && npm run verify:python-onnx-text && npm run verify:fal-backend && npm run verify:vast-backend && npm run verify:browser-extension-popup && npm run verify:langchain-package-manifest && npm run verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && npm run verify:compute-backends && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.ok(storeDef >= 0, 'router must define the shared W609 receipt-store wrapper');
   assert.ok(statusMount > storeDef, 'status routes must receive the real receipt-store wrapper');

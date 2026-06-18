@@ -25,6 +25,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REGISTRY_PATH = path.join(__dirname, 'registry.json');
 const DETECT_CACHE_PATH = path.join(os.homedir(), '.kolm', 'compute-detect.json');
 const DETECT_CACHE_TTL_SECONDS = 3600;
+const BACKEND_NAME_RE = /^[a-z0-9-]{1,64}$/;
+const MAX_ERROR_REASON_CHARS = 1000;
 
 let _registryCache = null;
 function loadRegistry() {
@@ -33,8 +35,32 @@ function loadRegistry() {
   return _registryCache;
 }
 
+function cloneJson(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function safeReason(err) {
+  return String(err?.message || err || 'unknown_error')
+    .replace(/[\x00-\x1f\x7f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MAX_ERROR_REASON_CHARS);
+}
+
+function validBackendName(name) {
+  return BACKEND_NAME_RE.test(String(name || ''));
+}
+
+function validDetectCache(cached) {
+  if (!cached || typeof cached !== 'object' || !cached.backends || typeof cached.backends !== 'object') return false;
+  const t = new Date(cached.at).getTime();
+  if (!Number.isFinite(t)) return false;
+  const age = (Date.now() - t) / 1000;
+  return age >= 0 && age < DETECT_CACHE_TTL_SECONDS;
+}
+
 export function list() {
-  return loadRegistry().backends.slice();
+  return loadRegistry().backends.map(cloneJson);
 }
 
 export function info(name) {
@@ -44,7 +70,8 @@ export function info(name) {
 // Load adapter module on demand. Pure dynamic import; missing modules are
 // silently treated as "not available right now" rather than fatal.
 async function loadAdapter(name) {
-  const filename = name.replace(/[^a-z0-9-]/gi, '');
+  if (!validBackendName(name)) return null;
+  const filename = String(name);
   try {
     const mod = await import(`./backends/${filename}.js`);
     return mod.default || mod;
@@ -59,8 +86,7 @@ export async function detect({ force = false } = {}) {
   if (!force && fs.existsSync(DETECT_CACHE_PATH)) {
     try {
       const cached = JSON.parse(fs.readFileSync(DETECT_CACHE_PATH, 'utf-8'));
-      const age = (Date.now() - new Date(cached.at).getTime()) / 1000;
-      if (age < DETECT_CACHE_TTL_SECONDS) return cached;
+      if (validDetectCache(cached)) return cached;
     } catch { /* fall through */ }
   }
   const out = { at: new Date().toISOString(), backends: {} };
@@ -73,7 +99,7 @@ export async function detect({ force = false } = {}) {
     try {
       out.backends[b.name] = await adapter.detect();
     } catch (err) {
-      out.backends[b.name] = { available: false, reason: String(err.message || err) };
+      out.backends[b.name] = { available: false, reason: safeReason(err) };
     }
   }
   try {
@@ -128,7 +154,7 @@ function passesConstraints(b, det, constraints) {
   }
   if (constraints.budget_usd != null && b.cost_per_hour_usd != null && b.cost_per_hour_usd > constraints.budget_usd) return false;
   if (constraints.tier_max != null && b.tier > constraints.tier_max) return false;
-  if (constraints.exclude && constraints.exclude.includes(b.name)) return false;
+  if (Array.isArray(constraints.exclude) && constraints.exclude.includes(b.name)) return false;
   return true;
 }
 
@@ -212,7 +238,7 @@ export async function test(name) {
       const out = await adapter.test();
       return { ok: !!out.ok, latency_ms: Date.now() - t0, ...out };
     } catch (err) {
-      return { ok: false, reason: String(err.message || err) };
+      return { ok: false, reason: safeReason(err) };
     }
   }
   // Fallback: just detect.

@@ -41,7 +41,7 @@ test('W927 runtime-rs build scripts are wired into direct depth verification', (
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && npm run verify:compute-backends && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.match(ps, new RegExp(CONTRACT_VERSION));
   assert.match(sh, new RegExp(CONTRACT_VERSION));

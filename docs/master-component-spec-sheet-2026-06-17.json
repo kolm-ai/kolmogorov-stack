@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 95.9,
-    "frontier_product_score": 71.4,
+    "local_engineering_score": 96.2,
+    "frontier_product_score": 71.5,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 830,
     "atomic_deep_dive_complete": 830,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 783,
-    "direct_test_reference_pct": 94.3,
-    "components_without_direct_test_reference": 47,
+    "direct_test_referenced_components": 789,
+    "direct_test_reference_pct": 95.1,
+    "components_without_direct_test_reference": 41,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -14188,7 +14188,7 @@
         "risk_signals": [
           "environment_configuration_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
         "sha256": "44c2a15cf8d16d65c2edde49191d8415e25382497f0ed2a7b5e8278a26cc5fca"
       },
@@ -14198,7 +14198,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave932-compute-backends-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -14207,10 +14209,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/compute/backends/local-qnn.js",
@@ -14235,7 +14235,7 @@
         "risk_signals": [
           "environment_configuration_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
         "sha256": "296f2d3b67fbbb738418fb62dd18c55fa3c44e4fa2cbdd8fd60fa39c717f9502"
       },
@@ -14245,7 +14245,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave932-compute-backends-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -14254,10 +14256,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/compute/backends/local-rocm.js",
@@ -14370,25 +14370,26 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 4089,
-          "lines": 151,
-          "imports": 0,
-          "exports": 2,
+          "bytes": 8160,
+          "lines": 270,
+          "imports": 1,
+          "exports": 4,
           "routes": 0,
           "env_refs": 3,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 1,
-          "crypto_refs": 0,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "environment_configuration_boundary",
           "network_or_provider_boundary"
         ],
-        "priority_score": 2,
-        "priority_band": "normal",
-        "sha256": "814c5608f7bf6350b0b35c3e4cfcaf54f1cc9a24e6c5b3414ef6d39b54478e8a"
+        "priority_score": 5,
+        "priority_band": "medium",
+        "sha256": "957a0d8100f9e4ad9ffda65e5c7ade16c1efa77a6f37915cd4616ae6c893190a"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -14397,7 +14398,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave551-compute-training-contract.test.js"
+          "tests/wave551-compute-training-contract.test.js",
+          "tests/wave932-compute-backends-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
@@ -14629,7 +14631,7 @@
           "markers": 0
         },
         "risk_signals": [],
-        "priority_score": 1,
+        "priority_score": 0,
         "priority_band": "normal",
         "sha256": "18e8e57b8e7c5341374c5b9196f7abe28835d7bc56ea5cbbd05c1a08cf48d9fd"
       },
@@ -14639,7 +14641,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave932-compute-backends-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -14648,10 +14652,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/compute/backends/together.js",
@@ -14730,7 +14732,7 @@
           "markers": 0
         },
         "risk_signals": [],
-        "priority_score": 1,
+        "priority_score": 0,
         "priority_band": "normal",
         "sha256": "2bfe06f50036a4bf6c5019dd24eb50c38ce3c8207a1a387a0fdc83cc437e377c"
       },
@@ -14740,7 +14742,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave932-compute-backends-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -14749,10 +14753,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/compute/backends/vast.js",
@@ -14824,7 +14826,7 @@
           "markers": 0
         },
         "risk_signals": [],
-        "priority_score": 1,
+        "priority_score": 0,
         "priority_band": "normal",
         "sha256": "17a99271eb1ad0afd76c770373bbc1da6383ea9ffc1f254e10c7af3b96f79a2f"
       },
@@ -14834,7 +14836,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave932-compute-backends-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -14843,10 +14847,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/compute/estimator.js",
@@ -14910,8 +14912,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 8581,
-          "lines": 224,
+          "bytes": 9307,
+          "lines": 250,
           "imports": 4,
           "exports": 8,
           "routes": 0,
@@ -14923,9 +14925,9 @@
           "markers": 0
         },
         "risk_signals": [],
-        "priority_score": 1,
+        "priority_score": 0,
         "priority_band": "normal",
-        "sha256": "f59d5b279ead5dacb3ff38a949f06e17b19f3b8128af3b8b05df1af497efdd85"
+        "sha256": "07ac3e323f53039ad2fccdeea1749bf7b4d8de3821e4225886df41eeac77fa79"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -14933,7 +14935,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave932-compute-backends-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -14942,10 +14946,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/compute/registry.json",
@@ -38595,7 +38597,8 @@
         "direct_test_refs": [
           "tests/server.test.js",
           "tests/wave551-compute-training-contract.test.js",
-          "tests/wave888d-deploy-pipeline.test.js"
+          "tests/wave888d-deploy-pipeline.test.js",
+          "tests/wave932-compute-backends-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",

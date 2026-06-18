@@ -72,7 +72,7 @@ test('W790 browser extension popup is wired into direct depth verification', () 
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:vast-backend && npm run verify:browser-extension-popup && npm run verify:langchain-package-manifest && npm run verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:vast-backend && npm run verify:browser-extension-popup && npm run verify:langchain-package-manifest && npm run verify:llamaindex-package-manifest && npm run verify:runtime-rs-build-scripts && npm run verify:runtime-rs-wasm-example && npm run verify:distribution-manifests && npm run verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && npm run verify:compute-backends && node scripts\/audit-sota-readiness\.cjs/,
   );
   assert.equal(manifest.action.default_popup, 'popup.html');
   assert.match(source, /w790-browser-extension-popup-v1/);

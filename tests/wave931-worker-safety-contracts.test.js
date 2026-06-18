@@ -276,6 +276,6 @@ test('W931 depth verification runs worker safety contracts before SOTA audit', (
   );
   assert.match(
     pkg.scripts['verify:depth'],
-    /verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && node scripts\/audit-sota-readiness\.cjs/,
+    /verify:eval-safety-harnesses && npm run verify:worker-safety-contracts && npm run verify:compute-backends && node scripts\/audit-sota-readiness\.cjs/,
   );
 });
