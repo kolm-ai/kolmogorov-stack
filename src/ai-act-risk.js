@@ -50,6 +50,7 @@ export const AI_ACT_RISK_CATEGORIES = Object.freeze([
   'high',
   'unacceptable',
 ]);
+export const AI_ACT_RISK_TEXT_LIMIT_CHARS = 20000;
 
 // Catalog of task-category strings → risk_category. Sourced from Annex III
 // (high-risk task list) and Article 5 (unacceptable / prohibited practices).
@@ -190,6 +191,14 @@ const _CLASSIFY_PATTERNS = Object.freeze([
   { key: 'search_ranking', re: /\b(?:search[\s_-]+ranking|query[\s_-]+expansion|search[\s_-]+result)\b/i, weight: 0.25 },
 ]);
 
+function _hasOwn(obj, key) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function _safeText(text) {
+  return String(text || '').slice(0, AI_ACT_RISK_TEXT_LIMIT_CHARS);
+}
+
 // classifyTaskCategory(text) - returns { key, confidence, version } where
 // key is the catalog key (defaults to 'recommendation' on no match, since
 // 'minimal' is the broadest plausible class for free-text inputs). Confidence
@@ -200,10 +209,11 @@ export function classifyTaskCategory(text) {
   if (typeof text !== 'string' || !text.trim()) {
     return null;
   }
+  const safeText = _safeText(text);
   // Walk patterns, accumulate weight per key, then pick the top-scoring key.
   const tally = new Map();
   for (const { key, re, weight } of _CLASSIFY_PATTERNS) {
-    if (re.test(text)) {
+    if (re.test(safeText)) {
       tally.set(key, (tally.get(key) || 0) + weight);
     }
   }
@@ -270,7 +280,7 @@ export function scoreArtifactRisk(manifest) {
 
   // 1. Explicit task_category.
   const tc = typeof manifest.task_category === 'string' ? manifest.task_category.trim() : '';
-  if (tc && AI_ACT_TASK_CATEGORY_MAP[tc] != null) {
+  if (tc && _hasOwn(AI_ACT_TASK_CATEGORY_MAP, tc)) {
     task_category = tc;
     risk_category = AI_ACT_TASK_CATEGORY_MAP[tc];
     reasoning = `manifest.task_category='${tc}' maps to risk_category='${risk_category}' per Annex III + Article 5 catalog`;
@@ -279,7 +289,7 @@ export function scoreArtifactRisk(manifest) {
   // 2. Vertical fallback.
   if (risk_category == null) {
     const v = _normalizeVertical(manifest.vertical);
-    if (v != null && VERTICAL_TO_CATEGORY[v] != null) {
+    if (v != null && _hasOwn(VERTICAL_TO_CATEGORY, v)) {
       risk_category = VERTICAL_TO_CATEGORY[v];
       // Synthesize a task_category guess from the vertical when none is set.
       task_category = null;
@@ -292,7 +302,7 @@ export function scoreArtifactRisk(manifest) {
     const text = typeof manifest.intended_use === 'string' ? manifest.intended_use : null;
     if (text) {
       const cls = classifyTaskCategory(text);
-      if (cls && cls.key && AI_ACT_TASK_CATEGORY_MAP[cls.key] != null) {
+      if (cls && cls.key && _hasOwn(AI_ACT_TASK_CATEGORY_MAP, cls.key)) {
         task_category = cls.key;
         risk_category = AI_ACT_TASK_CATEGORY_MAP[cls.key];
         reasoning = `classifyTaskCategory(intended_use) -> task_category='${cls.key}' at confidence ${cls.confidence.toFixed(2)} -> risk_category='${risk_category}'`;

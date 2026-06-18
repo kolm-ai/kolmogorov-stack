@@ -13,7 +13,13 @@
 // Never throws on non-2xx - upstream errors flow through as-is so the
 // gateway can sign + capture them. Never throws on transport failure.
 
-import { hardenedFetch, buildOpenAICompatBody, DEFAULT_TIMEOUT_MS } from './_shared.js';
+import {
+  hardenedFetch,
+  buildOpenAICompatBody,
+  DEFAULT_TIMEOUT_MS,
+  normalizeProviderTarget,
+  validateProviderApiKey,
+} from './_shared.js';
 
 const TOGETHER_DEFAULT_BASE = 'https://api.together.xyz';
 
@@ -24,13 +30,22 @@ export async function forward({ url, body, upstreamKey, base, timeoutMs } = {}) 
       json: { error: { type: 'no_upstream_key', message: 'pass your Together key in x-upstream-api-key (TOGETHER_API_KEY)' } },
     };
   }
-  const target = url || `${base || TOGETHER_DEFAULT_BASE}/v1/chat/completions`;
+  const key = validateProviderApiKey(upstreamKey, 'together');
+  if (!key.ok) return key.envelope;
+  const target = normalizeProviderTarget({
+    url,
+    base,
+    defaultBase: TOGETHER_DEFAULT_BASE,
+    path: '/v1/chat/completions',
+    provider: 'together',
+  });
+  if (!target.ok) return target.envelope;
   const shapedBody = buildOpenAICompatBody(body);
   return hardenedFetch({
-    url: target,
+    url: target.url,
     method: 'POST',
     headers: {
-      'authorization': `Bearer ${upstreamKey}`,
+      'authorization': `Bearer ${key.key}`,
       'content-type': 'application/json',
     },
     body: JSON.stringify(shapedBody),

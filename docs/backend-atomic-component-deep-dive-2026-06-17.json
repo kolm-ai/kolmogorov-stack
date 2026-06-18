@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 830,
-    "test_referenced_components": 796,
-    "components_without_direct_test_reference": 34,
+    "test_referenced_components": 805,
+    "components_without_direct_test_reference": 25,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 420,
+      "cryptographic_or_proof_boundary": 422,
       "distribution_or_worker_surface": 170,
       "environment_configuration_boundary": 315,
       "execution_or_subprocess_boundary": 235,
@@ -7815,10 +7815,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "f967a7bb81b1c439d3cc467f4d12ce3a72d5005df847052dd6eea2436644859d",
+      "sha256": "cae30ec1a94cd3a464d66693578999d3a4ab431e491c43357653cba712cdfec0",
       "metrics": {
-        "bytes": 19563,
-        "lines": 561,
+        "bytes": 20430,
+        "lines": 591,
         "imports": 4,
         "exports": 6,
         "routes": 0,
@@ -7829,9 +7829,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave934-provider-compliance-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -7868,12 +7870,12 @@
       "surface": "core-backend",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "ba9644c4a1655573bbe73f21d8037fada1f6e4495429b527f8f272eddb5d7919",
+      "sha256": "fa8655d28a38ee649607905d1891ed10f7338578b44b1a52dcaab4d3b4fca33a",
       "metrics": {
-        "bytes": 14591,
-        "lines": 330,
+        "bytes": 14872,
+        "lines": 340,
         "imports": 0,
-        "exports": 5,
+        "exports": 6,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -7882,9 +7884,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave934-provider-compliance-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -10081,10 +10085,10 @@
       "surface": "core-backend",
       "domain": "identity_access",
       "language": "javascript",
-      "sha256": "266496de673c1a57cc83c7c6fab03349cf04c4bdceb4f37ff84fb5885a620007",
+      "sha256": "60c0ba97ec532df8b21fdaf06af23e15e642ceffb92d583a5539bc16f5bd7f00",
       "metrics": {
-        "bytes": 60872,
-        "lines": 1206,
+        "bytes": 61469,
+        "lines": 1226,
         "imports": 7,
         "exports": 37,
         "routes": 1,
@@ -10759,7 +10763,8 @@
         "tests/wave600-product-research-atlas.test.js",
         "tests/wave601-surface-readiness-smoke-contract.test.js",
         "tests/wave665-router-boundary-contract.test.js",
-        "tests/wave933-capture-data-contracts.test.js"
+        "tests/wave933-capture-data-contracts.test.js",
+        "tests/wave934-provider-compliance-contracts.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -32479,9 +32484,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave934-provider-compliance-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -33896,10 +33903,10 @@
       "surface": "core-backend",
       "domain": "billing_marketplace",
       "language": "javascript",
-      "sha256": "96eedae557d5bbcbe8a1d2fde5301dd72d90d5ed401684b021f762daf19c3e73",
+      "sha256": "5bbb5a600f4c386409242f0ea29efe4099e440dd786daeb01247c4cfc2c4c66f",
       "metrics": {
-        "bytes": 4416,
-        "lines": 53,
+        "bytes": 4705,
+        "lines": 61,
         "imports": 0,
         "exports": 6,
         "routes": 0,
@@ -33910,9 +33917,11 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave934-provider-compliance-contracts.test.js"
+      ],
       "risk_signals": [],
-      "priority_score": 1,
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -34668,23 +34677,27 @@
       "surface": "core-backend",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "ad2f1927c32f3fc3f897a16070e465fe184dcfd2dc7ba63d739af00395a21aae",
+      "sha256": "ff5c18e789215ec5bb5a8b8c79c665da86f4ae918a6091b148512e017f7d378f",
       "metrics": {
-        "bytes": 15121,
-        "lines": 376,
-        "imports": 0,
+        "bytes": 15472,
+        "lines": 390,
+        "imports": 1,
         "exports": 4,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 8,
         "markers": 0
       },
-      "test_refs": [],
-      "risk_signals": [],
-      "priority_score": 1,
+      "test_refs": [
+        "tests/wave934-provider-compliance-contracts.test.js"
+      ],
+      "risk_signals": [
+        "cryptographic_or_proof_boundary"
+      ],
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -34977,18 +34990,18 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "5c793fb73ad4933ab316920252481ef5ac35b40c1050712f57847f8f2e88d502",
+      "sha256": "101a96c1aff678a7fb446b45efa93893350dbb53999aa3155abe3355757aa73f",
       "metrics": {
-        "bytes": 18963,
-        "lines": 439,
-        "imports": 0,
-        "exports": 14,
+        "bytes": 22502,
+        "lines": 579,
+        "imports": 1,
+        "exports": 17,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 5,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
       "test_refs": [
@@ -34997,12 +35010,14 @@
         "tests/sota-teams.test.js",
         "tests/wave709-routing-events.test.js",
         "tests/wave710-active-learning-queue.test.js",
-        "tests/wave816-failure-to-capture-loop.test.js"
+        "tests/wave816-failure-to-capture-loop.test.js",
+        "tests/wave934-provider-compliance-contracts.test.js"
       ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 1,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -35039,10 +35054,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "57f8cfd61c6ab78cd43a3a9b2fde669abe04f5e4575798ceecadadb30e6050d6",
+      "sha256": "1c75d36691cdfa37b5cd8b709859af2ebdd5a2dc3541ff32feaed0d620e70cfe",
       "metrics": {
-        "bytes": 1894,
-        "lines": 47,
+        "bytes": 2183,
+        "lines": 62,
         "imports": 1,
         "exports": 3,
         "routes": 0,
@@ -35053,11 +35068,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave934-provider-compliance-contracts.test.js"
+      ],
       "risk_signals": [
         "network_or_provider_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -35153,10 +35170,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "8d843dc1053d740a34cf7ddbbff659358569da5646b9941036309d47f2a6a198",
+      "sha256": "0fe2a66d2143fb68a96f7df1690c937488e2f4dff7ab8c1fcb031aa47872dd77",
       "metrics": {
-        "bytes": 4514,
-        "lines": 109,
+        "bytes": 5017,
+        "lines": 128,
         "imports": 1,
         "exports": 3,
         "routes": 0,
@@ -35167,11 +35184,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave934-provider-compliance-contracts.test.js"
+      ],
       "risk_signals": [
         "network_or_provider_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -35208,10 +35227,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "ad32f361ce40a9cd87dfea0ebc670a27d10f13fad5b2bd805a6129247b109888",
+      "sha256": "3ca31b21e1a4f880a15ec1c61e817ae719af4fd2960dfc07b857d177f025051d",
       "metrics": {
-        "bytes": 1964,
-        "lines": 49,
+        "bytes": 2245,
+        "lines": 64,
         "imports": 1,
         "exports": 3,
         "routes": 0,
@@ -35222,11 +35241,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave934-provider-compliance-contracts.test.js"
+      ],
       "risk_signals": [
         "network_or_provider_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -35437,10 +35458,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "6ce68c4e73b29b80afaae6afb4ab7f5884bcdac9b364dd14f72dfc939e399113",
+      "sha256": "c729b62804f556eca62391fea35de1f88582b1a4e8e5fbedb124fc128fd34a10",
       "metrics": {
-        "bytes": 1670,
-        "lines": 44,
+        "bytes": 1959,
+        "lines": 59,
         "imports": 1,
         "exports": 3,
         "routes": 0,
@@ -35451,11 +35472,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave934-provider-compliance-contracts.test.js"
+      ],
       "risk_signals": [
         "network_or_provider_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

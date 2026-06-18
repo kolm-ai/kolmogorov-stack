@@ -18,7 +18,13 @@
 // the hardenedFetch envelope replaces transport throws with synthetic
 // status:0 envelopes.
 
-import { hardenedFetch, buildOpenAICompatBody, DEFAULT_TIMEOUT_MS } from './_shared.js';
+import {
+  hardenedFetch,
+  buildOpenAICompatBody,
+  DEFAULT_TIMEOUT_MS,
+  normalizeProviderTarget,
+  validateProviderApiKey,
+} from './_shared.js';
 
 const GROQ_DEFAULT_BASE = 'https://api.groq.com';
 
@@ -29,13 +35,22 @@ export async function forward({ url, body, upstreamKey, base, timeoutMs } = {}) 
       json: { error: { type: 'no_upstream_key', message: 'pass your Groq key in x-upstream-api-key (GROQ_API_KEY)' } },
     };
   }
-  const target = url || `${base || GROQ_DEFAULT_BASE}/openai/v1/chat/completions`;
+  const key = validateProviderApiKey(upstreamKey, 'groq');
+  if (!key.ok) return key.envelope;
+  const target = normalizeProviderTarget({
+    url,
+    base,
+    defaultBase: GROQ_DEFAULT_BASE,
+    path: '/openai/v1/chat/completions',
+    provider: 'groq',
+  });
+  if (!target.ok) return target.envelope;
   const shapedBody = buildOpenAICompatBody(body);
   return hardenedFetch({
-    url: target,
+    url: target.url,
     method: 'POST',
     headers: {
-      'authorization': `Bearer ${upstreamKey}`,
+      'authorization': `Bearer ${key.key}`,
       'content-type': 'application/json',
     },
     body: JSON.stringify(shapedBody),

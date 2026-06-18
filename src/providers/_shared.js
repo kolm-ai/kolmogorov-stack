@@ -49,12 +49,152 @@
 // layer and at the parse layer, and so 2xx-with-junk-body still flows
 // through as a soft failure that triggers fallback (5xx-class status).
 
+import crypto from 'node:crypto';
+
 export const DEFAULT_TIMEOUT_MS = 60000;
 export const MIN_TIMEOUT_MS = 1000;
 export const MAX_TIMEOUT_MS = 300000;
 export const MAX_RETRIES = 3;
 export const RETRY_BACKOFF_MS = [500, 1500, 4500]; // exponential
 export const RETRY_AFTER_CAP_MS = 30000;
+export const PROVIDER_TARGET_LIMITS = Object.freeze({
+  max_url_chars: 4096,
+  max_api_key_chars: 8192,
+});
+
+function _sha256(value) {
+  return crypto.createHash('sha256').update(String(value || '')).digest('hex');
+}
+
+function _providerGuardFailure(type, fields = {}) {
+  return {
+    status: 400,
+    json: {
+      ok: false,
+      error: {
+        type,
+        ...fields,
+      },
+    },
+    elapsed_us: 0,
+  };
+}
+
+export function validateProviderApiKey(upstreamKey, provider = 'provider') {
+  const key = String(upstreamKey || '');
+  if (!key) {
+    return {
+      ok: false,
+      envelope: _providerGuardFailure('no_upstream_key', {
+        provider,
+        message: `missing upstream key for ${provider}`,
+      }),
+    };
+  }
+  if (key.length > PROVIDER_TARGET_LIMITS.max_api_key_chars || /[\u0000-\u001F\u007F]/u.test(key)) {
+    return {
+      ok: false,
+      envelope: _providerGuardFailure('invalid_upstream_key', {
+        provider,
+        reason: 'unsafe_header_value',
+        key_sha256: _sha256(key),
+        max_api_key_chars: PROVIDER_TARGET_LIMITS.max_api_key_chars,
+      }),
+    };
+  }
+  return { ok: true, key };
+}
+
+function _appendPath(baseUrl, path) {
+  const suffix = String(path || '').startsWith('/') ? String(path || '') : `/${String(path || '')}`;
+  const prefix = baseUrl.pathname && baseUrl.pathname !== '/'
+    ? baseUrl.pathname.replace(/\/+$/g, '')
+    : '';
+  baseUrl.pathname = `${prefix}${suffix}`.replace(/\/{2,}/g, '/');
+  return baseUrl;
+}
+
+export function normalizeProviderTarget({ url, base, defaultBase, path, provider = 'provider' } = {}) {
+  let raw;
+  const explicitUrl = typeof url === 'string' && url.trim().length > 0;
+  if (explicitUrl) {
+    raw = url.trim();
+  } else {
+    const baseRaw = String(base || defaultBase || '').trim();
+    if (!baseRaw) {
+      return {
+        ok: false,
+        envelope: _providerGuardFailure('invalid_provider_url', {
+          provider,
+          reason: 'missing_base_url',
+        }),
+      };
+    }
+    raw = baseRaw;
+  }
+
+  if (raw.length > PROVIDER_TARGET_LIMITS.max_url_chars) {
+    return {
+      ok: false,
+      envelope: _providerGuardFailure('invalid_provider_url', {
+        provider,
+        reason: 'url_too_large',
+        url_sha256: _sha256(raw),
+        max_url_chars: PROVIDER_TARGET_LIMITS.max_url_chars,
+      }),
+    };
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch (_) {
+    return {
+      ok: false,
+      envelope: _providerGuardFailure('invalid_provider_url', {
+        provider,
+        reason: 'parse_failed',
+        url_sha256: _sha256(raw),
+      }),
+    };
+  }
+
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+    return {
+      ok: false,
+      envelope: _providerGuardFailure('invalid_provider_url', {
+        provider,
+        reason: 'unsupported_scheme',
+        url_sha256: _sha256(raw),
+      }),
+    };
+  }
+  if (parsed.username || parsed.password) {
+    return {
+      ok: false,
+      envelope: _providerGuardFailure('invalid_provider_url', {
+        provider,
+        reason: 'embedded_credentials',
+        url_sha256: _sha256(raw),
+      }),
+    };
+  }
+  if (!parsed.hostname) {
+    return {
+      ok: false,
+      envelope: _providerGuardFailure('invalid_provider_url', {
+        provider,
+        reason: 'missing_hostname',
+        url_sha256: _sha256(raw),
+      }),
+    };
+  }
+
+  parsed.search = '';
+  parsed.hash = '';
+  if (!explicitUrl && path) _appendPath(parsed, path);
+  return { ok: true, url: parsed.toString() };
+}
 
 // Clamp an inbound timeout_ms (from the dispatch handler) into the safe
 // [1000, 300000] window the shared fetcher honors. Anything else returns

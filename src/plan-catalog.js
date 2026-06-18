@@ -11,7 +11,13 @@
 // Keep this file dependency-free (plain data + tiny helpers) so both the server
 // and the build script can import it without pulling in the router.
 
-export const PLAN_CATALOG = {
+function deepFreeze(value) {
+  if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+  for (const child of Object.values(value)) deepFreeze(child);
+  return Object.freeze(value);
+}
+
+const _PLAN_CATALOG = {
   free:       { id: 'free',       label: 'Free',       price_usd_month: 0,    price_label: '$0/mo',    cents_monthly:      0, gateway_calls_hard:     50000, quota:     50000, seats: 1,  self_serve: true,  compile_credits_monthly: 1,         annual_savings_pct: 0,  billing_env: null,                            stripe_link_env: null,                            billing_url_env: null },
   indie:      { id: 'indie',      label: 'Indie',      price_usd_month: 29,   price_label: '$29/mo',   cents_monthly:   2900, gateway_calls_hard:    500000, quota:    500000, seats: 1,  self_serve: true,  compile_credits_monthly: 10,        annual_savings_pct: 17, billing_env: 'STRIPE_PAYMENT_LINK_INDIE',     stripe_link_env: 'STRIPE_PAYMENT_LINK_INDIE',     billing_url_env: 'STRIPE_PAYMENT_LINK_INDIE' },
   pro:        { id: 'pro',        label: 'Pro',        price_usd_month: 49,   price_label: '$49/mo',   cents_monthly:   4900, gateway_calls_hard:    500000, quota:    500000, seats: 1,  self_serve: true,  compile_credits_monthly: 50,        annual_savings_pct: 17, billing_env: 'STRIPE_PAYMENT_LINK_PRO',       stripe_link_env: 'STRIPE_PAYMENT_LINK_PRO',       billing_url_env: 'STRIPE_PAYMENT_LINK_PRO' },
@@ -20,17 +26,19 @@ export const PLAN_CATALOG = {
   enterprise: { id: 'enterprise', label: 'Enterprise', price_usd_month: null, price_label: 'Custom',   cents_monthly:   null, gateway_calls_hard: 250000000, quota: 250000000, seats: 25, self_serve: false, compile_credits_monthly: 'custom', annual_savings_pct: 0,  billing_env: null,                            stripe_link_env: 'STRIPE_PAYMENT_LINK_ENT',       billing_url_env: 'STRIPE_PAYMENT_LINK_ENT' },
 };
 
+export const PLAN_CATALOG = deepFreeze(_PLAN_CATALOG);
+
 // Wave4 stripe-fix: removed `business: 'enterprise'` alias that forced
 // self-serve buyers into the sales-led path. Business is now its own row.
-export const PLAN_ALIASES = {
+export const PLAN_ALIASES = Object.freeze({
   developer: 'free',
   starter: 'pro',
   team: 'teams',
   teams: 'teams',
-};
+});
 
 // Stable display order for every rendered pricing surface.
-export const PLAN_ORDER = ['free', 'indie', 'pro', 'teams', 'business', 'enterprise'];
+export const PLAN_ORDER = Object.freeze(['free', 'indie', 'pro', 'teams', 'business', 'enterprise']);
 
 export function canonicalPlanId(raw) {
   const id = String(raw || 'free').toLowerCase().replace(/[^a-z0-9_-]+/g, '').trim();

@@ -8,8 +8,8 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 96.5,
-    "frontier_product_score": 71.7,
+    "local_engineering_score": 96.9,
+    "frontier_product_score": 71.9,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 830,
     "atomic_deep_dive_complete": 830,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 796,
-    "direct_test_reference_pct": 95.9,
-    "components_without_direct_test_reference": 34,
+    "direct_test_referenced_components": 805,
+    "direct_test_reference_pct": 97,
+    "components_without_direct_test_reference": 25,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -8056,8 +8056,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 19563,
-          "lines": 561,
+          "bytes": 20430,
+          "lines": 591,
           "imports": 4,
           "exports": 6,
           "routes": 0,
@@ -8069,9 +8069,9 @@
           "markers": 0
         },
         "risk_signals": [],
-        "priority_score": 1,
+        "priority_score": 0,
         "priority_band": "normal",
-        "sha256": "f967a7bb81b1c439d3cc467f4d12ce3a72d5005df847052dd6eea2436644859d"
+        "sha256": "cae30ec1a94cd3a464d66693578999d3a4ab431e491c43357653cba712cdfec0"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8079,7 +8079,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave934-provider-compliance-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -8087,10 +8089,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/ai-act-risk.js",
@@ -8100,10 +8100,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 14591,
-          "lines": 330,
+          "bytes": 14872,
+          "lines": 340,
           "imports": 0,
-          "exports": 5,
+          "exports": 6,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -8113,9 +8113,9 @@
           "markers": 0
         },
         "risk_signals": [],
-        "priority_score": 1,
+        "priority_score": 0,
         "priority_band": "normal",
-        "sha256": "ba9644c4a1655573bbe73f21d8037fada1f6e4495429b527f8f272eddb5d7919"
+        "sha256": "fa8655d28a38ee649607905d1891ed10f7338578b44b1a52dcaab4d3b4fca33a"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8123,7 +8123,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave934-provider-compliance-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
         "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
@@ -8132,10 +8134,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/airgap-bakeoff.js",
@@ -10126,8 +10126,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 60872,
-          "lines": 1206,
+          "bytes": 61469,
+          "lines": 1226,
           "imports": 7,
           "exports": 37,
           "routes": 1,
@@ -10148,7 +10148,7 @@
         ],
         "priority_score": 12,
         "priority_band": "high",
-        "sha256": "266496de673c1a57cc83c7c6fab03349cf04c4bdceb4f37ff84fb5885a620007"
+        "sha256": "60c0ba97ec532df8b21fdaf06af23e15e642ceffb92d583a5539bc16f5bd7f00"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -10750,7 +10750,8 @@
           "tests/wave600-product-research-atlas.test.js",
           "tests/wave601-surface-readiness-smoke-contract.test.js",
           "tests/wave665-router-boundary-contract.test.js",
-          "tests/wave933-capture-data-contracts.test.js"
+          "tests/wave933-capture-data-contracts.test.js",
+          "tests/wave934-provider-compliance-contracts.test.js"
         ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
@@ -29361,7 +29362,7 @@
           "markers": 0
         },
         "risk_signals": [],
-        "priority_score": 1,
+        "priority_score": 0,
         "priority_band": "normal",
         "sha256": "cc99a9d9332893da3e2b565ce4b571226b4f40be66c5f0e2a801267afb1fe0fa"
       },
@@ -29371,7 +29372,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave934-provider-compliance-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -29379,10 +29382,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/opportunity-engine.js",
@@ -30526,8 +30527,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 4416,
-          "lines": 53,
+          "bytes": 4705,
+          "lines": 61,
           "imports": 0,
           "exports": 6,
           "routes": 0,
@@ -30539,9 +30540,9 @@
           "markers": 0
         },
         "risk_signals": [],
-        "priority_score": 1,
+        "priority_score": 0,
         "priority_band": "normal",
-        "sha256": "96eedae557d5bbcbe8a1d2fde5301dd72d90d5ed401684b021f762daf19c3e73"
+        "sha256": "5bbb5a600f4c386409242f0ea29efe4099e440dd786daeb01247c4cfc2c4c66f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -30549,7 +30550,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave934-provider-compliance-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof",
         "innovation_opportunity": "Bind Stripe event id, entitlement grant, artifact delivery, and invoice line into one signed fulfillment chain.",
@@ -30557,10 +30560,8 @@
           "node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep signed_entitlement_ledger_and_webhook_idempotency_proof current."
     },
     {
       "path": "src/platform-capabilities.js",
@@ -31201,22 +31202,24 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 15121,
-          "lines": 376,
-          "imports": 0,
+          "bytes": 15472,
+          "lines": 390,
+          "imports": 1,
           "exports": 4,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 8,
           "markers": 0
         },
-        "risk_signals": [],
-        "priority_score": 1,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary"
+        ],
+        "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "ad2f1927c32f3fc3f897a16070e465fe184dcfd2dc7ba63d739af00395a21aae"
+        "sha256": "ff5c18e789215ec5bb5a8b8c79c665da86f4ae918a6091b148512e017f7d378f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -31224,7 +31227,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave934-provider-compliance-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
         "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
@@ -31233,10 +31238,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/provenance.js",
@@ -31457,24 +31460,25 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 18963,
-          "lines": 439,
-          "imports": 0,
-          "exports": 14,
+          "bytes": 22502,
+          "lines": 579,
+          "imports": 1,
+          "exports": 17,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 5,
-          "crypto_refs": 0,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "network_or_provider_boundary"
         ],
-        "priority_score": 1,
-        "priority_band": "normal",
-        "sha256": "5c793fb73ad4933ab316920252481ef5ac35b40c1050712f57847f8f2e88d502"
+        "priority_score": 4,
+        "priority_band": "medium",
+        "sha256": "101a96c1aff678a7fb446b45efa93893350dbb53999aa3155abe3355757aa73f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -31488,7 +31492,8 @@
           "tests/sota-teams.test.js",
           "tests/wave709-routing-events.test.js",
           "tests/wave710-active-learning-queue.test.js",
-          "tests/wave816-failure-to-capture-loop.test.js"
+          "tests/wave816-failure-to-capture-loop.test.js",
+          "tests/wave934-provider-compliance-contracts.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -31508,8 +31513,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1894,
-          "lines": 47,
+          "bytes": 2183,
+          "lines": 62,
           "imports": 1,
           "exports": 3,
           "routes": 0,
@@ -31523,9 +31528,9 @@
         "risk_signals": [
           "network_or_provider_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "57f8cfd61c6ab78cd43a3a9b2fde669abe04f5e4575798ceecadadb30e6050d6"
+        "sha256": "1c75d36691cdfa37b5cd8b709859af2ebdd5a2dc3541ff32feaed0d620e70cfe"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -31533,7 +31538,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave934-provider-compliance-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -31541,10 +31548,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/providers/fireworks.js",
@@ -31602,8 +31607,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 4514,
-          "lines": 109,
+          "bytes": 5017,
+          "lines": 128,
           "imports": 1,
           "exports": 3,
           "routes": 0,
@@ -31617,9 +31622,9 @@
         "risk_signals": [
           "network_or_provider_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "8d843dc1053d740a34cf7ddbbff659358569da5646b9941036309d47f2a6a198"
+        "sha256": "0fe2a66d2143fb68a96f7df1690c937488e2f4dff7ab8c1fcb031aa47872dd77"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -31627,7 +31632,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave934-provider-compliance-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -31635,10 +31642,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/providers/groq.js",
@@ -31648,8 +31653,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1964,
-          "lines": 49,
+          "bytes": 2245,
+          "lines": 64,
           "imports": 1,
           "exports": 3,
           "routes": 0,
@@ -31663,9 +31668,9 @@
         "risk_signals": [
           "network_or_provider_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "ad32f361ce40a9cd87dfea0ebc670a27d10f13fad5b2bd805a6129247b109888"
+        "sha256": "3ca31b21e1a4f880a15ec1c61e817ae719af4fd2960dfc07b857d177f025051d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -31673,7 +31678,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave934-provider-compliance-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -31681,10 +31688,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/providers/local-kolm.js",
@@ -31835,8 +31840,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1670,
-          "lines": 44,
+          "bytes": 1959,
+          "lines": 59,
           "imports": 1,
           "exports": 3,
           "routes": 0,
@@ -31850,9 +31855,9 @@
         "risk_signals": [
           "network_or_provider_boundary"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "6ce68c4e73b29b80afaae6afb4ab7f5884bcdac9b364dd14f72dfc939e399113"
+        "sha256": "c729b62804f556eca62391fea35de1f88582b1a4e8e5fbedb124fc128fd34a10"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -31860,7 +31865,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave934-provider-compliance-contracts.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -31868,10 +31875,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/proxy.js",

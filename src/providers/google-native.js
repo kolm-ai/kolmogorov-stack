@@ -36,6 +36,8 @@ import {
   buildGeminiNativeBody,
   extractGeminiText,
   DEFAULT_TIMEOUT_MS,
+  normalizeProviderTarget,
+  validateProviderApiKey,
 } from './_shared.js';
 
 const GEMINI_DEFAULT_BASE = 'https://generativelanguage.googleapis.com';
@@ -47,6 +49,8 @@ export async function forward({ url, body, upstreamKey, base, timeoutMs, native 
       json: { error: { type: 'no_upstream_key', message: 'pass your Gemini key in x-upstream-api-key (GEMINI_API_KEY)' } },
     };
   }
+  const key = validateProviderApiKey(upstreamKey, 'google');
+  if (!key.ok) return key.envelope;
   const baseUrl = base || GEMINI_DEFAULT_BASE;
   // Detect native vs OpenAI-compat based on either an explicit flag or the
   // URL path. The native generateContent endpoint has the model in the path
@@ -56,13 +60,21 @@ export async function forward({ url, body, upstreamKey, base, timeoutMs, native 
     || (typeof url === 'string' && /:generateContent/.test(url));
 
   if (isNative) {
-    const target = url || `${baseUrl}/v1beta/models/${encodeURIComponent(String(body && body.model || 'gemini-2.5-flash'))}:generateContent`;
+    const model = encodeURIComponent(String(body && body.model || 'gemini-2.5-flash'));
+    const target = normalizeProviderTarget({
+      url,
+      base: baseUrl,
+      defaultBase: GEMINI_DEFAULT_BASE,
+      path: `/v1beta/models/${model}:generateContent`,
+      provider: 'google',
+    });
+    if (!target.ok) return target.envelope;
     const shapedBody = buildGeminiNativeBody(body);
     const res = await hardenedFetch({
-      url: target,
+      url: target.url,
       method: 'POST',
       headers: {
-        'authorization': `Bearer ${upstreamKey}`,
+        'authorization': `Bearer ${key.key}`,
         'content-type': 'application/json',
       },
       body: JSON.stringify(shapedBody),
@@ -89,13 +101,20 @@ export async function forward({ url, body, upstreamKey, base, timeoutMs, native 
   }
 
   // OpenAI-compat alias.
-  const target = url || `${baseUrl}/v1beta/openai/chat/completions`;
+  const target = normalizeProviderTarget({
+    url,
+    base: baseUrl,
+    defaultBase: GEMINI_DEFAULT_BASE,
+    path: '/v1beta/openai/chat/completions',
+    provider: 'google',
+  });
+  if (!target.ok) return target.envelope;
   const shapedBody = buildOpenAICompatBody(body);
   return hardenedFetch({
-    url: target,
+    url: target.url,
     method: 'POST',
     headers: {
-      'authorization': `Bearer ${upstreamKey}`,
+      'authorization': `Bearer ${key.key}`,
       'content-type': 'application/json',
     },
     body: JSON.stringify(shapedBody),

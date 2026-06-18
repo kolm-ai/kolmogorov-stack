@@ -29,6 +29,7 @@
 import {
   scoreArtifactRisk,
   AI_ACT_RISK_VERSION,
+  AI_ACT_RISK_CATEGORIES,
 } from './ai-act-risk.js';
 
 export const AI_ACT_EXPORT_VERSION = 'w766-v1';
@@ -53,6 +54,25 @@ const NOT_YET_DISCLOSED = 'not_yet_disclosed';
 
 function _nowIso() {
   return new Date().toISOString();
+}
+
+function _boundedString(value, max = 160) {
+  return String(value == null ? '' : value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .trim()
+    .slice(0, max);
+}
+
+function _safeReportKey(value) {
+  const raw = _boundedString(value || '(default)', 160) || '(default)';
+  if (raw === '__proto__' || raw === 'constructor' || raw === 'prototype') {
+    return `${raw}_namespace`;
+  }
+  return raw;
+}
+
+function _errorDetail(e) {
+  return _boundedString(e && e.message ? e.message : e, 240);
 }
 
 // _disclosedOr(value, fallback) - return the manifest value if it's a non-empty
@@ -97,15 +117,24 @@ export function buildTechnicalDocumentation(manifest, opts = {}) {
   // Derive risk assessment (or accept caller override).
   let risk_assessment;
   if (opts && opts.risk_category) {
+    const riskCategory = String(opts.risk_category || '').trim().toLowerCase();
+    if (!AI_ACT_RISK_CATEGORIES.includes(riskCategory)) {
+      return {
+        ok: false,
+        error: 'invalid_risk_category',
+        hint: `risk_category must be one of ${AI_ACT_RISK_CATEGORIES.join(', ')}`,
+        version: AI_ACT_EXPORT_VERSION,
+      };
+    }
     risk_assessment = {
       ok: true,
-      risk_category: opts.risk_category,
+      risk_category: riskCategory,
       task_category: typeof manifest.task_category === 'string' ? manifest.task_category : null,
       reasoning: 'risk_category supplied by caller (external assessor override)',
       version: AI_ACT_RISK_VERSION,
       transparency_requirements: [],
-      human_oversight_required: opts.risk_category === 'high',
-      conformity_assessment_required: opts.risk_category === 'high',
+      human_oversight_required: riskCategory === 'high',
+      conformity_assessment_required: riskCategory === 'high',
     };
   } else {
     risk_assessment = scoreArtifactRisk(manifest);
@@ -275,7 +304,7 @@ export async function buildGovernanceReport(opts = {}) {
         ok: false,
         error: 'event_store_unavailable',
         hint: 'failed to import event-store; tests should inject opts.eventStore',
-        detail: String(e && e.message || e),
+        detail: _errorDetail(e),
         version: AI_ACT_EXPORT_VERSION,
       };
     }
@@ -303,11 +332,12 @@ export async function buildGovernanceReport(opts = {}) {
     return {
       ok: false,
       error: 'event_store_query_failed',
-      detail: String(e && e.message || e),
+      detail: _errorDetail(e),
       version: AI_ACT_EXPORT_VERSION,
     };
   }
   if (!Array.isArray(rows)) rows = [];
+  rows = rows.slice(0, 10000);
 
   // Collect manifest_id set (if caller restricted us to specific manifests).
   const manifestSet = Array.isArray(manifest_ids) && manifest_ids.length > 0
@@ -322,7 +352,7 @@ export async function buildGovernanceReport(opts = {}) {
   let n_confidence = 0;
   let oldest_at = null;
   let newest_at = null;
-  const by_namespace = {};
+  const by_namespace = Object.create(null);
 
   for (const row of rows) {
     // Defense-in-depth - re-check tenant_id on every row.
@@ -338,7 +368,7 @@ export async function buildGovernanceReport(opts = {}) {
     }
     count_total += 1;
     // Bucket by namespace.
-    const ns = row.namespace || '(default)';
+    const ns = _safeReportKey(row.namespace || '(default)');
     by_namespace[ns] = (by_namespace[ns] || 0) + 1;
     // Track timestamp range.
     const t = row.created_at;
@@ -473,7 +503,7 @@ export async function humanInLoopConfig(opts = {}) {
       return {
         ok: false,
         error: 'event_store_unavailable',
-        detail: String(e && e.message || e),
+        detail: _errorDetail(e),
         version: AI_ACT_EXPORT_VERSION,
       };
     }
@@ -504,7 +534,7 @@ export async function humanInLoopConfig(opts = {}) {
     return {
       ok: false,
       error: 'append_event_failed',
-      detail: String(e && e.message || e),
+      detail: _errorDetail(e),
       version: AI_ACT_EXPORT_VERSION,
     };
   }

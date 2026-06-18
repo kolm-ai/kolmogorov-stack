@@ -27,6 +27,8 @@
 //   - redactSystemPrompt({system_prompt, strategy, allow_list})
 //   - prepareForDistillation({captures, strategy})
 
+import crypto from 'node:crypto';
+
 export const PROMPT_REDACTOR_VERSION = 'w765-v1';
 
 // The four redaction strategies the W765 spec pins. Frozen so tests can
@@ -159,6 +161,18 @@ const BEHAVIOR_CLASSES = Object.freeze({
 // Helpers
 // ---------------------------------------------------------------------------
 
+function _tokenDigest(value) {
+  return crypto.createHash('sha256').update(String(value || '')).digest('hex');
+}
+
+function _removedToken(kind, value) {
+  return {
+    kind: String(kind || 'unknown').slice(0, 80),
+    sha256: _tokenDigest(value),
+    length: String(value || '').length,
+  };
+}
+
 function _normalizeAllowList(allow_list) {
   if (!Array.isArray(allow_list)) return [];
   return allow_list
@@ -167,7 +181,7 @@ function _normalizeAllowList(allow_list) {
 }
 
 // Walk the placeholder pattern table. Returns
-// {redacted, removed_tokens:[{kind, value}]}.
+// {redacted, removed_tokens:[{kind, sha256, length}]}.
 function _applyPlaceholderStrategy(text, allow_list) {
   const allow = _normalizeAllowList(allow_list);
   const removed_tokens = [];
@@ -177,7 +191,7 @@ function _applyPlaceholderStrategy(text, allow_list) {
       // Honor allow_list - caller can pin specific concrete strings
       // (e.g. a public docs URL) that should NOT be redacted.
       if (allow.includes(match)) return match;
-      removed_tokens.push({ kind, value: match });
+      removed_tokens.push(_removedToken(kind, match));
       return '[PLACEHOLDER:' + kind + ']';
     });
   }
@@ -185,13 +199,13 @@ function _applyPlaceholderStrategy(text, allow_list) {
 }
 
 // Walk literal-constraint pattern table. Returns
-// {redacted, removed_tokens:[{kind, value}]}.
+// {redacted, removed_tokens:[{kind, sha256, length}]}.
 function _applyRemoveLiteralConstraintsStrategy(text) {
   const removed_tokens = [];
   let redacted = text;
   for (const { kind, re } of LITERAL_CONSTRAINT_PATTERNS) {
     redacted = redacted.replace(re, (match) => {
-      removed_tokens.push({ kind, value: match });
+      removed_tokens.push(_removedToken(kind, match));
       return '[REDACTED:' + kind + ']';
     });
   }
@@ -200,7 +214,7 @@ function _applyRemoveLiteralConstraintsStrategy(text) {
 
 // Walk sentences, find imperative verbs, emit behavior summary.
 // Returns ONLY a behavior description - NEVER literal content from
-// the input. removed_tokens lists the verbs we matched (for audit).
+// the input. removed_tokens carries only hashes of matched verbs.
 function _applyExtractBehaviorOnlyStrategy(text) {
   const removed_tokens = [];
   const sentences = String(text || '').split(/[.!?\n]/).map((s) => s.trim()).filter(Boolean);
@@ -211,7 +225,7 @@ function _applyExtractBehaviorOnlyStrategy(text) {
       if (IMPERATIVE_VERBS.includes(tok)) {
         const cls = BEHAVIOR_CLASSES[tok] || tok;
         behaviors.add(cls);
-        removed_tokens.push({ kind: 'behavior_verb', value: tok });
+        removed_tokens.push(_removedToken('behavior_verb', tok));
       }
     }
   }

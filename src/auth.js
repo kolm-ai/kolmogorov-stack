@@ -40,13 +40,30 @@ function _loadOfacDenylist() {
     const raw = fs.readFileSync(path.join(here, 'ofac-denylist.json'), 'utf8');
     const cfg = JSON.parse(raw);
     const countries = Array.isArray(cfg.countries)
-      ? cfg.countries.map(c => String(c || '').trim().toUpperCase()).filter(c => c.length === 2)
+      ? Array.from(new Set(cfg.countries
+        .map(c => String(c || '').trim().toUpperCase())
+        .filter(c => /^[A-Z]{2}$/.test(c))))
       : [];
     if (!countries.length) throw new Error('ofac-denylist.json has no valid countries');
+    let source_url = typeof cfg.source_url === 'string' ? cfg.source_url : null;
+    if (source_url) {
+      try {
+        const u = new URL(source_url);
+        if (u.protocol !== 'https:' && u.protocol !== 'http:') source_url = null;
+        else if (u.username || u.password) source_url = null;
+        else {
+          u.search = '';
+          u.hash = '';
+          source_url = u.toString();
+        }
+      } catch (_) {
+        source_url = null;
+      }
+    }
     return {
       countries,
       version_date: typeof cfg.version_date === 'string' ? cfg.version_date : null,
-      source_url: typeof cfg.source_url === 'string' ? cfg.source_url : null,
+      source_url,
       review_cadence_days: Number.isFinite(cfg.review_cadence_days) ? cfg.review_cadence_days : 90,
       loaded: true,
       error: null,
@@ -91,7 +108,10 @@ export function ofacDenylistStaleness(nowMs = Date.now()) {
       reason = `ofac-denylist.json version_date is not a valid date: ${_OFAC.version_date}`;
     } else {
       ageDays = Math.floor((nowMs - vd) / (24 * 3600 * 1000));
-      if (ageDays > cadence) {
+      if (ageDays < -1) {
+        stale = true;
+        reason = `OFAC denylist version_date is in the future (${_OFAC.version_date})`;
+      } else if (ageDays > cadence) {
         stale = true;
         reason = `OFAC denylist last reviewed ${ageDays}d ago (> ${cadence}d cadence) - review against current sanctions programs`;
       }
