@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 93.2,
+    "local_engineering_score": 93.3,
     "frontier_product_score": 69.9,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 719,
-    "direct_test_reference_pct": 86.7,
-    "components_without_direct_test_reference": 110,
+    "direct_test_referenced_components": 720,
+    "direct_test_reference_pct": 86.9,
+    "components_without_direct_test_reference": 109,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -19803,24 +19803,24 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 4554,
-          "lines": 113,
-          "imports": 0,
-          "exports": 5,
+          "bytes": 9400,
+          "lines": 272,
+          "imports": 1,
+          "exports": 12,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 2,
+          "crypto_refs": 7,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "a8b9e1ce455d27e37abeabffe5741e34657dc714d28f8bbbe024fa3f2c335f17"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "7242b6630621c849fc888d3eac26cf7d4781ee511fa7ed5da24fa51e46f708a5"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -19828,7 +19828,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave698-dp-aggregation-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules small, pure, and linked to at least one owner test or product proof.",
@@ -19836,10 +19838,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/dp-training.js",

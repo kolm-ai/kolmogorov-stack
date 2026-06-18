@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 719,
-    "components_without_direct_test_reference": 110,
+    "test_referenced_components": 720,
+    "components_without_direct_test_reference": 109,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -21152,25 +21152,27 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "a8b9e1ce455d27e37abeabffe5741e34657dc714d28f8bbbe024fa3f2c335f17",
+      "sha256": "7242b6630621c849fc888d3eac26cf7d4781ee511fa7ed5da24fa51e46f708a5",
       "metrics": {
-        "bytes": 4554,
-        "lines": 113,
-        "imports": 0,
-        "exports": 5,
+        "bytes": 9400,
+        "lines": 272,
+        "imports": 1,
+        "exports": 12,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 2,
+        "crypto_refs": 7,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave698-dp-aggregation-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
