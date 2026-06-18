@@ -20621,6 +20621,9 @@ res.json({
       if (e && e.code === 'LISTING_INVALID') {
         return res.status(400).json({ error: 'listing_invalid', detail: String(e.message || e) });
       }
+      if (e && e.code === 'LISTING_CONFLICT') {
+        return res.status(409).json({ error: 'listing_conflict', detail: String(e.message || e) });
+      }
       return res.status(500).json({ error: 'marketplace_listings_error', detail: String(e.message || e) });
     }
   });

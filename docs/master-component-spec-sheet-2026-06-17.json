@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 707,
-    "direct_test_reference_pct": 85.3,
-    "components_without_direct_test_reference": 122,
+    "direct_test_referenced_components": 708,
+    "direct_test_reference_pct": 85.4,
+    "components_without_direct_test_reference": 121,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -21001,7 +21001,7 @@
           "tests/wave411-vendor-normalization-and-prodgate.test.js",
           "tests/wave423-media-capture-tenant.test.js",
           "tests/wave426-import-seeds-tenant.test.js",
-          "tests/wave720-self-improvement.test.js"
+          "tests/wave688-marketplace-store-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "tenant_scoped_cas_storage_retention_and_migration_simulation",
@@ -26778,25 +26778,26 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 8407,
-          "lines": 191,
-          "imports": 1,
-          "exports": 8,
+          "bytes": 17246,
+          "lines": 452,
+          "imports": 2,
+          "exports": 11,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "money_or_entitlement_path",
           "stateful_storage_boundary"
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "8d0100df9abac1db55270ec1c29f7f810d7d6982e04944eef53ff283c84e7e86"
+        "sha256": "01fefb8a3a9d0522c9661d02d3b7865d33904fde493e1cb415addcd254a92f13"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -26804,7 +26805,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave688-marketplace-store-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "signed_entitlement_ledger_and_webhook_idempotency_proof",
         "innovation_opportunity": "Bind Stripe event id, entitlement grant, artifact delivery, and invoice line into one signed fulfillment chain.",
@@ -26812,10 +26815,8 @@
           "node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep signed_entitlement_ledger_and_webhook_idempotency_proof current."
     },
     {
       "path": "src/marketplace-w825.js",
@@ -33586,8 +33587,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1467481,
-          "lines": 30777,
+          "bytes": 1467637,
+          "lines": 30780,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -33609,7 +33610,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "239e3ae374d9ed703c6752d4b49c612add710ef923b40800969a38c8838aab50"
+        "sha256": "1a6b625f6e9657aa29181b03f5fc5e5dbbd7fb897f1f7cede338fcdef3ee005b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

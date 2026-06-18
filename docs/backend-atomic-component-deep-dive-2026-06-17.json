@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 707,
-    "components_without_direct_test_reference": 122,
+    "test_referenced_components": 708,
+    "components_without_direct_test_reference": 121,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 402,
+      "cryptographic_or_proof_boundary": 403,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 313,
       "execution_or_subprocess_boundary": 233,
@@ -22551,7 +22551,7 @@
         "tests/wave411-vendor-normalization-and-prodgate.test.js",
         "tests/wave423-media-capture-tenant.test.js",
         "tests/wave426-import-seeds-tenant.test.js",
-        "tests/wave720-self-improvement.test.js"
+        "tests/wave688-marketplace-store-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -29401,22 +29401,25 @@
       "surface": "core-backend",
       "domain": "billing_marketplace",
       "language": "javascript",
-      "sha256": "8d0100df9abac1db55270ec1c29f7f810d7d6982e04944eef53ff283c84e7e86",
+      "sha256": "01fefb8a3a9d0522c9661d02d3b7865d33904fde493e1cb415addcd254a92f13",
       "metrics": {
-        "bytes": 8407,
-        "lines": 191,
-        "imports": 1,
-        "exports": 8,
+        "bytes": 17246,
+        "lines": 452,
+        "imports": 2,
+        "exports": 11,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave688-marketplace-store-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "money_or_entitlement_path",
         "stateful_storage_boundary"
       ],
@@ -37449,10 +37452,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "239e3ae374d9ed703c6752d4b49c612add710ef923b40800969a38c8838aab50",
+      "sha256": "1a6b625f6e9657aa29181b03f5fc5e5dbbd7fb897f1f7cede338fcdef3ee005b",
       "metrics": {
-        "bytes": 1467481,
-        "lines": 30777,
+        "bytes": 1467637,
+        "lines": 30780,
         "imports": 535,
         "exports": 8,
         "routes": 810,
