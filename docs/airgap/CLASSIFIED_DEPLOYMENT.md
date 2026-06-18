@@ -92,12 +92,18 @@ The W831 wave wires three new code paths an operator uses daily:
 
 ```
 # Offline distillation. The first call enforces no KOLM_TEACHER_API_KEY,
-# absolute-local paths, and a 50ms dial-failure probe to https://example.com.
+# absolute-local paths, a 50ms dial-failure probe to https://example.com,
+# and mandatory training-corpus redaction before it writes a queued spec.
 kolm airgap distill run \
   --user-data /var/lib/kolm/data/train.jsonl \
   --teacher /var/lib/kolm/teachers/llama-3-70b-instruct \
   --student /var/lib/kolm/students/qwen-3b \
   --out /var/lib/kolm/artifacts/distilled-2026Q2.kolm
+
+# Consume the queued spec through the Python KD worker under offline env.
+# This re-checks no-egress and redaction evidence, then writes completed/failed
+# status back to ~/.kolm/airgap-distill-runs/<run_id>.json.
+kolm airgap distill process --run-id airgap_<id>
 
 # Pack a .kolm into a sneakernet bundle with an Ed25519 detached signature.
 kolm sneakernet pack \

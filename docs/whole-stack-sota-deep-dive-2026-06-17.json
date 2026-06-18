@@ -83,12 +83,12 @@
   ],
   "summary": {
     "category_count": 16,
-    "categories_with_critical_frontier_work_open": 10,
+    "categories_with_critical_frontier_work_open": 9,
     "categories_with_major_frontier_work_open": 13,
     "total_atomic_component_links": 3535,
     "status_counts": {
-      "sota_review_complete_critical_frontier_work_open": 10,
-      "sota_review_complete_major_frontier_work_open": 5,
+      "sota_review_complete_critical_frontier_work_open": 9,
+      "sota_review_complete_major_frontier_work_open": 6,
       "sota_review_complete_external_or_release_gate_open": 1
     },
     "readiness_open_requirements": [
@@ -201,10 +201,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 152
+        "line": 153
       },
       "local_sota_review": {
-        "line": 152,
+        "line": 153,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -268,6 +268,25 @@
           }
         ],
         "sampled": [
+          {
+            "path": "src/airgap-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave656-airgap-routes-contract.test.js",
+              "tests/wave831-airgap.test.js",
+              "tests/wave953-airgap-distill-worker.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "workers/quantize/scripts/quantize.py",
             "domain": "training_model_optimization",
@@ -390,23 +409,6 @@
               "tests/wave921-ingest-stage.test.js"
             ],
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
-          },
-          {
-            "path": "src/airgap-distill.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave656-airgap-routes-contract.test.js",
-              "tests/wave831-airgap.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/model-weights-puller.js",
@@ -641,10 +643,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 206
+        "line": 207
       },
       "local_sota_review": {
-        "line": 206,
+        "line": 207,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -716,6 +718,25 @@
           }
         ],
         "sampled": [
+          {
+            "path": "src/airgap-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave656-airgap-routes-contract.test.js",
+              "tests/wave831-airgap.test.js",
+              "tests/wave953-airgap-distill-worker.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/distill-pipeline.js",
             "domain": "training_model_optimization",
@@ -854,23 +875,6 @@
               "tests/wave381-pipeline.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
-          },
-          {
-            "path": "src/airgap-distill.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave656-airgap-routes-contract.test.js",
-              "tests/wave831-airgap.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/compile.js",
@@ -1085,10 +1089,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 253
+        "line": 254
       },
       "local_sota_review": {
-        "line": 253,
+        "line": 254,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1151,6 +1155,25 @@
           }
         ],
         "sampled": [
+          {
+            "path": "src/airgap-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave656-airgap-routes-contract.test.js",
+              "tests/wave831-airgap.test.js",
+              "tests/wave953-airgap-distill-worker.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/distill-pipeline.js",
             "domain": "training_model_optimization",
@@ -1289,23 +1312,6 @@
               "tests/wave381-pipeline.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
-          },
-          {
-            "path": "src/airgap-distill.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave656-airgap-routes-contract.test.js",
-              "tests/wave831-airgap.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/compile.js",
@@ -1539,10 +1545,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 298
+        "line": 299
       },
       "local_sota_review": {
-        "line": 298,
+        "line": 299,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -1989,10 +1995,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 340
+        "line": 341
       },
       "local_sota_review": {
-        "line": 340,
+        "line": 341,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -2050,6 +2056,25 @@
           }
         ],
         "sampled": [
+          {
+            "path": "src/airgap-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave656-airgap-routes-contract.test.js",
+              "tests/wave831-airgap.test.js",
+              "tests/wave953-airgap-distill-worker.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "workers/quantize/scripts/quantize.py",
             "domain": "training_model_optimization",
@@ -2135,23 +2160,6 @@
             "test_refs": [
               "tests/finalized-c8-durable-compute-scheduler.test.js",
               "tests/wave644-cloud-distill-bridge.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "src/airgap-distill.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave656-airgap-routes-contract.test.js",
-              "tests/wave831-airgap.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -2406,10 +2414,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 374
+        "line": 375
       },
       "local_sota_review": {
-        "line": 374,
+        "line": 375,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2468,6 +2476,25 @@
           }
         ],
         "sampled": [
+          {
+            "path": "src/airgap-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave656-airgap-routes-contract.test.js",
+              "tests/wave831-airgap.test.js",
+              "tests/wave953-airgap-distill-worker.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "workers/quantize/scripts/quantize.py",
             "domain": "training_model_optimization",
@@ -2570,23 +2597,6 @@
             "test_refs": [
               "tests/finalized-c8-durable-compute-scheduler.test.js",
               "tests/wave644-cloud-distill-bridge.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-          },
-          {
-            "path": "src/airgap-distill.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave656-airgap-routes-contract.test.js",
-              "tests/wave831-airgap.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -2877,10 +2887,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 415
+        "line": 416
       },
       "local_sota_review": {
-        "line": 415,
+        "line": 416,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -2937,6 +2947,25 @@
           }
         ],
         "sampled": [
+          {
+            "path": "src/airgap-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave656-airgap-routes-contract.test.js",
+              "tests/wave831-airgap.test.js",
+              "tests/wave953-airgap-distill-worker.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "workers/quantize/scripts/quantize.py",
             "domain": "training_model_optimization",
@@ -3059,23 +3088,6 @@
               "tests/wave921-ingest-stage.test.js"
             ],
             "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
-          },
-          {
-            "path": "src/airgap-distill.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave656-airgap-routes-contract.test.js",
-              "tests/wave831-airgap.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/model-weights-puller.js",
@@ -3334,10 +3346,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 458
+        "line": 459
       },
       "local_sota_review": {
-        "line": 458,
+        "line": 459,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3398,6 +3410,25 @@
           }
         ],
         "sampled": [
+          {
+            "path": "src/airgap-distill.js",
+            "domain": "training_model_optimization",
+            "priority_score": 10,
+            "risk_signals": [
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
+              "network_or_provider_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave656-airgap-routes-contract.test.js",
+              "tests/wave831-airgap.test.js",
+              "tests/wave953-airgap-distill-worker.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "workers/quantize/scripts/quantize.py",
             "domain": "training_model_optimization",
@@ -3555,23 +3586,6 @@
               "tests/wave381-pipeline.test.js"
             ],
             "improvement_track": "split_or_add_generated_contract_map_before_growth"
-          },
-          {
-            "path": "src/airgap-distill.js",
-            "domain": "training_model_optimization",
-            "priority_score": 7,
-            "risk_signals": [
-              "cryptographic_or_proof_boundary",
-              "environment_configuration_boundary",
-              "execution_or_subprocess_boundary",
-              "network_or_provider_boundary",
-              "stateful_storage_boundary"
-            ],
-            "test_refs": [
-              "tests/wave656-airgap-routes-contract.test.js",
-              "tests/wave831-airgap.test.js"
-            ],
-            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
           {
             "path": "src/compile.js",
@@ -3794,10 +3808,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 493
+        "line": 494
       },
       "local_sota_review": {
-        "line": 493,
+        "line": 494,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -4270,10 +4284,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 521
+        "line": 522
       },
       "local_sota_review": {
-        "line": 521,
+        "line": 522,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4746,10 +4760,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 568
+        "line": 569
       },
       "local_sota_review": {
-        "line": 568,
+        "line": 569,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -5222,10 +5236,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 601
+        "line": 602
       },
       "local_sota_review": {
-        "line": 601,
+        "line": 602,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5735,10 +5749,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 632
+        "line": 633
       },
       "local_sota_review": {
-        "line": 632,
+        "line": 633,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6240,19 +6254,19 @@
     {
       "id": "confidential-compute",
       "stack_area": "enterprise",
-      "status": "sota_review_complete_critical_frontier_work_open",
+      "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 678
+        "line": 679
       },
       "local_sota_review": {
-        "line": 678,
+        "line": 679,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 7,
-        "improvement_count": 4,
+        "already_at_frontier_count": 8,
+        "improvement_count": 3,
         "gaps": {
-          "critical": 1,
+          "critical": 0,
           "major": 2,
           "minor": 1
         }
@@ -6262,17 +6276,19 @@
           {
             "path": "src/airgap-distill.js",
             "domain": "training_model_optimization",
-            "priority_score": 7,
+            "priority_score": 10,
             "risk_signals": [
               "cryptographic_or_proof_boundary",
               "environment_configuration_boundary",
               "execution_or_subprocess_boundary",
+              "large_component_contract_risk",
               "network_or_provider_boundary",
               "stateful_storage_boundary"
             ],
             "test_refs": [
               "tests/wave656-airgap-routes-contract.test.js",
-              "tests/wave831-airgap.test.js"
+              "tests/wave831-airgap.test.js",
+              "tests/wave953-airgap-distill-worker.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -6715,10 +6731,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 728
+        "line": 730
       },
       "local_sota_review": {
-        "line": 728,
+        "line": 730,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -7196,10 +7212,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 775
+        "line": 777
       },
       "local_sota_review": {
-        "line": 775,
+        "line": 777,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,

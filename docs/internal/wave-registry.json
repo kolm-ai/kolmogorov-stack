@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 403,
+    "orphan_tests": 404,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 406,
+    "state_local_green": 407,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 581,
-    "test_only_waves": 403,
-    "waves": 419
+    "test_files": 582,
+    "test_only_waves": 404,
+    "waves": 420
   },
-  "generated_at": "2026-06-18T16:37:56.382Z",
+  "generated_at": "2026-06-18T17:01:03.154Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -483,7 +483,8 @@
       "W949",
       "W950",
       "W951",
-      "W952"
+      "W952",
+      "W953"
     ],
     "plan_only_waves": [
       "W850",
@@ -895,7 +896,8 @@
       "W949",
       "W950",
       "W951",
-      "W952"
+      "W952",
+      "W953"
     ]
   },
   "schema": "kolm.wave_registry.v1",
@@ -6485,7 +6487,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave779-airgap-sneakernet.test.js tests/wave831-airgap.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave779-airgap-sneakernet.test.js tests/wave831-airgap.test.js tests/wave953-airgap-distill-worker.test.js",
           "script": "npm:verify:airgap"
         }
       ],
@@ -6878,7 +6880,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave779-airgap-sneakernet.test.js tests/wave831-airgap.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave779-airgap-sneakernet.test.js tests/wave831-airgap.test.js tests/wave953-airgap-distill-worker.test.js",
           "script": "npm:verify:airgap"
         }
       ],
@@ -7889,6 +7891,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave952-readiness-proof-matrix.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W953",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "research",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wave779-airgap-sneakernet.test.js tests/wave831-airgap.test.js tests/wave953-airgap-distill-worker.test.js",
+          "script": "npm:verify:airgap"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave953-airgap-distill-worker.test.js"
       ],
       "test_letter_suffixes": []
     }

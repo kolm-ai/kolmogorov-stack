@@ -71,7 +71,7 @@
       "environment_configuration_boundary": 315,
       "execution_or_subprocess_boundary": 235,
       "http_route_surface": 36,
-      "large_component_contract_risk": 37,
+      "large_component_contract_risk": 38,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 163,
       "open_marker_requires_owner_review": 8,
@@ -161,6 +161,20 @@
           "stateful_storage_boundary"
         ],
         "improvement_track": "maintain_generated_quantize_worker_matrix_and_frontier_method_contract"
+      },
+      {
+        "path": "src/airgap-distill.js",
+        "domain": "training_model_optimization",
+        "priority_score": 10,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
+          "execution_or_subprocess_boundary",
+          "large_component_contract_risk",
+          "network_or_provider_boundary",
+          "stateful_storage_boundary"
+        ],
+        "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
       },
       {
         "path": "src/binder.js",
@@ -450,18 +464,6 @@
           "http_route_surface"
         ],
         "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests"
-      },
-      {
-        "path": "src/transparency-log-routes.js",
-        "domain": "api_surface",
-        "priority_score": 8,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "environment_configuration_boundary",
-          "http_route_surface",
-          "network_or_provider_boundary"
-        ],
-        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate"
       }
     ]
   },
@@ -898,11 +900,11 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "be30fde921402d928aa78ff76d0427104a02a072ebaf5d8fd90a89cf44f32387",
+      "sha256": "9b4b2f573e218da09ef8b04361a9bca7a5b02e68dd1cd62e9cd86ae849965725",
       "metrics": {
-        "bytes": 2625432,
-        "lines": 57120,
-        "imports": 541,
+        "bytes": 2630519,
+        "lines": 57219,
+        "imports": 542,
         "exports": 1,
         "routes": 0,
         "env_refs": 414,
@@ -8300,32 +8302,34 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "e7a295206760822946cbacbf0d328b9729fca5c3c5bde2900b83a6762869e65f",
+      "sha256": "32db7489cbd26c8d1bef760cb800e9b3463a56ce2f73d749cc7b3880b95c78d3",
       "metrics": {
-        "bytes": 21037,
-        "lines": 562,
-        "imports": 5,
-        "exports": 6,
+        "bytes": 34581,
+        "lines": 976,
+        "imports": 7,
+        "exports": 10,
         "routes": 0,
-        "env_refs": 4,
+        "env_refs": 8,
         "fs_writes": 2,
-        "subprocess_refs": 2,
-        "network_refs": 6,
-        "crypto_refs": 9,
+        "subprocess_refs": 5,
+        "network_refs": 7,
+        "crypto_refs": 22,
         "markers": 0
       },
       "test_refs": [
         "tests/wave656-airgap-routes-contract.test.js",
-        "tests/wave831-airgap.test.js"
+        "tests/wave831-airgap.test.js",
+        "tests/wave953-airgap-distill-worker.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary",
+        "large_component_contract_risk",
         "network_or_provider_boundary",
         "stateful_storage_boundary"
       ],
-      "priority_score": 7,
+      "priority_score": 10,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

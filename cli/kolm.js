@@ -3908,6 +3908,12 @@ USAGE
   kolm airgap disable                    remove ~/.kolm/airgap.env
   kolm airgap verify <artifact.kolm>     inspect + signature-check entirely offline
   kolm airgap test [--probe]             network-leak audit (W779; shape-only unless --probe)
+  kolm airgap distill run --user-data <jsonl> --teacher <path> --student <path> --out <path>
+                                      verify/redact/enqueue an offline distill spec
+  kolm airgap distill list [--json]      list queued/running/completed air-gap distill runs
+  kolm airgap distill status <run_id>    inspect one queued spec/status file
+  kolm airgap distill process [--run-id <id>|--limit N] [--json]
+                                      consume queued runs through the Python trainer worker
 
 Sets TRANSFORMERS_OFFLINE=1, HF_DATASETS_OFFLINE=1, HF_HUB_OFFLINE=1, KOLM_AIRGAP=1.
 After 'enable', source the env file in your shell to make every kolm verb in
@@ -34155,6 +34161,99 @@ async function cmdAirgap(args) {
       console.log('verified offline — no network calls made.');
     });
     return;
+  }
+  if (sub === 'distill') {
+    const action = rest[0] || 'list';
+    const rargs = rest.slice(rest.length && rest[0] && !rest[0].startsWith('-') ? 1 : 0);
+    const wantJson = rargs.includes('--json');
+    const mod = await import('../src/airgap-distill.js');
+    if (action === '--help' || action === '-h' || action === 'help') {
+      console.log('usage: kolm airgap distill <run|list|status|process> [flags]');
+      console.log('');
+      console.log('  run --user-data <jsonl> --teacher <path> --student <path> --out <path> [--json]');
+      console.log('  list [--status queued|running|completed|failed] [--json]');
+      console.log('  status <run_id> [--json]');
+      console.log('  process [--run-id <id>|--limit N] [--json]');
+      console.log('');
+      console.log('run verifies the air-gap shape and queues a redacted training corpus.');
+      console.log('process re-runs the no-egress guard, verifies redaction evidence,');
+      console.log('and delegates execution to apps/trainer/airgap_distill_worker.py.');
+      return;
+    }
+    if (action === 'run') {
+      const env = await mod.offlineDistill({
+        user_data_path: flag(rargs, '--user-data') || flag(rargs, '--data') || flag(rargs, '--train-jsonl'),
+        teacher_path_local: flag(rargs, '--teacher') || flag(rargs, '--teacher-path'),
+        student_path_local: flag(rargs, '--student') || flag(rargs, '--student-path'),
+        output_path: flag(rargs, '--out') || flag(rargs, '--output'),
+        tenant: flag(rargs, '--tenant') || flag(rargs, '--tenant-id') || null,
+      });
+      if (wantJson) console.log(JSON.stringify(env, null, 2));
+      else if (env.ok) {
+        console.log(`${env.run_id}: ${env.status}`);
+        console.log('spec: ' + env.spec_path);
+        console.log('redacted corpus: ' + env.user_data_path);
+      } else {
+        console.error('airgap distill run: ' + (env.error || 'airgap_distill_error'));
+        if (env.detail) console.error(env.detail);
+      }
+      if (!env.ok) process.exit(EXIT.EXECUTION);
+      return;
+    }
+    if (action === 'list') {
+      const env = mod.listOfflineDistillRuns({ status: flag(rargs, '--status') || null });
+      if (wantJson) console.log(JSON.stringify(env, null, 2));
+      else {
+        if (!env.runs.length) {
+          console.log('no air-gap distill runs found');
+        } else {
+          for (const run of env.runs) {
+            console.log(`${run.run_id}  ${String(run.status || 'unknown').padEnd(10)}  ${run.queued_at || ''}`);
+          }
+        }
+      }
+      return;
+    }
+    if (action === 'status') {
+      const runId = flag(rargs, '--run-id') || rargs.find((a) => a && !a.startsWith('-'));
+      const env = mod.getOfflineDistillStatus({ run_id: runId });
+      if (wantJson) console.log(JSON.stringify(env, null, 2));
+      else if (!env.ok) {
+        console.error('airgap distill status: ' + env.error);
+        process.exit(EXIT.NOT_FOUND);
+      } else {
+        console.log(`${env.run_id}: ${env.status}`);
+        if (env.worker && env.worker.kind) console.log('worker: ' + env.worker.kind);
+        if (env.output_path) console.log('output: ' + env.output_path);
+        if (env.error) console.log('error: ' + env.error);
+      }
+      return;
+    }
+    if (action === 'process') {
+      const runId = flag(rargs, '--run-id') || rargs.find((a) => a && !a.startsWith('-'));
+      const limit = Math.max(1, Number(flag(rargs, '--limit') || 1));
+      const workerArgs = rargs.includes('--receipt-only') ? ['--receipt-only'] : [];
+      const opts = { worker_args: workerArgs };
+      const env = runId
+        ? await mod.processOfflineDistillRun({ run_id: runId, ...opts })
+        : await mod.processOfflineDistillQueue({ limit, ...opts });
+      if (wantJson) console.log(JSON.stringify(env, null, 2));
+      else if (runId) {
+        console.log(`${env.run_id || runId}: ${env.status || (env.ok ? 'completed' : 'failed')}`);
+        if (env.output_path) console.log('output: ' + env.output_path);
+        if (!env.ok) console.error('error: ' + (env.error || 'airgap_worker_error'));
+      } else {
+        console.log(`processed=${env.processed} completed=${env.completed} failed=${env.failed}`);
+        for (const result of env.results || []) {
+          console.log(`  ${result.run_id}: ${result.status || (result.ok ? 'completed' : 'failed')}`);
+        }
+      }
+      if (!env.ok) process.exit(EXIT.EXECUTION);
+      return;
+    }
+    console.error('unknown airgap distill subcommand:', action);
+    console.error('try: kolm airgap distill --help');
+    process.exit(EXIT.BAD_ARGS);
   }
   // W779 - `kolm airgap test` is a network-leak audit driven by the
   // src/airgap-mode.js testNetworkLeak() helper. Defaults to shape-only
