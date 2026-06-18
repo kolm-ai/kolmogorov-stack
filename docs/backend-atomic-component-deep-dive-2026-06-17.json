@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 746,
-    "components_without_direct_test_reference": 83,
+    "test_referenced_components": 747,
+    "components_without_direct_test_reference": 82,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -2578,7 +2578,8 @@
         "tests/wave-dapo-sampling-py.test.js",
         "tests/wave-gkd-onpolicy-executor.test.js",
         "tests/wave482-sdk-catalog-honesty.test.js",
-        "tests/wave693-python-framework-adapters-contract.test.js"
+        "tests/wave693-python-framework-adapters-contract.test.js",
+        "tests/wave754-python-onnx-text-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -2695,7 +2696,8 @@
       },
       "test_refs": [
         "tests/wave482-sdk-catalog-honesty.test.js",
-        "tests/wave693-python-framework-adapters-contract.test.js"
+        "tests/wave693-python-framework-adapters-contract.test.js",
+        "tests/wave754-python-onnx-text-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -2887,7 +2889,8 @@
         "tests/wave-dapo-sampling-py.test.js",
         "tests/wave-gkd-onpolicy-executor.test.js",
         "tests/wave482-sdk-catalog-honesty.test.js",
-        "tests/wave693-python-framework-adapters-contract.test.js"
+        "tests/wave693-python-framework-adapters-contract.test.js",
+        "tests/wave754-python-onnx-text-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -3004,7 +3007,8 @@
       },
       "test_refs": [
         "tests/wave482-sdk-catalog-honesty.test.js",
-        "tests/wave693-python-framework-adapters-contract.test.js"
+        "tests/wave693-python-framework-adapters-contract.test.js",
+        "tests/wave754-python-onnx-text-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -4406,7 +4410,8 @@
         "tests/wave-dapo-sampling-py.test.js",
         "tests/wave-gkd-onpolicy-executor.test.js",
         "tests/wave482-sdk-catalog-honesty.test.js",
-        "tests/wave693-python-framework-adapters-contract.test.js"
+        "tests/wave693-python-framework-adapters-contract.test.js",
+        "tests/wave754-python-onnx-text-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -4469,7 +4474,8 @@
         "tests/wave-dapo-sampling-py.test.js",
         "tests/wave-gkd-onpolicy-executor.test.js",
         "tests/wave482-sdk-catalog-honesty.test.js",
-        "tests/wave693-python-framework-adapters-contract.test.js"
+        "tests/wave693-python-framework-adapters-contract.test.js",
+        "tests/wave754-python-onnx-text-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -4512,26 +4518,28 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "python",
-      "sha256": "b8d7f6b364b71ea54ef1de9b527a0498675ba2b2dec4be824fdc7ee2501f7d7a",
+      "sha256": "323aaae7b57be087507e3236f8dbfaedf330e828ebc5fdee51192ac581df3791",
       "metrics": {
-        "bytes": 3464,
-        "lines": 83,
+        "bytes": 7755,
+        "lines": 211,
         "imports": 0,
-        "exports": 3,
+        "exports": 9,
         "routes": 0,
-        "env_refs": 3,
+        "env_refs": 2,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave754-python-onnx-text-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface",
         "environment_configuration_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 2,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -4569,9 +4577,9 @@
       "surface": "package-distribution",
       "domain": "developer_distribution",
       "language": "toml",
-      "sha256": "0fda1449ee813afa1dca97531a9f8b47bca07f162de863812ee3dfba4402d083",
+      "sha256": "d11ef5e40644cd708d573f136f8d027cdc4574eda683cfd99e21a47c464cd50a",
       "metrics": {
-        "bytes": 862,
+        "bytes": 897,
         "lines": 34,
         "imports": 0,
         "exports": 0,
@@ -4585,7 +4593,8 @@
       },
       "test_refs": [
         "tests/wave482-sdk-catalog-honesty.test.js",
-        "tests/wave693-python-framework-adapters-contract.test.js"
+        "tests/wave693-python-framework-adapters-contract.test.js",
+        "tests/wave754-python-onnx-text-contract.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -14236,6 +14245,7 @@
         "tests/wave250-remote-compute.test.js",
         "tests/wave555-user-completion-cloud-optimizer.test.js",
         "tests/wave583-cloud-compute-broker.test.js",
+        "tests/wave754-python-onnx-text-contract.test.js",
         "tests/wave921-data-curate-modules.test.js",
         "tests/wave921-gbm-regressor.test.js"
       ],

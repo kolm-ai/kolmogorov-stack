@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 746,
-    "direct_test_reference_pct": 90,
-    "components_without_direct_test_reference": 83,
+    "direct_test_referenced_components": 747,
+    "direct_test_reference_pct": 90.1,
+    "components_without_direct_test_reference": 82,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -3709,7 +3709,8 @@
           "tests/wave-dapo-sampling-py.test.js",
           "tests/wave-gkd-onpolicy-executor.test.js",
           "tests/wave482-sdk-catalog-honesty.test.js",
-          "tests/wave693-python-framework-adapters-contract.test.js"
+          "tests/wave693-python-framework-adapters-contract.test.js",
+          "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -3804,7 +3805,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave482-sdk-catalog-honesty.test.js",
-          "tests/wave693-python-framework-adapters-contract.test.js"
+          "tests/wave693-python-framework-adapters-contract.test.js",
+          "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -3963,7 +3965,8 @@
           "tests/wave-dapo-sampling-py.test.js",
           "tests/wave-gkd-onpolicy-executor.test.js",
           "tests/wave482-sdk-catalog-honesty.test.js",
-          "tests/wave693-python-framework-adapters-contract.test.js"
+          "tests/wave693-python-framework-adapters-contract.test.js",
+          "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -4058,7 +4061,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave482-sdk-catalog-honesty.test.js",
-          "tests/wave693-python-framework-adapters-contract.test.js"
+          "tests/wave693-python-framework-adapters-contract.test.js",
+          "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -5225,7 +5229,8 @@
           "tests/wave-dapo-sampling-py.test.js",
           "tests/wave-gkd-onpolicy-executor.test.js",
           "tests/wave482-sdk-catalog-honesty.test.js",
-          "tests/wave693-python-framework-adapters-contract.test.js"
+          "tests/wave693-python-framework-adapters-contract.test.js",
+          "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -5275,7 +5280,8 @@
           "tests/wave-dapo-sampling-py.test.js",
           "tests/wave-gkd-onpolicy-executor.test.js",
           "tests/wave482-sdk-catalog-honesty.test.js",
-          "tests/wave693-python-framework-adapters-contract.test.js"
+          "tests/wave693-python-framework-adapters-contract.test.js",
+          "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -5296,12 +5302,12 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 3464,
-          "lines": 83,
+          "bytes": 7755,
+          "lines": 211,
           "imports": 0,
-          "exports": 3,
+          "exports": 9,
           "routes": 0,
-          "env_refs": 3,
+          "env_refs": 2,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
@@ -5312,9 +5318,9 @@
           "distribution_or_worker_surface",
           "environment_configuration_boundary"
         ],
-        "priority_score": 3,
+        "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "b8d7f6b364b71ea54ef1de9b527a0498675ba2b2dec4be824fdc7ee2501f7d7a"
+        "sha256": "323aaae7b57be087507e3236f8dbfaedf330e828ebc5fdee51192ac581df3791"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5322,7 +5328,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave754-python-onnx-text-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
@@ -5331,10 +5339,8 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "packages/sdk-python/pyproject.toml",
@@ -5344,7 +5350,7 @@
       "language": "toml",
       "composition": {
         "metrics": {
-          "bytes": 862,
+          "bytes": 897,
           "lines": 34,
           "imports": 0,
           "exports": 0,
@@ -5361,7 +5367,7 @@
         ],
         "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "0fda1449ee813afa1dca97531a9f8b47bca07f162de863812ee3dfba4402d083"
+        "sha256": "d11ef5e40644cd708d573f136f8d027cdc4574eda683cfd99e21a47c464cd50a"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5371,7 +5377,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave482-sdk-catalog-honesty.test.js",
-          "tests/wave693-python-framework-adapters-contract.test.js"
+          "tests/wave693-python-framework-adapters-contract.test.js",
+          "tests/wave754-python-onnx-text-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_package_sdk_conformance_and_release_evidence",
@@ -13831,6 +13838,7 @@
           "tests/wave250-remote-compute.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js",
           "tests/wave583-cloud-compute-broker.test.js",
+          "tests/wave754-python-onnx-text-contract.test.js",
           "tests/wave921-data-curate-modules.test.js",
           "tests/wave921-gbm-regressor.test.js"
         ],
