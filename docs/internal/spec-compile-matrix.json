@@ -1,0 +1,1290 @@
+{
+  "build_and_zip_fields": [
+    "allow_below_gate",
+    "artifact_class",
+    "attestation_report",
+    "auditor_attestation",
+    "base_model",
+    "binaries",
+    "compiled_binary",
+    "compiled_targets",
+    "continuous_batching",
+    "drift_report",
+    "evals",
+    "export",
+    "external_holdout",
+    "extra_files",
+    "index",
+    "job_id",
+    "license",
+    "lineage",
+    "moe",
+    "native_skip_reasons",
+    "outDir",
+    "outPath",
+    "pack",
+    "pretokenize",
+    "prompt_cache",
+    "recipes",
+    "runtime_passports",
+    "seed_provenance",
+    "speculative_decoding",
+    "supersession",
+    "task",
+    "tenant_shadow_corpus",
+    "training_stats"
+  ],
+  "compile_options": [
+    "adversarialHoldouts",
+    "allowBelowGate",
+    "allowEmptyEvals",
+    "allowSeedAutoResolve",
+    "allow_below_gate",
+    "artifactClass",
+    "attestation_kind",
+    "attestation_report",
+    "auditorAttestations",
+    "cOnly",
+    "comparator",
+    "compileNative",
+    "compileWasm",
+    "cwd",
+    "dataDir",
+    "distillProvenancePath",
+    "drift_report",
+    "exportProvenancePath",
+    "externalHoldouts",
+    "extra_files",
+    "holdoutRatio",
+    "license",
+    "lineage",
+    "moeProvenancePath",
+    "outDir",
+    "outPath",
+    "pretokenizeProvenancePath",
+    "rustOnly",
+    "seedsPath",
+    "splitSeed",
+    "supersession",
+    "target",
+    "task",
+    "tenantShadowCorpora",
+    "tokenizerPath",
+    "toolchains",
+    "useSeedsGate",
+    "wasmOnly",
+    "workload_profile"
+  ],
+  "compile_phases": [
+    {
+      "evidence": [
+        "validateSpec(spec)",
+        "KOLM_E_SPEC_INVALID"
+      ],
+      "line": 97,
+      "owner": "validateSpec",
+      "phase": "spec_validation",
+      "present": true
+    },
+    {
+      "evidence": [
+        "KOLM_WORKLOAD_PROFILE",
+        "workload_profile must be one of 'latency' | 'batching' | 'auto'"
+      ],
+      "line": 146,
+      "owner": "compileSpec",
+      "phase": "workload_profile_validation",
+      "present": true
+    },
+    {
+      "evidence": [
+        "ensurePerUserSecret()",
+        "chmodSync(cfg, 0o600)"
+      ],
+      "line": 77,
+      "owner": "ensurePerUserSecret",
+      "phase": "receipt_secret_resolution",
+      "present": true
+    },
+    {
+      "evidence": [
+        "emitJs(r.dsl)",
+        "source_hash",
+        "version_id"
+      ],
+      "line": 146,
+      "owner": "compileSpec",
+      "phase": "recipe_normalization",
+      "present": true
+    },
+    {
+      "evidence": [
+        "SUPPORTED_COMPARATORS",
+        "comparatorName"
+      ],
+      "line": 146,
+      "owner": "compileSpec",
+      "phase": "comparator_selection",
+      "present": true
+    },
+    {
+      "evidence": [
+        "prepareSeedSplit({",
+        "allowEmptyEvals",
+        "no seeds provided"
+      ],
+      "line": 44,
+      "owner": "prepareSeedSplit",
+      "phase": "seed_gate",
+      "present": true
+    },
+    {
+      "evidence": [
+        "verifyRecipe(generator",
+        "pass_rate_positive_measured",
+        "evals_report"
+      ],
+      "line": 42,
+      "owner": "verifyRecipe",
+      "phase": "measured_eval",
+      "present": true
+    },
+    {
+      "evidence": [
+        "computeSeedProductionReady(seedSplit)",
+        "leakage_report_hash",
+        "synthesis_input_hash"
+      ],
+      "line": 45,
+      "owner": "computeSeedProductionReady",
+      "phase": "seed_provenance",
+      "present": true
+    },
+    {
+      "evidence": [
+        "artifactClass === 'compiled_rule'",
+        "emitCompiledTargets",
+        "getSourceFileEntries"
+      ],
+      "line": 47,
+      "owner": "emitCompiledTargets",
+      "phase": "dsl_native_sources",
+      "present": true
+    },
+    {
+      "evidence": [
+        "compileNativeTargets(compiled_targets",
+        "targetLc",
+        "compileWasm"
+      ],
+      "line": 411,
+      "owner": "compileNativeTargets",
+      "phase": "native_wasm_compile",
+      "present": true
+    },
+    {
+      "evidence": [
+        "opts.tokenizerPath",
+        "tokenizer.json",
+        "extraFiles"
+      ],
+      "line": 465,
+      "owner": "tokenizerPath",
+      "phase": "tokenizer_packaging",
+      "present": true
+    },
+    {
+      "evidence": [
+        "loadDistillProvenance",
+        "teacher_holdout_accuracy",
+        "lineageBlock"
+      ],
+      "line": 48,
+      "owner": "loadDistillProvenance",
+      "phase": "distill_lineage",
+      "present": true
+    },
+    {
+      "evidence": [
+        "loadExportProvenance",
+        "estimatePassport",
+        "runtimePassports"
+      ],
+      "line": 49,
+      "owner": "loadExportProvenance",
+      "phase": "export_runtime_passports",
+      "present": true
+    },
+    {
+      "evidence": [
+        "loadMoeProvenance",
+        "loadPretokenizeProvenance",
+        "pretokenize_block"
+      ],
+      "line": 50,
+      "owner": "loadMoeProvenance",
+      "phase": "moe_pretokenize_provenance",
+      "present": true
+    },
+    {
+      "evidence": [
+        "loadHoldouts",
+        "buildExternalHoldoutBlock",
+        "external_holdout_summary"
+      ],
+      "line": 52,
+      "owner": "buildExternalHoldoutBlock",
+      "phase": "external_holdouts",
+      "present": true
+    },
+    {
+      "evidence": [
+        "loadTenantCorpus",
+        "buildTenantShadowBlock",
+        "tenant_shadow_summary"
+      ],
+      "line": 53,
+      "owner": "buildTenantShadowBlock",
+      "phase": "tenant_shadow_corpus",
+      "present": true
+    },
+    {
+      "evidence": [
+        "loadAuditorAttestationFile",
+        "crossCheckAuditorAttestation",
+        "auditor_attestation"
+      ],
+      "line": 54,
+      "owner": "crossCheckAuditorAttestation",
+      "phase": "auditor_attestation",
+      "present": true
+    },
+    {
+      "evidence": [
+        "buildSupersessionBlock",
+        "loadDriftReport",
+        "validateDriftReport"
+      ],
+      "line": 55,
+      "owner": "buildSupersessionBlock",
+      "phase": "supersession_drift",
+      "present": true
+    },
+    {
+      "evidence": [
+        "buildBinariesArray",
+        "compiled_binary",
+        "native_skip_reasons"
+      ],
+      "line": 878,
+      "owner": "buildBinariesArray",
+      "phase": "compiled_binary_honesty",
+      "present": true
+    },
+    {
+      "evidence": [
+        "attestation_report",
+        "attestation_kind",
+        "supplied without an attestation kind"
+      ],
+      "line": 896,
+      "owner": "attestation_report",
+      "phase": "confidential_compute_attestation",
+      "present": true
+    },
+    {
+      "evidence": [
+        "KOLM_COMPILE_SPECULATIVE_DRAFT",
+        "resolveSpeculative",
+        "speculative_decoding"
+      ],
+      "line": 944,
+      "owner": "resolveSpeculative",
+      "phase": "speculative_decoding_resolution",
+      "present": true
+    },
+    {
+      "evidence": [
+        "KOLM_SPECEVAL_RUNTIME",
+        "evalSpeculativeDecoding",
+        "eval_skipped_reason"
+      ],
+      "line": 1001,
+      "owner": "evalSpeculativeDecoding",
+      "phase": "speculative_decoding_eval",
+      "present": true
+    },
+    {
+      "evidence": [
+        "KOLM_COMPILE_PROMPT_CACHE",
+        "KOLM_COMPILE_MAX_BATCH",
+        "continuous_batching"
+      ],
+      "line": 1049,
+      "owner": "promptCacheBlock",
+      "phase": "inference_fingerprints",
+      "present": true
+    },
+    {
+      "evidence": [
+        "buildAndZip({",
+        "allow_below_gate",
+        "runtime_passports"
+      ],
+      "line": 69,
+      "owner": "buildAndZip",
+      "phase": "build_and_zip",
+      "present": true
+    },
+    {
+      "evidence": [
+        "postBuildCleanup",
+        "fs.unlinkSync(p)",
+        "postBuildOk"
+      ],
+      "line": 1127,
+      "owner": "postBuildCleanup",
+      "phase": "post_build_cleanup",
+      "present": true
+    },
+    {
+      "evidence": [
+        "VERTICAL_DISCLAIMER_ADJECTIVE",
+        "disclaimer_injection",
+        "professional ${adj} advice"
+      ],
+      "line": 1184,
+      "owner": "disclaimer_injection",
+      "phase": "vertical_disclaimer",
+      "present": true
+    },
+    {
+      "evidence": [
+        "AdmZip",
+        "workload_profile_hash",
+        "createHmac"
+      ],
+      "line": 1209,
+      "owner": "AdmZip",
+      "phase": "workload_profile_zip_patch",
+      "present": true
+    },
+    {
+      "evidence": [
+        "CHUNK = 1024 * 1024",
+        "fs.readSync",
+        "h.digest"
+      ],
+      "line": 1311,
+      "owner": "fs.readSync",
+      "phase": "chunked_hash",
+      "present": true
+    },
+    {
+      "evidence": [
+        "outPath: final",
+        "evals_report",
+        "tenant_shadow_corpus_provenance"
+      ],
+      "line": 176,
+      "owner": "return {",
+      "phase": "return_envelope",
+      "present": true
+    },
+    {
+      "evidence": [
+        "export { compilePipeline } from './pipeline-runner.js'"
+      ],
+      "line": 1358,
+      "owner": "compilePipeline",
+      "phase": "pipeline_reexport",
+      "present": true
+    }
+  ],
+  "env_refs": [
+    "KOLM_ARTIFACT_SECRET",
+    "KOLM_COMPILE_MAX_BATCH",
+    "KOLM_COMPILE_NATIVE",
+    "KOLM_COMPILE_PROMPT_CACHE",
+    "KOLM_COMPILE_SPECULATIVE_DRAFT",
+    "KOLM_COMPILE_SPECULATIVE_K",
+    "KOLM_COMPILE_WASM",
+    "KOLM_COMPILE_WASM_ONLY",
+    "KOLM_SPECEVAL_HEAD_KIND",
+    "KOLM_SPECEVAL_RUNTIME",
+    "KOLM_WORKLOAD_PROFILE",
+    "RECIPE_RECEIPT_SECRET"
+  ],
+  "exports": [
+    {
+      "async": false,
+      "kind": "function",
+      "line": 97,
+      "name": "validateSpec"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 146,
+      "name": "compileSpec"
+    },
+    {
+      "async": false,
+      "from": "./pipeline-runner.js",
+      "kind": "re-export",
+      "line": 1370,
+      "name": "compilePipeline"
+    }
+  ],
+  "failed_safety_guards": [],
+  "functions": [
+    {
+      "async": false,
+      "exported": false,
+      "line": 58,
+      "name": "err"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 64,
+      "name": "isNonEmptyString"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 70,
+      "name": "canonicalJsonLocal"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 77,
+      "name": "ensurePerUserSecret"
+    },
+    {
+      "async": false,
+      "exported": true,
+      "line": 97,
+      "name": "validateSpec"
+    },
+    {
+      "async": true,
+      "exported": true,
+      "line": 146,
+      "name": "compileSpec"
+    }
+  ],
+  "gates": {
+    "failures": [],
+    "ok": true,
+    "warnings": []
+  },
+  "missing_required_exports": [],
+  "public_return_shapes": {
+    "compilePipeline": [
+      "ok",
+      "sidecar",
+      "sidecar_hash",
+      "sidecar_content_sha256"
+    ],
+    "compileSpec": [
+      "outPath",
+      "manifest",
+      "k_score",
+      "sha256",
+      "bytes",
+      "evals_report",
+      "distill_provenance",
+      "export_provenance",
+      "moe_provenance",
+      "pretokenize_provenance",
+      "external_holdout_provenance",
+      "tenant_shadow_corpus_provenance",
+      "auditor_attestation_provenance"
+    ],
+    "validateSpec": [
+      "true",
+      "throws KOLM_E_SPEC_INVALID"
+    ]
+  },
+  "purpose": "Generated contract matrix for src/spec-compile.js: spec validation, seed and eval gating, signed artifact build inputs, provenance blocks, native/WASM honesty, attestation, workload-profile patching, speculative-decoding compile fingerprints, and compilePipeline re-export ownership.",
+  "required_exports": [
+    "validateSpec",
+    "compileSpec",
+    "compilePipeline"
+  ],
+  "required_test_evidence": [
+    "tests/wave144-dsl-codegen.test.js",
+    "tests/wave144-seeds-gate.test.js",
+    "tests/wave144-tokenizer-artifact.test.js",
+    "tests/wave282-compile-routing.test.js",
+    "tests/wave345-eval-bench-parity.test.js",
+    "tests/wave350-probe-cleanup.test.js",
+    "tests/wave409q-c-rust-wasm-verify.test.js",
+    "tests/wave457-build-honors-out.test.js",
+    "tests/wave460-attestation-embed.test.js",
+    "tests/wave470-native-target-completion.test.js",
+    "tests/wave690-pipeline-runner-contract.test.js",
+    "tests/wave708-vertical-disclaimer.test.js",
+    "tests/wave726-bvl-kernels.test.js",
+    "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
+    "tests/wave946-spec-compile-matrix.test.js"
+  ],
+  "safety_guards": {
+    "all_expected_phase_rows_present": true,
+    "auditor_attestation_cross_check_after_artifact_hash": true,
+    "build_and_zip_receives_all_frontier_blocks": true,
+    "chunked_final_hash_handles_large_artifacts": true,
+    "comparator_declared_and_measured": true,
+    "compile_options_cover_current_surface": true,
+    "compile_pipeline_reexport_uses_runner_owner": true,
+    "compiled_rule_requires_dsl_before_codegen": true,
+    "confidential_attestation_requires_kind": true,
+    "direct_evidence_covers_required_tests": true,
+    "env_fingerprints_cover_compile_runtime_knobs": true,
+    "high_risk_vertical_disclaimer_is_in_memory_only": true,
+    "invalid_specs_use_kolm_error_code": true,
+    "large_export_files_streamed_by_abs_path": true,
+    "native_target_truthful_binary_verdict": true,
+    "no_empty_eval_default_ships_without_opt_in": true,
+    "out_path_passed_to_build_and_zip_directly": true,
+    "post_build_failures_cleanup_artifacts": true,
+    "production_ready_uses_shared_gate": true,
+    "prompt_cache_and_batching_are_env_fingerprints": true,
+    "required_public_exports_present": true,
+    "seed_gate_scores_holdout_not_train": true,
+    "source_aliases_bound_into_extra_files": true,
+    "speculative_eval_fail_loud_keeps_null_block": true,
+    "speculative_resolution_never_breaks_build": true,
+    "validation_rules_are_complete": true,
+    "workload_profile_invalid_rejected_early": true,
+    "workload_profile_patch_resigns_manifest": true
+  },
+  "schema": "kolm.spec_compile_matrix.v1",
+  "sources": [
+    "src/spec-compile.js",
+    "src/artifact.js",
+    "src/native-compile.js",
+    "src/pipeline-runner.js",
+    "tests/wave144-dsl-codegen.test.js",
+    "tests/wave144-seeds-gate.test.js",
+    "tests/wave144-tokenizer-artifact.test.js",
+    "tests/wave282-compile-routing.test.js",
+    "tests/wave345-eval-bench-parity.test.js",
+    "tests/wave350-probe-cleanup.test.js",
+    "tests/wave409q-c-rust-wasm-verify.test.js",
+    "tests/wave457-build-honors-out.test.js",
+    "tests/wave460-attestation-embed.test.js",
+    "tests/wave470-native-target-completion.test.js",
+    "tests/wave690-pipeline-runner-contract.test.js",
+    "tests/wave708-vertical-disclaimer.test.js",
+    "tests/wave726-bvl-kernels.test.js",
+    "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
+    "tests/wave946-spec-compile-matrix.test.js"
+  ],
+  "summary": {
+    "build_and_zip_field_count": 33,
+    "compile_option_count": 39,
+    "direct_test_evidence_count": 67,
+    "env_ref_count": 12,
+    "export_count": 3,
+    "failed_safety_guards": 0,
+    "failed_validation_rules": 0,
+    "function_count": 6,
+    "missing_required_exports": 0,
+    "missing_test_evidence": 0,
+    "phase_count": 30,
+    "present_phase_count": 30,
+    "present_validation_rule_count": 10,
+    "required_test_evidence_count": 15,
+    "spec_compile_bytes": 72247,
+    "spec_compile_lines": 1372,
+    "validation_rule_count": 10
+  },
+  "test_evidence": [
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 2,
+      "path": "tests/byoc-gpu-attestation.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 3,
+      "path": "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 2,
+      "path": "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 2,
+      "path": "tests/finalized-c6-transitive-holdout-disjointness-ledger.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 1,
+      "path": "tests/finalized-c7-artifact-provenance-repro.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 4,
+      "path": "tests/nras-verifier.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 1,
+      "path": "tests/path-to-100-w3b-wizard-real-stream.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 2,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave144-bench-compare.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 2,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave144-bench-proof.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 2,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave144-completions-api.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 2,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 2,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave144-completions-server.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 2,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 4,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave144-distill-worker.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 4,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 9,
+      "compile_workflow_refs": 11,
+      "path": "tests/wave144-dsl-codegen.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 9,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 2,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave144-moe-compose.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 2,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 23,
+      "compile_workflow_refs": 2,
+      "path": "tests/wave144-native-compile.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 23,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 29,
+      "compile_workflow_refs": 19,
+      "path": "tests/wave144-seeds-gate.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 29,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 9,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave144-tokenizer-artifact.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 9,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 2,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave144-tui-chat.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 2,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 6,
+      "path": "tests/wave144-verifier-states.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 5,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave145-kscore-t-axis.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 5,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 10,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave146-export-provenance.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 10,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 10,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave147-moe-composition.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 10,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 10,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave148-pretokenize.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 10,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 20,
+      "path": "tests/wave151-recipe-class.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave157-redactor-receipt.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 2,
+      "path": "tests/wave164-external-adversarial.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 1,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave166-auditor-attestation.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 1,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave197-nl-cli-verb.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 2,
+      "path": "tests/wave199-seeds-new.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 1,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave252-ml-fixes.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 1,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave255-e2e-compile-distill.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 6,
+      "compile_workflow_refs": 8,
+      "path": "tests/wave282-compile-routing.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 6,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 7,
+      "path": "tests/wave283-train-only-synthesis.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 2,
+      "path": "tests/wave285-source-type-enforcement.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 14,
+      "path": "tests/wave339-production-verdict.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 2,
+      "path": "tests/wave341-run-gate.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 3,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave345-eval-bench-parity.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 3,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 11,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave350-probe-cleanup.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 11,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 2,
+      "path": "tests/wave389-production-ready-parity.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 11,
+      "path": "tests/wave409aa-verify-hardening.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 35,
+      "path": "tests/wave409c-no-stub-production.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 8,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave409q-c-rust-wasm-verify.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 8,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 3,
+      "path": "tests/wave409x-marketplace-gate.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave411-dedupe-and-holdout.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave411-vendor-normalization-and-prodgate.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 2,
+      "path": "tests/wave417-definition-of-done.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave438-real-compile.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave457-build-honors-out.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 11,
+      "compile_workflow_refs": 17,
+      "path": "tests/wave460-attestation-embed.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 11,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 11,
+      "compile_workflow_refs": 3,
+      "path": "tests/wave470-native-target-completion.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 11,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 6,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave690-pipeline-runner-contract.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 6,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 11,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave708-vertical-disclaimer.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 11,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave710-meta-routes-contract.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 8,
+      "compile_workflow_refs": 24,
+      "path": "tests/wave726-bvl-kernels.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 8,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave809-structured-output.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 1,
+      "validateSpec_refs": 1
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 3,
+      "path": "tests/wave817-format-v1.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 1,
+      "path": "tests/wave921-serve-config.test.js",
+      "source_lock": false,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave937-api-contract-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave938-auth-boundary-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave939-cli-command-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave940-daemon-connector-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave941-quantize-worker-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 3,
+      "path": "tests/wave942-binder-contract-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave943-intent-contract-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave944-wrapper-cli-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 0,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 0,
+      "path": "tests/wave945-distill-pipeline-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 0,
+      "validateSpec_refs": 0
+    },
+    {
+      "compilePipeline_refs": 3,
+      "compileSpec_refs": 0,
+      "compile_workflow_refs": 8,
+      "path": "tests/wave946-spec-compile-matrix.test.js",
+      "source_lock": true,
+      "total_symbol_refs": 7,
+      "validateSpec_refs": 4
+    }
+  ],
+  "updated_at": "2026-06-18",
+  "validation_rules": [
+    {
+      "evidence": [
+        "spec must be a JSON object",
+        "Array.isArray(spec)"
+      ],
+      "present": true,
+      "rule": "spec_object"
+    },
+    {
+      "evidence": [
+        "spec.job_id must be a non-empty string",
+        "/^job_[a-z0-9_-]+$/i"
+      ],
+      "present": true,
+      "rule": "job_id_nonempty_and_regex"
+    },
+    {
+      "evidence": [
+        "spec.task must be a non-empty string"
+      ],
+      "present": true,
+      "rule": "task_nonempty"
+    },
+    {
+      "evidence": [
+        "spec.recipes must be a non-empty array"
+      ],
+      "present": true,
+      "rule": "recipes_nonempty_array"
+    },
+    {
+      "evidence": [
+        "every recipe needs an id",
+        "name is required"
+      ],
+      "present": true,
+      "rule": "recipe_id_and_name_required"
+    },
+    {
+      "evidence": [
+        "needs either source",
+        "or dsl"
+      ],
+      "present": true,
+      "rule": "recipe_source_or_dsl_required"
+    },
+    {
+      "evidence": [
+        "artifact_class='compiled_rule' requires a dsl block"
+      ],
+      "present": true,
+      "rule": "compiled_rule_requires_dsl"
+    },
+    {
+      "evidence": [
+        "validateDsl(r.dsl",
+        "targets: compiledRule ? ['c', 'rust'] : []"
+      ],
+      "present": true,
+      "rule": "dsl_validated_for_native_targets"
+    },
+    {
+      "evidence": [
+        "compileJs(r.source)",
+        "source failed to compile"
+      ],
+      "present": true,
+      "rule": "source_compiles_before_build"
+    },
+    {
+      "evidence": [
+        "spec.evals must be an object when present",
+        "spec.evals.cases must be an array"
+      ],
+      "present": true,
+      "rule": "evals_shape_checked"
+    }
+  ]
+}

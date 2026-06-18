@@ -25,6 +25,8 @@ const WRAPPER_CLI_MATRIX = path.join(ROOT, 'docs', 'internal', 'wrapper-cli-matr
 const WRAPPER_CLI_MATRIX_TEST = path.join(ROOT, 'tests', 'wave944-wrapper-cli-matrix.test.js');
 const DISTILL_PIPELINE_MATRIX = path.join(ROOT, 'docs', 'internal', 'distill-pipeline-matrix.json');
 const DISTILL_PIPELINE_MATRIX_TEST = path.join(ROOT, 'tests', 'wave945-distill-pipeline-matrix.test.js');
+const SPEC_COMPILE_MATRIX = path.join(ROOT, 'docs', 'internal', 'spec-compile-matrix.json');
+const SPEC_COMPILE_MATRIX_TEST = path.join(ROOT, 'tests', 'wave946-spec-compile-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
@@ -34,6 +36,7 @@ let binderContractMatrixGreen = null;
 let intentContractMatrixGreen = null;
 let wrapperCliMatrixGreen = null;
 let distillPipelineMatrixGreen = null;
+let specCompileMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -374,6 +377,37 @@ function distillPipelineMatrixOk() {
   return distillPipelineMatrixGreen;
 }
 
+function specCompileMatrixOk() {
+  if (specCompileMatrixGreen != null) return specCompileMatrixGreen;
+  try {
+    if (!fs.existsSync(SPEC_COMPILE_MATRIX) || !fs.existsSync(SPEC_COMPILE_MATRIX_TEST)) {
+      specCompileMatrixGreen = false;
+      return specCompileMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(SPEC_COMPILE_MATRIX, 'utf8'));
+    specCompileMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.spec_compile_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.validation_rule_count === 10
+      && matrix.summary.present_validation_rule_count === 10
+      && matrix.summary.phase_count === 30
+      && matrix.summary.present_phase_count === 30
+      && matrix.summary.build_and_zip_field_count >= 33
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/spec-compile.js')
+    );
+  } catch {
+    specCompileMatrixGreen = false;
+  }
+  return specCompileMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -529,6 +563,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'src/intent.js' && intentContractMatrixOk()) return 'maintain_generated_intent_contract_matrix_and_routing_workflow_taxonomy';
   if (rel === 'src/wrapper-cli.js' && wrapperCliMatrixOk()) return 'maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract';
   if (rel === 'src/distill-pipeline.js' && distillPipelineMatrixOk()) return 'maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract';
+  if (rel === 'src/spec-compile.js' && specCompileMatrixOk()) return 'maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -577,7 +612,7 @@ function commandsFor(domain) {
     billing_marketplace: ['node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js'],
     trust_security_compliance: ['npm run verify:claims-scope', 'npm run verify:compliance-packet'],
     storage_state: ['node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js'],
-    compile_artifact_runtime: ['npm run verify:inventions', 'npm run verify:benchmark-evidence', 'npm run verify:wrapper-cli-matrix'],
+    compile_artifact_runtime: ['npm run verify:inventions', 'npm run verify:benchmark-evidence', 'npm run verify:wrapper-cli-matrix', 'npm run verify:spec-compile-matrix'],
     capture_data_eval: ['npm run verify:redaction-benchmark', 'npm run verify:quality-calibration'],
     training_model_optimization: ['npm run verify:quantize-worker-matrix', 'npm run verify:distill-pipeline-matrix', 'node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],

@@ -88,9 +88,9 @@ test('W944 package wiring makes the wrapper CLI matrix a depth and control-file 
     pkg.scripts['verify:wrapper-cli-matrix'],
     'node scripts/build-wrapper-cli-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave944-wrapper-cli-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:intent-contract-matrix && npm run build:wrapper-cli-matrix && npm run build:distill-pipeline-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:file-ledger/);
-  assert.match(pkg.scripts['verify:depth'], /verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:meta-routes/);
+  assert.match(pkg.scripts['build:control-files'], /build:intent-contract-matrix && npm run build:wrapper-cli-matrix && npm run build:distill-pipeline-matrix && npm run build:spec-compile-matrix && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['verify:depth'], /verify:intent-contract-matrix && npm run verify:wrapper-cli-matrix && npm run verify:distill-pipeline-matrix && npm run verify:spec-compile-matrix && npm run verify:meta-routes/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');
   assert.match(ledgerBuilder, /build-wrapper-cli-matrix\.cjs/);

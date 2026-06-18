@@ -56,7 +56,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | `src/distill-pipeline.js` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract. |
 | `src/intent.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_intent_contract_matrix_and_routing_workflow_taxonomy. |
 | `src/otel.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping. |
-| `src/spec-compile.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
+| `src/spec-compile.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract. |
 | `src/wrapper-cli.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract. |
 | `workers/distill/scripts/dedup_pairs.py` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `workers/distill/scripts/train_preference.py` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
