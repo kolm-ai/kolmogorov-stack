@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 752,
-    "components_without_direct_test_reference": 77,
+    "test_referenced_components": 754,
+    "components_without_direct_test_reference": 75,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -3128,10 +3128,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "shell",
-      "sha256": "051e9222eea9eb45e91a038dc17cb7b48e0ba813c57836a913de33ec1c378fa4",
+      "sha256": "73bb58f13f8067fb7c65c71166ea882108f0c56a8206c4155ccd73e13eff79e7",
       "metrics": {
-        "bytes": 2068,
-        "lines": 67,
+        "bytes": 2731,
+        "lines": 87,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3142,11 +3142,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave927-runtime-rs-build-scripts-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -3184,10 +3186,10 @@
       "surface": "package-distribution",
       "domain": "compile_artifact_runtime",
       "language": "shell",
-      "sha256": "ebaa32652d9fe695be9afa0f94ea0a18e6a5182313fbc325bed45304489c27c6",
+      "sha256": "94f31e04ee146a4c34ff908bb7c88ceb7f5bff522270cab18bcad7c0be53ef9d",
       "metrics": {
-        "bytes": 1766,
-        "lines": 65,
+        "bytes": 2388,
+        "lines": 86,
         "imports": 0,
         "exports": 0,
         "routes": 0,
@@ -3198,11 +3200,13 @@
         "crypto_refs": 0,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave927-runtime-rs-build-scripts-contract.test.js"
+      ],
       "risk_signals": [
         "distribution_or_worker_surface"
       ],
-      "priority_score": 2,
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -3506,6 +3510,7 @@
       "test_refs": [
         "tests/agent-verify-ratelimit.test.js",
         "tests/wave211-ci-hotfix.test.js",
+        "tests/wave927-runtime-rs-build-scripts-contract.test.js",
         "tests/wrapper-r-enrich.test.js"
       ],
       "risk_signals": [

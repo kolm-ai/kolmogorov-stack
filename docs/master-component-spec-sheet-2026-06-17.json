@@ -8,7 +8,7 @@
     "readiness_ledger": "docs/product-sota-readiness.json"
   },
   "perfection_model": {
-    "local_engineering_score": 94.6,
+    "local_engineering_score": 94.8,
     "frontier_product_score": 70.7,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 752,
-    "direct_test_reference_pct": 90.7,
-    "components_without_direct_test_reference": 77,
+    "direct_test_referenced_components": 754,
+    "direct_test_reference_pct": 91,
+    "components_without_direct_test_reference": 75,
     "high_priority_components": 50,
     "high_priority_direct_test_referenced": 50,
     "high_priority_direct_test_reference_pct": 100,
@@ -4143,8 +4143,8 @@
       "language": "shell",
       "composition": {
         "metrics": {
-          "bytes": 2068,
-          "lines": 67,
+          "bytes": 2731,
+          "lines": 87,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -4158,9 +4158,9 @@
         "risk_signals": [
           "distribution_or_worker_surface"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "051e9222eea9eb45e91a038dc17cb7b48e0ba813c57836a913de33ec1c378fa4"
+        "sha256": "73bb58f13f8067fb7c65c71166ea882108f0c56a8206c4155ccd73e13eff79e7"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -4168,7 +4168,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave927-runtime-rs-build-scripts-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
@@ -4177,10 +4179,8 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "packages/runtime-rs/build.sh",
@@ -4190,8 +4190,8 @@
       "language": "shell",
       "composition": {
         "metrics": {
-          "bytes": 1766,
-          "lines": 65,
+          "bytes": 2388,
+          "lines": 86,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -4205,9 +4205,9 @@
         "risk_signals": [
           "distribution_or_worker_surface"
         ],
-        "priority_score": 2,
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "ebaa32652d9fe695be9afa0f94ea0a18e6a5182313fbc325bed45304489c27c6"
+        "sha256": "94f31e04ee146a4c34ff908bb7c88ceb7f5bff522270cab18bcad7c0be53ef9d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -4215,7 +4215,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave927-runtime-rs-build-scripts-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
         "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
@@ -4224,10 +4226,8 @@
           "npm run verify:benchmark-evidence"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "packages/runtime-rs/Cargo.toml",
@@ -4472,6 +4472,7 @@
         "direct_test_refs": [
           "tests/agent-verify-ratelimit.test.js",
           "tests/wave211-ci-hotfix.test.js",
+          "tests/wave927-runtime-rs-build-scripts-contract.test.js",
           "tests/wrapper-r-enrich.test.js"
         ],
         "category_links": [],
