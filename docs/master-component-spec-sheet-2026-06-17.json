@@ -9,7 +9,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 93.2,
-    "frontier_product_score": 69.8,
+    "frontier_product_score": 69.9,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 717,
-    "direct_test_reference_pct": 86.5,
-    "components_without_direct_test_reference": 112,
+    "direct_test_referenced_components": 719,
+    "direct_test_reference_pct": 86.7,
+    "components_without_direct_test_reference": 110,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -2246,8 +2246,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 2624189,
-          "lines": 57100,
+          "bytes": 2624456,
+          "lines": 57103,
           "imports": 541,
           "exports": 1,
           "routes": 0,
@@ -2269,7 +2269,7 @@
         ],
         "priority_score": 11,
         "priority_band": "high",
-        "sha256": "a01fe3a1beb53b8a9730a9e2d73cdc28e7307b960646ae7cb6dedf11ee072024"
+        "sha256": "6add4259f6329eddff4583ad52fcb6dae92170932b3c51254be10e2abd989858"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -12542,6 +12542,9 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave697-cerebras-adapter-contract.test.js",
+          "tests/wave888b-cloud-providers.test.js",
+          "tests/wave888c-devices.test.js",
           "tests/wave923-session-surfaces.test.js"
         ],
         "category_links": [],
@@ -13744,6 +13747,9 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave697-cerebras-adapter-contract.test.js",
+          "tests/wave888b-cloud-providers.test.js",
+          "tests/wave888c-devices.test.js",
           "tests/wave923-session-surfaces.test.js"
         ],
         "category_links": [],
@@ -17884,24 +17890,24 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 4040,
-          "lines": 105,
-          "imports": 3,
-          "exports": 2,
+          "bytes": 9921,
+          "lines": 271,
+          "imports": 4,
+          "exports": 3,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 3,
+          "crypto_refs": 6,
           "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "1f2e802731b128412d32e3ab56321b6eec8c6755b7bda9909c08399bc5fd17a1"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "b3c9d2f798721650629a68681776c82405d1842a4137ad15551c90c363bd3d6e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -17909,7 +17915,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave697-cerebras-adapter-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -17918,10 +17926,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/device-adapters/index.js",
@@ -17944,7 +17950,7 @@
           "markers": 0
         },
         "risk_signals": [],
-        "priority_score": 1,
+        "priority_score": 0,
         "priority_band": "normal",
         "sha256": "8b0b8db795c336759a5bac8a82dd7b1bfbd05e6dad6003959eddcbb0c7da2fca"
       },
@@ -17954,7 +17960,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave697-cerebras-adapter-contract.test.js"
+        ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
         "innovation_opportunity": "Add provider/device boot probes that turn estimated capability rows into tested deployment evidence.",
@@ -17963,10 +17971,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "direct_test_reference_missing"
-      ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/device-adapters/k8s-adapter.js",
@@ -18073,7 +18079,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 906,
+          "bytes": 904,
           "lines": 24,
           "imports": 1,
           "exports": 2,
@@ -18090,7 +18096,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "a158c97d7541c136414b74ed5e7f6de5fb05093d58d494c27c2c816ad38b8552"
+        "sha256": "31a5e5b6e259aabe05b35dacb12d9b4b11a647f4d5f0a0f7e9bc3b92ac3f28ef"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -18168,7 +18174,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 925,
+          "bytes": 923,
           "lines": 24,
           "imports": 1,
           "exports": 2,
@@ -18185,7 +18191,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "6970fcfd1c314a191f1c82d5518901d3b003c60dad1800e120fce5a9a9ffded6"
+        "sha256": "870e517d31f653bac0b2788afb6a76bdbf95a592e69a3621acaa2aa7a54a6612"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -18327,7 +18333,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 12924,
+          "bytes": 12963,
           "lines": 292,
           "imports": 4,
           "exports": 2,
@@ -18344,7 +18350,7 @@
         ],
         "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "c0b3d10cc4e191a491ba8ec690722b1f0209c8978f41551132b0f1b2ff662960"
+        "sha256": "4e5718c9325b945995fbca3e5b430240425c76dd0ccf789d3e746dbaf5c93cf4"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -18353,6 +18359,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave697-cerebras-adapter-contract.test.js",
           "tests/wave888c-devices.test.js"
         ],
         "category_links": [],
@@ -18504,7 +18511,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 11594,
+          "bytes": 11606,
           "lines": 292,
           "imports": 4,
           "exports": 4,
@@ -18523,7 +18530,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "647550b31de8a48b223def3cef4fa0bfdbada9295b257be5a766299b28335fa1"
+        "sha256": "a6a00b5b5040ab1dfb28338984446e5b75ff5283ae387e9b06cec48cfee89c3e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -18532,6 +18539,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave697-cerebras-adapter-contract.test.js",
           "tests/wave888c-devices.test.js"
         ],
         "category_links": [],
@@ -30441,8 +30449,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 41371,
-          "lines": 683,
+          "bytes": 42805,
+          "lines": 698,
           "imports": 1,
           "exports": 13,
           "routes": 0,
@@ -30459,7 +30467,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "c76450b85d751fbf8f832708c48d922f73f7307f7eb1abf27ba5cf00a336d90f"
+        "sha256": "59d05d8b307c0be8eb18349ec8992b51537754fda264aee880e7362cf8d804e3"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -30471,7 +30479,8 @@
           "tests/finalized-c13-product-cohesion.test.js",
           "tests/wave553-codegraph-cloud-platform.test.js",
           "tests/wave558-object-storage-cloud-contract.test.js",
-          "tests/wave611-platform-capability-evidence.test.js"
+          "tests/wave611-platform-capability-evidence.test.js",
+          "tests/wave697-cerebras-adapter-contract.test.js"
         ],
         "category_links": [
           {
@@ -38106,6 +38115,9 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave697-cerebras-adapter-contract.test.js",
+          "tests/wave888b-cloud-providers.test.js",
+          "tests/wave888c-devices.test.js",
           "tests/wave923-session-surfaces.test.js"
         ],
         "category_links": [],

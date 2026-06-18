@@ -2,7 +2,7 @@
 //
 // Deferred to W888-B cloud module (src/cloud-providers/runpod.js already
 // ships the serving-endpoint create path). This adapter exists so the
-// adapter table is uniform across all 6 device types; calling it returns a
+// adapter table is uniform across all device types; calling it returns a
 // deterministic "not_yet_wired" envelope until W889 ties the runpod cloud
 // provider into the deploy pipeline.
 

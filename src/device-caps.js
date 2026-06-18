@@ -275,14 +275,14 @@ export async function deviceCaps(device, sshConnFactory = null) {
         }
       }
     }
-    if (device.type === 'ollama' || device.type === 'k8s' || device.type === 'runpod' || device.type === 'modal') {
+    if (device.type === 'ollama' || device.type === 'k8s' || device.type === 'runpod' || device.type === 'modal' || device.type === 'cerebras') {
       return {
         ok: false,
         error: 'probe_not_supported_for_type',
         hint: `type=${device.type} is reachable over HTTP/API not SSH; use the adapter health endpoint instead`,
       };
     }
-    return { ok: false, error: 'unknown_device_type', hint: `type "${device.type}" not in {ssh,local,ollama,k8s,runpod,modal}` };
+    return { ok: false, error: 'unknown_device_type', hint: `type "${device.type}" not in {ssh,local,ollama,k8s,runpod,modal,cerebras}` };
   } catch (e) {
     return { ok: false, error: e && e.message ? e.message : String(e), hint: 'check ssh reachability + key path' };
   }

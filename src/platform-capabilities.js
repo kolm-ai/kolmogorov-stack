@@ -47,6 +47,15 @@ export const MODEL_FRAMEWORK_TARGETS = Object.freeze([
     status: 'implemented',
   },
   {
+    id: 'cerebras-cloud-inference',
+    family: 'gateway-api',
+    model_types: ['chat', 'teacher-eval', 'high-throughput-inference'],
+    runtime_formats: ['openai-compatible-http'],
+    env: ['CEREBRAS_API_KEY', 'KOLM_CEREBRAS_TOKEN'],
+    evidence: ['src/cloud-providers/cerebras.js', 'src/device-adapters/cerebras-adapter.js', 'src/teachers/cerebras.js'],
+    status: 'implemented',
+  },
+  {
     id: 'gguf-llama-cpp',
     family: 'local-runtime',
     model_types: ['dense-llm', 'moe-llm', 'embedding'],
@@ -182,6 +191,7 @@ export const MODEL_FAMILY_TARGETS = Object.freeze([
   { id: 'frontier-teacher-gpt', class: 'teacher', modalities: ['text', 'vision', 'tool-calling'], evidence: ['src/completions-api.js'], status: 'implemented' },
   { id: 'frontier-teacher-claude', class: 'teacher', modalities: ['text', 'vision', 'tool-use'], evidence: ['src/compute/backends/anthropic.js'], status: 'implemented' },
   { id: 'frontier-teacher-gemini', class: 'teacher', modalities: ['text', 'vision', 'audio'], evidence: ['src/provider-registry.js', 'src/completions-api.js'], status: 'implemented' },
+  { id: 'frontier-teacher-cerebras', class: 'teacher', modalities: ['text', 'code'], evidence: ['src/teachers/cerebras.js', 'src/teacher-bridge.mjs', 'scripts/cerebras-bench.mjs'], status: 'implemented' },
   { id: 'open-weight-dense-llm', class: 'student', modalities: ['text', 'code'], evidence: ['src/model-registry.js', 'src/model-weights-manifest.js'], status: 'implemented' },
   { id: 'open-weight-moe-llm', class: 'student', modalities: ['text', 'code'], evidence: ['src/model-registry.js', 'src/moe.js'], status: 'implemented' },
   { id: 'small-language-model', class: 'student', modalities: ['text'], evidence: ['src/model-registry.js', 'src/distill-pipeline.js'], status: 'implemented' },
@@ -218,6 +228,7 @@ export const DEVICE_TARGETS = Object.freeze([
   { id: 'vercel-edge', class: 'edge-cloud', runtimes: ['edge-runtime', 'wasm'], evidence: ['vercel.json', 'docs/cloud-product-readiness.md'], status: 'target-declared' },
   { id: 'aws-lambda', class: 'cloud', runtimes: ['node', 'container'], evidence: ['server.js', 'docs/cloud-product-readiness.md'], status: 'implemented' },
   { id: 'kubernetes-gpu', class: 'cloud-gpu', runtimes: ['vllm', 'sglang', 'tgi', 'triton'], evidence: ['src/compute/registry.json', 'src/remote-compute.js'], status: 'implemented' },
+  { id: 'cerebras-cloud-inference', class: 'cloud-inference', runtimes: ['openai-compatible-http'], evidence: ['src/cloud-providers/cerebras.js', 'src/device-adapters/cerebras-adapter.js'], status: 'implemented' },
   { id: 'remote-ssh-gpu', class: 'self-hosted-gpu', runtimes: ['ssh', 'docker'], evidence: ['src/remote-compute.js', 'src/compute/registry.json'], status: 'implemented' },
   { id: 'airgapped-server', class: 'enterprise', runtimes: ['docker', 'offline-cli'], evidence: ['src/airgap-routes.js', 'src/airgap-bundle.js', 'docs/kolm-format-v1.md'], status: 'implemented' },
 ]);
@@ -357,13 +368,14 @@ const CLOUD_GROUPS = Object.freeze([
   { id: 'anthropic-teacher', label: 'Claude teacher/evaluator', category: 'teacher-provider', required: ['ANTHROPIC_API_KEY'], optional: ['ANTHROPIC_MODEL'], docs_url: 'https://docs.anthropic.com/en/api/overview', setup_hint: 'Use Claude as a teacher, judge, or fallback provider without forcing OpenAI-only flows.', caveats: ['Model/version pinning matters for reproducible evals.'] },
   { id: 'openai-teacher', label: 'OpenAI teacher/evaluator', category: 'teacher-provider', required: ['OPENAI_API_KEY'], optional: ['OPENAI_MODEL'], docs_url: 'https://platform.openai.com/docs', setup_hint: 'Use OpenAI as a teacher, judge, capture source, or OpenAI-compatible client target.', caveats: ['Record model ids and response hashes in receipts before promoting eval claims.'] },
   { id: 'openrouter-teacher', label: 'OpenRouter teacher/evaluator', category: 'teacher-provider', required: ['OPENROUTER_API_KEY'], optional: [], docs_url: 'https://openrouter.ai/docs', setup_hint: 'Use OpenRouter for provider breadth while preserving Kolm capture, cost, and fallback metadata.', caveats: ['Downstream provider behavior can vary; use K-score gates before promotion.'] },
+  { id: 'cerebras-inference', label: 'Cerebras Cloud Inference', category: 'teacher-provider', required_any_sets: [['CEREBRAS_API_KEY'], ['KOLM_CEREBRAS_TOKEN']], optional: ['KOLM_CEREBRAS_URL'], docs_url: 'https://inference-docs.cerebras.ai/', setup_hint: 'Use for high-throughput OpenAI-compatible teacher/evaluator inference and namespace bindings.', caveats: ['Cerebras Cloud Inference is a hosted inference target; it does not upload or train customer LoRA adapters through this adapter.'] },
   { id: 'otel-collector', label: 'OpenTelemetry collector', category: 'observability', required: ['KOLM_OTEL', 'OTEL_EXPORTER_OTLP_ENDPOINT'], optional: ['OTEL_EXPORTER_OTLP_HEADERS'], docs_url: 'https://opentelemetry.io/docs/', setup_hint: 'Send gateway/runtime spans and metrics to the customer monitoring stack.', caveats: ['Do not put secrets in OTEL attributes or headers shown in account UI.'] },
   { id: 'enterprise-sso', label: 'Enterprise SSO/SCIM', category: 'enterprise-identity', required_any_sets: [['KOLM_SAML_METADATA_URL'], ['WORKOS_API_KEY'], ['AUTH0_DOMAIN']], optional: ['KOLM_SCIM_TOKEN'], docs_url: 'https://workos.com/docs', setup_hint: 'Use for enterprise identity readiness, SAML/SCIM onboarding, and admin-controlled workspaces.', caveats: ['Live SSO/SCIM still requires customer IdP metadata exchange and tenant-specific validation.'] },
 ]);
 
 const STORAGE_PROVIDER_IDS = Object.freeze(['cloudflare-r2', 's3-compatible', 'aws-s3', 'supabase-storage']);
 const COMPUTE_PROVIDER_IDS = Object.freeze(['modal-gpu', 'runpod-gpu', 'lambda-gpu', 'vast-gpu', 'remote-ssh-gpu', 'together-managed-train']);
-const TEACHER_PROVIDER_IDS = Object.freeze(['anthropic-teacher', 'openai-teacher', 'openrouter-teacher']);
+const TEACHER_PROVIDER_IDS = Object.freeze(['anthropic-teacher', 'openai-teacher', 'openrouter-teacher', 'cerebras-inference']);
 
 export const DEPLOYMENT_PROFILES = Object.freeze([
   {
@@ -544,6 +556,7 @@ export function validatePlatformCapabilities() {
   const requiredFrameworks = [
     'openai-compatible',
     'anthropic-messages',
+    'cerebras-cloud-inference',
     'gguf-llama-cpp',
     'safetensors-peft',
     'onnx-runtime',
@@ -566,6 +579,7 @@ export function validatePlatformCapabilities() {
     'frontier-teacher-gpt',
     'frontier-teacher-claude',
     'frontier-teacher-gemini',
+    'frontier-teacher-cerebras',
     'open-weight-dense-llm',
     'open-weight-moe-llm',
     'vision-language-model',
@@ -588,6 +602,7 @@ export function validatePlatformCapabilities() {
     'browser-webgpu',
     'cloudflare-workers',
     'aws-lambda',
+    'cerebras-cloud-inference',
     'remote-ssh-gpu',
     'airgapped-server',
   ];

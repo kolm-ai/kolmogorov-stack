@@ -2041,7 +2041,7 @@ EXAMPLES
 
 USAGE
   kolm test <artifact.kolm> [--regression] [--adversarial] [--json]
-  kolm test cloud --provider <runpod|modal> | --storage <s3|postgres> | --all
+  kolm test cloud --provider <runpod|modal|cerebras> | --storage <s3|postgres> | --all
   kolm test ship-gate [--json] [--report <path>] [--failures-only] [--skip=<ids>]
   kolm test e2e --persona <indie|enterprise|no-gpu|full> [--full] [--json]
 
@@ -4083,7 +4083,7 @@ POLICY LADDER
   devices: `kolm devices - operator-registered device fleet. (W372 + W888-C)
 
 USAGE
-  kolm devices add --id <id> --host <host> [--type ssh|local|ollama|k8s|runpod|modal]
+  kolm devices add --id <id> [--host <host>] [--type ssh|local|ollama|k8s|runpod|modal|cerebras]
                    [--port 22] [--user <user>] [--key ~/.ssh/id_ed25519] [--tag a,b,c]
   kolm devices list [--type <t>] [--tag <t>] [--status online|offline|unknown] [--json]
   kolm devices show <id> [--json]
@@ -4101,6 +4101,7 @@ DEVICE TYPES (W888-C)
   k8s      Kubernetes cluster (kubectl on PATH)
   runpod   RunPod cloud GPU (stub; via src/cloud-providers/runpod.js)
   modal    Modal cloud GPU  (stub; via src/cloud-providers/modal.js)
+  cerebras Cerebras Cloud Inference binding (via src/cloud-providers/cerebras.js)
 
 FLAGS
   --json     deterministic JSON envelope for scripts
@@ -12702,13 +12703,14 @@ async function cmdTest(args) {
 // W888-B - Unified cloud smoke test runner. Wires:
 //   kolm test cloud --provider runpod      RunPod compute reachability
 //   kolm test cloud --provider modal       Modal compute reachability
+//   kolm test cloud --provider cerebras    Cerebras model catalog reachability
 //   kolm test cloud --storage s3           S3 put/get/delete round-trip
 //   kolm test cloud --storage postgres     Postgres migrate/insert/read/delete
 //   kolm test cloud --all                  All of the above
 // Output (--json):  { ok, target, latency_ms, detail, ts }
 async function cmdTestCloud(args) {
   if (args && (args.includes('--help') || args.includes('-h'))) {
-    console.log('kolm test cloud --provider <runpod|modal>');
+    console.log('kolm test cloud --provider <runpod|modal|cerebras>');
     console.log('kolm test cloud --storage <s3|postgres>');
     console.log('kolm test cloud --all');
     console.log('');
@@ -12727,6 +12729,7 @@ async function cmdTestCloud(args) {
   if (all) {
     targets.push({ kind: 'provider', name: 'runpod' });
     targets.push({ kind: 'provider', name: 'modal' });
+    targets.push({ kind: 'provider', name: 'cerebras' });
     targets.push({ kind: 'storage', name: 's3' });
     targets.push({ kind: 'storage', name: 'postgres' });
   } else {
@@ -12737,11 +12740,11 @@ async function cmdTestCloud(args) {
     if (jsonFlag) {
       console.log(JSON.stringify({
         ok: false,
-        error: 'no target specified; pass --provider <runpod|modal> or --storage <s3|postgres> or --all',
+        error: 'no target specified; pass --provider <runpod|modal|cerebras> or --storage <s3|postgres> or --all',
         install_hint: 'kolm test cloud --all',
       }, null, 2));
     } else {
-      console.error('error: pass --provider <runpod|modal>, --storage <s3|postgres>, or --all');
+      console.error('error: pass --provider <runpod|modal|cerebras>, --storage <s3|postgres>, or --all');
       console.error('       run: kolm test cloud --help');
     }
     process.exit(EXIT.BAD_ARGS);

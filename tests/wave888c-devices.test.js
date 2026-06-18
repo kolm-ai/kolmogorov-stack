@@ -3,7 +3,7 @@
 // These tests cover the W888-C surface added in this wave:
 //   - src/device-registry.js                (single-file JSON registry)
 //   - src/device-caps.js                    (hardware probe over ssh|local)
-//   - src/device-adapters/{ssh,local,ollama,k8s,runpod,modal}-adapter.js
+//   - src/device-adapters/{ssh,local,ollama,k8s,runpod,modal,cerebras}-adapter.js
 //   - cli/kolm.js cmdDevices                (add / list / show / probe / remove)
 //   - src/router.js /v1/devices/* W888-C    (register / list / probe /
 //                                             heartbeat / delete / get)
@@ -656,8 +656,8 @@ test('W888-C #18 — HTTP DELETE /v1/devices/:id soft-deletes the device', async
 // Bonus: structural lock-ins on the exported constants — pins the surface so
 // future refactors can't silently shrink the device-type set.
 //
-test('W888-C — DEVICE_TYPES_LIST contains all 6 canonical device types', () => {
-  assert.deepEqual([...DEVICE_TYPES_LIST].sort(), ['k8s', 'local', 'modal', 'ollama', 'runpod', 'ssh']);
+test('W888-C — DEVICE_TYPES_LIST contains all 7 canonical device types', () => {
+  assert.deepEqual([...DEVICE_TYPES_LIST].sort(), ['cerebras', 'k8s', 'local', 'modal', 'ollama', 'runpod', 'ssh']);
   assert.ok(DEVICE_STATUSES.includes('unknown'));
   assert.ok(DEVICE_STATUSES.includes('online'));
   assert.ok(DEVICE_STATUSES.includes('offline'));

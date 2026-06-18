@@ -40,7 +40,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-const DEVICE_TYPES = new Set(['ssh', 'local', 'ollama', 'k8s', 'runpod', 'modal']);
+const DEVICE_TYPES = new Set(['ssh', 'local', 'ollama', 'k8s', 'runpod', 'modal', 'cerebras']);
 const VALID_STATUSES = new Set(['unknown', 'online', 'offline', 'error']);
 
 function _defaultDataDir() {

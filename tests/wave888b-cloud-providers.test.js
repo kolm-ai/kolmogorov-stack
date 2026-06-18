@@ -30,7 +30,7 @@
 //  12) smokePostgresStore() (direct call) uses target='postgres'. Note: the
 //      CLI's no-url short-circuit path emits 'storage:postgres' before ever
 //      calling smokePostgresStore — both labels are valid surface contracts.
-//  13) `kolm test cloud --all --json` exercises all four targets and
+//  13) `kolm test cloud --all --json` exercises all five targets and
 //      emits an aggregate { ok, targets:[...] } shape with the canonical
 //      kind:name labels from _smokeOneCloudTarget().
 //  14) `kolm test cloud --dry-run --provider runpod --json` forces
@@ -71,6 +71,8 @@ function runCli(argv, extraEnv = {}) {
     MODAL_TOKEN_ID: '',
     MODAL_TOKEN_SECRET: '',
     KOLM_MODAL_TOKEN: '',
+    CEREBRAS_API_KEY: '',
+    KOLM_CEREBRAS_TOKEN: '',
     AWS_ACCESS_KEY_ID: '',
     AWS_SECRET_ACCESS_KEY: '',
     KOLM_S3_BUCKET: '',
@@ -339,19 +341,19 @@ test('W888-B #12 — smokePostgresStore() direct call uses target="postgres" (li
 });
 
 // ---------------------------------------------------------------------------
-// 13) `kolm test cloud --all --json` covers all four targets
+// 13) `kolm test cloud --all --json` covers all five targets
 // ---------------------------------------------------------------------------
-test('W888-B #13 — `kolm test cloud --all --json` emits an aggregate of all four targets', () => {
+test('W888-B #13 — `kolm test cloud --all --json` emits an aggregate of all five targets', () => {
   const r = runCli(['test', 'cloud', '--all', '--json']);
   assert.ok(r.body, `must emit parseable JSON; got stdout=${r.stdout.slice(0, 400)}`);
   assert.equal(typeof r.body.ok, 'boolean');
   assert.ok(Array.isArray(r.body.targets), '.targets must be an array');
-  // All four targets present. The CLI's _smokeOneCloudTarget shim emits the
+  // All five targets present. The CLI's _smokeOneCloudTarget shim emits the
   // canonical kind:name labels for the no-url short-circuit path — the
   // direct-call live path label is asserted in lock-in #12.
   const labels = r.body.targets.map((t) => t.target).sort();
-  assert.deepEqual(labels, ['provider:modal', 'provider:runpod', 'storage:postgres', 'storage:s3'],
-    `--all must hit exactly the four canonical targets; got: ${JSON.stringify(labels)}`);
+  assert.deepEqual(labels, ['provider:cerebras', 'provider:modal', 'provider:runpod', 'storage:postgres', 'storage:s3'],
+    `--all must hit exactly the five canonical targets; got: ${JSON.stringify(labels)}`);
   for (const t of r.body.targets) {
     assert.equal(typeof t.latency_ms, 'number');
     assert.ok(t.detail && typeof t.detail === 'object');
