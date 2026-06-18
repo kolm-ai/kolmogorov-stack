@@ -54,7 +54,7 @@ Interpretation: local code/spec discipline is strong and fully inventoried, but 
 | `src/binder.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_binder_contract_matrix_and_verifier_failure_taxonomy. |
 | `src/data-curate.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/distill-pipeline.js` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
-| `src/intent.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
+| `src/intent.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_intent_contract_matrix_and_routing_workflow_taxonomy. |
 | `src/otel.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping. |
 | `src/spec-compile.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/wrapper-cli.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |

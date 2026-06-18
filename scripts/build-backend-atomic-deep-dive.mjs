@@ -19,12 +19,15 @@ const QUANTIZE_WORKER_MATRIX = path.join(ROOT, 'docs', 'internal', 'quantize-wor
 const QUANTIZE_WORKER_MATRIX_TEST = path.join(ROOT, 'tests', 'wave941-quantize-worker-matrix.test.js');
 const BINDER_CONTRACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'binder-contract-matrix.json');
 const BINDER_CONTRACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave942-binder-contract-matrix.test.js');
+const INTENT_CONTRACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'intent-contract-matrix.json');
+const INTENT_CONTRACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave943-intent-contract-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
 let daemonConnectorMatrixGreen = null;
 let quantizeWorkerMatrixGreen = null;
 let binderContractMatrixGreen = null;
+let intentContractMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -274,6 +277,39 @@ function binderContractMatrixOk() {
   return binderContractMatrixGreen;
 }
 
+function intentContractMatrixOk() {
+  if (intentContractMatrixGreen != null) return intentContractMatrixGreen;
+  try {
+    if (!fs.existsSync(INTENT_CONTRACT_MATRIX) || !fs.existsSync(INTENT_CONTRACT_MATRIX_TEST)) {
+      intentContractMatrixGreen = false;
+      return intentContractMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(INTENT_CONTRACT_MATRIX, 'utf8'));
+    intentContractMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.intent_contract_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.verb_count >= 90
+      && matrix.summary.duplicate_verb_count === 0
+      && matrix.summary.phrase_collision_count === 0
+      && matrix.summary.phrasing_count >= 800
+      && matrix.summary.regex_rule_count >= 18
+      && matrix.summary.workflow_count >= 16
+      && matrix.summary.subcommand_workflow_count >= 2
+      && matrix.summary.required_verb_gaps === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('src/intent.js')
+    );
+  } catch {
+    intentContractMatrixGreen = false;
+  }
+  return intentContractMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -426,6 +462,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'src/daemon-connector.js' && daemonConnectorMatrixOk()) return 'maintain_generated_daemon_connector_matrix_and_privacy_proxy_contract';
   if (rel === 'workers/quantize/scripts/quantize.py' && quantizeWorkerMatrixOk()) return 'maintain_generated_quantize_worker_matrix_and_frontier_method_contract';
   if (rel === 'src/binder.js' && binderContractMatrixOk()) return 'maintain_generated_binder_contract_matrix_and_verifier_failure_taxonomy';
+  if (rel === 'src/intent.js' && intentContractMatrixOk()) return 'maintain_generated_intent_contract_matrix_and_routing_workflow_taxonomy';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -480,7 +517,7 @@ function commandsFor(domain) {
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
     infra_cloud_device: ['npm run verify:platform', 'npm run verify:package-release'],
     developer_distribution: ['npm run verify:cli-command-matrix', 'npm run verify:package-release'],
-    platform_support: ['npm run verify:daemon-connector-matrix', 'npm run verify:binder-contract-matrix', 'npm run verify:codegraph'],
+    platform_support: ['npm run verify:daemon-connector-matrix', 'npm run verify:binder-contract-matrix', 'npm run verify:intent-contract-matrix', 'npm run verify:codegraph'],
   };
   return map[domain] || ['npm run verify:codegraph'];
 }

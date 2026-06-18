@@ -1,0 +1,1704 @@
+{
+  "confidence_floors": [
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.7,
+      "line": 724,
+      "verb": "compile"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.7,
+      "line": 724,
+      "verb": "deploy"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.7,
+      "line": 724,
+      "verb": "distill"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.7,
+      "line": 724,
+      "verb": "publish"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.7,
+      "line": 724,
+      "verb": "pull"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.7,
+      "line": 725,
+      "verb": "cloud"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 725,
+      "verb": "export"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.7,
+      "line": 725,
+      "verb": "federated"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 725,
+      "verb": "migrate"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 725,
+      "verb": "quantize"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 726,
+      "verb": "build"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.7,
+      "line": 726,
+      "verb": "cloud train"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 726,
+      "verb": "fix"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 726,
+      "verb": "import"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 726,
+      "verb": "tune"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 727,
+      "verb": "anonymize"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 727,
+      "verb": "pack"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.65,
+      "line": 727,
+      "verb": "redact"
+    },
+    {
+      "class": "destructive_or_paid",
+      "floor": 0.8,
+      "line": 727,
+      "verb": "rotate keys"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 729,
+      "verb": "health"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 729,
+      "verb": "list"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 729,
+      "verb": "status"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 729,
+      "verb": "what"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 729,
+      "verb": "whoami"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 730,
+      "verb": "jobs"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 730,
+      "verb": "logs"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 730,
+      "verb": "metrics"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 730,
+      "verb": "sessions"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 730,
+      "verb": "version"
+    },
+    {
+      "class": "medium",
+      "floor": 0.5,
+      "line": 731,
+      "verb": "hub"
+    },
+    {
+      "class": "medium",
+      "floor": 0.5,
+      "line": 731,
+      "verb": "lake"
+    },
+    {
+      "class": "medium",
+      "floor": 0.5,
+      "line": 731,
+      "verb": "lineage"
+    },
+    {
+      "class": "medium",
+      "floor": 0.5,
+      "line": 731,
+      "verb": "opportunities"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.3,
+      "line": 733,
+      "verb": "ask"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.4,
+      "line": 733,
+      "verb": "chat"
+    },
+    {
+      "class": "read_only_or_fallback",
+      "floor": 0.45,
+      "line": 733,
+      "verb": "next"
+    }
+  ],
+  "duplicate_verbs": [],
+  "exports": [
+    {
+      "async": false,
+      "kind": "const",
+      "line": 59,
+      "name": "VERB_DESCRIPTIONS"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 597,
+      "name": "listVerbs"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 1317,
+      "name": "classifyIntent"
+    },
+    {
+      "async": true,
+      "kind": "function",
+      "line": 1506,
+      "name": "snapshotContext"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 1833,
+      "name": "recommendNext"
+    },
+    {
+      "async": false,
+      "kind": "function",
+      "line": 2147,
+      "name": "expandToWorkflow"
+    },
+    {
+      "async": false,
+      "kind": "default",
+      "line": 2266,
+      "name": "default"
+    }
+  ],
+  "failed_safety_guards": [],
+  "functions": [
+    {
+      "async": false,
+      "exported": true,
+      "line": 597,
+      "name": "listVerbs"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 633,
+      "name": "_edit1"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 661,
+      "name": "fuzzyCorrect"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 736,
+      "name": "verbFloor"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 771,
+      "name": "resolvePronouns"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 798,
+      "name": "normalize"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 818,
+      "name": "tokens"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 843,
+      "name": "keywordMatch"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1138,
+      "name": "regexMatch"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1162,
+      "name": "overlapRank"
+    },
+    {
+      "async": true,
+      "exported": false,
+      "line": 1199,
+      "name": "llmClassify"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1256,
+      "name": "parseLlmResponse"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1281,
+      "name": "llmConfig"
+    },
+    {
+      "async": true,
+      "exported": true,
+      "line": 1317,
+      "name": "classifyIntent"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1483,
+      "name": "pickContextualNamespace"
+    },
+    {
+      "async": true,
+      "exported": true,
+      "line": 1506,
+      "name": "snapshotContext"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1799,
+      "name": "pickTopKey"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1810,
+      "name": "aggregateNamespaces"
+    },
+    {
+      "async": false,
+      "exported": false,
+      "line": 1824,
+      "name": "currentTenantFilterValue"
+    },
+    {
+      "async": false,
+      "exported": true,
+      "line": 1833,
+      "name": "recommendNext"
+    },
+    {
+      "async": false,
+      "exported": true,
+      "line": 2147,
+      "name": "expandToWorkflow"
+    }
+  ],
+  "gates": {
+    "failures": [],
+    "ok": true,
+    "warnings": []
+  },
+  "missing_required_exports": [],
+  "missing_required_verbs": [],
+  "phrase_collisions": [],
+  "public_return_shapes": {
+    "classifyIntent": [
+      "verb",
+      "args",
+      "confidence",
+      "alternatives",
+      "source",
+      "matchedPhrase",
+      "subcommand",
+      "original",
+      "normalized"
+    ],
+    "expandToWorkflow": [
+      "summary",
+      "namespace_hint",
+      "steps"
+    ],
+    "recommendNext": [
+      "action",
+      "command",
+      "why",
+      "rank"
+    ],
+    "snapshotContext": [
+      "cwd",
+      "home",
+      "artifacts",
+      "captures_summary",
+      "jobs",
+      "config",
+      "current_tenant",
+      "counts",
+      "lake",
+      "opportunities",
+      "datasets",
+      "generated_at"
+    ]
+  },
+  "purpose": "Generated contract matrix for the natural-language intent dispatcher boundary: verb catalog, phrase ownership, regex extractors, LLM opt-in fallback, tenant-scoped snapshots, next-action ranking, workflow expansion, and CLI/router evidence.",
+  "regex_rules": [
+    {
+      "emits_args": true,
+      "line": 889,
+      "matched_phrase": false,
+      "pattern": "/(?:show|list|tail|watch|stream|see|follow)\\s+(?:my\\s+)?captures?(?:\\s+(?:in|from|for|under|of)\\s+(?:namespace\\s+)?[\"'`]?([\\w.\\-:/]+)[\"'`]?)?/i",
+      "verb": "tail"
+    },
+    {
+      "emits_args": true,
+      "line": 899,
+      "matched_phrase": false,
+      "pattern": "/(?:how many|count|number of)\\s+captures?(?:\\s+(?:in|from|for|under)\\s+(?:namespace\\s+)?[\"'`]?([\\w.\\-:/]+)[\"'`]?)?/i",
+      "verb": "capture"
+    },
+    {
+      "emits_args": true,
+      "line": 909,
+      "matched_phrase": false,
+      "pattern": "/(?:distill|train|fine[- ]?tune)(?:\\s+(?:from|using|with))?\\s+(?:my\\s+)?captures?(?:\\s+(?:in|from|for|under)\\s+(?:namespace\\s+)?[\"'`]?([\\w.\\-:/]+)[\"'`]?)?/i",
+      "verb": "distill"
+    },
+    {
+      "emits_args": false,
+      "line": 924,
+      "matched_phrase": true,
+      "pattern": "/(?:multi[- ]?teacher|teacher[- ]?council|ensemble\\s+teachers?|multiple\\s+teachers?|distill\\s+(?:from\\s+)?(?:multiple|several|both)\\s+teachers?)/i",
+      "verb": "distill"
+    },
+    {
+      "emits_args": true,
+      "line": 965,
+      "matched_phrase": true,
+      "pattern": "/distill\\s+(?:[^,]{0,30}\\s+)?(?:from|with|using)\\s+([\\w.\\-]+(?:\\s*[, ]\\s*(?:and\\s+)?[\\w.\\-]+){1,})(?:\\s+together)?/i",
+      "verb": "distill"
+    },
+    {
+      "emits_args": true,
+      "line": 1001,
+      "matched_phrase": true,
+      "pattern": "/\\b(?:federated|consortium)\\b/i",
+      "verb": "federated"
+    },
+    {
+      "emits_args": true,
+      "line": 1021,
+      "matched_phrase": true,
+      "pattern": "/\\b(?:confidence[- ]?rout(?:ing|er)|route\\s+(?:the\\s+)?easy(?:\\s+\\d+%?)?|cheap\\s+(?:base\\s+)?model\\s+for(?:\\s+the)?\\s+easy|frontier\\s+only\\s+when|route\\s+(?:only\\s+)?on\\s+confidence)\\b/i",
+      "verb": "route"
+    },
+    {
+      "emits_args": false,
+      "line": 1032,
+      "matched_phrase": false,
+      "pattern": "/(?:build|make|create|scaffold)\\s+(?:a\\s+)?(redactor|classifier|extractor|extraction|chatbot|agent)(?:\\s+(?:from|using)\\s+[\"'`]?([^\"'`]+?)[\"'`]?)?$/i",
+      "verb": "init-agent"
+    },
+    {
+      "emits_args": true,
+      "line": 1042,
+      "matched_phrase": false,
+      "pattern": "/compile(?:\\s+(?:the|my))?\\s+([\\w.\\-/\\\\]+\\.(?:spec\\.json|spec|yaml|yml|json))$/i",
+      "verb": "compile"
+    },
+    {
+      "emits_args": true,
+      "line": 1047,
+      "matched_phrase": false,
+      "pattern": "/(?:run|execute|invoke|call)\\s+([\\w.\\-/\\\\]+\\.kolm)(?:\\s+(?:on|with|against)\\s+[\"'`]([^\"'`]+)[\"'`])?/i",
+      "verb": "run"
+    },
+    {
+      "emits_args": true,
+      "line": 1057,
+      "matched_phrase": false,
+      "pattern": "/(?:inspect|open|explain|describe|eval|evaluate|verify|audit|bench|benchmark)\\s+(?:the\\s+)?([\\w.\\-/\\\\]+\\.kolm)/i",
+      "verb": "seeds"
+    },
+    {
+      "emits_args": true,
+      "line": 1080,
+      "matched_phrase": false,
+      "pattern": "/(?:generate|create|make)\\s+(\\d+)\\s+(?:synthetic\\s+)?(?:examples?|seeds?|rows?)/i",
+      "verb": "seeds"
+    },
+    {
+      "emits_args": true,
+      "line": 1090,
+      "matched_phrase": false,
+      "pattern": "/export\\s+([\\w.\\-/\\\\]+\\.kolm)\\s+(?:to|as)\\s+(gguf|mlx|onnx|coreml|tensorrt)/i",
+      "verb": "export"
+    },
+    {
+      "emits_args": true,
+      "line": 1100,
+      "matched_phrase": false,
+      "pattern": "/(?:publish|push|upload|share)\\s+([\\w.\\-/\\\\]+\\.kolm)(?:\\s+(public|private))?/i",
+      "verb": "publish"
+    },
+    {
+      "emits_args": true,
+      "line": 1110,
+      "matched_phrase": false,
+      "pattern": "/(?:pull|download|get|fetch)\\s+([\\w\\-]+\\/[\\w.\\-]+(?:@sha:[a-f0-9]+)?)/i",
+      "verb": "pull"
+    },
+    {
+      "emits_args": true,
+      "line": 1115,
+      "matched_phrase": false,
+      "pattern": "/(?:install|wire|integrate)\\s+(claude(?:-code)?|cursor|continue|cline)/i",
+      "verb": "install"
+    },
+    {
+      "emits_args": true,
+      "line": 1123,
+      "matched_phrase": false,
+      "pattern": "/(?:search|find)\\s+(?:the\\s+)?marketplace\\s+(?:for\\s+)?([\\w\\s\\-]+)/i",
+      "verb": "marketplace"
+    },
+    {
+      "emits_args": false,
+      "line": 1128,
+      "matched_phrase": false,
+      "pattern": "/(?:log\\s*in|login|sign\\s*in|auth(?:enticate)?)(?:\\s+with\\s+(?:key\\s+)?(ks_[a-z0-9_]+))?/i",
+      "verb": "login"
+    }
+  ],
+  "required_exports": [
+    "VERB_DESCRIPTIONS",
+    "listVerbs",
+    "classifyIntent",
+    "snapshotContext",
+    "recommendNext",
+    "expandToWorkflow"
+  ],
+  "required_test_evidence": [
+    "tests/wave351-intent.test.js",
+    "tests/wave352-do-what-next.test.js",
+    "tests/wave353-agent-guide.test.js",
+    "tests/wave389-production-ready-parity.test.js",
+    "tests/wave412-nl-intent-w409-verbs.test.js",
+    "tests/wave414-tui-next-view.test.js",
+    "tests/wave417-definition-of-done.test.js",
+    "tests/wave432-intent-tenant-scope.test.js",
+    "tests/wave457-telemetry-reconciliation.test.js",
+    "tests/wave943-intent-contract-matrix.test.js"
+  ],
+  "required_verbs": [
+    "compile",
+    "run",
+    "eval",
+    "bench",
+    "verify",
+    "inspect",
+    "list",
+    "tail",
+    "capture",
+    "distill",
+    "replay",
+    "serve",
+    "publish",
+    "pull",
+    "hub",
+    "marketplace",
+    "login",
+    "signup",
+    "whoami",
+    "status",
+    "health",
+    "doctor",
+    "quickstart",
+    "build",
+    "models",
+    "gpu",
+    "export",
+    "quantize",
+    "cloud",
+    "ask",
+    "do",
+    "what",
+    "next",
+    "fix",
+    "lake",
+    "opportunities",
+    "dataset",
+    "labels",
+    "bakeoff",
+    "gateway",
+    "route",
+    "pipeline",
+    "lineage",
+    "regulatory"
+  ],
+  "safety_guards": {
+    "classifier_layer_order_documented": true,
+    "cli_do_what_next_uses_intent": true,
+    "confidence_floors_cover_paid_verbs": true,
+    "examples_present_for_every_verb": true,
+    "followup_affirm_previous_workflow": true,
+    "keyword_phrasing_density": true,
+    "llm_opt_in_env_gated": true,
+    "llm_response_known_verbs_only": true,
+    "low_confidence_destructive_floor": true,
+    "multi_teacher_workflow_present": true,
+    "pronoun_resolution_context": true,
+    "quickstart_subcommand_workflows": true,
+    "recommend_next_ranked_and_capped": true,
+    "regex_rules_present": true,
+    "required_public_exports_present": true,
+    "router_intent_routes_tenant_scoped": true,
+    "sandbox_home_skips_live_probes": true,
+    "snapshot_api_keys_redacted": true,
+    "snapshot_tenant_scope": true,
+    "verb_catalog_large_enough": true,
+    "verb_catalog_unique": true,
+    "verb_phrase_collisions_absent": true,
+    "workflow_expansions_present": true
+  },
+  "schema": "kolm.intent_contract_matrix.v1",
+  "sources": [
+    "src/intent.js",
+    "src/router.js",
+    "cli/kolm.js",
+    "tests/wave351-intent.test.js",
+    "tests/wave352-do-what-next.test.js",
+    "tests/wave353-agent-guide.test.js",
+    "tests/wave389-production-ready-parity.test.js",
+    "tests/wave412-nl-intent-w409-verbs.test.js",
+    "tests/wave414-tui-next-view.test.js",
+    "tests/wave417-definition-of-done.test.js",
+    "tests/wave432-intent-tenant-scope.test.js",
+    "tests/wave457-telemetry-reconciliation.test.js",
+    "tests/wave943-intent-contract-matrix.test.js"
+  ],
+  "subcommand_workflows": [
+    {
+      "line": 684,
+      "step_count": 3,
+      "subcommand": "wrapper",
+      "verb": "quickstart"
+    },
+    {
+      "line": 692,
+      "step_count": 3,
+      "subcommand": "studio",
+      "verb": "quickstart"
+    }
+  ],
+  "summary": {
+    "confidence_floor_count": 36,
+    "direct_test_evidence_count": 10,
+    "duplicate_verb_count": 0,
+    "example_count": 124,
+    "export_count": 7,
+    "failed_safety_guards": 0,
+    "function_count": 21,
+    "intent_bytes": 119057,
+    "intent_lines": 2274,
+    "missing_required_exports": 0,
+    "missing_test_evidence": 0,
+    "phrase_collision_count": 0,
+    "phrasing_count": 823,
+    "regex_rule_count": 18,
+    "required_test_evidence_count": 10,
+    "required_verb_gaps": 0,
+    "subcommand_workflow_count": 2,
+    "unique_phrasing_count": 823,
+    "unique_verb_count": 94,
+    "verb_count": 94,
+    "workflow_count": 16
+  },
+  "test_evidence": [
+    {
+      "catalog_refs": 10,
+      "classify_refs": 29,
+      "direct_import": true,
+      "list_verbs_refs": 6,
+      "path": "tests/wave351-intent.test.js",
+      "previous_workflow_refs": 0,
+      "recommend_refs": 12,
+      "snapshot_refs": 9,
+      "source_lock": true,
+      "workflow_refs": 0
+    },
+    {
+      "catalog_refs": 0,
+      "classify_refs": 0,
+      "direct_import": false,
+      "list_verbs_refs": 0,
+      "path": "tests/wave352-do-what-next.test.js",
+      "previous_workflow_refs": 0,
+      "recommend_refs": 0,
+      "snapshot_refs": 1,
+      "source_lock": false,
+      "workflow_refs": 0
+    },
+    {
+      "catalog_refs": 6,
+      "classify_refs": 0,
+      "direct_import": true,
+      "list_verbs_refs": 4,
+      "path": "tests/wave353-agent-guide.test.js",
+      "previous_workflow_refs": 0,
+      "recommend_refs": 0,
+      "snapshot_refs": 0,
+      "source_lock": true,
+      "workflow_refs": 0
+    },
+    {
+      "catalog_refs": 0,
+      "classify_refs": 0,
+      "direct_import": true,
+      "list_verbs_refs": 0,
+      "path": "tests/wave389-production-ready-parity.test.js",
+      "previous_workflow_refs": 0,
+      "recommend_refs": 0,
+      "snapshot_refs": 6,
+      "source_lock": true,
+      "workflow_refs": 0
+    },
+    {
+      "catalog_refs": 4,
+      "classify_refs": 7,
+      "direct_import": true,
+      "list_verbs_refs": 2,
+      "path": "tests/wave412-nl-intent-w409-verbs.test.js",
+      "previous_workflow_refs": 0,
+      "recommend_refs": 11,
+      "snapshot_refs": 4,
+      "source_lock": true,
+      "workflow_refs": 0
+    },
+    {
+      "catalog_refs": 0,
+      "classify_refs": 0,
+      "direct_import": false,
+      "list_verbs_refs": 0,
+      "path": "tests/wave414-tui-next-view.test.js",
+      "previous_workflow_refs": 0,
+      "recommend_refs": 1,
+      "snapshot_refs": 1,
+      "source_lock": false,
+      "workflow_refs": 0
+    },
+    {
+      "catalog_refs": 0,
+      "classify_refs": 0,
+      "direct_import": true,
+      "list_verbs_refs": 0,
+      "path": "tests/wave417-definition-of-done.test.js",
+      "previous_workflow_refs": 0,
+      "recommend_refs": 3,
+      "snapshot_refs": 3,
+      "source_lock": true,
+      "workflow_refs": 0
+    },
+    {
+      "catalog_refs": 0,
+      "classify_refs": 0,
+      "direct_import": true,
+      "list_verbs_refs": 0,
+      "path": "tests/wave432-intent-tenant-scope.test.js",
+      "previous_workflow_refs": 0,
+      "recommend_refs": 0,
+      "snapshot_refs": 15,
+      "source_lock": false,
+      "workflow_refs": 0
+    },
+    {
+      "catalog_refs": 0,
+      "classify_refs": 0,
+      "direct_import": true,
+      "list_verbs_refs": 0,
+      "path": "tests/wave457-telemetry-reconciliation.test.js",
+      "previous_workflow_refs": 0,
+      "recommend_refs": 0,
+      "snapshot_refs": 12,
+      "source_lock": true,
+      "workflow_refs": 0
+    },
+    {
+      "catalog_refs": 4,
+      "classify_refs": 10,
+      "direct_import": true,
+      "list_verbs_refs": 4,
+      "path": "tests/wave943-intent-contract-matrix.test.js",
+      "previous_workflow_refs": 1,
+      "recommend_refs": 1,
+      "snapshot_refs": 1,
+      "source_lock": true,
+      "workflow_refs": 4
+    }
+  ],
+  "updated_at": "2026-06-18",
+  "verb_catalog": [
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 60,
+      "phrasing_count": 17,
+      "verb": "compile"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 67,
+      "phrasing_count": 13,
+      "verb": "run"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 74,
+      "phrasing_count": 4,
+      "verb": "eval"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 78,
+      "phrasing_count": 4,
+      "verb": "bench"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 82,
+      "phrasing_count": 33,
+      "verb": "verify"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 96,
+      "phrasing_count": 4,
+      "verb": "inspect"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 100,
+      "phrasing_count": 17,
+      "verb": "list"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 108,
+      "phrasing_count": 4,
+      "verb": "artifacts"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 112,
+      "phrasing_count": 10,
+      "verb": "tail"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 117,
+      "phrasing_count": 36,
+      "verb": "capture"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 131,
+      "phrasing_count": 41,
+      "verb": "distill"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 151,
+      "phrasing_count": 3,
+      "verb": "replay"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 155,
+      "phrasing_count": 5,
+      "verb": "serve"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 159,
+      "phrasing_count": 3,
+      "verb": "publish"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 163,
+      "phrasing_count": 3,
+      "verb": "pull"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 167,
+      "phrasing_count": 4,
+      "verb": "hub"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 171,
+      "phrasing_count": 3,
+      "verb": "marketplace"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 175,
+      "phrasing_count": 15,
+      "verb": "login"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 182,
+      "phrasing_count": 12,
+      "verb": "signup"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 188,
+      "phrasing_count": 14,
+      "verb": "whoami"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 194,
+      "phrasing_count": 4,
+      "verb": "status"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 198,
+      "phrasing_count": 4,
+      "verb": "health"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 202,
+      "phrasing_count": 3,
+      "verb": "metrics"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 206,
+      "phrasing_count": 4,
+      "verb": "support-bundle"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 210,
+      "phrasing_count": 5,
+      "verb": "init"
+    },
+    {
+      "example_count": 3,
+      "has_desc": true,
+      "has_when": true,
+      "line": 216,
+      "phrasing_count": 24,
+      "verb": "quickstart"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 225,
+      "phrasing_count": 4,
+      "verb": "init-agent"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 229,
+      "phrasing_count": 4,
+      "verb": "new"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 233,
+      "phrasing_count": 14,
+      "verb": "build"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 240,
+      "phrasing_count": 5,
+      "verb": "seeds"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 244,
+      "phrasing_count": 4,
+      "verb": "redact"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 248,
+      "phrasing_count": 3,
+      "verb": "anonymize"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 252,
+      "phrasing_count": 15,
+      "verb": "doctor"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 259,
+      "phrasing_count": 5,
+      "verb": "loop"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 263,
+      "phrasing_count": 5,
+      "verb": "logs"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 267,
+      "phrasing_count": 3,
+      "verb": "jobs"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 271,
+      "phrasing_count": 3,
+      "verb": "watch"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 275,
+      "phrasing_count": 3,
+      "verb": "sessions"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 279,
+      "phrasing_count": 3,
+      "verb": "resume"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 283,
+      "phrasing_count": 4,
+      "verb": "rescue"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 287,
+      "phrasing_count": 5,
+      "verb": "install"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 291,
+      "phrasing_count": 8,
+      "verb": "models"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 296,
+      "phrasing_count": 4,
+      "verb": "gpu"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 300,
+      "phrasing_count": 4,
+      "verb": "export"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 304,
+      "phrasing_count": 21,
+      "verb": "quantize"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 312,
+      "phrasing_count": 4,
+      "verb": "runtime"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 316,
+      "phrasing_count": 4,
+      "verb": "profile"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 320,
+      "phrasing_count": 4,
+      "verb": "team"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 324,
+      "phrasing_count": 3,
+      "verb": "tunnel"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 328,
+      "phrasing_count": 3,
+      "verb": "compute"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 332,
+      "phrasing_count": 21,
+      "verb": "airgap"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 341,
+      "phrasing_count": 4,
+      "verb": "rag"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 345,
+      "phrasing_count": 4,
+      "verb": "tune"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 349,
+      "phrasing_count": 3,
+      "verb": "drift"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 353,
+      "phrasing_count": 3,
+      "verb": "config"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 357,
+      "phrasing_count": 4,
+      "verb": "keys"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 361,
+      "phrasing_count": 3,
+      "verb": "completion"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 365,
+      "phrasing_count": 3,
+      "verb": "upgrade"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 369,
+      "phrasing_count": 4,
+      "verb": "update"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 373,
+      "phrasing_count": 4,
+      "verb": "version"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 377,
+      "phrasing_count": 12,
+      "verb": "tui"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 384,
+      "phrasing_count": 3,
+      "verb": "repl"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 388,
+      "phrasing_count": 13,
+      "verb": "chat"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 395,
+      "phrasing_count": 2,
+      "verb": "ask"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 399,
+      "phrasing_count": 3,
+      "verb": "do"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 407,
+      "phrasing_count": 13,
+      "verb": "what"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 413,
+      "phrasing_count": 13,
+      "verb": "next"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 420,
+      "phrasing_count": 4,
+      "verb": "explain"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 424,
+      "phrasing_count": 4,
+      "verb": "fix"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 431,
+      "phrasing_count": 27,
+      "verb": "lake"
+    },
+    {
+      "example_count": 1,
+      "has_desc": true,
+      "has_when": true,
+      "line": 441,
+      "phrasing_count": 25,
+      "verb": "opportunities"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 451,
+      "phrasing_count": 20,
+      "verb": "dataset"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 460,
+      "phrasing_count": 9,
+      "verb": "labels"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 465,
+      "phrasing_count": 22,
+      "verb": "bakeoff"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 480,
+      "phrasing_count": 11,
+      "verb": "diagnose"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 486,
+      "phrasing_count": 11,
+      "verb": "gateway"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 492,
+      "phrasing_count": 16,
+      "verb": "route"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 500,
+      "phrasing_count": 10,
+      "verb": "import"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 506,
+      "phrasing_count": 8,
+      "verb": "migrate"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 511,
+      "phrasing_count": 9,
+      "verb": "pack"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 516,
+      "phrasing_count": 8,
+      "verb": "pipeline"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 521,
+      "phrasing_count": 9,
+      "verb": "lineage"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 526,
+      "phrasing_count": 8,
+      "verb": "guardrails"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 532,
+      "phrasing_count": 9,
+      "verb": "tool"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 537,
+      "phrasing_count": 7,
+      "verb": "long-context"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 542,
+      "phrasing_count": 7,
+      "verb": "approvals"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 547,
+      "phrasing_count": 7,
+      "verb": "chargeback"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 552,
+      "phrasing_count": 6,
+      "verb": "failure-modes"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 557,
+      "phrasing_count": 6,
+      "verb": "active-learn"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 562,
+      "phrasing_count": 5,
+      "verb": "failure-to-capture-loop"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 567,
+      "phrasing_count": 8,
+      "verb": "federated"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 572,
+      "phrasing_count": 7,
+      "verb": "lingual"
+    },
+    {
+      "example_count": 2,
+      "has_desc": true,
+      "has_when": true,
+      "line": 577,
+      "phrasing_count": 8,
+      "verb": "regulatory"
+    },
+    {
+      "example_count": 4,
+      "has_desc": true,
+      "has_when": true,
+      "line": 583,
+      "phrasing_count": 16,
+      "verb": "cloud"
+    }
+  ],
+  "workflows": [
+    {
+      "has_summary": true,
+      "line": 2002,
+      "namespace_hinted": true,
+      "step_count": 4,
+      "workflow": "compile"
+    },
+    {
+      "has_summary": true,
+      "line": 2011,
+      "namespace_hinted": true,
+      "step_count": 4,
+      "workflow": "distill"
+    },
+    {
+      "has_summary": true,
+      "line": 2024,
+      "namespace_hinted": true,
+      "step_count": 6,
+      "workflow": "multi_teacher_distill"
+    },
+    {
+      "has_summary": true,
+      "line": 2036,
+      "namespace_hinted": false,
+      "step_count": 2,
+      "workflow": "run"
+    },
+    {
+      "has_summary": true,
+      "line": 2043,
+      "namespace_hinted": false,
+      "step_count": 2,
+      "workflow": "bench"
+    },
+    {
+      "has_summary": true,
+      "line": 2050,
+      "namespace_hinted": false,
+      "step_count": 2,
+      "workflow": "verify"
+    },
+    {
+      "has_summary": true,
+      "line": 2057,
+      "namespace_hinted": true,
+      "step_count": 2,
+      "workflow": "replay"
+    },
+    {
+      "has_summary": true,
+      "line": 2064,
+      "namespace_hinted": true,
+      "step_count": 2,
+      "workflow": "bakeoff"
+    },
+    {
+      "has_summary": true,
+      "line": 2071,
+      "namespace_hinted": true,
+      "step_count": 3,
+      "workflow": "dataset"
+    },
+    {
+      "has_summary": true,
+      "line": 2079,
+      "namespace_hinted": false,
+      "step_count": 3,
+      "workflow": "quantize"
+    },
+    {
+      "has_summary": true,
+      "line": 2087,
+      "namespace_hinted": false,
+      "step_count": 2,
+      "workflow": "export"
+    },
+    {
+      "has_summary": true,
+      "line": 2094,
+      "namespace_hinted": true,
+      "step_count": 3,
+      "workflow": "capture"
+    },
+    {
+      "has_summary": true,
+      "line": 2102,
+      "namespace_hinted": true,
+      "step_count": 3,
+      "workflow": "lake"
+    },
+    {
+      "has_summary": true,
+      "line": 2110,
+      "namespace_hinted": false,
+      "step_count": 2,
+      "workflow": "fix"
+    },
+    {
+      "has_summary": true,
+      "line": 2117,
+      "namespace_hinted": false,
+      "step_count": 3,
+      "workflow": "serve"
+    },
+    {
+      "has_summary": true,
+      "line": 2128,
+      "namespace_hinted": false,
+      "step_count": 3,
+      "workflow": "quickstart"
+    }
+  ]
+}
