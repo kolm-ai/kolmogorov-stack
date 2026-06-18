@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 729,
-    "components_without_direct_test_reference": 100,
+    "test_referenced_components": 730,
+    "components_without_direct_test_reference": 99,
     "high_priority_components": 49,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 410,
+      "cryptographic_or_proof_boundary": 411,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 314,
       "execution_or_subprocess_boundary": 233,
@@ -29302,22 +29302,25 @@
       "surface": "core-backend",
       "domain": "billing_marketplace",
       "language": "javascript",
-      "sha256": "c8600b32ec5e79aaa97a65269079acc99fddb19156014d97db403617e0e81866",
+      "sha256": "f26c990ed04f27fb7fe9abaa6ad019867c0ec7bedbc36324411e6ad7d6f835c2",
       "metrics": {
-        "bytes": 6467,
-        "lines": 149,
-        "imports": 2,
-        "exports": 7,
+        "bytes": 14862,
+        "lines": 376,
+        "imports": 3,
+        "exports": 11,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave708-marketplace-payouts-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "money_or_entitlement_path"
       ],
       "priority_score": 4,
@@ -29430,7 +29433,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave647-marketplace-routes-contract.test.js"
+        "tests/wave647-marketplace-routes-contract.test.js",
+        "tests/wave708-marketplace-payouts-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -33195,7 +33199,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave689-pii-bakeoff-scan-contract.test.js"
+        "tests/wave689-pii-bakeoff-scan-contract.test.js",
+        "tests/wave708-marketplace-payouts-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
