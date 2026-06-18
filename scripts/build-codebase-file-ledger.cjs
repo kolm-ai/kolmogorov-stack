@@ -101,6 +101,7 @@ const GENERATED_BY = [
   { gen: 'scripts/build-wave-registry.cjs', match: /^docs\/internal\/wave-reconcile-report\.json$/ },
   { gen: 'scripts/build-catalog-manifest.mjs', match: /^docs\/internal\/catalog-manifest\.json$/ },
   { gen: 'scripts/build-product-media-proof.cjs', match: /^docs\/internal\/product-media-proof\.json$/ },
+  { gen: 'scripts/build-api-contract-matrix.cjs', match: /^docs\/internal\/api-contract-matrix\.json$/ },
 ];
 
 function generatedBy(p) {
@@ -228,6 +229,7 @@ function main() {
     'docs/internal/wave-reconcile-report.json',
     'docs/internal/catalog-manifest.json',
     'docs/internal/product-media-proof.json',
+    'docs/internal/api-contract-matrix.json',
   ]);
   for (const sp of SELF_PATHS) all.delete(sp);
 

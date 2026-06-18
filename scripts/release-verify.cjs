@@ -12,7 +12,7 @@
 // Gates, in order:
 //   1.  npm run lint:refs                (static-ref + href integrity + product-surface
 //                                         catalog vs api-routes.json contract)
-//   2.  control-files                    (W855: 7 internal JSONs in docs/internal/
+//   2.  control-files                    (W855/W937: internal JSONs in docs/internal/
 //                                         parse + match expected schema strings +
 //                                         carry non-empty required arrays)
 //   3.  openapi-sync                     (W490: public/openapi.json covers every
@@ -273,6 +273,7 @@ async function gateControlFiles() {
   const t = Date.now();
   const CONTROL = [
     { file: 'docs/internal/catalog-manifest.json',     schema: 'kolm.catalog_manifest.v1',     requiredArrays: ['entries'] },
+    { file: 'docs/internal/api-contract-matrix.json',  schema: 'kolm.api_contract_matrix.v1',  requiredArrays: ['routes', 'route_groups'] },
     { file: 'docs/internal/codebase-file-ledger.json', schema: 'kolm.codebase_file_ledger.v1', requiredArrays: ['paths'] },
     { file: 'docs/internal/design-cascade-ledger.json',schema: 'kolm.design_cascade_ledger.v1',requiredArrays: ['files'] },
     { file: 'docs/internal/product-media-proof.json',  schema: 'kolm.product_media_proof.v1',  requiredArrays: ['pages'] },
@@ -302,7 +303,7 @@ async function gateControlFiles() {
   }
   const ok = failures.length === 0;
   recordResult('control-files', ok, {
-    detail: ok ? `7 files ok: ${summaries.join(', ')}` : failures.join('; '),
+    detail: ok ? `${CONTROL.length} files ok: ${summaries.join(', ')}` : failures.join('; '),
     files: CONTROL.length,
     failures: failures.length,
     duration_ms: Date.now() - t,

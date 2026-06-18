@@ -18,6 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { classifyRouteSecurity } = require('./api-contract-matrix-lib.cjs');
 
 const ROOT = path.resolve(__dirname, '..');
 const API_ROUTES = path.join(ROOT, 'public', 'docs', 'api-routes.json');
@@ -99,10 +100,14 @@ function descriptionFor(route) {
 }
 
 function buildOperation(route, tagLabel) {
+  const auth = classifyRouteSecurity(route);
   const op = {
     tags: [tagLabel],
     operationId: slugId(route.method, route.path),
     summary: summaryFor(route),
+    security: auth.openapi_security,
+    'x-kolm-auth': auth.level,
+    'x-kolm-auth-proof': auth.proof,
   };
   const desc = descriptionFor(route);
   if (desc) op.description = desc;
@@ -276,6 +281,9 @@ function operationContainsStaleKeysCopy(op, route) {
 function refreshRouteDerivedFields(op, route, tagLabel) {
   const generated = buildOperation(route, tagLabel);
   op.summary = generated.summary;
+  op.security = generated.security;
+  op['x-kolm-auth'] = generated['x-kolm-auth'];
+  op['x-kolm-auth-proof'] = generated['x-kolm-auth-proof'];
   if (generated.description) op.description = generated.description;
   else delete op.description;
   delete op['x-kolm-stub'];
@@ -327,6 +335,19 @@ for (const p of Object.keys(merged.paths)) {
 
 // Ensure shared response objects exist.
 if (!merged.components) merged.components = {};
+if (!merged.components.securitySchemes) merged.components.securitySchemes = {};
+merged.components.securitySchemes.bearerAuth = {
+  type: 'http',
+  scheme: 'bearer',
+  bearerFormat: 'Kolm API key or session bearer',
+  description: 'Authorization: Bearer <kolm API key or session token>.',
+};
+merged.components.securitySchemes.apiKeyAuth = {
+  type: 'apiKey',
+  in: 'header',
+  name: 'X-API-Key',
+  description: 'Kolm API key header accepted by authenticated API operations.',
+};
 if (!merged.components.responses) merged.components.responses = {};
 const RESPS = merged.components.responses;
 // W890-9 — every shared response carries a canonical example so the
@@ -468,6 +489,36 @@ for (const [oapiPath, methods] of Object.entries(merged.paths)) {
 // For ops where the response is an inline content schema without an example,
 // we backfill a minimal `{ ok: true }` example so machine generators (Postman
 // collections, SDK code-gen) produce realistic call payloads.
+// W937 - every operation carries explicit security metadata derived from the
+// same source-indexed route manifest used by the API contract matrix. Public
+// operations use `security: []`; authenticated operations accept bearer or
+// X-API-Key auth. Curated operations are refreshed here too.
+let backfilledSec = 0;
+for (const g of routes.groups || []) {
+  for (const route of g.routes || []) {
+    const m = String(route.method || '').toLowerCase();
+    if (!['get', 'post', 'put', 'patch', 'delete', 'options', 'head'].includes(m)) continue;
+    const oapiPath = openapiPath(route.path);
+    const op = merged.paths[oapiPath] && merged.paths[oapiPath][m];
+    if (!op) continue;
+    const auth = classifyRouteSecurity(route);
+    const before = JSON.stringify({
+      security: op.security,
+      auth: op['x-kolm-auth'],
+      proof: op['x-kolm-auth-proof'],
+    });
+    op.security = auth.openapi_security;
+    op['x-kolm-auth'] = auth.level;
+    op['x-kolm-auth-proof'] = auth.proof;
+    const after = JSON.stringify({
+      security: op.security,
+      auth: op['x-kolm-auth'],
+      proof: op['x-kolm-auth-proof'],
+    });
+    if (before !== after) backfilledSec++;
+  }
+}
+
 let backfilledEx = 0;
 function ensureResponseExample(responseObj) {
   if (!responseObj) return false;
@@ -514,5 +565,6 @@ console.log('  ops added:          ' + added);
 console.log('  ops kept (curated): ' + skipped);
 console.log('  ops refreshed:      ' + refreshed);
 console.log('  req backfilled:     ' + backfilledReq);
+console.log('  sec backfilled:     ' + backfilledSec);
 console.log('  ex  backfilled:     ' + backfilledEx);
 console.log('  tags:               ' + (merged.tags ? merged.tags.length : 0));

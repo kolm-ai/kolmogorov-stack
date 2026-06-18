@@ -7,6 +7,9 @@ const ROOT = path.resolve(process.cwd());
 const UPDATED_AT = '2026-06-17';
 const OUT = path.join(ROOT, 'docs', 'backend-atomic-component-deep-dive-2026-06-17.json');
 const args = new Set(process.argv.slice(2));
+const API_CONTRACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'api-contract-matrix.json');
+const API_CONTRACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave937-api-contract-matrix.test.js');
+let apiContractMatrixSourceSet = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -70,6 +73,34 @@ function sha256(body) {
 
 function readText(abs) {
   return fs.readFileSync(abs, 'utf8');
+}
+
+function apiContractMatrixSources() {
+  if (apiContractMatrixSourceSet) return apiContractMatrixSourceSet;
+  const out = new Set();
+  try {
+    if (!fs.existsSync(API_CONTRACT_MATRIX) || !fs.existsSync(API_CONTRACT_MATRIX_TEST)) {
+      apiContractMatrixSourceSet = out;
+      return out;
+    }
+    const matrix = JSON.parse(fs.readFileSync(API_CONTRACT_MATRIX, 'utf8'));
+    if (!matrix || matrix.schema !== 'kolm.api_contract_matrix.v1' || !matrix.gates || matrix.gates.ok !== true) {
+      apiContractMatrixSourceSet = out;
+      return out;
+    }
+    for (const route of matrix.routes || []) {
+      if (route && route.source) out.add(String(route.source).replace(/\\/g, '/'));
+    }
+  } catch {
+    // Keep the deep-dive builder best-effort. The dedicated matrix verifier
+    // owns schema and drift failure.
+  }
+  apiContractMatrixSourceSet = out;
+  return out;
+}
+
+function hasGeneratedApiContractMap(rel) {
+  return apiContractMatrixSources().has(String(rel || '').replace(/\\/g, '/'));
 }
 
 function isTextComponent(abs) {
@@ -219,8 +250,17 @@ function riskSignals(rel, metrics) {
 function improvementFor(domain, rel, metrics, tests) {
   const highRisk = riskSignals(rel, metrics).length >= 3;
   if (tests.length === 0 && highRisk) return 'add_targeted_contract_tests_for_high_risk_boundary';
-  if (metrics.lines >= 1200) return 'split_or_add_generated_contract_map_before_growth';
-  if (domain === 'api_surface') return 'route_contract_auth_idempotency_and_error_shape_matrix';
+  if (metrics.lines >= 1200) {
+    if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
+      return 'maintain_generated_api_contract_matrix_and_route_split_plan';
+    }
+    return 'split_or_add_generated_contract_map_before_growth';
+  }
+  if (domain === 'api_surface') {
+    return hasGeneratedApiContractMap(rel)
+      ? 'maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate'
+      : 'route_contract_auth_idempotency_and_error_shape_matrix';
+  }
   if (domain === 'identity_access') return 'policy_as_data_rbac_sso_and_key_lifecycle_tests';
   if (domain === 'billing_marketplace') return 'signed_entitlement_ledger_and_webhook_idempotency_proof';
   if (domain === 'trust_security_compliance') return 'unified_proof_chain_revocation_transparency_and_audit_exports';
@@ -236,7 +276,7 @@ function improvementFor(domain, rel, metrics, tests) {
 
 function innovationFor(domain) {
   return {
-    api_surface: 'Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.',
+    api_surface: 'Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.',
     identity_access: 'Turn RBAC, SSO, SCIM, key rotation, and tenant isolation into a policy-as-data engine with replayable access decisions.',
     billing_marketplace: 'Bind Stripe event id, entitlement grant, artifact delivery, and invoice line into one signed fulfillment chain.',
     trust_security_compliance: 'Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.',
@@ -253,7 +293,7 @@ function innovationFor(domain) {
 
 function commandsFor(domain) {
   const map = {
-    api_surface: ['npm run lint:refs', 'npm run verify:surfaces'],
+    api_surface: ['npm run verify:api-contract-matrix', 'npm run lint:refs', 'npm run verify:surfaces'],
     identity_access: ['node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js'],
     billing_marketplace: ['node --test --test-concurrency=1 tests/*billing*.test.js tests/*stripe*.test.js tests/*marketplace*.test.js'],
     trust_security_compliance: ['npm run verify:claims-scope', 'npm run verify:compliance-packet'],

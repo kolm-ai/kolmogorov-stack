@@ -374,8 +374,9 @@
           "relation": "sampled"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_and_route_split_plan.",
       "suggested_verification": [
+        "npm run verify:api-contract-matrix",
         "npm run lint:refs",
         "npm run verify:surfaces"
       ]
@@ -457,8 +458,9 @@
           "relation": "sampled"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_and_route_split_plan.",
       "suggested_verification": [
+        "npm run verify:api-contract-matrix",
         "npm run lint:refs",
         "npm run verify:surfaces"
       ]
@@ -1232,6 +1234,7 @@
       ],
       "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix.",
       "suggested_verification": [
+        "npm run verify:api-contract-matrix",
         "npm run lint:refs",
         "npm run verify:surfaces"
       ]
@@ -1611,8 +1614,9 @@
           "relation": "sampled"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix.",
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate.",
       "suggested_verification": [
+        "npm run verify:api-contract-matrix",
         "npm run lint:refs",
         "npm run verify:surfaces"
       ]
@@ -1642,6 +1646,7 @@
       ],
       "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix.",
       "suggested_verification": [
+        "npm run verify:api-contract-matrix",
         "npm run lint:refs",
         "npm run verify:surfaces"
       ]
@@ -1675,6 +1680,7 @@
       ],
       "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix.",
       "suggested_verification": [
+        "npm run verify:api-contract-matrix",
         "npm run lint:refs",
         "npm run verify:surfaces"
       ]
@@ -1910,8 +1916,9 @@
         ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -1968,8 +1975,9 @@
           }
         ],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -2026,8 +2034,9 @@
         ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -2089,8 +2098,9 @@
           }
         ],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -7038,8 +7048,9 @@
           }
         ],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -7356,8 +7367,9 @@
           }
         ],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -7401,18 +7413,20 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave822-ab-testing.test.js"
+          "tests/wave822-ab-testing.test.js",
+          "tests/wave937-api-contract-matrix.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/accelerate-backends/index.js",
@@ -7568,15 +7582,16 @@
           "tests/wave921-account-ui-routes.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/active-learning-queue.js",
@@ -8424,15 +8439,16 @@
           "tests/wave683-capture-forget-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/airgap-sneakernet.js",
@@ -9901,9 +9917,10 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "split_or_add_generated_contract_map_before_growth",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_and_route_split_plan",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -9911,7 +9928,7 @@
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_and_route_split_plan."
     },
     {
       "path": "src/audit-trail-analyzer.js",
@@ -13464,8 +13481,9 @@
         ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -15089,8 +15107,9 @@
         ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -22261,15 +22280,16 @@
           "tests/wave830-federated-consortium.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/federated-learning.js",
@@ -23109,8 +23129,9 @@
           }
         ],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -23206,8 +23227,9 @@
         ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -23345,15 +23367,16 @@
           "tests/wave921-govern-receipts-compliance.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/groups.js",
@@ -23854,8 +23877,9 @@
         ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -24172,9 +24196,10 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -24182,7 +24207,7 @@
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
     },
     {
       "path": "src/intoto-receipt.js",
@@ -24641,15 +24666,16 @@
           "tests/wave824-k8s.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/kernel-selector.js",
@@ -26384,15 +26410,16 @@
           "tests/synthesize-gated.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/lingual-synthesize.js",
@@ -26882,9 +26909,10 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -26892,7 +26920,7 @@
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
     },
     {
       "path": "src/marketplace-store.js",
@@ -27110,9 +27138,10 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -27120,7 +27149,7 @@
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
     },
     {
       "path": "src/mcp-gateway.js",
@@ -27608,7 +27637,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave710-meta-routes-contract.test.js"
+          "tests/wave710-meta-routes-contract.test.js",
+          "tests/wave937-api-contract-matrix.test.js"
         ],
         "category_links": [
           {
@@ -27624,9 +27654,10 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -27634,7 +27665,7 @@
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
     },
     {
       "path": "src/metrics.js",
@@ -28881,15 +28912,16 @@
           "tests/wave829-multimodal-pipeline.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/namespace-fingerprint.js",
@@ -30325,15 +30357,16 @@
           "tests/wave829-multimodal-pipeline.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/pipeline-runner.js",
@@ -33336,15 +33369,16 @@
           "tests/wave834-regulatory.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/region-aware-sampler.js",
@@ -33807,9 +33841,10 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "split_or_add_generated_contract_map_before_growth",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_and_route_split_plan",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -33817,7 +33852,7 @@
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_and_route_split_plan."
     },
     {
       "path": "src/routing-events.js",
@@ -34207,8 +34242,9 @@
         ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -34806,15 +34842,16 @@
           "tests/wave730-scim-provisioning-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/savings-tracker.js",
@@ -35693,8 +35730,9 @@
           }
         ],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -39216,9 +39254,10 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
@@ -39226,7 +39265,7 @@
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
+      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
     },
     {
       "path": "src/transparency-log.js",
@@ -40426,15 +40465,16 @@
           "tests/wave742-website-status-contract.test.js"
         ],
         "category_links": [],
-        "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
-        "innovation_opportunity": "Generate an auth/idempotency/error-shape route contract from live route registration and fail CI on unmapped routes.",
+        "improvement_track": "maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate",
+        "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
         "suggested_verification": [
+          "npm run verify:api-contract-matrix",
           "npm run lint:refs",
           "npm run verify:surfaces"
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/workflow-ir.js",
