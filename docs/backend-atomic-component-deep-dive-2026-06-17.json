@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 747,
-    "components_without_direct_test_reference": 82,
+    "test_referenced_components": 748,
+    "components_without_direct_test_reference": 81,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -66,7 +66,7 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 412,
+      "cryptographic_or_proof_boundary": 413,
       "distribution_or_worker_surface": 169,
       "environment_configuration_boundary": 315,
       "execution_or_subprocess_boundary": 235,
@@ -14168,26 +14168,29 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "dce87f83dd9144c5df3d405c381b7c813c2c301faecb79ad66356305b686efba",
+      "sha256": "a494c7a7a82be717a540ef2b76dd189e4867ad17d773a69d248a3c0e97de373a",
       "metrics": {
-        "bytes": 4625,
-        "lines": 110,
-        "imports": 1,
-        "exports": 4,
+        "bytes": 9892,
+        "lines": 302,
+        "imports": 2,
+        "exports": 6,
         "routes": 0,
         "env_refs": 3,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 2,
-        "crypto_refs": 0,
+        "crypto_refs": 5,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave776-fal-backend-contract.test.js"
+      ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 3,
+      "priority_score": 5,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
