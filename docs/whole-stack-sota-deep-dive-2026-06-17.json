@@ -656,11 +656,15 @@
           {
             "path": "src/forge-experts.js",
             "domain": "identity_access",
-            "priority_score": 4,
+            "priority_score": 5,
             "risk_signals": [
-              "auth_or_tenant_boundary"
+              "auth_or_tenant_boundary",
+              "cryptographic_or_proof_boundary",
+              "environment_configuration_boundary"
             ],
-            "test_refs": [],
+            "test_refs": [
+              "tests/wave701-forge-experts-contract.test.js"
+            ],
             "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests"
           },
           {

@@ -9,7 +9,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 93.4,
-    "frontier_product_score": 69.9,
+    "frontier_product_score": 70,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and shipped/implemented readiness requirements.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
@@ -35,9 +35,9 @@
     "component_count": 829,
     "atomic_deep_dive_complete": 829,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 722,
-    "direct_test_reference_pct": 87.1,
-    "components_without_direct_test_reference": 107,
+    "direct_test_referenced_components": 723,
+    "direct_test_reference_pct": 87.2,
+    "components_without_direct_test_reference": 106,
     "high_priority_components": 49,
     "high_priority_direct_test_referenced": 49,
     "high_priority_direct_test_reference_pct": 100,
@@ -22458,24 +22458,26 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 6374,
-          "lines": 156,
-          "imports": 3,
-          "exports": 4,
+          "bytes": 16733,
+          "lines": 484,
+          "imports": 5,
+          "exports": 13,
           "routes": 0,
-          "env_refs": 0,
+          "env_refs": 6,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
-          "auth_or_tenant_boundary"
+          "auth_or_tenant_boundary",
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary"
         ],
-        "priority_score": 4,
+        "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "524b28322f9b7c689a992259c609a260158cd9bd2dd65867838d3441ab72d13e"
+        "sha256": "162028557e0fe4fdf31e1b6f36ef7b7335350b5a526a40ce83069aaab99abd5d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -22483,7 +22485,9 @@
       },
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
-        "direct_test_refs": [],
+        "direct_test_refs": [
+          "tests/wave701-forge-experts-contract.test.js"
+        ],
         "category_links": [
           {
             "id": "moe-distill-quant",
@@ -22499,10 +22503,9 @@
         ]
       },
       "perfection_gaps": [
-        "direct_test_reference_missing",
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Add at least one direct test reference or document why coverage is indirect."
+      "next_best_action": "Execute the linked frontier track: policy_as_data_rbac_sso_and_key_lifecycle_tests."
     },
     {
       "path": "src/forge-fit.js",
@@ -22638,7 +22641,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave658-forge-inspect-contract.test.js"
+          "tests/wave658-forge-inspect-contract.test.js",
+          "tests/wave701-forge-experts-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "policy_as_data_rbac_sso_and_key_lifecycle_tests",
@@ -29866,7 +29870,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave659-pattern-lake-contract.test.js"
+          "tests/wave659-pattern-lake-contract.test.js",
+          "tests/wave701-forge-experts-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "tenant_scoped_cas_storage_retention_and_migration_simulation",
@@ -33622,8 +33627,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1467813,
-          "lines": 30776,
+          "bytes": 1467919,
+          "lines": 30777,
           "imports": 535,
           "exports": 8,
           "routes": 810,
@@ -33645,7 +33650,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "b8214cc6b90bc0f6ac7723ca4b7dd2ae632bca4de986444db5166f9de7268e71"
+        "sha256": "a3a607a561e6825a5d68bf5bdca10d28da7bf2155580730e24a5ece489ca7145"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

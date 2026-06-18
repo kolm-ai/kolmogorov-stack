@@ -30386,10 +30386,11 @@ res.json({
       }
       const analysis = await forgeExperts.analyzeExperts(body.artifact_path, {
         threshold: Number(body.threshold || forgeExperts.DEFAULT_PRUNE_THRESHOLD),
+        allowed_roots: forgeExperts.defaultAllowedArtifactRoots(),
       });
       res.json({ ok: true, ...analysis });
     } catch (e) {
-      res.status(500).json({ ok: false, error: String(e.message || e) });
+      res.status(forgeExperts.expertErrorStatus(e)).json({ ok: false, error: forgeExperts.safeExpertError(e) });
     }
   });
 
