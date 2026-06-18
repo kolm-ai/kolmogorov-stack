@@ -34,11 +34,25 @@
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import path from 'node:path';
 
 export const FINGERPRINT_VERSION = 'w715-v1';
+export const FINGERPRINT_CONTRACT_VERSION = 'w712-v1';
 export const TOP_TERMS_K = 32;
 export const MIN_TOKEN_LENGTH = 2;
 export const MAX_TOKEN_LENGTH = 32;
+export const FINGERPRINT_LIMITS = Object.freeze({
+  max_captures: 5000,
+  max_text_chars_per_capture: 24000,
+  max_messages_per_capture: 64,
+  max_nearest_k: 50,
+  max_fingerprint_file_bytes: 1024 * 1024,
+  max_namespace_chars: 128,
+});
+
+const SAFE_NAMESPACE_RE = /^[A-Za-z0-9_.:-]{1,128}$/;
+const HEX64_RE = /^[a-f0-9]{64}$/;
+const FP_ID_RE = /^fp_[a-f0-9]{24}$/;
 
 // VERTICAL_STUBS - scaffold for W751-W755. Each list is a tiny seed of
 // distinctive single-word terms for the vertical. The matcher is dumb on
@@ -107,12 +121,28 @@ function _sha256Hex(s) {
   return crypto.createHash('sha256').update(s).digest('hex');
 }
 
+function _namespaceHash(namespace) {
+  if (namespace == null || namespace === '') return null;
+  return _sha256Hex(FINGERPRINT_VERSION + ':namespace:' + String(namespace));
+}
+
+function _safeNamespace(namespace) {
+  if (namespace == null || namespace === '') return null;
+  const s = String(namespace).slice(0, FINGERPRINT_LIMITS.max_namespace_chars);
+  if (SAFE_NAMESPACE_RE.test(s)) return s;
+  return 'ns_' + _namespaceHash(namespace).slice(0, 24);
+}
+
+function _boundedText(s) {
+  return String(s == null ? '' : s).slice(0, FINGERPRINT_LIMITS.max_text_chars_per_capture);
+}
+
 function _extractText(capture) {
   // Captures land in many shapes from many surfaces (chat, agent trace,
   // connector). We read in priority order: explicit text fields first,
   // then output/response, never raw_body/raw_text (those keep PII).
   if (!capture || typeof capture !== 'object') return '';
-  if (typeof capture.text === 'string') return capture.text;
+  if (typeof capture.text === 'string') return _boundedText(capture.text);
   const parts = [];
   if (typeof capture.prompt === 'string') parts.push(capture.prompt);
   if (typeof capture.input === 'string') parts.push(capture.input);
@@ -123,11 +153,11 @@ function _extractText(capture) {
   if (typeof capture.assistant === 'string') parts.push(capture.assistant);
   // Tool-call style messages - pull every string-typed message[].content.
   if (Array.isArray(capture.messages)) {
-    for (const m of capture.messages) {
+    for (const m of capture.messages.slice(0, FINGERPRINT_LIMITS.max_messages_per_capture)) {
       if (m && typeof m.content === 'string') parts.push(m.content);
     }
   }
-  return parts.join(' ');
+  return _boundedText(parts.join(' '));
 }
 
 // verticalGuess(token_counts) → one of {legal, medical, code, finance,
@@ -165,16 +195,23 @@ export function verticalGuess(token_counts) {
 // Privacy lock: returned object passes through JSON.stringify with NO raw
 // capture text (W715 test #8 enforces).
 export function computeFingerprint(opts = {}) {
-  const captures = Array.isArray(opts.captures) ? opts.captures : [];
-  const namespace = typeof opts.namespace === 'string' ? opts.namespace : null;
+  const rawCaptures = Array.isArray(opts.captures) ? opts.captures : [];
+  const captures = rawCaptures.slice(0, FINGERPRINT_LIMITS.max_captures);
+  const rawNamespace = typeof opts.namespace === 'string' ? opts.namespace : null;
+  const namespace = _safeNamespace(rawNamespace);
+  const namespace_hash = _namespaceHash(rawNamespace);
 
   if (captures.length === 0) {
     // Honest empty envelope. Same shape as the populated path so consumers
     // never have to branch - they just see n_captures=0 + zeroed hashes.
     return {
       version: FINGERPRINT_VERSION,
+      contract_version: FINGERPRINT_CONTRACT_VERSION,
       namespace,
+      namespace_hash,
       n_captures: 0,
+      n_captures_seen: rawCaptures.length,
+      captures_truncated: rawCaptures.length > FINGERPRINT_LIMITS.max_captures,
       n_tokens: 0,
       n_unique_terms: 0,
       token_bag_hash: ''.padEnd(64, '0'),
@@ -225,8 +262,12 @@ export function computeFingerprint(opts = {}) {
 
   return {
     version: FINGERPRINT_VERSION,
+    contract_version: FINGERPRINT_CONTRACT_VERSION,
     namespace,
+    namespace_hash,
     n_captures: captures.length,
+    n_captures_seen: rawCaptures.length,
+    captures_truncated: rawCaptures.length > FINGERPRINT_LIMITS.max_captures,
     n_tokens,
     n_unique_terms: Object.keys(bigram_counts).length,
     token_bag_hash,
@@ -245,8 +286,8 @@ export function computeFingerprint(opts = {}) {
 // Range [0, 1]; identical → 1.0; disjoint → 0.0.
 export function cosineSimilarity(fp1, fp2) {
   if (!fp1 || !fp2) return 0;
-  const a = Array.isArray(fp1.top_terms_hash_array) ? fp1.top_terms_hash_array : [];
-  const b = Array.isArray(fp2.top_terms_hash_array) ? fp2.top_terms_hash_array : [];
+  const a = _hashArray(fp1.top_terms_hash_array);
+  const b = _hashArray(fp2.top_terms_hash_array);
   if (a.length === 0 && b.length === 0) {
     // Two empty fingerprints. Returning 1 would say "perfect siblings"
     // which is misleading; returning 0 is honest "no signal to compare".
@@ -261,31 +302,56 @@ export function cosineSimilarity(fp1, fp2) {
 }
 
 // findNearestNamespaces(target_fp, candidate_fps, k) - ranked list of the
-// top-K siblings by cosineSimilarity, descending. Each entry is
-// {namespace, fingerprint_id, similarity, vertical_guess,
-//  warm_start_checkpoint_path?}. The optional checkpoint path is
-// preserved from the candidate fingerprint when present - that is the
-// hook W715-2 trainer reads with --warm-start-from-fingerprint.
+// top-K siblings by cosineSimilarity, descending. Each entry carries only a
+// safe namespace ref/hash, fingerprint_id, similarity, vertical_guess, and a
+// checkpoint hash ref. Raw warm_start_checkpoint_path is returned only when
+// explicitly requested with {include_paths:true} by a same-tenant caller.
 export function findNearestNamespaces(target_fp, candidate_fps, k = 5) {
   if (!target_fp || !Array.isArray(candidate_fps)) return [];
+  let limit = k;
+  let opts = {};
+  if (k && typeof k === 'object') {
+    opts = k;
+    limit = opts.k == null ? 5 : opts.k;
+  }
+  const n = Math.max(0, Math.min(FINGERPRINT_LIMITS.max_nearest_k, Math.trunc(Number(limit) || 0)));
+  const includePaths = opts.include_paths === true;
   const ranked = candidate_fps
     .filter(c => c && c.fingerprint_id !== target_fp.fingerprint_id)
-    .map(c => ({
-      namespace: c.namespace,
-      fingerprint_id: c.fingerprint_id,
-      vertical_guess: c.vertical_guess,
-      similarity: cosineSimilarity(target_fp, c),
-      warm_start_checkpoint_path: c.warm_start_checkpoint_path || null,
-    }))
+    .map(c => {
+      const out = {
+        namespace: _safeNamespace(c.namespace),
+        namespace_hash: _safeHash(c.namespace_hash) || _namespaceHash(c.namespace),
+        fingerprint_id: (typeof c.fingerprint_id === 'string' && FP_ID_RE.test(c.fingerprint_id)) ? c.fingerprint_id : null,
+        vertical_guess: _safeVertical(c.vertical_guess),
+        similarity: cosineSimilarity(target_fp, c),
+      };
+      if (c.warm_start_checkpoint_path) {
+        out.warm_start_checkpoint_ref = _checkpointRef(c.warm_start_checkpoint_path);
+        if (includePaths) out.warm_start_checkpoint_path = String(c.warm_start_checkpoint_path);
+      } else {
+        out.warm_start_checkpoint_ref = null;
+        if (includePaths) out.warm_start_checkpoint_path = null;
+      }
+      return out;
+    })
     .sort((a, b) => b.similarity - a.similarity);
-  return ranked.slice(0, Math.max(0, k | 0));
+  return ranked.slice(0, n);
 }
 
 // Lower-level helper exported for tests + the federated trainer warm-start
 // loader. Reads a JSON fingerprint file from disk + validates the version
 // stamp matches what this module emits.
-export function readFingerprintFile(filePath) {
-  const raw = fs.readFileSync(filePath, 'utf8');
+export function readFingerprintFile(filePath, opts = {}) {
+  const p = _resolveFingerprintPath(filePath, opts);
+  const st = fs.statSync(p);
+  const maxBytes = Number.isFinite(Number(opts.max_bytes))
+    ? Math.max(1, Math.trunc(Number(opts.max_bytes)))
+    : FINGERPRINT_LIMITS.max_fingerprint_file_bytes;
+  if (st.size > maxBytes) {
+    throw new Error('fingerprint file too large: max_bytes=' + maxBytes);
+  }
+  const raw = fs.readFileSync(p, 'utf8');
   const fp = JSON.parse(raw);
   if (!fp || fp.version !== FINGERPRINT_VERSION) {
     throw new Error(
@@ -293,5 +359,68 @@ export function readFingerprintFile(filePath) {
       ' expected=' + FINGERPRINT_VERSION
     );
   }
-  return fp;
+  return _validateFingerprintShape(fp);
+}
+
+function _hashArray(value) {
+  if (!Array.isArray(value)) return [];
+  const out = [];
+  for (const item of value.slice(0, TOP_TERMS_K)) {
+    if (typeof item === 'string' && HEX64_RE.test(item)) out.push(item);
+  }
+  return out;
+}
+
+function _safeVertical(v) {
+  return typeof v === 'string' && Object.prototype.hasOwnProperty.call(VERTICAL_STUBS, v) ? v : 'general';
+}
+
+function _checkpointRef(value) {
+  const s = String(value || '');
+  return {
+    present: true,
+    sha256: _sha256Hex(FINGERPRINT_VERSION + ':checkpoint:' + s),
+  };
+}
+
+function _safeHash(value) {
+  return typeof value === 'string' && HEX64_RE.test(value) ? value : null;
+}
+
+function _resolveFingerprintPath(filePath, opts = {}) {
+  if (typeof filePath !== 'string' || filePath.length === 0) {
+    throw new Error('fingerprint file path required');
+  }
+  const resolved = path.resolve(filePath);
+  if (opts.allowed_root) {
+    const root = path.resolve(String(opts.allowed_root));
+    const rel = path.relative(root, resolved);
+    if (rel.startsWith('..') || path.isAbsolute(rel)) {
+      throw new Error('fingerprint file outside allowed_root');
+    }
+  }
+  return resolved;
+}
+
+function _validateFingerprintShape(fp) {
+  if (!fp || typeof fp !== 'object') throw new Error('fingerprint must be an object');
+  if (!HEX64_RE.test(String(fp.token_bag_hash || ''))) {
+    throw new Error('fingerprint token_bag_hash must be sha256 hex');
+  }
+  if (fp.fingerprint_id != null && !FP_ID_RE.test(String(fp.fingerprint_id))) {
+    throw new Error('fingerprint_id must be fp_<24hex>');
+  }
+  const top = _hashArray(fp.top_terms_hash_array);
+  if (Array.isArray(fp.top_terms_hash_array) && top.length !== fp.top_terms_hash_array.length) {
+    throw new Error('top_terms_hash_array must contain only sha256 hex strings');
+  }
+  const namespace = _safeNamespace(fp.namespace);
+  return {
+    ...fp,
+    contract_version: fp.contract_version || FINGERPRINT_CONTRACT_VERSION,
+    namespace,
+    namespace_hash: _safeHash(fp.namespace_hash) || _namespaceHash(fp.namespace),
+    vertical_guess: _safeVertical(fp.vertical_guess),
+    top_terms_hash_array: top,
+  };
 }

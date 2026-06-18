@@ -39,8 +39,8 @@
   ],
   "summary": {
     "component_count": 829,
-    "test_referenced_components": 733,
-    "components_without_direct_test_reference": 96,
+    "test_referenced_components": 734,
+    "components_without_direct_test_reference": 95,
     "high_priority_components": 50,
     "domains": {
       "api_surface": 32,
@@ -12500,6 +12500,7 @@
       "test_refs": [
         "tests/wave665-router-boundary-contract.test.js",
         "tests/wave700-failure-modes-w745-contract.test.js",
+        "tests/wave712-namespace-fingerprint-contract.test.js",
         "tests/wave783-chargeback.test.js"
       ],
       "risk_signals": [
@@ -21169,7 +21170,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave698-dp-aggregation-contract.test.js"
+        "tests/wave698-dp-aggregation-contract.test.js",
+        "tests/wave712-namespace-fingerprint-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -31754,25 +31756,27 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "2f105f0a150779e861e3b111463a9a8c0277ec2bc67cb087888849f8c7853670",
+      "sha256": "9ae31c6c227b148351fbf514a1da1e95202a089effc59b6e85099d68dd38a38d",
       "metrics": {
-        "bytes": 12658,
-        "lines": 298,
-        "imports": 2,
-        "exports": 10,
+        "bytes": 17565,
+        "lines": 427,
+        "imports": 3,
+        "exports": 12,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 11,
+        "crypto_refs": 14,
         "markers": 0
       },
-      "test_refs": [],
+      "test_refs": [
+        "tests/wave712-namespace-fingerprint-contract.test.js"
+      ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -33027,7 +33031,8 @@
       "test_refs": [
         "tests/wave659-pattern-lake-contract.test.js",
         "tests/wave701-forge-experts-contract.test.js",
-        "tests/wave702-forge-fit-contract.test.js"
+        "tests/wave702-forge-fit-contract.test.js",
+        "tests/wave712-namespace-fingerprint-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
