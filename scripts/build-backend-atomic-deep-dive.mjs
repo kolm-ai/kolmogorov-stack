@@ -31,6 +31,8 @@ const DATA_CURATE_MATRIX = path.join(ROOT, 'docs', 'internal', 'data-curate-matr
 const DATA_CURATE_MATRIX_TEST = path.join(ROOT, 'tests', 'wave947-data-curate-matrix.test.js');
 const ARTIFACT_MATRIX = path.join(ROOT, 'docs', 'internal', 'artifact-matrix.json');
 const ARTIFACT_MATRIX_TEST = path.join(ROOT, 'tests', 'wave948-artifact-matrix.test.js');
+const TUI_WORKBENCH_MATRIX = path.join(ROOT, 'docs', 'internal', 'tui-workbench-matrix.json');
+const TUI_WORKBENCH_MATRIX_TEST = path.join(ROOT, 'tests', 'wave949-tui-workbench-matrix.test.js');
 let apiContractMatrixSourceSet = null;
 let authBoundaryMatrixGreen = null;
 let cliCommandMatrixGreen = null;
@@ -43,6 +45,7 @@ let distillPipelineMatrixGreen = null;
 let specCompileMatrixGreen = null;
 let dataCurateMatrixGreen = null;
 let artifactMatrixGreen = null;
+let tuiWorkbenchMatrixGreen = null;
 
 const SCOPE = Object.freeze({
   root_files: ['server.js'],
@@ -476,6 +479,45 @@ function artifactMatrixOk() {
   return artifactMatrixGreen;
 }
 
+function tuiWorkbenchMatrixOk() {
+  if (tuiWorkbenchMatrixGreen != null) return tuiWorkbenchMatrixGreen;
+  try {
+    if (!fs.existsSync(TUI_WORKBENCH_MATRIX) || !fs.existsSync(TUI_WORKBENCH_MATRIX_TEST)) {
+      tuiWorkbenchMatrixGreen = false;
+      return tuiWorkbenchMatrixGreen;
+    }
+    const matrix = JSON.parse(fs.readFileSync(TUI_WORKBENCH_MATRIX, 'utf8'));
+    tuiWorkbenchMatrixGreen = !!(
+      matrix
+      && matrix.schema === 'kolm.tui_workbench_matrix.v1'
+      && matrix.gates
+      && matrix.gates.ok === true
+      && matrix.summary
+      && matrix.summary.command_count === 15
+      && matrix.summary.present_command_count === 15
+      && matrix.summary.zip_reader_phase_count === 7
+      && matrix.summary.present_zip_reader_phase_count === 7
+      && matrix.summary.serve_guard_count === 7
+      && matrix.summary.present_serve_guard_count === 7
+      && matrix.summary.module_bridge_count === 5
+      && matrix.summary.present_module_bridge_count === 5
+      && matrix.summary.direct_entrypoint_guard_count === 5
+      && matrix.summary.present_direct_entrypoint_guard_count === 5
+      && matrix.summary.test_surface_export_count === 11
+      && matrix.summary.env_ref_count === 0
+      && matrix.summary.missing_required_exports === 0
+      && matrix.summary.missing_test_surface_exports === 0
+      && matrix.summary.failed_safety_guards === 0
+      && matrix.summary.missing_test_evidence === 0
+      && Array.isArray(matrix.sources)
+      && matrix.sources.includes('cli/kolm-tui.mjs')
+    );
+  } catch {
+    tuiWorkbenchMatrixGreen = false;
+  }
+  return tuiWorkbenchMatrixGreen;
+}
+
 function isTextComponent(abs) {
   const base = path.basename(abs);
   return TEXT_NAMES.has(base) || TEXT_EXTS.has(path.extname(abs).toLowerCase());
@@ -634,6 +676,7 @@ function improvementFor(domain, rel, metrics, tests) {
   if (rel === 'src/spec-compile.js' && specCompileMatrixOk()) return 'maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract';
   if (rel === 'src/data-curate.js' && dataCurateMatrixOk()) return 'maintain_generated_data_curate_matrix_and_frontier_curation_contract';
   if (rel === 'src/artifact.js' && artifactMatrixOk()) return 'maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract';
+  if (rel === 'cli/kolm-tui.mjs' && tuiWorkbenchMatrixOk()) return 'maintain_generated_tui_workbench_matrix_and_cli_distribution_contract';
   if (metrics.lines >= 1200) {
     if ((domain === 'api_surface' || metrics.routes > 0) && hasGeneratedApiContractMap(rel)) {
       return 'maintain_generated_api_contract_matrix_and_route_split_plan';
@@ -687,7 +730,7 @@ function commandsFor(domain) {
     training_model_optimization: ['npm run verify:quantize-worker-matrix', 'npm run verify:distill-pipeline-matrix', 'node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready', 'npm run verify:quant-oracle'],
     runtime_serving_routing: ['npm run verify:codegraph', 'npm run verify:surfaces'],
     infra_cloud_device: ['npm run verify:platform', 'npm run verify:package-release'],
-    developer_distribution: ['npm run verify:cli-command-matrix', 'npm run verify:package-release'],
+    developer_distribution: ['npm run verify:cli-command-matrix', 'npm run verify:tui-workbench-matrix', 'npm run verify:package-release'],
     platform_support: ['npm run verify:daemon-connector-matrix', 'npm run verify:binder-contract-matrix', 'npm run verify:intent-contract-matrix', 'npm run verify:codegraph'],
   };
   return map[domain] || ['npm run verify:codegraph'];
