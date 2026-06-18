@@ -337,6 +337,7 @@ const reinjectionLogHash = fileSha256(reinjectionLogPath);
 
 let mlRun = false;
 let mlReport = null;
+let trainerSummary = null;
 let rejectionRan = false;   // C4 - true ONLY when the real best-of-N trainer ran
 if (mode === 'full') {
   const ready = await doctor();
@@ -447,6 +448,7 @@ if (mode === 'full') {
       mlReport = { exit_code: res.status, signal: res.signal || null };
     }
   }
+  trainerSummary = readJsonMaybe(path.join(outDir, 'student', 'training-summary.json'));
 }
 
 // wave 145 — optional teacher-holdout pass. When --teacher-holdout is set
@@ -544,6 +546,20 @@ const manifest = {
   redact_class: redactClass,
   ml_pipeline_run: mlRun,
   ml_report: mlReport,
+  trainer_summary: trainerSummary,
+  student_holdout_accuracy: numberOrNull(
+    trainerSummary && (
+      trainerSummary.student_holdout_accuracy ??
+      trainerSummary.holdout_accuracy ??
+      trainerSummary.eval_accuracy
+    )
+  ),
+  holdout_accuracy: numberOrNull(trainerSummary && trainerSummary.holdout_accuracy),
+  loss_final: numberOrNull(trainerSummary && (
+    trainerSummary.loss_final ??
+    trainerSummary.final_loss ??
+    trainerSummary.eval_loss
+  )),
   training_pairs_collected: collected,
   training_pairs_path: path.relative(outDir, pairsPath),
   training_pairs_hash: trainingPairsHash,
@@ -584,6 +600,21 @@ function readSeeds(p) {
     } catch { /* skip malformed */ }
   }
   return rows;
+}
+
+function readJsonMaybe(p) {
+  try {
+    if (!fs.existsSync(p)) return null;
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function numberOrNull(v) {
+  if (v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
 }
 
 function splitSeeds(rows, splitSeed) {

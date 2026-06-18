@@ -183,6 +183,15 @@ export async function compileSpec(spec, opts = {}) {
       schema: r.schema || null,
       params: r.params || null,
       dsl: hasDsl ? r.dsl : null,
+      class: r.class || r.recipe_class || null,
+      source_type: r.source_type || null,
+      weights_file: r.weights_file || null,
+      gguf_file: r.gguf_file || null,
+      onnx_file: r.onnx_file || null,
+      teacher_vendor: r.teacher_vendor || null,
+      teacher_model: r.teacher_model || null,
+      synthesized_by: r.synthesized_by || null,
+      synthesis_strategy: r.synthesis_strategy || null,
     };
   });
 
@@ -1065,6 +1074,46 @@ export async function compileSpec(spec, opts = {}) {
     }
   }
 
+  // W960 - portable neural weight bundle. The distill worker often produces a
+  // trainer output directory, but a signed weight-class .kolm needs an actual
+  // portable runtime file (.gguf/.onnx/.wasm) to ride inside the artifact. When
+  // callers provide opts.modelWeightsPath, bind those bytes into the manifest
+  // through artifact.js's model_weights/runtime_target contract rather than
+  // falling back to the legacy pointer-only model.gguf record.
+  let modelWeightsForBuild = opts.model_weights || opts.modelWeights || null;
+  let runtimeTargetForBuild = opts.runtime_target || opts.runtimeTarget || null;
+  let runtimeTargetConfigForBuild = opts.runtime_target_config || opts.runtimeTargetConfig || null;
+  if (opts.modelWeightsPath) {
+    const weightAbs = path.isAbsolute(opts.modelWeightsPath)
+      ? opts.modelWeightsPath
+      : path.resolve(opts.cwd || process.cwd(), opts.modelWeightsPath);
+    let st;
+    try {
+      st = fs.statSync(weightAbs);
+    } catch (e) {
+      throw err(`modelWeightsPath ${opts.modelWeightsPath} failed to load: ${e.message}`);
+    }
+    if (!st.isFile() || st.size <= 0) {
+      throw err(`modelWeightsPath must point at a non-empty portable weight file (.gguf/.onnx/.wasm); got ${weightAbs}`);
+    }
+    const ext = path.extname(weightAbs).toLowerCase();
+    if (ext === '.gguf') {
+      runtimeTargetForBuild = runtimeTargetForBuild || 'gguf';
+      runtimeTargetConfigForBuild = runtimeTargetConfigForBuild || { gguf_path: 'model.gguf' };
+      modelWeightsForBuild = { filename: runtimeTargetConfigForBuild.gguf_path, content: fs.readFileSync(weightAbs) };
+    } else if (ext === '.onnx') {
+      runtimeTargetForBuild = runtimeTargetForBuild || 'onnx';
+      runtimeTargetConfigForBuild = runtimeTargetConfigForBuild || { onnx_path: 'model.onnx' };
+      modelWeightsForBuild = { filename: runtimeTargetConfigForBuild.onnx_path, content: fs.readFileSync(weightAbs) };
+    } else if (ext === '.wasm') {
+      runtimeTargetForBuild = runtimeTargetForBuild || 'wasm';
+      runtimeTargetConfigForBuild = runtimeTargetConfigForBuild || {};
+      modelWeightsForBuild = { filename: 'target.wasm', content: fs.readFileSync(weightAbs) };
+    } else {
+      throw err(`modelWeightsPath must end in .gguf, .onnx, or .wasm; got ${weightAbs}`);
+    }
+  }
+
   // W457b - when the caller passes opts.outPath, hand it straight to
   // buildAndZip so the .kolm is written at the user's exact filename
   // (no `<job_id>.kolm` intermediate + copy-rename that leaked the
@@ -1117,6 +1166,9 @@ export async function compileSpec(spec, opts = {}) {
     speculative_decoding: speculativeDecodingBlock,
     prompt_cache: promptCacheBlock,
     continuous_batching: continuousBatchingBlock,
+    runtime_target: runtimeTargetForBuild,
+    runtime_target_config: runtimeTargetConfigForBuild,
+    model_weights: modelWeightsForBuild,
   });
 
   // W350 - once buildAndZip has produced an artifact, any post-build failure
@@ -1368,4 +1420,3 @@ export async function compileSpec(spec, opts = {}) {
 // - pipeline-runner.js owns the canonicalisation and the W739 wave will
 // extend that file (not this one) when lineage diffs ship.
 export { compilePipeline } from './pipeline-runner.js';
-

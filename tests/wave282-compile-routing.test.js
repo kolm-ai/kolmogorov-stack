@@ -11,6 +11,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -172,4 +173,152 @@ test('W282 runJob behavior: strategy=claude → artifact_class=synthesized_rule 
   const t = fresh.manifest?.training || {};
   assert.ok(t.teacher_vendor || t.teacher_model || t.synthesized_by,
     'synthesized_rule artifact must record teacher attribution');
+});
+
+test('W960 createJob preserves explicit distilled_model compile intent', async () => {
+  process.env.KOLM_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w960-'));
+  const { createJob } = await import('../src/compile.js');
+  const job = createJob({
+    task: 'draft answers',
+    examples: [{ input: 'a', output: 'b' }],
+    tenant: 't_w960_a',
+    recipe_class: 'distilled_model',
+    hw_tier: 'h100-80',
+    output_target: 'gguf',
+    multi_device: ['server-cuda', 'browser-wasm'],
+  });
+  assert.equal(job.recipe_class, 'distilled_model');
+  assert.equal(job.hw_tier, 'h100-80');
+  assert.equal(job.output_target, 'gguf');
+  assert.deepEqual(job.multi_device, ['server-cuda', 'browser-wasm']);
+});
+
+test('W960 distilled_model compile fails closed when neural worker only collects pairs', async () => {
+  process.env.KOLM_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w960-'));
+  const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w960-out-'));
+  const { createJob, runJob, getJob } = await import('../src/compile.js');
+  const examples = Array.from({ length: 8 }, (_, i) => ({
+    input: 'prompt ' + i,
+    output: 'answer ' + i,
+  }));
+  let receivedPairCount = null;
+  const job = createJob({
+    task: 'answer prompts',
+    examples,
+    tenant: 't_w960_b',
+    recipe_class: 'distilled_model',
+    k_threshold: 0.50,
+  });
+  const ctx = {
+    examples,
+    synthesize: async () => { throw new Error('synthesize must not run for distilled_model compile'); },
+    distill: async function* (opts) {
+      receivedPairCount = opts.pairs_override.length;
+      yield {
+        done: true,
+        artifact_path: outDir,
+        worker_mode: 'collect',
+        student_path: null,
+        manifest: {
+          worker: 'kolm-distill-worker',
+          worker_version: 'w960-test',
+          mode: 'collect',
+          ml_pipeline_run: false,
+        },
+      };
+    },
+    recall: null,
+    registry: null,
+    outDir,
+  };
+  await runJob(job, ctx);
+  const fresh = getJob(job.id, 't_w960_b');
+  assert.equal(fresh.status, 'failed');
+  assert.equal(fresh.error_code, 'KOLM_E_NEURAL_TRAINING_NOT_RUN');
+  assert.equal(fresh.artifact_path, null);
+  assert.ok(receivedPairCount > 0 && receivedPairCount < examples.length,
+    'neural compile must feed only the pre-split train rows');
+});
+
+test('W960 distilled_model compile packages portable worker weights with distill provenance', async () => {
+  process.env.KOLM_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w960-'));
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w960-success-'));
+  const outDir = path.join(tmp, 'artifacts');
+  const distillOut = path.join(tmp, 'distill-out');
+  fs.mkdirSync(distillOut, { recursive: true });
+  const weightPath = path.join(tmp, 'student.gguf');
+  const weightBytes = Buffer.from('GGUF_W960_PORTABLE_WEIGHT_BYTES');
+  fs.writeFileSync(weightPath, weightBytes);
+  const pairsPath = path.join(distillOut, 'training-pairs.jsonl');
+  fs.writeFileSync(pairsPath, [
+    JSON.stringify({ id: 'p1', input: 'prompt 1', teacher_output: 'answer 1' }),
+    JSON.stringify({ id: 'p2', input: 'prompt 2', teacher_output: 'answer 2' }),
+  ].join('\n') + '\n');
+  const pairsHash = 'sha256:' + crypto.createHash('sha256').update(fs.readFileSync(pairsPath)).digest('hex');
+  const manifest = {
+    worker: 'kolm-distill-worker',
+    worker_version: 'w960-test',
+    mode: 'full',
+    teacher_vendor: 'local',
+    teacher_model: 'fixture-teacher',
+    teacher_version: 'fixture-v1',
+    student_base: 'Qwen/Qwen3-4B-Instruct-2507',
+    distillation_method: 'lora',
+    ml_pipeline_run: true,
+    student_holdout_accuracy: 1.0,
+    holdout_accuracy: 1.0,
+    teacher_holdout_accuracy: 1.0,
+    training_pairs_collected: 2,
+    training_pairs_path: 'training-pairs.jsonl',
+    training_pairs_hash: pairsHash,
+    redaction_map_hash: null,
+    redact_class: 'none',
+    teacher_call_log_hash: null,
+    reinjection_log_hash: null,
+  };
+  fs.writeFileSync(path.join(distillOut, 'manifest.json'), JSON.stringify(manifest, null, 2));
+
+  const { createJob, runJob, getJob } = await import('../src/compile.js');
+  const examples = Array.from({ length: 8 }, (_, i) => ({
+    input: 'prompt ' + i,
+    output: 'answer ' + i,
+  }));
+  const job = createJob({
+    task: 'answer prompts with a neural student',
+    examples,
+    tenant: 't_w960_c',
+    recipe_class: 'distilled_model',
+    base_model: 'Qwen/Qwen3-4B-Instruct-2507',
+    k_threshold: 0.50,
+    allow_below_gate: true,
+  });
+  const ctx = {
+    examples,
+    synthesize: async () => { throw new Error('synthesize must not run for distilled_model compile'); },
+    distill: async function* () {
+      yield {
+        done: true,
+        artifact_path: distillOut,
+        worker_mode: 'full',
+        student_path: weightPath,
+        manifest,
+      };
+    },
+    recall: null,
+    registry: null,
+    outDir,
+  };
+  await runJob(job, ctx);
+  const fresh = getJob(job.id, 't_w960_c');
+  assert.equal(fresh.status, 'completed', `expected completed, got ${fresh.status} err=${fresh.error}`);
+  assert.equal(fresh.manifest?.artifact_class, 'distilled_model');
+  assert.equal(fresh.manifest?.runtime_target, 'gguf');
+  assert.equal(fresh.manifest?.runtime_target_config?.gguf_path, 'model.gguf');
+  assert.equal(
+    fresh.manifest?.hashes?.model_weights,
+    crypto.createHash('sha256').update(weightBytes).digest('hex'),
+  );
+  assert.equal(fresh.manifest?.training?.ml_pipeline_run, true);
+  assert.equal(fresh.manifest?.training?.student_holdout_accuracy, 1.0);
+  assert.equal(fresh.neural_compile?.ml_pipeline_run, true);
 });

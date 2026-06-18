@@ -20,6 +20,7 @@ import { all, findOne, insert, update } from './store.js';
 import { compileSpec } from './spec-compile.js';
 import { prepareSeedSplit, hashSeeds } from './seeds.js';
 import { TEMPLATES as CHAT_TEMPLATES, pickTemplate, manifestBlock } from './chat-templates.js';
+import { DEFAULT_MODEL } from './models.js';
 
 // W234 - resolve the chat_template block that gets stamped into the artifact
 // manifest. Callers can either name a template explicitly (chat_template) or
@@ -59,6 +60,10 @@ const VALID_PRESETS = new Set([
   'grpo-reasoning', // verifiable-reward online RL
   'instant',        // TAID-inspired zero-shot
 ]);
+
+const VALID_RECIPE_CLASSES = new Set(['rule', 'synthesized_rule', 'compiled_rule', 'distilled_model']);
+const VALID_OUTPUT_TARGETS = new Set(['gguf', 'onnx', 'safetensors', 'coreml', 'mlx', 'executorch', 'tensorrt', 'native-c', 'native-rust', 'wasm']);
+const VALID_MULTI_DEVICE = new Set(['phone-ios', 'phone-android', 'laptop-cpu', 'browser-wasm', 'edge-jetson', 'server-cuda']);
 
 // W716-3 - Mixture-of-Experts recipe scaffold.
 //
@@ -169,6 +174,8 @@ export function createJob({
   tenant, tenant_id, deploy_hook,
   preset, lora_rank, k_threshold,
   chat_template, thinking_mode,
+  recipe_class, hw_tier, output_target, multi_device,
+  distill_mode,
   allow_below_gate,
 }) {
   ensureJobsTable();
@@ -185,9 +192,16 @@ export function createJob({
     examples_n: Array.isArray(examples) ? examples.length : 0,
     corpus_namespace: corpus_namespace || null,
     base_model: base_model || 'none',
+    recipe_class: VALID_RECIPE_CLASSES.has(recipe_class) ? recipe_class : null,
     preset: preset && VALID_PRESETS.has(preset) ? preset : 'lora-fast',
     lora_rank: clampRank(lora_rank),
     k_threshold: clampThreshold(k_threshold),
+    hw_tier: typeof hw_tier === 'string' && hw_tier ? hw_tier : null,
+    output_target: VALID_OUTPUT_TARGETS.has(output_target) ? output_target : null,
+    multi_device: Array.isArray(multi_device)
+      ? multi_device.filter((d) => VALID_MULTI_DEVICE.has(d)).slice(0, 6)
+      : [],
+    distill_mode: typeof distill_mode === 'string' ? distill_mode : null,
     chat_template: chatBlock,
     thinking_mode: typeof thinking_mode === 'boolean' ? thinking_mode : chatBlock.thinking,
     allow_below_gate: allow_below_gate === true,
@@ -236,6 +250,184 @@ function setStatus(job, status, patch = {}) {
   Object.assign(job, { status }, patch);
   update('compile_jobs', x => x.id === job.id, { status, ...patch });
   JOBS.set(job.id, job);
+}
+
+function normalizeKScore(kScore) {
+  if (typeof kScore === 'number') return kScore;
+  if (kScore && typeof kScore.composite === 'number') return kScore.composite;
+  return null;
+}
+
+function completionPatch(job, built, composite, extra = {}) {
+  return {
+    progress: 100,
+    artifact_path: built.outPath,
+    artifact_bytes: built.bytes,
+    manifest: built.manifest,
+    receipt: built.manifest?.receipt || null,
+    artifact_hash: built.manifest?.hashes?.artifact_hash || built.manifest?.artifact_hash || null,
+    cid: built.manifest?.cid || null,
+    eval_set_hash: built.manifest?.hashes?.evals || null,
+    k_score: composite,
+    k_score_envelope: built.k_score,
+    evals_summary: built.manifest?.evals
+      ? { total: built.manifest.evals.n || 0, source: 'seeds.jsonl holdout' }
+      : { total: 0, source: 'none' },
+    seed_provenance: built.manifest?.seed_provenance || null,
+    completed_at: new Date().toISOString(),
+    ...extra,
+  };
+}
+
+async function sendDeployHook(job, built, composite) {
+  if (!job.deploy_hook) return;
+  const payload = JSON.stringify({
+    job_id: job.id,
+    artifact_url: `/v1/compile/${job.id}/.kolm`,
+    artifact_hash: built.manifest?.hashes?.artifact_hash || built.manifest?.artifact_hash || null,
+    cid: built.manifest?.cid || null,
+    k_score: composite || null,
+    base_model: job.base_model,
+    completed_at: job.completed_at,
+  });
+  try {
+    const r = await fetch(job.deploy_hook, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'user-agent': 'kolm-compile/1' },
+      body: payload,
+    });
+    update('compile_jobs', x => x.id === job.id, {
+      deploy_status: r.ok ? 'sent' : 'failed',
+      deploy_response_code: r.status,
+      deploy_attempted_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    update('compile_jobs', x => x.id === job.id, {
+      deploy_status: 'failed',
+      deploy_response_code: null,
+      deploy_attempted_at: new Date().toISOString(),
+    });
+  }
+}
+
+function trainRowsToDistillPairs(rows) {
+  return (Array.isArray(rows) ? rows : []).map((row, i) => ({
+    event_id: (row.metadata && row.metadata.id) ? String(row.metadata.id) : `compile_train_${i + 1}`,
+    prompt: row.input,
+    response: row.expected,
+  }));
+}
+
+function finiteMetric(...vals) {
+  for (const v of vals) {
+    if (v === null || v === undefined) continue;
+    if (typeof v === 'number' && Number.isFinite(v)) return v;
+    const n = Number(v);
+    if (Number.isFinite(n)) return n;
+  }
+  return null;
+}
+
+function readJsonIfExists(p) {
+  try {
+    if (p && fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch (_) {} // deliberate: cleanup
+  return null;
+}
+
+function resolvePortableWeight(studentPath) {
+  if (!studentPath || !fs.existsSync(studentPath)) return null;
+  const pick = (filePath) => {
+    const ext = path.extname(filePath).toLowerCase();
+    if (!['.gguf', '.onnx', '.wasm'].includes(ext)) return null;
+    const st = fs.statSync(filePath);
+    if (!st.isFile() || st.size <= 0) return null;
+    if (ext === '.gguf') {
+      return { path: filePath, runtime_target: 'gguf', runtime_target_config: { gguf_path: 'model.gguf' }, recipe_field: 'gguf_file' };
+    }
+    if (ext === '.onnx') {
+      return { path: filePath, runtime_target: 'onnx', runtime_target_config: { onnx_path: 'model.onnx' }, recipe_field: 'onnx_file' };
+    }
+    return { path: filePath, runtime_target: 'wasm', runtime_target_config: {}, recipe_field: 'weights_file' };
+  };
+  const st = fs.statSync(studentPath);
+  if (st.isFile()) return pick(studentPath);
+  if (!st.isDirectory()) return null;
+  const stack = [''];
+  while (stack.length) {
+    const rel = stack.pop();
+    const abs = path.join(studentPath, rel);
+    for (const name of fs.readdirSync(abs)) {
+      const childRel = path.join(rel, name);
+      const childAbs = path.join(studentPath, childRel);
+      const childSt = fs.statSync(childAbs);
+      if (childSt.isDirectory()) {
+        if (childRel.split(/[\\/]/).length < 4) stack.push(childRel);
+        continue;
+      }
+      const picked = pick(childAbs);
+      if (picked) return picked;
+    }
+  }
+  return null;
+}
+
+async function runNeuralDistillForCompile(job, ctx, trainRows) {
+  const pairs = trainRowsToDistillPairs(trainRows);
+  const studentBase = job.base_model && job.base_model !== 'none' ? job.base_model : DEFAULT_MODEL;
+  const distillFn = typeof ctx.distill === 'function'
+    ? ctx.distill
+    : (await import('./distill-pipeline.js')).distill;
+  let done = null;
+  for await (const ev of distillFn({
+    student_base: studentBase,
+    pairs_override: pairs,
+    pipeline_mode: job.distill_mode || 'kd_softmax',
+    max_steps: Math.max(1, Math.min(Number(process.env.KOLM_COMPILE_NEURAL_MAX_STEPS) || pairs.length || 200, pairs.length || 200)),
+    emit_progress_every: 0,
+    tenant_id: job.tenant_id || job.tenant || 'local',
+  })) {
+    if (ev && ev.done) done = ev;
+  }
+  if (!done) {
+    return { ok: false, code: 'KOLM_E_NEURAL_DISTILL_NO_RESULT', error: 'neural_compile_failed: distill worker produced no done event' };
+  }
+  const manifest = done.manifest || readJsonIfExists(done.artifact_path ? path.join(done.artifact_path, 'manifest.json') : null);
+  if (!manifest || manifest.ml_pipeline_run !== true || !done.student_path) {
+    return {
+      ok: false,
+      code: 'KOLM_E_NEURAL_TRAINING_NOT_RUN',
+      error: 'neural_compile_failed: recipe_class=distilled_model requires the Python ML worker to run (manifest.ml_pipeline_run=true) and produce a student_path; collect/stub runs are not signed as distilled_model artifacts.',
+      done,
+      manifest,
+    };
+  }
+  const studentHoldout = finiteMetric(
+    manifest.student_holdout_accuracy,
+    manifest.holdout_accuracy,
+    manifest.k_score_final,
+    manifest.k_score,
+  );
+  if (studentHoldout == null) {
+    return {
+      ok: false,
+      code: 'KOLM_E_NEURAL_HOLDOUT_EVAL_MISSING',
+      error: 'neural_compile_failed: trained student has no measured holdout metric (student_holdout_accuracy/holdout_accuracy/k_score_final). Run the student holdout eval before signing a distilled_model artifact.',
+      done,
+      manifest,
+    };
+  }
+  const portableWeight = resolvePortableWeight(done.student_path);
+  if (!portableWeight) {
+    return {
+      ok: false,
+      code: 'KOLM_E_NEURAL_PORTABLE_WEIGHTS_MISSING',
+      error: 'neural_compile_failed: trained student exists but no portable .gguf/.onnx/.wasm weight file was found; export/quantize the student before signing a distilled_model artifact.',
+      done,
+      manifest,
+    };
+  }
+  return { ok: true, done, manifest, portableWeight, studentBase, studentHoldout };
 }
 
 // Slug a free-text task description into a valid recipe id.
@@ -324,6 +516,143 @@ export async function runJob(job, ctx) {
       holdout_count: preSplit?.holdout_count ?? 0,
       synthesis_input_hash: synthesisInputHash,
     });
+
+    // W960 - explicit neural compile lane. A caller who asks for
+    // recipe_class='distilled_model' should never silently receive a JS rule
+    // artifact. The lane delegates to the same Python-backed distill worker
+    // used by `kolm distill`, feeds only the pre-split TRAIN rows, and signs
+    // a distilled_model artifact only after all three proofs exist:
+    //   1. manifest.ml_pipeline_run=true (real Python ML worker ran)
+    //   2. measured student holdout metric
+    //   3. portable weight file (.gguf/.onnx/.wasm) bundled into .kolm
+    if (job.recipe_class === 'distilled_model') {
+      setStage(job, 'distill.neural.start', {
+        student_base: job.base_model && job.base_model !== 'none' ? job.base_model : DEFAULT_MODEL,
+        train_count: trainForSynthesis.length,
+      });
+      const neural = await runNeuralDistillForCompile(job, ctx, trainForSynthesis);
+      setStage(job, 'distill.neural.done', {
+        ok: !!neural.ok,
+        worker_mode: neural.done?.worker_mode || neural.manifest?.mode || null,
+        ml_pipeline_run: neural.manifest?.ml_pipeline_run === true,
+        student_path: neural.done?.student_path || null,
+        portable_weight: neural.portableWeight?.path || null,
+        student_holdout_accuracy: neural.studentHoldout ?? null,
+        error_code: neural.code || null,
+      });
+      if (!neural.ok) {
+        try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
+        setStatus(job, 'failed', {
+          error: neural.error,
+          error_code: neural.code,
+          progress: 50,
+          failed_at: new Date().toISOString(),
+          neural_compile: {
+            requested: true,
+            worker_mode: neural.done?.worker_mode || neural.manifest?.mode || null,
+            ml_pipeline_run: neural.manifest?.ml_pipeline_run === true,
+            student_path: neural.done?.student_path || null,
+          },
+        });
+        return;
+      }
+
+      setStatus(job, 'running', { progress: 70 });
+      setStage(job, 'package.start', {
+        artifact_class: 'distilled_model',
+        runtime_target: neural.portableWeight.runtime_target,
+      });
+      const synthName = slugify(job.task || 'task');
+      const recipeId = 'rcp_distilled_' + job.id;
+      const distillTrainingStats = {
+        distill_compile: true,
+        pass_rate_positive: neural.studentHoldout,
+        holdout_accuracy: neural.studentHoldout,
+        student_holdout_accuracy: neural.studentHoldout,
+        teacher_holdout_accuracy: finiteMetric(neural.manifest.teacher_holdout_accuracy),
+        teacher_vendor: neural.manifest.teacher_vendor || null,
+        teacher_model: neural.manifest.teacher_model || null,
+        teacher_version: neural.manifest.teacher_version || null,
+        student_base: neural.manifest.student_base || neural.studentBase,
+        distillation_method: neural.manifest.distillation_method || 'lora',
+        ml_pipeline_run: true,
+        training_pairs_collected: neural.manifest.training_pairs_collected || null,
+        training_pairs_hash: neural.manifest.training_pairs_hash || null,
+        synthesis_input_hash: synthesisInputHash,
+      };
+      const weightField = neural.portableWeight.recipe_field;
+      const spec = {
+        job_id: job.id,
+        task: job.task,
+        base_model: neural.manifest.student_base || neural.studentBase,
+        recipes: [{
+          id: recipeId,
+          name: synthName,
+          source: 'function generate(input, lib){ return input.__kolm_distilled_model_runtime_required(); }',
+          version_id: `ver_distilled_${job.id}`,
+          class: 'distilled_model',
+          source_type: 'distilled',
+          tags: ['compiled', 'distilled'],
+          [weightField]: neural.portableWeight.path,
+        }],
+        artifact_class: 'distilled_model',
+        training_stats: distillTrainingStats,
+      };
+
+      let built;
+      try {
+        built = await compileSpec(spec, {
+          seedsPath,
+          outDir,
+          useSeedsGate: true,
+          allow_below_gate: job.allow_below_gate === true,
+          distillProvenancePath: neural.done.artifact_path,
+          modelWeightsPath: neural.portableWeight.path,
+          runtime_target: neural.portableWeight.runtime_target,
+          runtime_target_config: neural.portableWeight.runtime_target_config,
+        });
+      } catch (e) {
+        setStatus(job, 'failed', {
+          error: 'compile_failed: ' + String(e.message || e),
+          error_code: 'KOLM_E_COMPILE',
+          progress: 80,
+          failed_at: new Date().toISOString(),
+        });
+        try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
+        return;
+      }
+      const composite = normalizeKScore(built.k_score);
+      setStage(job, 'package.done', { bytes: built.bytes, k_score: composite, artifact_class: 'distilled_model' });
+      const threshold = typeof job.k_threshold === 'number' ? job.k_threshold : 0.85;
+      if (typeof composite === 'number' && composite < threshold) {
+        setStatus(job, 'failed', {
+          error: `k_score ${composite.toFixed(3)} below threshold ${threshold.toFixed(2)} - no artifact shipped`,
+          error_code: 'KOLM_E_K_SCORE_BELOW_THRESHOLD',
+          k_score: composite,
+          artifact_path: null,
+          artifact_bytes: null,
+          failed_at: new Date().toISOString(),
+        });
+        try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
+        return;
+      }
+      setStatus(job, 'completed', completionPatch(job, built, composite, {
+        concept_id: null,
+        version_id: null,
+        neural_compile: {
+          requested: true,
+          worker_mode: neural.done.worker_mode,
+          ml_pipeline_run: true,
+          student_path: neural.done.student_path,
+          portable_weight_path: neural.portableWeight.path,
+          runtime_target: neural.portableWeight.runtime_target,
+          student_holdout_accuracy: neural.studentHoldout,
+        },
+      }));
+      try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
+      await sendDeployHook(job, built, composite);
+      return;
+    }
 
     // Stage 2 - Distill: synthesize a JS recipe from the train slice only.
     setStage(job, 'distill.start');
@@ -464,9 +793,7 @@ export async function runJob(job, ctx) {
     }
     // The build payload returns either a number (legacy v1 K-score) or the v2
     // envelope { composite, ships, axes, ... }. Normalize to one number.
-    const composite = typeof built.k_score === 'number'
-      ? built.k_score
-      : (built.k_score && typeof built.k_score.composite === 'number' ? built.k_score.composite : null);
+    const composite = normalizeKScore(built.k_score);
     setStage(job, 'package.done', { bytes: built.bytes, k_score: composite });
 
     const threshold = typeof job.k_threshold === 'number' ? job.k_threshold : 0.85;
@@ -483,58 +810,15 @@ export async function runJob(job, ctx) {
       return;
     }
 
-    setStatus(job, 'completed', {
-      progress: 100,
-      artifact_path: built.outPath,
-      artifact_bytes: built.bytes,
-      manifest: built.manifest,
-      receipt: built.manifest?.receipt || null,
+    setStatus(job, 'completed', completionPatch(job, built, composite, {
       concept_id: registered_concept_id,
       version_id: registered_version_id,
-      artifact_hash: built.manifest?.hashes?.artifact_hash || built.manifest?.artifact_hash || null,
-      cid: built.manifest?.cid || null,
-      eval_set_hash: built.manifest?.hashes?.evals || null,
-      k_score: composite,
-      k_score_envelope: built.k_score,
-      evals_summary: built.manifest?.evals
-        ? { total: built.manifest.evals.n || 0, source: 'seeds.jsonl holdout' }
-        : { total: 0, source: 'none' },
-      seed_provenance: built.manifest?.seed_provenance || null,
-      completed_at: new Date().toISOString(),
-    });
+    }));
 
     try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
 
     // Machine self-serve deploy hook.
-    if (job.deploy_hook) {
-      const payload = JSON.stringify({
-        job_id: job.id,
-        artifact_url: `/v1/compile/${job.id}/.kolm`,
-        artifact_hash: built.manifest?.hashes?.artifact_hash || built.manifest?.artifact_hash || null,
-        cid: built.manifest?.cid || null,
-        k_score: composite || null,
-        base_model: job.base_model,
-        completed_at: job.completed_at,
-      });
-      try {
-        const r = await fetch(job.deploy_hook, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json', 'user-agent': 'kolm-compile/1' },
-          body: payload,
-        });
-        update('compile_jobs', x => x.id === job.id, {
-          deploy_status: r.ok ? 'sent' : 'failed',
-          deploy_response_code: r.status,
-          deploy_attempted_at: new Date().toISOString(),
-        });
-      } catch (e) {
-        update('compile_jobs', x => x.id === job.id, {
-          deploy_status: 'failed',
-          deploy_response_code: null,
-          deploy_attempted_at: new Date().toISOString(),
-        });
-      }
-    }
+    await sendDeployHook(job, built, composite);
   } catch (e) {
     setStatus(job, 'failed', {
       error: String(e.message || e),

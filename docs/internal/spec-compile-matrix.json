@@ -18,6 +18,7 @@
     "job_id",
     "license",
     "lineage",
+    "model_weights",
     "moe",
     "native_skip_reasons",
     "outDir",
@@ -27,6 +28,8 @@
     "prompt_cache",
     "recipes",
     "runtime_passports",
+    "runtime_target",
+    "runtime_target_config",
     "seed_provenance",
     "speculative_decoding",
     "supersession",
@@ -58,10 +61,17 @@
     "holdoutRatio",
     "license",
     "lineage",
+    "modelWeights",
+    "modelWeightsPath",
+    "model_weights",
     "moeProvenancePath",
     "outDir",
     "outPath",
     "pretokenizeProvenancePath",
+    "runtimeTarget",
+    "runtimeTargetConfig",
+    "runtime_target",
+    "runtime_target_config",
     "rustOnly",
     "seedsPath",
     "splitSeed",
@@ -177,7 +187,7 @@
         "targetLc",
         "compileWasm"
       ],
-      "line": 411,
+      "line": 420,
       "owner": "compileNativeTargets",
       "phase": "native_wasm_compile",
       "present": true
@@ -188,7 +198,7 @@
         "tokenizer.json",
         "extraFiles"
       ],
-      "line": 465,
+      "line": 474,
       "owner": "tokenizerPath",
       "phase": "tokenizer_packaging",
       "present": true
@@ -276,7 +286,7 @@
         "compiled_binary",
         "native_skip_reasons"
       ],
-      "line": 878,
+      "line": 887,
       "owner": "buildBinariesArray",
       "phase": "compiled_binary_honesty",
       "present": true
@@ -287,7 +297,7 @@
         "attestation_kind",
         "supplied without an attestation kind"
       ],
-      "line": 896,
+      "line": 905,
       "owner": "attestation_report",
       "phase": "confidential_compute_attestation",
       "present": true
@@ -298,7 +308,7 @@
         "resolveSpeculative",
         "speculative_decoding"
       ],
-      "line": 944,
+      "line": 953,
       "owner": "resolveSpeculative",
       "phase": "speculative_decoding_resolution",
       "present": true
@@ -309,7 +319,7 @@
         "evalSpeculativeDecoding",
         "eval_skipped_reason"
       ],
-      "line": 1001,
+      "line": 1010,
       "owner": "evalSpeculativeDecoding",
       "phase": "speculative_decoding_eval",
       "present": true
@@ -320,7 +330,7 @@
         "KOLM_COMPILE_MAX_BATCH",
         "continuous_batching"
       ],
-      "line": 1049,
+      "line": 1058,
       "owner": "promptCacheBlock",
       "phase": "inference_fingerprints",
       "present": true
@@ -342,7 +352,7 @@
         "fs.unlinkSync(p)",
         "postBuildOk"
       ],
-      "line": 1127,
+      "line": 1179,
       "owner": "postBuildCleanup",
       "phase": "post_build_cleanup",
       "present": true
@@ -353,7 +363,7 @@
         "disclaimer_injection",
         "professional ${adj} advice"
       ],
-      "line": 1184,
+      "line": 1236,
       "owner": "disclaimer_injection",
       "phase": "vertical_disclaimer",
       "present": true
@@ -364,7 +374,7 @@
         "workload_profile_hash",
         "createHmac"
       ],
-      "line": 1209,
+      "line": 1261,
       "owner": "AdmZip",
       "phase": "workload_profile_zip_patch",
       "present": true
@@ -375,7 +385,7 @@
         "fs.readSync",
         "h.digest"
       ],
-      "line": 1311,
+      "line": 1363,
       "owner": "fs.readSync",
       "phase": "chunked_hash",
       "present": true
@@ -395,7 +405,7 @@
       "evidence": [
         "export { compilePipeline } from './pipeline-runner.js'"
       ],
-      "line": 1358,
+      "line": 1410,
       "owner": "compilePipeline",
       "phase": "pipeline_reexport",
       "present": true
@@ -432,7 +442,7 @@
       "async": false,
       "from": "./pipeline-runner.js",
       "kind": "re-export",
-      "line": 1370,
+      "line": 1422,
       "name": "compilePipeline"
     }
   ],
@@ -584,8 +594,8 @@
     "tests/wave946-spec-compile-matrix.test.js"
   ],
   "summary": {
-    "build_and_zip_field_count": 33,
-    "compile_option_count": 39,
+    "build_and_zip_field_count": 36,
+    "compile_option_count": 46,
     "direct_test_evidence_count": 71,
     "env_ref_count": 12,
     "export_count": 3,
@@ -598,8 +608,8 @@
     "present_phase_count": 30,
     "present_validation_rule_count": 10,
     "required_test_evidence_count": 15,
-    "spec_compile_bytes": 72247,
-    "spec_compile_lines": 1372,
+    "spec_compile_bytes": 75095,
+    "spec_compile_lines": 1423,
     "validation_rule_count": 10
   },
   "test_evidence": [

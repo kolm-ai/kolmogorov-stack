@@ -8668,6 +8668,7 @@ export function buildRouter() {
       task, examples, corpus_namespace, base_model,
       tenant: req.tenant, tenant_id: req.tenant_record?.id || null,
       deploy_hook, preset, lora_rank, k_threshold,
+      recipe_class, hw_tier, output_target, multi_device,
       chat_template, thinking_mode,
       allow_below_gate: allow_below_gate === true || allow_below_gate === 'true' || allow_below_gate === 1,
     });

@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 407,
+    "orphan_tests": 410,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 410,
+    "state_local_green": 413,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 586,
-    "test_only_waves": 407,
-    "waves": 423
+    "test_files": 590,
+    "test_only_waves": 410,
+    "waves": 426
   },
-  "generated_at": "2026-06-18T18:09:11.031Z",
+  "generated_at": "2026-06-18T20:05:36.044Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -487,7 +487,10 @@
       "W953",
       "W954",
       "W955",
-      "W956"
+      "W956",
+      "W957",
+      "W958",
+      "W959"
     ],
     "plan_only_waves": [
       "W850",
@@ -903,7 +906,10 @@
       "W953",
       "W954",
       "W955",
-      "W956"
+      "W956",
+      "W957",
+      "W958",
+      "W959"
     ]
   },
   "schema": "kolm.wave_registry.v1",
@@ -3663,7 +3669,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js",
           "script": "npm:verify:ondevice"
         }
       ],
@@ -3907,7 +3913,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -4246,7 +4252,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/build-backend-atomic-deep-dive.mjs --check --summary && node --test --test-concurrency=1 tests/wave602-backend-atomic-deep-dive.test.js",
+          "command": "node scripts/build-backend-atomic-deep-dive.mjs --check --summary && node --test --test-concurrency=1 tests/wave602-backend-atomic-deep-dive.test.js tests/wave957-apps-atomic-scope.test.js",
           "script": "npm:verify:backend-atomic"
         }
       ],
@@ -4284,7 +4290,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -4341,7 +4347,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js",
+          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js tests/wave957-eagle3-train.test.js",
           "script": "npm:verify:kv-cache"
         }
       ],
@@ -4417,7 +4423,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js",
+          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js",
           "script": "npm:verify:ondevice"
         }
       ],
@@ -4531,7 +4537,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js",
+          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js tests/wave957-eagle3-train.test.js",
           "script": "npm:verify:kv-cache"
         }
       ],
@@ -7257,7 +7263,7 @@
           "script": "npm:verify:finetune-frameworks"
         },
         {
-          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js",
+          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js tests/wave957-eagle3-train.test.js",
           "script": "npm:verify:kv-cache"
         },
         {
@@ -7965,11 +7971,11 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
           "script": "npm:verify:distill-strategy"
         },
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -7978,6 +7984,68 @@
       "test_files": [
         "tests/wave956-gad-cli.test.js",
         "tests/wave956-gad-onpolicy.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W957",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "research",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/build-backend-atomic-deep-dive.mjs --check --summary && node --test --test-concurrency=1 tests/wave602-backend-atomic-deep-dive.test.js tests/wave957-apps-atomic-scope.test.js",
+          "script": "npm:verify:backend-atomic"
+        },
+        {
+          "command": "node --test --test-concurrency=1 tests/wrapper-shard.test.js tests/wrapper-shard-wire.test.js tests/wave921-serve-config.test.js tests/wave607-kv-cache-cli-dispatch.test.js tests/wave635-speculative-registry-sync.test.js tests/wave957-eagle3-train.test.js",
+          "script": "npm:verify:kv-cache"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave957-apps-atomic-scope.test.js",
+        "tests/wave957-eagle3-train.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W958",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
+          "script": "npm:verify:distill-strategy"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave958-moe-to-dense.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W959",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wave553-codegraph-cloud-platform.test.js tests/wave611-platform-capability-evidence.test.js tests/wave959-browser-webgpu-runner.test.js",
+          "script": "npm:verify:ondevice"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave959-browser-webgpu-runner.test.js"
       ],
       "test_letter_suffixes": []
     }
