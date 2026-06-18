@@ -69,6 +69,9 @@
 //                                recorded honestly, never faked.
 //   --export-quant <Q4_K_M>      GGUF quant level for --export-portable.
 //   --export-skip-coherence      skip the llama-cli coherence probe.
+//   --train-preset <qdora>       one-click quality preset.
+//   --train-method <qlora|lora>  trainer method override; qlora forwards
+//                                --qlora into train_lora.py.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -386,6 +389,16 @@ let mlReport = null;
 let trainerSummary = null;
 let portableExport = null;
 let rejectionRan = false;   // C4 - true ONLY when the real best-of-N trainer ran
+const trainPreset = String(args['train-preset'] || process.env.KOLM_TRAIN_PRESET || spec?.train?.preset || '').trim().toLowerCase() || null;
+const trainMethod = String(args['train-method'] || process.env.KOLM_TRAIN_METHOD || spec?.train?.method || (trainPreset === 'qdora' ? 'qlora' : '')).trim().toLowerCase() || null;
+if (trainPreset && !new Set(['qdora']).has(trainPreset)) {
+  console.error(`[distill-worker] train preset must be one of [qdora]; got ${JSON.stringify(trainPreset)}`);
+  process.exit(2);
+}
+if (trainMethod && !new Set(['qlora', 'lora', 'full']).has(trainMethod)) {
+  console.error(`[distill-worker] train method must be one of [qlora, lora, full]; got ${JSON.stringify(trainMethod)}`);
+  process.exit(2);
+}
 if (mode === 'full') {
   const ready = await doctor();
   if (!ready.python_ok || !ready.torch_ok) {
@@ -484,6 +497,7 @@ if (mode === 'full') {
         || (spec && spec.train && typeof spec.train.backend === 'string' ? spec.train.backend : null)
         || (typeof spec.backend === 'string' ? spec.backend : null);
       if (trainerBackend) pyArgs.push('--backend', String(trainerBackend));
+      if (trainMethod === 'qlora') pyArgs.push('--qlora');
       // W713/W711 - forward the data-ordering flags so train_lora.py engages a
       // SequentialSampler (curriculum) or WeightedRandomSampler (importance).
       // The pairs file already carries complexity_proxy per row (W713); the
@@ -606,6 +620,8 @@ const manifest = {
   ml_pipeline_run: mlRun,
   ml_report: mlReport,
   trainer_summary: trainerSummary,
+  train_preset: trainPreset,
+  train_method: trainMethod,
   training_pair_source: trainFromSeeds ? 'seed_output' : 'teacher',
   portable_export: portableExport,
   portable_weight_path: portableExport && portableExport.ok && portableExport.output_path

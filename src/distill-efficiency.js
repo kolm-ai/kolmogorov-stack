@@ -298,13 +298,28 @@ export function buildEfficiencyEnv(normalized) {
 // arXiv:2403.03507; packing arXiv:2407.09105.
 // =============================================================================
 
-export const LORA_VARIANTS = Object.freeze(['lora', 'rslora', 'dora', 'loraplus', 'lora-fa']);
+export const LORA_VARIANTS = Object.freeze(['lora', 'rslora', 'dora', 'qdora', 'loraplus', 'lora-fa']);
 export const DEFAULT_LORA_VARIANT = 'rslora';
 export const LORA_INITS = Object.freeze(['default', 'gaussian', 'pissa', 'pissa_niter_16', 'olora']);
 export const TRAINER_OPTIMS = Object.freeze([
   'adamw_torch', 'adamw_8bit', 'paged_adamw_8bit',
   'galore_adamw', 'galore_adamw_8bit', 'galore_adamw_layerwise', 'galore_adafactor',
 ]);
+export const TRAINER_METHODS = Object.freeze(['qlora', 'lora', 'full']);
+export const TRAINER_PRESETS = Object.freeze({
+  qdora: Object.freeze({
+    preset: 'qdora',
+    method: 'qlora',
+    lora_variant: 'qdora',
+    lora_init: 'default',
+    optim: 'paged_adamw_8bit',
+    neftune_alpha: 5,
+    packing: true,
+    backend: 'auto',
+    use_liger: true,
+  }),
+});
+export const TRAINER_PRESET_NAMES = Object.freeze(Object.keys(TRAINER_PRESETS));
 
 // W921 - normalizeTrainerVariantOptions: validate the raw trainer-variant opts
 // against the frozen enums, clamp numerics, and surface refusals as thrown
@@ -312,29 +327,56 @@ export const TRAINER_OPTIMS = Object.freeze([
 // buildTrainerVariantEnv + the recipe loader.
 export function normalizeTrainerVariantOptions(opts = {}) {
   const raw = (opts && typeof opts === 'object') ? opts : {};
+  const preset = raw.preset ?? raw.quality_preset ?? raw.train_preset ?? null;
+  let presetDefaults = {};
+  if (preset != null && preset !== '') {
+    const presetName = String(preset).toLowerCase();
+    if (!Object.prototype.hasOwnProperty.call(TRAINER_PRESETS, presetName)) {
+      const err = new Error(`train preset must be one of [${TRAINER_PRESET_NAMES.join(', ')}]; got ${JSON.stringify(preset)}`);
+      err.code = 'invalid_train_preset';
+      throw err;
+    }
+    presetDefaults = TRAINER_PRESETS[presetName];
+  }
+  const pick = (key, fallback = undefined) => raw[key] == null ? (presetDefaults[key] ?? fallback) : raw[key];
 
-  const lora_variant = raw.lora_variant == null ? DEFAULT_LORA_VARIANT : String(raw.lora_variant).toLowerCase();
+  const lora_variant = pick('lora_variant', DEFAULT_LORA_VARIANT) == null
+    ? DEFAULT_LORA_VARIANT
+    : String(pick('lora_variant', DEFAULT_LORA_VARIANT)).toLowerCase();
   if (!LORA_VARIANTS.includes(lora_variant)) {
     const err = new Error(`lora_variant must be one of [${LORA_VARIANTS.join(', ')}]; got ${JSON.stringify(raw.lora_variant)}`);
     err.code = 'invalid_lora_variant';
     throw err;
   }
-  const lora_init = raw.lora_init == null ? 'default' : String(raw.lora_init).toLowerCase();
+  const lora_init = String(pick('lora_init', 'default')).toLowerCase();
   if (!LORA_INITS.includes(lora_init)) {
     const err = new Error(`lora_init must be one of [${LORA_INITS.join(', ')}]; got ${JSON.stringify(raw.lora_init)}`);
     err.code = 'invalid_lora_init';
     throw err;
   }
-  const optim = raw.optim == null ? 'adamw_torch' : String(raw.optim).toLowerCase();
+  const optim = String(pick('optim', 'adamw_torch')).toLowerCase();
   if (!TRAINER_OPTIMS.includes(optim)) {
     const err = new Error(`optim must be one of [${TRAINER_OPTIMS.join(', ')}]; got ${JSON.stringify(raw.optim)}`);
     err.code = 'invalid_optim';
     throw err;
   }
+  const method = pick('method', null) ? String(pick('method', null)).toLowerCase() : null;
+  if (method != null && !TRAINER_METHODS.includes(method)) {
+    const err = new Error(`method must be one of [${TRAINER_METHODS.join(', ')}]; got ${JSON.stringify(raw.method)}`);
+    err.code = 'invalid_train_method';
+    throw err;
+  }
+  const backend = pick('backend', null) ? String(pick('backend', null)).toLowerCase() : null;
+  if (backend != null && !['auto', 'hf', 'unsloth'].includes(backend)) {
+    const err = new Error(`backend must be one of [auto, hf, unsloth]; got ${JSON.stringify(raw.backend)}`);
+    err.code = 'invalid_backend';
+    throw err;
+  }
 
   let neftune_alpha = null;
-  if (raw.neftune_alpha != null && raw.neftune_alpha !== '') {
-    const v = Number(raw.neftune_alpha);
+  const rawNeftune = pick('neftune_alpha', null);
+  if (rawNeftune != null && rawNeftune !== '') {
+    const v = Number(rawNeftune);
     if (!Number.isFinite(v) || v < 0) {
       const err = new Error(`neftune_alpha must be a non-negative number; got ${JSON.stringify(raw.neftune_alpha)}`);
       err.code = 'invalid_neftune_alpha';
@@ -368,9 +410,11 @@ export function normalizeTrainerVariantOptions(opts = {}) {
     galore = { rank, update_proj_gap, scale, target_modules };
   }
 
-  const packing = raw.packing === true || raw.packing === 'true' || raw.packing === 1 || raw.packing === '1';
+  const rawPacking = pick('packing', false);
+  const packing = rawPacking === true || rawPacking === 'true' || rawPacking === 1 || rawPacking === '1';
   const grad_accum = Number.isFinite(Number(raw.grad_accum)) ? Math.floor(Number(raw.grad_accum)) : 1;
-  const method = raw.method ? String(raw.method).toLowerCase() : null;
+  const rawUseLiger = pick('use_liger', false);
+  const use_liger = rawUseLiger === true || rawUseLiger === 'true' || rawUseLiger === 1 || rawUseLiger === '1';
 
   // Refusals (fail-before-spend) - never silently misconfigure.
   // 1. GaLore is incompatible with 4-bit params (needs full-precision weights).
@@ -387,6 +431,10 @@ export function normalizeTrainerVariantOptions(opts = {}) {
   }
 
   return {
+    preset: presetDefaults.preset || null,
+    method,
+    backend,
+    use_liger,
     lora_variant,
     lora_init,
     neftune_alpha,
@@ -405,6 +453,18 @@ export function normalizeTrainerVariantOptions(opts = {}) {
 export function buildTrainerVariantEnv(normalized) {
   if (!normalized || typeof normalized !== 'object') return {};
   const out = {};
+  if (normalized.preset) {
+    out.KOLM_TRAIN_PRESET = normalized.preset;
+  }
+  if (normalized.method) {
+    out.KOLM_TRAIN_METHOD = normalized.method;
+  }
+  if (normalized.backend) {
+    out.KOLM_TRAIN_LORA_BACKEND = normalized.backend;
+  }
+  if (normalized.use_liger) {
+    out.KOLM_USE_LIGER = '1';
+  }
   if (normalized.lora_variant) {
     out.KOLM_LORA_VARIANT = normalized.lora_variant;
   }
@@ -439,6 +499,9 @@ export default {
   DEFAULT_LORA_VARIANT,
   LORA_INITS,
   TRAINER_OPTIMS,
+  TRAINER_METHODS,
+  TRAINER_PRESETS,
+  TRAINER_PRESET_NAMES,
   shouldStopEarly,
   normalizeEfficiencyOptions,
   efficiencyDoctor,

@@ -104,6 +104,8 @@ test('W921-STUDIO.6 local-worker accepts + normalizes the trainer-variant flags'
   assert.match(body, /pick\('--optim'\)/);
   assert.match(body, /pick\('--galore-rank'\)/);
   assert.match(body, /pick\('--galore-proj-gap'\)/);
+  assert.match(body, /pick\('--train-preset'\)/);
+  assert.match(body, /pick\('--quality-preset'\)/);
   assert.match(body, /args\.includes\('--packing'\)/);
   assert.match(body, /eff\.normalizeTrainerVariantOptions\(vopts\)/, 'normalizes via distill-efficiency');
   assert.match(body, /eff\.buildTrainerVariantEnv\(normalisedVariant\)/, 'builds the variant env');
@@ -117,8 +119,11 @@ test('W921-STUDIO.8 local-worker auto-maps recipe.train.* to the same env', () =
   const start = SRC.indexOf('async function cmdDistillLocalWorker(args');
   const body = SRC.slice(start, start + 14000);
   assert.match(body, /_w921RecipeTrain/, 'reads a recipe train block from --spec');
+  assert.match(body, /if \(t\.preset != null\) vopts\.preset = t\.preset/);
   assert.match(body, /if \(t\.lora_variant != null\) vopts\.lora_variant = t\.lora_variant/);
+  assert.match(body, /if \(t\.backend != null\) vopts\.backend = t\.backend/);
   // Explicit CLI flags override the recipe values.
+  assert.match(body, /if \(_w921TrainPreset != null\) vopts\.preset = _w921TrainPreset/);
   assert.match(body, /if \(_w921LoraVariant != null\) vopts\.lora_variant = _w921LoraVariant/);
 });
 

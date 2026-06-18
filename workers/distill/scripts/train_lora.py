@@ -538,7 +538,7 @@ def main():
     p.add_argument("--warmup-ratio", type=float, default=0.03)
     p.add_argument("--save-total-limit", type=int, default=3)
     p.add_argument("--qlora", action="store_true",
-                   help="use the Unsloth QLoRA path; HF fallback refuses rather than silently running plain LoRA")
+                   help="use 4-bit NF4 QLoRA; HF path requires bitsandbytes, Unsloth path is used only when feature parity allows it")
     p.add_argument("--neftune-noise-alpha", dest="neftune_noise_alpha", type=float, default=None)
     # W713 — curriculum ordering. When set (ascending|descending|1), sort the
     # training rows by their complexity_proxy field (stamped JS-side by
@@ -562,6 +562,8 @@ def main():
     args.student_base = _resolve_student_base_alias(args.student_base)
 
     # ── W921 LoRA-variant / GaLore / packing knobs (env-threaded, default-off) ──
+    train_preset = str(os.environ.get("KOLM_TRAIN_PRESET", "") or "").strip().lower() or None
+    train_method = str(os.environ.get("KOLM_TRAIN_METHOD", "") or "").strip().lower() or None
     lora_variant = os.environ.get("KOLM_LORA_VARIANT", "rslora").lower()
     lora_init = os.environ.get("KOLM_LORA_INIT", "default").lower()
     neftune_alpha = args.neftune_noise_alpha
@@ -573,10 +575,23 @@ def main():
     galore_args = os.environ.get("KOLM_GALORE_ARGS", "")
     galore_targets = os.environ.get("KOLM_GALORE_TARGETS", "attn,mlp")
     packing_enabled = os.environ.get("KOLM_PACKING", "0") == "1"
+    if train_preset == "qdora":
+        if "KOLM_LORA_VARIANT" not in os.environ:
+            lora_variant = "qdora"
+        if "KOLM_OPTIM" not in os.environ:
+            trainer_optim = "paged_adamw_8bit"
+        if args.neftune_noise_alpha is None and "KOLM_NEFTUNE_ALPHA" not in os.environ:
+            neftune_alpha = 5.0
+        if "KOLM_PACKING" not in os.environ:
+            packing_enabled = True
+        args.qlora = True
+    if train_method == "qlora":
+        args.qlora = True
     variants_active = (lora_variant != "lora" or lora_init != "default" or neftune_alpha
                        or trainer_optim != "adamw_torch" or packing_enabled)
     backend_plan = _backend_plan_for_args(args, lora_variant, lora_init, trainer_optim, packing_enabled)
     liger_plan = _maybe_apply_liger(args.student_base, apply_patch=False)
+    bitsandbytes_importable = importlib.util.find_spec("bitsandbytes") is not None
 
     # ── W921 preflight: probe variant deps; FAIL LOUD on missing support. ──
     if variants_active and _lv is not None:
@@ -592,6 +607,9 @@ def main():
         # Construct the variant config WITHOUT loading models. Proves the path.
         cfg_preview = {
             "lora_variant": lora_variant,
+            "train_preset": train_preset,
+            "train_method": train_method or ("qlora" if args.qlora else "lora"),
+            "qlora": bool(args.qlora),
             "lora_init": lora_init,
             "neftune_alpha": neftune_alpha,
             "optim": trainer_optim,
@@ -610,6 +628,7 @@ def main():
                 "unsloth_supported": backend_plan["unsloth_supported"],
                 "unsloth_families": backend_plan["unsloth_families"],
                 "unsloth_skip_reason": None if backend_plan["selected"] == "unsloth" else backend_plan["reason"],
+                "bitsandbytes_importable": bitsandbytes_importable,
                 "liger_available": liger_plan["available"],
                 "liger_api": liger_plan["api"],
             },
@@ -623,11 +642,6 @@ def main():
         p.error("--out is required unless --preflight-only")
     if args.student_base != requested_student_base:
         print(f"[train_lora] resolved student base '{requested_student_base}' -> '{args.student_base}'")
-    if args.qlora and backend_plan["selected"] != "unsloth":
-        sys.stderr.write("[train_lora] --qlora requires the Unsloth backend in this worker.\n")
-        sys.stderr.write(f"             selected backend={backend_plan['selected']} reason={backend_plan['reason']}\n")
-        sys.stderr.write("             install unsloth or remove --qlora for plain HF LoRA.\n")
-        sys.exit(13)
     if backend_plan["selected"] == "unsloth":
         _exec_unsloth_backend(args, backend_plan["reason"], neftune_alpha, trainer_optim)
 
@@ -694,6 +708,17 @@ def main():
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
 
+    precision = os.environ.get("KOLM_PRECISION", "auto").lower()
+    if precision == "auto":
+        precision = "bf16" if hasattr(torch, "cuda") and torch.cuda.is_available() and getattr(torch.cuda, "is_bf16_supported", lambda: False)() else "fp16"
+    fp16_flag = precision in ("fp16", "mixed-fp16")
+    bf16_flag = precision in ("bf16", "mixed-bf16")
+    if precision == "fp32":
+        fp16_flag = False
+        bf16_flag = False
+    grad_ckpt_flag = os.environ.get("KOLM_GRAD_CHECKPOINT", "0") == "1"
+    qlora_active = bool(args.qlora)
+
     def to_example(row):
         prompt = str(row["input"])
         completion = str(row["teacher_output"])
@@ -715,11 +740,31 @@ def main():
         print(f"[train_lora] train={len(ds)} val={len(eval_ds)} (val_fraction={args.val_fraction})")
 
     liger_plan = _maybe_apply_liger(args.student_base, apply_patch=True)
-    base = AutoModelForCausalLM.from_pretrained(
-        args.student_base,
-        torch_dtype=torch.float16,
-        device_map="auto",
-    )
+    model_kwargs = {"device_map": "auto"}
+    if qlora_active:
+        if not bitsandbytes_importable:
+            sys.stderr.write("[train_lora] --qlora requires bitsandbytes for the HF QLoRA path.\n")
+            sys.stderr.write("             install hint: pip install bitsandbytes\n")
+            sys.exit(15)
+        BitsAndBytesConfig = getattr(transformers, "BitsAndBytesConfig", None)
+        prepare_kbit = getattr(peft, "prepare_model_for_kbit_training", None)
+        if BitsAndBytesConfig is None or prepare_kbit is None:
+            sys.stderr.write("[train_lora] --qlora requires transformers.BitsAndBytesConfig and peft.prepare_model_for_kbit_training.\n")
+            sys.stderr.write("             install hint: pip install -U transformers peft bitsandbytes\n")
+            sys.exit(15)
+        compute_dtype = torch.bfloat16 if bf16_flag else torch.float16
+        model_kwargs["torch_dtype"] = compute_dtype
+        model_kwargs["quantization_config"] = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=compute_dtype,
+            bnb_4bit_use_double_quant=True,
+        )
+    else:
+        model_kwargs["torch_dtype"] = torch.float16
+    base = AutoModelForCausalLM.from_pretrained(args.student_base, **model_kwargs)
+    if qlora_active:
+        base = prepare_kbit(base, use_gradient_checkpointing=grad_ckpt_flag)
 
     # W921 — variant-aware LoRA config. When no variant knobs are set this
     # produces the IDENTICAL plain LoRA config as before (backward-compat).
@@ -759,15 +804,6 @@ def main():
     # flags actually steer the trainer instead of being marketing copy.
     # Default precision = bf16 when supported, fp16 fallback otherwise
     # (matches the trainer_real.py auto-detect convention).
-    precision = os.environ.get("KOLM_PRECISION", "auto").lower()
-    if precision == "auto":
-        precision = "bf16" if hasattr(torch, "cuda") and torch.cuda.is_available() and getattr(torch.cuda, "is_bf16_supported", lambda: False)() else "fp16"
-    fp16_flag = precision in ("fp16", "mixed-fp16")
-    bf16_flag = precision in ("bf16", "mixed-bf16")
-    if precision == "fp32":
-        fp16_flag = False
-        bf16_flag = False
-    grad_ckpt_flag = os.environ.get("KOLM_GRAD_CHECKPOINT", "0") == "1"
     save_strategy = "steps" if args.save_steps > 0 else "epoch"
     ta_kwargs = dict(
         output_dir=args.out,
@@ -974,6 +1010,7 @@ def main():
                 "unsloth_supported": backend_plan["unsloth_supported"],
                 "hf_only_features": backend_plan["hf_only_features"],
                 "neftune_noise_alpha": float(neftune_alpha) if neftune_alpha else 0.0,
+                "bitsandbytes_importable": bitsandbytes_importable,
             },
             # W787 — record the effective compute-efficiency choices so the
             # downstream .kolm receipt chain documents which precision + grad-
@@ -994,6 +1031,8 @@ def main():
             # record the vanilla path; pissa_converted proves a PiSSA adapter is
             # base-relative (loads on the published base).
             "variants": {
+                "train_preset": train_preset,
+                "train_method": train_method or ("qlora" if qlora_active else "lora"),
                 "lora_variant": lora_variant,
                 "lora_init": lora_init,
                 "neftune_alpha": neftune_alpha,
@@ -1012,7 +1051,7 @@ def main():
                 "val_fraction": args.val_fraction if args.val_fraction > 0 else None,
                 "val_rows": len(eval_ds) if eval_ds is not None else 0,
                 "resumed_from": resume_arg,
-                "qlora": False,
+                "qlora": qlora_active,
                 "optim": trainer_optim,
                 "max_grad_norm": args.max_grad_norm,
                 "warmup_ratio": args.warmup_ratio,

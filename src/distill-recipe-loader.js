@@ -73,6 +73,7 @@ const ORCHESTRATOR_MAP = {
 
 const VALID_TRAIN_METHODS = new Set(['qlora', 'lora', 'full']);
 const VALID_TRAIN_BACKENDS = new Set(['auto', 'hf', 'unsloth']);
+const VALID_TRAIN_PRESETS = new Set(['qdora']);
 
 // W921 - additive recipe vocabulary.
 // Distillation OBJECTIVE (loss). seqkd is the SFT-on-strings default; the
@@ -85,7 +86,7 @@ const VALID_OBJECTIVES = new Set(['seqkd', 'forward_kl', 'reverse_kl', 'jsd', 'd
 // Objectives that need teacher LOGITS (API teachers are text-only).
 const LOGIT_OBJECTIVES = new Set(['forward_kl', 'reverse_kl', 'jsd', 'distillm2', 'gkd']);
 // LoRA-variant vocabulary (kept in sync with src/distill-efficiency.js).
-const VALID_LORA_VARIANTS = new Set(['lora', 'rslora', 'dora', 'loraplus', 'lora-fa']);
+const VALID_LORA_VARIANTS = new Set(['lora', 'rslora', 'dora', 'qdora', 'loraplus', 'lora-fa']);
 const VALID_LORA_INITS = new Set(['default', 'gaussian', 'pissa', 'pissa_niter_16', 'olora']);
 const VALID_OPTIMS = new Set([
   'adamw_torch', 'adamw_8bit', 'paged_adamw_8bit',
@@ -223,7 +224,8 @@ function _validateTrain(train) {
     issues.push('train must be an object');
     return issues;
   }
-  if (!VALID_TRAIN_METHODS.has(train.method)) {
+  const effectiveMethod = train.method ?? (train.preset === 'qdora' ? 'qlora' : undefined);
+  if (!VALID_TRAIN_METHODS.has(effectiveMethod)) {
     issues.push(`train.method must be one of: ${Array.from(VALID_TRAIN_METHODS).join(', ')} (got ${JSON.stringify(train.method)})`);
   }
   if (typeof train.student_base !== 'string' || train.student_base.length === 0) {
@@ -231,6 +233,12 @@ function _validateTrain(train) {
   }
   if (train.backend !== undefined && !VALID_TRAIN_BACKENDS.has(train.backend)) {
     issues.push(`train.backend must be one of: ${Array.from(VALID_TRAIN_BACKENDS).join(', ')} (got ${JSON.stringify(train.backend)})`);
+  }
+  if (train.preset !== undefined && !VALID_TRAIN_PRESETS.has(train.preset)) {
+    issues.push(`train.preset must be one of: ${Array.from(VALID_TRAIN_PRESETS).join(', ')} (got ${JSON.stringify(train.preset)})`);
+  }
+  if (train.preset === 'qdora' && train.method !== undefined && train.method !== 'qlora') {
+    issues.push('train.preset=qdora requires train.method=qlora so the receipt cannot claim QDoRA while running plain LoRA');
   }
   const numericKeys = ['epochs', 'batch_size', 'lr', 'max_seq_len'];
   for (const k of numericKeys) {
@@ -241,7 +249,7 @@ function _validateTrain(train) {
     }
   }
   // LoRA-specific knobs only matter for qlora/lora.
-  if (train.method === 'qlora' || train.method === 'lora') {
+  if (effectiveMethod === 'qlora' || effectiveMethod === 'lora') {
     if (!_isPlainObject(train.lora)) {
       issues.push('train.lora must be an object for method=qlora|lora');
     } else {
@@ -266,7 +274,7 @@ function _validateTrain(train) {
     issues.push(`train.optim must be one of: ${Array.from(VALID_OPTIMS).join(', ')} (got ${JSON.stringify(train.optim)})`);
   }
   // GaLore is incompatible with 4-bit (qlora) - refuse before spend.
-  if (typeof train.optim === 'string' && train.optim.startsWith('galore') && train.method === 'qlora') {
+  if (typeof train.optim === 'string' && train.optim.startsWith('galore') && effectiveMethod === 'qlora') {
     issues.push('train.optim galore_* is incompatible with method=qlora (4-bit params); use method=full');
   }
   if (train.neftune_alpha !== undefined) {

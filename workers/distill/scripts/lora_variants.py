@@ -57,10 +57,10 @@ class LoraVariantConfig:
 
     def variant_from_name(self, name: str) -> "LoraVariantConfig":
         """Set the boolean variant flags from a variant NAME
-        (lora|rslora|dora|loraplus|lora-fa)."""
+        (lora|rslora|dora|qdora|loraplus|lora-fa)."""
         name = (name or "lora").lower()
-        self.use_rslora = name == "rslora"
-        self.use_dora = name == "dora"
+        self.use_rslora = name in ("rslora", "qdora")
+        self.use_dora = name in ("dora", "qdora")
         self.use_lora_plus = name == "loraplus"
         self.freeze_a = name == "lora-fa"
         return self

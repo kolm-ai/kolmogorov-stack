@@ -193,6 +193,20 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   const doraJson = JSON.parse((dora.stdout || '').toString());
   assert.equal(doraJson.config.lora_variant, 'dora');
   assert.equal(doraJson.backend.selected, 'hf');
+  const qdora = spawnSync(PY, [script, '--pairs', pairs, '--out', out, '--preflight-only'], {
+    stdio: 'pipe', timeout: 60000, env: { ...process.env, KOLM_USE_LIGER: '0', KOLM_TRAIN_PRESET: 'qdora' },
+  });
+  assert.equal(qdora.status, 0, (qdora.stderr || '').toString());
+  const qdoraJson = JSON.parse((qdora.stdout || '').toString());
+  assert.equal(qdoraJson.config.train_preset, 'qdora');
+  assert.equal(qdoraJson.config.train_method, 'qlora');
+  assert.equal(qdoraJson.config.qlora, true);
+  assert.equal(qdoraJson.config.lora_variant, 'qdora');
+  assert.equal(qdoraJson.config.optim, 'paged_adamw_8bit');
+  assert.equal(qdoraJson.config.packing, true);
+  assert.equal(qdoraJson.backend.selected, 'hf');
+  assert.ok(qdoraJson.backend.hf_only_features.includes('lora_variant:qdora'));
+  assert.equal(typeof qdoraJson.checks.bitsandbytes_importable, 'boolean');
   const liger = spawnSync(PY, [script, '--student-base', 'Qwen/Qwen2.5-0.5B-Instruct', '--preflight-only'], {
     stdio: 'pipe', timeout: 60000, env: {
       ...process.env,
@@ -227,12 +241,16 @@ test('W616 trainer backend wiring spans recipe, CLI, worker, and mirror', () => 
   assert.match(train, /def _exec_unsloth_backend/);
   assert.match(train, /_exec_unsloth_backend\(args, backend_plan\["reason"\]/);
   assert.match(train, /if args\.holdout:[\s\S]+--holdout/);
+  assert.match(train, /train_preset == "qdora"[\s\S]+args\.qlora = True/);
+  assert.match(train, /if qlora_active:[\s\S]+BitsAndBytesConfig/);
   assert.match(train, /LIGER_KERNEL_APIS/);
   assert.match(train, /def _maybe_apply_liger/);
   assert.match(train, /_maybe_apply_liger\(args\.student_base, apply_patch=True\)/);
   assert.match(train, /"liger_kernel": bool\(liger_plan\.get\("applied"\)\)/);
   const worker = fs.readFileSync(path.join(repoRoot, 'workers/distill/distill.mjs'), 'utf8');
   assert.match(worker, /spec\.train\.backend/);
+  assert.match(worker, /train preset must be one of \[qdora\]/);
+  assert.match(worker, /train method must be one of \[qlora, lora, full\]/);
   assert.match(worker, /pyArgs\.push\('--backend'/);
   const cli = fs.readFileSync(path.join(repoRoot, 'cli/kolm.js'), 'utf8');
   assert.match(cli, /const trainerBackend = pick\('--backend'\)/);

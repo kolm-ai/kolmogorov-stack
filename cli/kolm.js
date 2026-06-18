@@ -2449,7 +2449,10 @@ LOCAL-WORKER OBJECTIVE + TRAINER VARIANTS (wave 921)
                        gkd/...) require teacher logits — pass --teacher-local.
   --teacher-local      assert the teacher serves logits (local endpoint), which
                        unlocks the logit-level objectives above.
-  --lora-variant lora|rslora|dora|loraplus|lora-fa
+  --train-preset qdora  one-click QDoRA quality preset (QLoRA + DoRA + rsLoRA).
+  --quality-preset qdora
+                       alias for --train-preset.
+  --lora-variant lora|rslora|dora|qdora|loraplus|lora-fa
   --lora-init  default|gaussian|pissa|pissa_niter_16|olora
   --neftune <alpha>    NEFTune noise alpha (>0 enables).
   --optim adamw_torch|adamw_8bit|paged_adamw_8bit|galore_adamw|galore_adamw_8bit|galore_adamw_layerwise|galore_adafactor
@@ -27260,11 +27263,13 @@ async function cmdDistillLocalWorker(args) {
   const _w921Optim = pick('--optim');
   const _w921GaloreRank = pick('--galore-rank');
   const _w921GaloreProjGap = pick('--galore-proj-gap');
+  const _w921TrainPreset = pick('--train-preset') || pick('--quality-preset');
   const _w921Packing = args.includes('--packing');
   let _w921VariantEnv = {};
   const _w921VariantSet = _w921LoraVariant != null || _w921LoraInit != null
     || _w921Neftune != null || _w921Optim != null
-    || _w921GaloreRank != null || _w921GaloreProjGap != null || _w921Packing;
+    || _w921GaloreRank != null || _w921GaloreProjGap != null
+    || _w921TrainPreset != null || _w921Packing;
   // W921 — auto-map a recipe's train.{lora_variant,...} block to the same env
   // when the user points --spec at a recipe-shaped JSON carrying a `train`
   // section. Explicit CLI flags WIN over recipe values. Best-effort: a spec
@@ -27284,6 +27289,7 @@ async function cmdDistillLocalWorker(args) {
       const t = _w921RecipeTrain || {};
       const vopts = {};
       // Recipe defaults first, then override with explicit CLI flags.
+      if (t.preset != null) vopts.preset = t.preset;
       if (t.lora_variant != null) vopts.lora_variant = t.lora_variant;
       if (t.lora_init != null) vopts.lora_init = t.lora_init;
       if (t.neftune_alpha != null) vopts.neftune_alpha = t.neftune_alpha;
@@ -27292,6 +27298,8 @@ async function cmdDistillLocalWorker(args) {
       if (t.packing != null) vopts.packing = t.packing;
       if (t.galore != null && typeof t.galore === 'object') vopts.galore = { ...t.galore };
       if (t.method != null) vopts.method = t.method;
+      if (t.backend != null) vopts.backend = t.backend;
+      if (_w921TrainPreset != null) vopts.preset = _w921TrainPreset;
       if (_w921LoraVariant != null) vopts.lora_variant = _w921LoraVariant;
       if (_w921LoraInit != null) vopts.lora_init = _w921LoraInit;
       if (_w921Neftune != null) vopts.neftune_alpha = _w921Neftune;

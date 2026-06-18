@@ -16,14 +16,17 @@ import path from 'node:path';
 import {
   normalizeTrainerVariantOptions, buildTrainerVariantEnv,
   LORA_VARIANTS, DEFAULT_LORA_VARIANT, LORA_INITS, TRAINER_OPTIMS,
+  TRAINER_PRESET_NAMES,
 } from '../src/distill-efficiency.js';
 import { loadRecipe } from '../src/distill-recipe-loader.js';
 
 test('frozen enums present', () => {
   assert.ok(LORA_VARIANTS.includes('dora'));
+  assert.ok(LORA_VARIANTS.includes('qdora'));
   assert.equal(DEFAULT_LORA_VARIANT, 'rslora');
   assert.ok(LORA_INITS.includes('pissa_niter_16'));
   assert.ok(TRAINER_OPTIMS.includes('galore_adamw'));
+  assert.ok(TRAINER_PRESET_NAMES.includes('qdora'));
   assert.ok(Object.isFrozen(LORA_VARIANTS));
 });
 
@@ -65,6 +68,29 @@ test('buildTrainerVariantEnv exact wire format; default rsLoRA + explicit lora o
   assert.equal(galore.KOLM_GALORE_TARGETS, 'attn,mlp');
   const packing = buildTrainerVariantEnv(normalizeTrainerVariantOptions({ packing: true }));
   assert.equal(packing.KOLM_PACKING, '1');
+});
+
+test('qdora preset expands to one-click frontier quality env', () => {
+  const v = normalizeTrainerVariantOptions({ preset: 'qdora' });
+  assert.equal(v.preset, 'qdora');
+  assert.equal(v.method, 'qlora');
+  assert.equal(v.lora_variant, 'qdora');
+  assert.equal(v.optim, 'paged_adamw_8bit');
+  assert.equal(v.neftune_alpha, 5);
+  assert.equal(v.packing, true);
+  assert.equal(v.backend, 'auto');
+  assert.equal(v.use_liger, true);
+  assert.deepEqual(buildTrainerVariantEnv(v), {
+    KOLM_TRAIN_PRESET: 'qdora',
+    KOLM_TRAIN_METHOD: 'qlora',
+    KOLM_TRAIN_LORA_BACKEND: 'auto',
+    KOLM_USE_LIGER: '1',
+    KOLM_LORA_VARIANT: 'qdora',
+    KOLM_NEFTUNE_ALPHA: '5',
+    KOLM_OPTIM: 'paged_adamw_8bit',
+    KOLM_PACKING: '1',
+  });
+  assert.throws(() => normalizeTrainerVariantOptions({ preset: 'bogus' }), /train preset/);
 });
 
 test('loraplus default ratio', () => {
@@ -109,4 +135,18 @@ test('recipe loader: trinity-2000 still valid; pissa/galore recipe validates; ba
   const r3 = loadRecipe(pb3);
   assert.equal(r3.ok, false);
   assert.ok(r3.issues.some((i) => /train\.backend/.test(i)));
+  const qdora = JSON.parse(JSON.stringify(good));
+  qdora.train.preset = 'qdora';
+  delete qdora.train.method;
+  delete qdora.train.lora_variant;
+  const pq = path.join(os.tmpdir(), 'kolm-lv-qdora-' + Date.now() + '.json');
+  fs.writeFileSync(pq, JSON.stringify(qdora));
+  assert.equal(loadRecipe(pq).ok, true);
+  const qdoraBad = JSON.parse(JSON.stringify(qdora));
+  qdoraBad.train.method = 'lora';
+  const pqb = path.join(os.tmpdir(), 'kolm-lv-qdora-bad-' + Date.now() + '.json');
+  fs.writeFileSync(pqb, JSON.stringify(qdoraBad));
+  const rb = loadRecipe(pqb);
+  assert.equal(rb.ok, false);
+  assert.ok(rb.issues.some((i) => /preset=qdora requires train\.method=qlora/.test(i)));
 });
