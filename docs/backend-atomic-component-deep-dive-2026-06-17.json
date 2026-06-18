@@ -39,8 +39,8 @@
     "frontier_improvement_or_invention"
   ],
   "summary": {
-    "component_count": 966,
-    "test_referenced_components": 966,
+    "component_count": 968,
+    "test_referenced_components": 968,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 64,
     "domains": {
@@ -54,29 +54,29 @@
       "platform_support": 221,
       "runtime_serving_routing": 26,
       "storage_state": 28,
-      "training_model_optimization": 171,
+      "training_model_optimization": 173,
       "trust_security_compliance": 63
     },
     "surfaces": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 627,
+      "core-backend": 628,
       "package-distribution": 92,
       "service": 3,
-      "worker": 210
+      "worker": 211
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 473,
-      "distribution_or_worker_surface": 305,
-      "environment_configuration_boundary": 366,
-      "execution_or_subprocess_boundary": 310,
+      "distribution_or_worker_surface": 306,
+      "environment_configuration_boundary": 367,
+      "execution_or_subprocess_boundary": 312,
       "http_route_surface": 41,
       "large_component_contract_risk": 42,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 171,
       "open_marker_requires_owner_review": 9,
-      "stateful_storage_boundary": 124
+      "stateful_storage_boundary": 125
     },
     "top_review_targets": [
       {
@@ -7929,6 +7929,70 @@
       ]
     },
     {
+      "path": "apps/trainer/moe_to_dense.py",
+      "id": "apps-trainer-moe-to-dense-py",
+      "surface": "worker",
+      "domain": "training_model_optimization",
+      "language": "python",
+      "sha256": "157829a3eca92a7518074557ceb4809cefb45cf190cdab876c08abfdccca4a31",
+      "metrics": {
+        "bytes": 22397,
+        "lines": 597,
+        "imports": 0,
+        "exports": 25,
+        "routes": 0,
+        "env_refs": 0,
+        "fs_writes": 3,
+        "subprocess_refs": 0,
+        "network_refs": 0,
+        "crypto_refs": 0,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/wave957-apps-atomic-scope.test.js",
+        "tests/wave958-moe-to-dense.test.js",
+        "tests/wave584-distill-strategy.test.js"
+      ],
+      "risk_signals": [
+        "distribution_or_worker_surface",
+        "execution_or_subprocess_boundary",
+        "stateful_storage_boundary"
+      ],
+      "priority_score": 3,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
+      "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
+      "suggested_verification": [
+        "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
+        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
+        "npm run verify:quant-oracle"
+      ]
+    },
+    {
       "path": "apps/trainer/moe.py",
       "id": "apps-trainer-moe-py",
       "surface": "worker",
@@ -7950,7 +8014,8 @@
       },
       "test_refs": [
         "tests/wave147-moe-composition.test.js",
-        "tests/wave957-apps-atomic-scope.test.js"
+        "tests/wave957-apps-atomic-scope.test.js",
+        "tests/wave958-moe-to-dense.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -9597,11 +9662,11 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "d32dc11ca229359bfd3ccbfe6a916672858e02f7b4556cf8e33d5f9f938b86e9",
+      "sha256": "43f0d67085403d0183fc8ab047723060cd844a16753d98b88e5962c2d84feb8c",
       "metrics": {
-        "bytes": 2637810,
-        "lines": 57355,
-        "imports": 544,
+        "bytes": 2640602,
+        "lines": 57415,
+        "imports": 545,
         "exports": 1,
         "routes": 0,
         "env_refs": 414,
@@ -30437,9 +30502,9 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "875c639a93b3c712eeb95e59bc4edf6648910991c49272a560f9b5a7c1389feb",
+      "sha256": "982b77504405c3de129dfe02f6f0c49a1efa7cdeb643b5bdffd3b5f63bd45c85",
       "metrics": {
-        "bytes": 22877,
+        "bytes": 23080,
         "lines": 532,
         "imports": 2,
         "exports": 3,
@@ -30454,7 +30519,8 @@
       "test_refs": [
         "tests/wave584-distill-strategy.test.js",
         "tests/wave602-backend-atomic-deep-dive.test.js",
-        "tests/wave604-distill-strategy-frontier.test.js"
+        "tests/wave604-distill-strategy-frontier.test.js",
+        "tests/wave958-moe-to-dense.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary"
@@ -41485,6 +41551,68 @@
       ]
     },
     {
+      "path": "src/moe-to-dense.js",
+      "id": "src-moe-to-dense-js",
+      "surface": "core-backend",
+      "domain": "training_model_optimization",
+      "language": "javascript",
+      "sha256": "1022f6a815dc0c2b4aecb31a07d30b2f15d65586e4dc09aae12a3607ac89a599",
+      "metrics": {
+        "bytes": 7507,
+        "lines": 219,
+        "imports": 5,
+        "exports": 5,
+        "routes": 0,
+        "env_refs": 6,
+        "fs_writes": 0,
+        "subprocess_refs": 4,
+        "network_refs": 0,
+        "crypto_refs": 0,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/wave958-moe-to-dense.test.js",
+        "tests/wave584-distill-strategy.test.js"
+      ],
+      "risk_signals": [
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary"
+      ],
+      "priority_score": 2,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
+      "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
+      "suggested_verification": [
+        "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
+        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
+        "npm run verify:quant-oracle"
+      ]
+    },
+    {
       "path": "src/moe.js",
       "id": "src-moe-js",
       "surface": "core-backend",
@@ -41509,6 +41637,7 @@
         "tests/wave147-moe-composition.test.js",
         "tests/wave191-moe-cli.test.js",
         "tests/wave921-moe-quantize.test.js",
+        "tests/wave958-moe-to-dense.test.js",
         "tests/wrapper-s7.test.js"
       ],
       "risk_signals": [

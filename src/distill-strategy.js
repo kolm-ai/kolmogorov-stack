@@ -138,10 +138,10 @@ const STRATEGIES = Object.freeze([
   },
   {
     id: 'moe_to_dense_distill',
-    label: 'MoE-to-dense distillation plan',
+    label: 'MoE-to-dense structural collapse + distillation',
     family: 'distill',
     command_kind: 'moe-distill',
-    execution_status: 'plan_only',
+    execution_status: 'worker_ready_structural_collapse',
     objective: 'forward_kl',
     min_real_pairs: 1000,
     min_holdout_pairs: 200,
@@ -151,7 +151,7 @@ const STRATEGIES = Object.freeze([
     privacy: ['standard', 'regulated', 'zero_retention', 'airgap'],
     best_for: ['generation', 'reasoning', 'moe-teacher', 'large-moe-reasoner', 'moe-to-dense', 'expert-prune-then-distill'],
     references: [
-      { name: 'krafton-ai/moe-to-dense', method: 'expert-score-prune-merge-forward-kl', status: 'frontier_reference' },
+      { name: 'MoE-to-dense: Pruning and Distilling Mixture-of-Experts into Dense Language Models', method: 'score-select-group-concat-forward-kl', status: 'frontier_reference', paper: 'arXiv:2605.28207' },
       { name: 'SlimMoE', method: 'multi-stage-expert-slimming-and-distill', status: 'frontier_reference' },
     ],
   },
@@ -406,7 +406,7 @@ function commandFor(strategy, profile) {
   if (strategy.command_kind === 'gad-blackbox') return `kolm distill onpolicy --gad --namespace ${ns}`;
   if (strategy.command_kind === 'onpolicy-gkd') return `kolm distill onpolicy train --namespace ${ns} --pairs <pairs.jsonl> --student <student-path> --teacher <local-teacher>`;
   if (strategy.command_kind === 'local-worker-objective') return `kolm distill --local-worker --mode full --teacher-local --objective=${strategy.objective} --spec <spec.json> --seeds <pairs.jsonl> --out <out-dir>`;
-  if (strategy.command_kind === 'moe-distill') return `kolm distill moe-to-dense --namespace ${ns} --teacher ${clean(profile.moe.teacher_model, 'local-moe-teacher')} --student-base ${base} --plan-only`;
+  if (strategy.command_kind === 'moe-distill') return `kolm distill moe-to-dense --namespace ${ns} --teacher ${clean(profile.moe.teacher_model, 'local-moe-teacher')} --student-base ${base} --checkpoint <moe-checkpoint> --router-stats <router-stats.json> --out <dense-init-dir>`;
   if (strategy.command_kind === 'cot-distill') return `kolm distill --namespace ${ns} --reasoning-trace-loss-weight 0.2`;
   if (strategy.command_kind === 'preference') return `kolm distill preference --namespace ${ns} --objective dpo`;
   if (strategy.command_kind === 'onpolicy') return `kolm distill onpolicy --namespace ${ns}`;

@@ -31,7 +31,7 @@ const STACK_CATEGORIES = Object.freeze([
     domains: ['training_model_optimization', 'compile_artifact_runtime'],
     readiness_surfaces: ['compile-train-distill', 'ai-ml-optimizer'],
     keywords: ['moe', 'expert', 'forge', 'quant'],
-    required_paths: ['src/moe-support.js', 'src/moe-registry.js', 'src/forge-experts.js', 'workers/quantize/scripts/quantize.py'],
+    required_paths: ['src/moe-support.js', 'src/moe-registry.js', 'src/forge-experts.js', 'src/moe-to-dense.js', 'apps/trainer/moe_to_dense.py', 'workers/quantize/scripts/quantize.py'],
   },
   {
     id: 'quantization',
@@ -163,6 +163,13 @@ const EXTERNAL_FRESHNESS_PROBE = Object.freeze([
     source_type: 'paper',
     url: 'https://arxiv.org/abs/2511.10643',
     confirms: 'GAD remains a primary frontier reference for black-box on-policy distillation and supports the open GAD trainer/bakeoff gap.',
+  },
+  {
+    id: 'moe-to-dense-arxiv',
+    category: 'moe-distill-quant',
+    source_type: 'paper',
+    url: 'https://arxiv.org/abs/2605.28207',
+    confirms: 'MoE-to-dense remains the current frontier path: score/select/group experts, concatenate into a dense FFN, then recover with forward-KL distillation.',
   },
   {
     id: 'nvidia-tensorrt-llm-quantization',

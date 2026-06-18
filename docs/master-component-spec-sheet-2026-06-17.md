@@ -7,16 +7,16 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 ## How Close To Perfect
 
 - Local engineering perfection: **100/100**
-- Frontier/product perfection: **78.8/100**
-- Atomic components inventoried: **966**
+- Frontier/product perfection: **80/100**
+- Atomic components inventoried: **968**
 - Atomic deep dives complete: **100%**
-- Direct test referenced: **966/966 (100%)**
+- Direct test referenced: **968/968 (100%)**
 - High-priority direct test referenced: **64/64 (100%)**
 - Local readiness proof coverage: **57/57 (100%)**
 - Claimable readiness closed locally: **49/57 (86%)**
 - Readiness proof surplus hill-climb: **104.3/110**
 - Language fit: **js_control_plane_with_python_rust_native_escape_hatches**
-- SOTA categories still carrying critical work: **5/16**
+- SOTA categories still carrying critical work: **4/16**
 - SOTA categories still carrying major work: **13/16**
 
 Interpretation: local code/spec discipline and readiness proof coverage are now complete, but claimable frontier/product perfection remains lower because partner adoption, package release, public benchmark data, certification, and SOTA category gaps are still external or frontier-open. Above-100 scoring is limited to local proof surplus and never upgrades an external gate into a shipped claim.
@@ -26,7 +26,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | Category | Area | Status | Frontier | Required Components | Verification |
 | --- | --- | --- | --- | --- | --- |
 | distillation | training | sota_review_complete_local_frontier_aligned | at=12 open=0/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
-| moe-distill-quant | training | sota_review_complete_critical_frontier_work_open | at=6 open=2/2/2 | 4 | npm run verify:stack-sota<br>npm run verify:inventions |
+| moe-distill-quant | training | sota_review_complete_major_frontier_work_open | at=7 open=0/4/2 | 6 | npm run verify:stack-sota<br>npm run verify:inventions |
 | quantization | compiler-runtime | sota_review_complete_major_frontier_work_open | at=10 open=0/4/1 | 3 | npm run verify:stack-sota<br>npm run verify:quant-oracle |
 | kv-cache | runtime | sota_review_complete_major_frontier_work_open | at=8 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | speculative-decoding | runtime | sota_review_complete_major_frontier_work_open | at=8 open=0/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:surfaces |

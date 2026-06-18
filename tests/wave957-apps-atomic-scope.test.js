@@ -129,6 +129,7 @@ const APPS_COMPONENTS = Object.freeze([
   'apps/trainer/models.py',
   'apps/trainer/moe.py',
   'apps/trainer/moe_run.py',
+  'apps/trainer/moe_to_dense.py',
   'apps/trainer/multinode_launch.py',
   'apps/trainer/nvfp4.py',
   'apps/trainer/online_dpo.py',

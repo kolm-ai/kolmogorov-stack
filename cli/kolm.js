@@ -22244,6 +22244,65 @@ async function cmdDistillStrategy(args) {
 //   --decide:      compareAndDecide({base, candidate}) -> promote/hold/rollback
 //
 // Common flags: --json (machine-readable envelope), --namespace, --tenant.
+async function cmdDistillMoeToDense(args) {
+  const wantJson = args.includes('--json');
+  const doctor = args.includes('--doctor') || args.includes('doctor');
+  const dryRun = args.includes('--dry-run') || args.includes('--plan-only');
+  const checkpointPath = pickFlag(args, '--checkpoint') || pickFlag(args, '--moe-checkpoint');
+  const routerStatsPath = pickFlag(args, '--router-stats') || pickFlag(args, '--stats');
+  const pairsPath = pickFlag(args, '--pairs') || pickFlag(args, '--seeds');
+  const outDir = pickFlag(args, '--out') || pickFlag(args, '--out-dir');
+  const teacher = pickFlag(args, '--teacher') || 'local-moe-teacher';
+  const studentBase = pickFlag(args, '--student-base') || pickFlag(args, '--base') || 'dense-student';
+  const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
+  const tenant = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || 'local';
+  const selectedFlag = pickFlag(args, '--selected-experts') || pickFlag(args, '--experts');
+  const selectedExperts = selectedFlag == null ? 2 : Number(selectedFlag);
+  const keepExperts = args.includes('--keep-experts');
+  const mod = await import('../src/moe-to-dense.js');
+
+  if (doctor) {
+    const env = mod.doctorMoeToDense();
+    console.log(JSON.stringify(env, null, 2));
+    if (!env.ok) process.exit(EXIT.MISSING_PREREQ);
+    return;
+  }
+
+  const result = mod.runMoeToDense({
+    checkpointPath,
+    routerStatsPath,
+    pairsPath,
+    outDir,
+    teacher,
+    studentBase,
+    namespace,
+    tenant_id: tenant,
+    selectedExperts,
+    dryRun,
+    keepExperts,
+  });
+  if (wantJson || !result.ok) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(`moe-to-dense: ${result.deferred ? 'deferred' : 'ok'}`);
+    console.log(`  run_dir: ${result.run_dir}`);
+    if (result.deferred) {
+      console.log('  status: trainer not installed; no dense checkpoint written');
+      if (result.install_hint) console.log('  hint: ' + result.install_hint.split('\n')[0]);
+      return;
+    }
+    console.log(`  trainer: ${result.trainer || result.trainer_source || '-'}`);
+    if (result.manifest?.structural_collapse?.layers) {
+      console.log(`  layers: ${result.manifest.structural_collapse.layers.length}`);
+      const first = result.manifest.structural_collapse.layers[0];
+      if (first?.selected_experts) console.log(`  selected_experts[0]: ${first.selected_experts.join(',')}`);
+    }
+    if (result.manifest?.out_checkpoint) console.log(`  dense_init: ${result.manifest.out_checkpoint}`);
+    console.log('  next: run recovery KD with apps/trainer/distill.py using the emitted dense-init checkpoint.');
+  }
+  if (!result.ok) process.exit(EXIT.EXECUTION);
+}
+
 async function cmdDistillImprove(args) {
   const wantJson = args.includes('--json');
   const namespace = pickFlag(args, '--namespace') || pickFlag(args, '-n') || 'default';
@@ -22507,6 +22566,7 @@ async function cmdDistill(args) {
   if (args[0] === 'itkv') return cmdDistillKvOptim(args.slice(1));
   // W480 on-policy + preference subverbs.
   if (args[0] === 'onpolicy') return cmdDistillOnPolicy(args.slice(1));
+  if (args[0] === 'moe-to-dense') return cmdDistillMoeToDense(args.slice(1));
   if (args[0] === 'preference' || args[0] === 'dpo' || args[0] === 'simpo') {
     return cmdDistillPreference(args.slice(1), args[0]);
   }

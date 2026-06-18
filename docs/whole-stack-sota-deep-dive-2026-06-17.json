@@ -37,6 +37,13 @@
         "confirms": "GAD remains a primary frontier reference for black-box on-policy distillation and supports the open GAD trainer/bakeoff gap."
       },
       {
+        "id": "moe-to-dense-arxiv",
+        "category": "moe-distill-quant",
+        "source_type": "paper",
+        "url": "https://arxiv.org/abs/2605.28207",
+        "confirms": "MoE-to-dense remains the current frontier path: score/select/group experts, concatenate into a dense FFN, then recover with forward-KL distillation."
+      },
+      {
         "id": "nvidia-tensorrt-llm-quantization",
         "category": "quantization",
         "source_type": "official-docs",
@@ -83,13 +90,13 @@
   ],
   "summary": {
     "category_count": 16,
-    "categories_with_critical_frontier_work_open": 5,
+    "categories_with_critical_frontier_work_open": 4,
     "categories_with_major_frontier_work_open": 13,
-    "total_atomic_component_links": 4443,
+    "total_atomic_component_links": 4459,
     "status_counts": {
       "sota_review_complete_local_frontier_aligned": 1,
-      "sota_review_complete_critical_frontier_work_open": 5,
-      "sota_review_complete_major_frontier_work_open": 9,
+      "sota_review_complete_major_frontier_work_open": 10,
+      "sota_review_complete_critical_frontier_work_open": 4,
       "sota_review_complete_external_or_release_gate_open": 1
     },
     "readiness_open_requirements": [
@@ -548,7 +555,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 261,
+        "count": 263,
         "missing_required_paths": []
       },
       "readiness": {
@@ -645,7 +652,7 @@
     {
       "id": "moe-distill-quant",
       "stack_area": "training",
-      "status": "sota_review_complete_critical_frontier_work_open",
+      "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
         "line": 213
@@ -654,16 +661,32 @@
         "line": 213,
         "has_as_built": true,
         "has_frontier_delta": true,
-        "already_at_frontier_count": 6,
+        "already_at_frontier_count": 7,
         "improvement_count": 3,
         "gaps": {
-          "critical": 2,
-          "major": 2,
+          "critical": 0,
+          "major": 4,
           "minor": 2
         }
       },
       "atomic_components": {
         "required": [
+          {
+            "path": "apps/trainer/moe_to_dense.py",
+            "domain": "training_model_optimization",
+            "priority_score": 3,
+            "risk_signals": [
+              "distribution_or_worker_surface",
+              "execution_or_subprocess_boundary",
+              "stateful_storage_boundary"
+            ],
+            "test_refs": [
+              "tests/wave957-apps-atomic-scope.test.js",
+              "tests/wave958-moe-to-dense.test.js",
+              "tests/wave584-distill-strategy.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
           {
             "path": "src/forge-experts.js",
             "domain": "identity_access",
@@ -699,6 +722,20 @@
             "test_refs": [
               "tests/wave921-moe-quantize.test.js",
               "tests/wrapper-s7.test.js"
+            ],
+            "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
+          },
+          {
+            "path": "src/moe-to-dense.js",
+            "domain": "training_model_optimization",
+            "priority_score": 2,
+            "risk_signals": [
+              "environment_configuration_boundary",
+              "execution_or_subprocess_boundary"
+            ],
+            "test_refs": [
+              "tests/wave958-moe-to-dense.test.js",
+              "tests/wave584-distill-strategy.test.js"
             ],
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           },
@@ -1004,7 +1041,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 325,
+        "count": 327,
         "missing_required_paths": []
       },
       "readiness": {
@@ -1102,10 +1139,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 260
+        "line": 264
       },
       "local_sota_review": {
-        "line": 260,
+        "line": 264,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -1449,7 +1486,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 376,
+        "count": 378,
         "missing_required_paths": []
       },
       "readiness": {
@@ -1566,10 +1603,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 305
+        "line": 309
       },
       "local_sota_review": {
-        "line": 305,
+        "line": 309,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -2018,10 +2055,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 347
+        "line": 351
       },
       "local_sota_review": {
-        "line": 347,
+        "line": 351,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -2371,7 +2408,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 203,
+        "count": 205,
         "missing_required_paths": []
       },
       "readiness": {
@@ -2454,10 +2491,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 382
+        "line": 386
       },
       "local_sota_review": {
-        "line": 382,
+        "line": 386,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 10,
@@ -2793,7 +2830,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 269,
+        "count": 271,
         "missing_required_paths": []
       },
       "readiness": {
@@ -2924,10 +2961,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 423
+        "line": 427
       },
       "local_sota_review": {
-        "line": 423,
+        "line": 427,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -3263,7 +3300,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 262,
+        "count": 264,
         "missing_required_paths": []
       },
       "readiness": {
@@ -3386,10 +3423,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 470
+        "line": 474
       },
       "local_sota_review": {
-        "line": 470,
+        "line": 474,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 6,
@@ -3733,7 +3770,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 321,
+        "count": 323,
         "missing_required_paths": []
       },
       "readiness": {
@@ -3857,10 +3894,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 505
+        "line": 509
       },
       "local_sota_review": {
-        "line": 505,
+        "line": 509,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 5,
@@ -4334,10 +4371,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 533
+        "line": 537
       },
       "local_sota_review": {
-        "line": 533,
+        "line": 537,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 7,
@@ -4812,10 +4849,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 580
+        "line": 584
       },
       "local_sota_review": {
-        "line": 580,
+        "line": 584,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 11,
@@ -5288,10 +5325,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 613
+        "line": 617
       },
       "local_sota_review": {
-        "line": 613,
+        "line": 617,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -5806,10 +5843,10 @@
       "status": "sota_review_complete_external_or_release_gate_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 644
+        "line": 648
       },
       "local_sota_review": {
-        "line": 644,
+        "line": 648,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6316,10 +6353,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 690
+        "line": 694
       },
       "local_sota_review": {
-        "line": 690,
+        "line": 694,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -6668,7 +6705,7 @@
             "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
           }
         ],
-        "count": 308,
+        "count": 310,
         "missing_required_paths": []
       },
       "readiness": {
@@ -6788,10 +6825,10 @@
       "status": "sota_review_complete_major_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 741
+        "line": 745
       },
       "local_sota_review": {
-        "line": 741,
+        "line": 745,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 8,
@@ -7269,10 +7306,10 @@
       "status": "sota_review_complete_critical_frontier_work_open",
       "source_stack_spec": {
         "path": "docs/STACK-TECH-SPEC-2026-06-15.md",
-        "line": 790
+        "line": 794
       },
       "local_sota_review": {
-        "line": 790,
+        "line": 794,
         "has_as_built": true,
         "has_frontier_delta": true,
         "already_at_frontier_count": 9,
