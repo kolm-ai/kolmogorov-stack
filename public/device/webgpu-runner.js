@@ -14,6 +14,7 @@ export const BROWSER_WEIGHT_SIGNED_FIELDS = Object.freeze([
   'runtime',
   'weights_url',
   'weights_sha256',
+  'runtime_config',
   'input',
   'output_labels',
   'created_at',
