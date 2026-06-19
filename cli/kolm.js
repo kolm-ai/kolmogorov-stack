@@ -33403,6 +33403,7 @@ async function cmdCloud(args) {
       console.log('kolm cloud distill <submit|status|list|cancel|meter> [options]');
       console.log('');
       console.log('  submit  [--namespace ns] [--capture-window 7d] [--recipe id] [--gpu-sku H100-80GB] [--vram-tier 1x]');
+      console.log('          [--provider runpod|modal|together] [--student model] [--params-b N] [--corpus-url URL|--training-file-id id]');
       console.log('  status  <job_id>');
       console.log('  list    [--status queued|running|succeeded|failed|cancelled] [--namespace ns] [--limit N]');
       console.log('  cancel  <job_id> [--reason "text"]');
@@ -33416,6 +33417,14 @@ async function cmdCloud(args) {
         recipe_id: flag(r2, '--recipe') || flag(r2, '--recipe-id'),
         gpu_sku: flag(r2, '--gpu-sku') || flag(r2, '--gpu'),
         vram_tier: flag(r2, '--vram-tier') || flag(r2, '--vram'),
+        managed_provider: flag(r2, '--provider') || flag(r2, '--managed-provider'),
+        student: flag(r2, '--student'),
+        teacher: flag(r2, '--teacher'),
+        base_model: flag(r2, '--base-model') || flag(r2, '--model'),
+        student_params_b: flag(r2, '--params-b') || flag(r2, '--student-params-b'),
+        mode: flag(r2, '--mode'),
+        corpus_url: flag(r2, '--corpus-url') || flag(r2, '--training-corpus-url'),
+        training_file_id: flag(r2, '--training-file-id'),
         billing_token: flag(r2, '--billing-token'),
       };
       // Strip null/undefined values so the server applies defaults instead
@@ -33434,6 +33443,11 @@ async function cmdCloud(args) {
         console.log(`bridge_source:         ${out.bridge_source || 'remote_trainer'}`);
         if (out.bridge_job_id) console.log(`bridge_job_id:         ${out.bridge_job_id}`);
         if (out.poll_url || out.bridge_status_url) console.log(`poll_url:              ${out.poll_url || out.bridge_status_url}`);
+      } else if (out.cloud_backend_status === 'reachable_via_provider') {
+        console.log(`managed_provider:      ${out.managed_provider || '(unknown)'}`);
+        if (out.provider_job_id) console.log(`provider_job_id:       ${out.provider_job_id}`);
+        if (out.poll_url || out.provider_status_url) console.log(`poll_url:              ${out.poll_url || out.provider_status_url}`);
+        if (out.managed_provider_launch_spec_hash) console.log(`launch_spec_hash:      ${out.managed_provider_launch_spec_hash}`);
       }
       console.log(`gpu_sku:               ${out.gpu_sku || '(default)'}`);
       console.log(`vram_tier:             ${out.vram_tier || '(default)'}`);
@@ -33455,7 +33469,10 @@ async function cmdCloud(args) {
       console.log(`cloud_backend_status: ${out.cloud_backend_status}`);
       if (out.bridge_source) console.log(`bridge_source:        ${out.bridge_source}`);
       if (out.bridge_job_id) console.log(`bridge_job_id:        ${out.bridge_job_id}`);
-      if (out.poll_url || out.bridge_status_url) console.log(`poll_url:             ${out.poll_url || out.bridge_status_url}`);
+      if (out.managed_provider) console.log(`managed_provider:     ${out.managed_provider}`);
+      if (out.provider_job_id) console.log(`provider_job_id:      ${out.provider_job_id}`);
+      if (out.managed_provider_launch_spec_hash) console.log(`launch_spec_hash:     ${out.managed_provider_launch_spec_hash}`);
+      if (out.poll_url || out.provider_status_url || out.bridge_status_url) console.log(`poll_url:             ${out.poll_url || out.provider_status_url || out.bridge_status_url}`);
       console.log(`namespace:            ${out.namespace}`);
       console.log(`created_at:           ${out.created_at}`);
       if (out.started_at) console.log(`started_at:           ${out.started_at}`);

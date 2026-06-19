@@ -41,6 +41,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { planRemoteDistill } from './distill-runners/index.js';
 import {
   submitSchedulerJob,
   cancelSchedulerJob,
@@ -48,7 +49,7 @@ import {
   _resetSchedulerForTests,
 } from './compute-scheduler.js';
 
-export const CLOUD_DISTILL_VERSION = 'w785-v1';
+export const CLOUD_DISTILL_VERSION = 'w785/w989-v2';
 
 // Closed set of legal job lifecycle states. Frozen so a refactor cannot
 // quietly add a new state without bumping the version stamp. queued is the
@@ -64,8 +65,10 @@ export const CLOUD_DISTILL_STATES = Object.freeze([
 // configured: not a Kolm-hosted fleet, but a real dispatch target.
 // 'simulated' is reserved for development envs that wire a stub pool.
 export const CLOUD_BACKEND_STATUSES = Object.freeze([
-  'no_pool_configured', 'reachable', 'reachable_via_bridge', 'simulated', 'unreachable',
+  'no_pool_configured', 'reachable', 'reachable_via_bridge', 'reachable_via_provider', 'simulated', 'unreachable',
 ]);
+
+export const MANAGED_DISTILL_PROVIDERS = Object.freeze(['runpod', 'modal', 'together']);
 
 // Training meter is FUNDAMENTALLY different from inference meter:
 //   - inference is per-1k-tokens (continuous, low-amplitude)
@@ -207,6 +210,207 @@ function _bridgePollUrl(base, body) {
   return null;
 }
 
+function _canonicalJson(value) {
+  if (Array.isArray(value)) return '[' + value.map(_canonicalJson).join(',') + ']';
+  if (value && typeof value === 'object') {
+    return '{' + Object.keys(value).sort().map((k) =>
+      JSON.stringify(k) + ':' + _canonicalJson(value[k])
+    ).join(',') + '}';
+  }
+  return JSON.stringify(value);
+}
+
+function _sha256Json(value) {
+  return crypto.createHash('sha256').update(_canonicalJson(value)).digest('hex');
+}
+
+function _managedProviderRaw(opts) {
+  const o = opts || {};
+  const raw = o.managed_provider || o.provider || process.env.KOLM_MANAGED_DISTILL_PROVIDER
+    || process.env.KOLM_CLOUD_DISTILL_PROVIDER || '';
+  return typeof raw === 'string' && raw.trim() ? raw.trim().toLowerCase() : null;
+}
+
+function _optOrEnv(opts, optKeys, envKeys) {
+  const o = opts || {};
+  for (const key of optKeys || []) {
+    if (typeof o[key] === 'string' && o[key].trim()) return o[key].trim();
+  }
+  for (const key of envKeys || []) {
+    if (typeof process.env[key] === 'string' && process.env[key].trim()) return process.env[key].trim();
+  }
+  return '';
+}
+
+function _managedProviderConfig(opts) {
+  const provider = _managedProviderRaw(opts);
+  if (!provider) return null;
+  if (!MANAGED_DISTILL_PROVIDERS.includes(provider)) {
+    return {
+      provider,
+      status: 'unreachable',
+      error: 'invalid_managed_provider',
+      missing_env: [],
+      hint: 'managed provider must be one of ' + MANAGED_DISTILL_PROVIDERS.join(','),
+    };
+  }
+
+  if (provider === 'runpod') {
+    const token = _optOrEnv(opts, ['runpod_token', 'provider_token'], ['KOLM_RUNPOD_TOKEN', 'RUNPOD_API_KEY']);
+    const endpointId = _optOrEnv(opts, ['runpod_endpoint_id', 'provider_endpoint_id'], [
+      'KOLM_RUNPOD_DISTILL_ENDPOINT_ID',
+      'KOLM_RUNPOD_ENDPOINT_ID',
+      'RUNPOD_ENDPOINT_ID',
+    ]);
+    const missing = [];
+    if (!token) missing.push('KOLM_RUNPOD_TOKEN');
+    if (!endpointId) missing.push('KOLM_RUNPOD_DISTILL_ENDPOINT_ID');
+    return {
+      provider,
+      status: missing.length ? 'unreachable' : 'reachable_via_provider',
+      endpoint: endpointId || null,
+      token,
+      missing_env: missing,
+      hint: missing.length
+        ? 'set KOLM_RUNPOD_TOKEN and KOLM_RUNPOD_DISTILL_ENDPOINT_ID for managed cloud-distill dispatch'
+        : 'RunPod managed distill endpoint configured',
+    };
+  }
+
+  if (provider === 'modal') {
+    const token = _optOrEnv(opts, ['modal_token', 'provider_token'], ['KOLM_MODAL_TOKEN', 'MODAL_TOKEN_ID']);
+    const endpoint = _optOrEnv(opts, ['modal_distill_url', 'provider_endpoint'], ['KOLM_MODAL_DISTILL_URL']);
+    const missing = [];
+    if (!token) missing.push('KOLM_MODAL_TOKEN');
+    if (!endpoint) missing.push('KOLM_MODAL_DISTILL_URL');
+    return {
+      provider,
+      status: missing.length ? 'unreachable' : 'reachable_via_provider',
+      endpoint: endpoint || null,
+      token,
+      missing_env: missing,
+      hint: missing.length
+        ? 'set KOLM_MODAL_TOKEN and KOLM_MODAL_DISTILL_URL for managed cloud-distill dispatch'
+        : 'Modal distill HTTPS endpoint configured',
+    };
+  }
+
+  const token = _optOrEnv(opts, ['together_token', 'provider_token'], ['KOLM_TOGETHER_TOKEN', 'TOGETHER_API_KEY']);
+  const missing = [];
+  if (!token) missing.push('KOLM_TOGETHER_TOKEN');
+  return {
+    provider,
+    status: missing.length ? 'unreachable' : 'reachable_via_provider',
+    endpoint: 'https://api.together.xyz/v1/fine-tunes',
+    token,
+    missing_env: missing,
+    hint: missing.length
+      ? 'set KOLM_TOGETHER_TOKEN for managed Together fine-tune dispatch'
+      : 'Together managed fine-tune API configured; submit requires training_file_id or corpus_url',
+  };
+}
+
+function _runnerGpuFromSku(gpuSku) {
+  const sku = String(gpuSku || '').toUpperCase();
+  if (sku.includes('H100')) return 'H100';
+  if (sku.includes('H200')) return 'H200';
+  if (sku.includes('B200') || sku.includes('GB200')) return 'B200';
+  if (sku.includes('A100-40')) return 'A100-40GB';
+  if (sku.includes('A100')) return 'A100-80GB';
+  if (sku.includes('L40')) return 'L40S';
+  if (sku.includes('4090')) return 'RTX4090';
+  return null;
+}
+
+function _numOrNull(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function _managedRecipe(opts, recipe_id) {
+  const o = opts || {};
+  const paramsB = _numOrNull(o.student_params_b ?? o.params_b ?? o.paramsB);
+  return {
+    id: recipe_id,
+    student: typeof o.student === 'string' && o.student.trim()
+      ? o.student.trim()
+      : (typeof o.base_model === 'string' && o.base_model.trim() ? o.base_model.trim() : undefined),
+    teacher: typeof o.teacher === 'string' && o.teacher.trim() ? o.teacher.trim() : undefined,
+    mode: typeof o.mode === 'string' && o.mode.trim() ? o.mode.trim() : undefined,
+    student_params_b: paramsB || undefined,
+    params_b: paramsB || undefined,
+  };
+}
+
+function _buildManagedProviderLaunch({ config, opts, recipe_id, gpu_sku, job_id }) {
+  const provider = config && config.provider;
+  const recipe = _managedRecipe(opts, recipe_id);
+  const artifactOut = '/workspace/out/' + job_id;
+  if (provider === 'runpod' || provider === 'modal') {
+    const plan = planRemoteDistill({
+      recipe,
+      provider,
+      gpu: _runnerGpuFromSku(gpu_sku),
+      image: opts?.image,
+      timeout_s: _numOrNull(opts?.timeout_s) || _numOrNull(opts?.timeout_seconds) || 3600,
+      extraEnv: {
+        KOLM_CLOUD_DISTILL_JOB_ID: job_id,
+      },
+    });
+    const spec = plan && plan.spec ? { ...plan.spec } : null;
+    if (spec && provider === 'runpod') spec.artifact_out = artifactOut;
+    if (spec && provider === 'modal' && spec.function) {
+      spec.function = { ...spec.function, env: { ...(spec.function.env || {}), KOLM_OUT_DIR: artifactOut } };
+    }
+    return {
+      ok: !!(plan && plan.ok && spec),
+      provider,
+      recipe,
+      plan_reason: plan?.reason || null,
+      launch_spec: spec,
+      launch_spec_hash: spec ? _sha256Json(spec) : null,
+      error: plan && !plan.ok ? 'managed_provider_plan_not_fit' : null,
+    };
+  }
+  const trainingFileId = _optOrEnv(opts, ['training_file_id', 'together_training_file_id'], ['KOLM_TOGETHER_TRAINING_FILE_ID']);
+  const corpusUrl = _optOrEnv(opts, ['corpus_url', 'training_corpus_url'], ['KOLM_TRAINING_CORPUS_URL']);
+  const spec = {
+    provider: 'together',
+    version: CLOUD_DISTILL_VERSION,
+    training_file_id: trainingFileId || null,
+    corpus_url: corpusUrl || null,
+    model: recipe.student || opts?.base_model || 'Qwen/Qwen2.5-7B-Instruct',
+    suffix: String(recipe_id || job_id).replace(/[^a-z0-9-]/gi, '').slice(0, 32) || 'kolm',
+    n_epochs: Math.max(1, Math.trunc(Number(opts?.epochs || 3) || 3)),
+    lora: true,
+  };
+  return {
+    ok: !!(trainingFileId || corpusUrl),
+    provider,
+    recipe,
+    plan_reason: trainingFileId || corpusUrl
+      ? 'Together managed fine-tune request has a training file or corpus URL'
+      : 'Together managed fine-tune requires training_file_id or corpus_url',
+    launch_spec: spec,
+    launch_spec_hash: _sha256Json(spec),
+    error: trainingFileId || corpusUrl ? null : 'together_training_file_required',
+  };
+}
+
+function _providerPollUrl(config, body) {
+  if (body && typeof body.status_url === 'string' && body.status_url.trim()) return body.status_url.trim();
+  if (body && typeof body.poll_url === 'string' && body.poll_url.trim()) return body.poll_url.trim();
+  const jobId = body && (body.id || body.job_id || body.run_id || body.fine_tune_id);
+  if (!jobId) return null;
+  if (config.provider === 'runpod') {
+    return 'https://api.runpod.ai/v2/' + encodeURIComponent(config.endpoint) + '/status/' + encodeURIComponent(String(jobId));
+  }
+  if (config.provider === 'together') {
+    return 'https://api.together.xyz/v1/fine-tunes/' + encodeURIComponent(String(jobId));
+  }
+  return _cleanBaseUrl(config.endpoint) + '/jobs/' + encodeURIComponent(String(jobId));
+}
+
 async function _postTrainerBridge({ backend, token, job_id, scheduler_job_id, tenant, namespace, capture_window, recipe_id, gpu_sku, vram_tier, fetchImpl }) {
   const doFetch = typeof fetchImpl === 'function' ? fetchImpl : (typeof fetch === 'function' ? fetch : null);
   if (typeof doFetch !== 'function') {
@@ -261,6 +465,133 @@ async function _postTrainerBridge({ backend, token, job_id, scheduler_job_id, te
   };
 }
 
+async function _postManagedProvider({
+  config,
+  launch,
+  job_id,
+  scheduler_job_id,
+  tenant,
+  namespace,
+  capture_window,
+  recipe_id,
+  gpu_sku,
+  vram_tier,
+  fetchImpl,
+}) {
+  const doFetch = typeof fetchImpl === 'function' ? fetchImpl : (typeof fetch === 'function' ? fetch : null);
+  if (typeof doFetch !== 'function') {
+    return { ok: false, error: 'fetch_unavailable', detail: 'global fetch is unavailable for managed provider submission' };
+  }
+  if (!config || config.status !== 'reachable_via_provider') {
+    return {
+      ok: false,
+      error: config?.error || 'managed_provider_not_configured',
+      missing_env: config?.missing_env || [],
+      detail: config?.hint || null,
+    };
+  }
+  if (!launch || !launch.ok) {
+    return {
+      ok: false,
+      error: launch?.error || 'managed_provider_plan_invalid',
+      detail: launch?.plan_reason || null,
+      launch_spec_hash: launch?.launch_spec_hash || null,
+    };
+  }
+
+  const common = {
+    tenant,
+    namespace,
+    source: 'cloud-distill',
+    cloud_distill_job_id: job_id,
+    scheduler_job_id,
+    capture_window,
+    recipe_id,
+    gpu_sku,
+    vram_tier,
+    callback_url: _publicBase() + '/v1/cloud/distill/' + encodeURIComponent(job_id),
+    launch_spec_hash: launch.launch_spec_hash,
+    launch_spec: launch.launch_spec,
+    expected_artifact: 'signed .kolm',
+  };
+  let endpoint;
+  let init;
+  if (config.provider === 'runpod') {
+    endpoint = 'https://api.runpod.ai/v2/' + encodeURIComponent(config.endpoint) + '/run';
+    init = {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${config.token}` },
+      body: JSON.stringify({ input: common }),
+    };
+  } else if (config.provider === 'modal') {
+    endpoint = _cleanBaseUrl(config.endpoint);
+    init = {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${config.token}` },
+      body: JSON.stringify(common),
+    };
+  } else {
+    endpoint = 'https://api.together.xyz/v1/fine-tunes';
+    const spec = launch.launch_spec || {};
+    if (!spec.training_file_id && !spec.corpus_url) {
+      return {
+        ok: false,
+        error: 'together_training_file_required',
+        detail: 'Together managed fine-tune dispatch requires training_file_id or corpus_url.',
+        launch_spec_hash: launch.launch_spec_hash,
+      };
+    }
+    const body = {
+      training_file: spec.training_file_id || spec.corpus_url,
+      model: spec.model,
+      n_epochs: spec.n_epochs,
+      lora: true,
+      suffix: spec.suffix,
+      metadata: {
+        source: 'cloud-distill',
+        cloud_distill_job_id: job_id,
+        scheduler_job_id,
+        launch_spec_hash: launch.launch_spec_hash,
+      },
+    };
+    init = {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${config.token}` },
+      body: JSON.stringify(body),
+    };
+  }
+
+  let res;
+  try {
+    res = await doFetch(endpoint, init);
+  } catch (e) {
+    return { ok: false, error: 'managed_provider_unreachable', detail: String((e && e.message) || e) };
+  }
+  const text = await res.text().catch(() => '');
+  let body;
+  try { body = text ? JSON.parse(text) : {}; } catch { body = { _raw: text }; }
+  if (!res.ok) {
+    return {
+      ok: false,
+      error: 'managed_provider_rejected',
+      provider: config.provider,
+      status: res.status,
+      detail: (body && (body.error || body.detail || body.message)) || text || ('HTTP ' + res.status),
+      launch_spec_hash: launch.launch_spec_hash,
+    };
+  }
+  const providerJobId = body && (body.id || body.job_id || body.run_id || body.fine_tune_id) || null;
+  return {
+    ok: true,
+    managed_provider: config.provider,
+    provider_job_id: providerJobId ? String(providerJobId) : null,
+    provider_status_url: _providerPollUrl(config, body),
+    poll_url: _providerPollUrl(config, body),
+    launch_spec_hash: launch.launch_spec_hash,
+    provider_response_keys: body && typeof body === 'object' ? Object.keys(body).sort().slice(0, 30) : [],
+  };
+}
+
 // _backendStatus - the honesty check. Returns the current backend status
 // based on env vars + opts (DI seam for tests). If KOLM_CLOUD_DISTILL_ENDPOINT
 // is unset, but KOLM_TRAINER_BRIDGE_URL is set, the job can dispatch through
@@ -275,6 +606,19 @@ export function getCloudBackendStatus(opts) {
     : (process.env.KOLM_CLOUD_DISTILL_ENDPOINT || '');
   const bridge = _trainerBridgeUrl(o);
   if (!explicit) {
+    const managed = _managedProviderConfig(o);
+    if (managed) {
+      return {
+        status: managed.status,
+        endpoint: managed.endpoint || null,
+        hint: managed.hint,
+        managed_provider: managed.provider,
+        provider_source: 'managed_distill_provider',
+        missing_env: managed.missing_env || [],
+        error: managed.error || null,
+        version: CLOUD_DISTILL_VERSION,
+      };
+    }
     if (bridge) {
       const hasToken = !!_trainerBridgeToken(o);
       return {
@@ -369,21 +713,50 @@ export async function submitJob(opts) {
       version: CLOUD_DISTILL_VERSION,
     };
   }
+  if (backend.status === 'unreachable' && backend.provider_source === 'managed_distill_provider') {
+    return {
+      ok: false,
+      error: backend.error || 'managed_provider_not_configured',
+      detail: backend.hint || null,
+      missing_env: backend.missing_env || [],
+      managed_provider: backend.managed_provider || null,
+      cloud_backend_status: backend.status,
+      cloud_backend_endpoint: backend.endpoint,
+      version: CLOUD_DISTILL_VERSION,
+    };
+  }
   const now = _now();
   const job_id = _newJobId();
   const usesBridge = backend.status === 'reachable_via_bridge';
+  const usesManagedProvider = backend.status === 'reachable_via_provider';
+  const managedProviderConfig = usesManagedProvider ? _managedProviderConfig(o) : null;
+  const managedLaunch = usesManagedProvider
+    ? _buildManagedProviderLaunch({ config: managedProviderConfig, opts: o, recipe_id, gpu_sku, job_id })
+    : null;
+  if (usesManagedProvider && (!managedLaunch || !managedLaunch.ok)) {
+    return {
+      ok: false,
+      error: managedLaunch?.error || 'managed_provider_plan_invalid',
+      detail: managedLaunch?.plan_reason || null,
+      managed_provider: backend.managed_provider || managedProviderConfig?.provider || null,
+      launch_spec_hash: managedLaunch?.launch_spec_hash || null,
+      version: CLOUD_DISTILL_VERSION,
+    };
+  }
   const scheduler_idempotency_key = (typeof o.idempotency_key === 'string' && o.idempotency_key)
     ? o.idempotency_key
     : null;
+  const schedulerLane = backend.status === 'no_pool_configured'
+    ? 'managed-distill-pool-unconfigured'
+    : (usesBridge ? 'managed-distill-trainer-bridge'
+      : (usesManagedProvider ? 'managed-distill-provider-' + managedProviderConfig.provider : 'managed-distill-pool'));
   const scheduler = submitSchedulerJob({
     tenant,
     family: 'cloud-distill',
     operation: 'distill',
     idempotency_key: scheduler_idempotency_key,
     priority: o.priority || o.plan_tier,
-    lane: backend.status === 'no_pool_configured'
-      ? 'managed-distill-pool-unconfigured'
-      : (usesBridge ? 'managed-distill-trainer-bridge' : 'managed-distill-pool'),
+    lane: schedulerLane,
     estimated_cost_usd: o.estimated_cost_usd,
     budget_usd: o.budget_usd,
     max_attempts: o.max_attempts || 3,
@@ -395,14 +768,19 @@ export async function submitJob(opts) {
       vram_tier,
       cloud_backend_status: backend.status,
       cloud_backend_endpoint: backend.endpoint,
+      managed_provider: managedProviderConfig?.provider || null,
+      managed_provider_launch_spec_hash: managedLaunch?.launch_spec_hash || null,
+      managed_provider_launch_spec: managedLaunch?.launch_spec || null,
     },
     labels: {
       source: 'cloud-distill',
       backend_status: backend.status,
+      managed_provider: managedProviderConfig?.provider || null,
     },
     lineage: {
       cloud_distill_job_id: job_id,
       meter_ledger: 'training',
+      managed_provider_launch_spec_hash: managedLaunch?.launch_spec_hash || null,
     },
   });
   if (!scheduler.ok) {
@@ -428,7 +806,11 @@ export async function submitJob(opts) {
         bridge_source: existing.bridge_source || null,
         bridge_job_id: existing.bridge_job_id || null,
         bridge_status_url: existing.bridge_status_url || null,
-        poll_url: existing.poll_url || existing.bridge_status_url || null,
+        managed_provider: existing.managed_provider || null,
+        provider_job_id: existing.provider_job_id || null,
+        provider_status_url: existing.provider_status_url || null,
+        managed_provider_launch_spec_hash: existing.managed_provider_launch_spec_hash || null,
+        poll_url: existing.poll_url || existing.provider_status_url || existing.bridge_status_url || null,
         scheduler_job_id: scheduler.job_id,
         scheduler_state: scheduler.job?.state || null,
         namespace: existing.namespace,
@@ -459,6 +841,22 @@ export async function submitJob(opts) {
       fetchImpl: o.fetchImpl,
     });
   }
+  let providerDispatch = null;
+  if (usesManagedProvider) {
+    providerDispatch = await _postManagedProvider({
+      config: managedProviderConfig,
+      launch: managedLaunch,
+      job_id,
+      scheduler_job_id: scheduler.job_id,
+      tenant,
+      namespace,
+      capture_window,
+      recipe_id,
+      gpu_sku,
+      vram_tier,
+      fetchImpl: o.fetchImpl,
+    });
+  }
   const row = {
     job_id,
     tenant_id: tenant,
@@ -469,16 +867,24 @@ export async function submitJob(opts) {
     gpu_sku,
     vram_tier,
     state: 'queued',
-    cloud_backend_status: bridge && !bridge.ok ? 'unreachable' : backend.status,
+    cloud_backend_status: (bridge && !bridge.ok) || (providerDispatch && !providerDispatch.ok) ? 'unreachable' : backend.status,
     cloud_backend_endpoint: backend.endpoint,
     bridge_source: usesBridge ? 'remote_trainer' : null,
     bridge_job_id: bridge && bridge.ok ? bridge.bridge_job_id : null,
     bridge_status_url: bridge && bridge.ok ? bridge.bridge_status_url : null,
-    poll_url: bridge && bridge.ok ? bridge.bridge_status_url : null,
+    managed_provider: managedProviderConfig?.provider || null,
+    provider_job_id: providerDispatch && providerDispatch.ok ? providerDispatch.provider_job_id : null,
+    provider_status_url: providerDispatch && providerDispatch.ok ? providerDispatch.provider_status_url : null,
+    managed_provider_launch_spec_hash: managedLaunch?.launch_spec_hash || null,
+    poll_url: providerDispatch && providerDispatch.ok
+      ? providerDispatch.poll_url
+      : (bridge && bridge.ok ? bridge.bridge_status_url : null),
     scheduler_job_id: scheduler.job_id,
     scheduler_state: scheduler.job?.state || 'queued',
     artifact_url: null,
-    error: bridge && !bridge.ok ? (bridge.error || 'trainer_bridge_error') : null,
+    error: bridge && !bridge.ok
+      ? (bridge.error || 'trainer_bridge_error')
+      : (providerDispatch && !providerDispatch.ok ? (providerDispatch.error || 'managed_provider_error') : null),
     created_at: now,
     updated_at: now,
     started_at: null,
@@ -486,7 +892,7 @@ export async function submitJob(opts) {
     submitted_by: typeof o.submitted_by === 'string' ? o.submitted_by : tenant,
     version: CLOUD_DISTILL_VERSION,
   };
-  if (bridge && !bridge.ok) {
+  if ((bridge && !bridge.ok) || (providerDispatch && !providerDispatch.ok)) {
     row.state = 'failed';
     row.finished_at = now;
     try {
@@ -495,7 +901,7 @@ export async function submitJob(opts) {
         job_id: scheduler.job_id,
         state: 'dead_letter',
         error: row.error,
-        reason: 'trainer_bridge_submit_failed',
+        reason: providerDispatch && !providerDispatch.ok ? 'managed_provider_submit_failed' : 'trainer_bridge_submit_failed',
       });
       row.scheduler_state = 'dead_letter';
     } catch (_) {
@@ -523,16 +929,19 @@ export async function submitJob(opts) {
   };
   _appendLine(_meterPath(), meter_initial);
 
-  if (bridge && !bridge.ok) {
+  if ((bridge && !bridge.ok) || (providerDispatch && !providerDispatch.ok)) {
+    const failed = providerDispatch && !providerDispatch.ok ? providerDispatch : bridge;
     return {
       ok: false,
-      error: bridge.error || 'trainer_bridge_error',
-      detail: bridge.detail || null,
-      status: bridge.status || null,
+      error: failed.error || (providerDispatch ? 'managed_provider_error' : 'trainer_bridge_error'),
+      detail: failed.detail || null,
+      status: failed.status || null,
       job_id: row.job_id,
       state: row.state,
       cloud_backend_status: row.cloud_backend_status,
       cloud_backend_endpoint: row.cloud_backend_endpoint,
+      managed_provider: row.managed_provider,
+      launch_spec_hash: row.managed_provider_launch_spec_hash,
       scheduler_job_id: scheduler.job_id,
       scheduler_state: row.scheduler_state,
       version: CLOUD_DISTILL_VERSION,
@@ -548,6 +957,10 @@ export async function submitJob(opts) {
     bridge_source: row.bridge_source,
     bridge_job_id: row.bridge_job_id,
     bridge_status_url: row.bridge_status_url,
+    managed_provider: row.managed_provider,
+    provider_job_id: row.provider_job_id,
+    provider_status_url: row.provider_status_url,
+    managed_provider_launch_spec_hash: row.managed_provider_launch_spec_hash,
     poll_url: row.poll_url,
     scheduler_job_id: scheduler.job_id,
     scheduler_state: scheduler.job?.state || 'queued',
@@ -595,7 +1008,11 @@ export function getJobStatus(opts) {
     bridge_source: row.bridge_source || null,
     bridge_job_id: row.bridge_job_id || null,
     bridge_status_url: row.bridge_status_url || null,
-    poll_url: row.poll_url || row.bridge_status_url || null,
+    managed_provider: row.managed_provider || null,
+    provider_job_id: row.provider_job_id || null,
+    provider_status_url: row.provider_status_url || null,
+    managed_provider_launch_spec_hash: row.managed_provider_launch_spec_hash || null,
+    poll_url: row.poll_url || row.provider_status_url || row.bridge_status_url || null,
     scheduler_job_id: row.scheduler_job_id || null,
     scheduler_state: row.scheduler_state || null,
     artifact_url: row.artifact_url,
@@ -910,6 +1327,7 @@ export default {
   CLOUD_DISTILL_STATES,
   CLOUD_BACKEND_STATUSES,
   CLOUD_METER_RATES,
+  MANAGED_DISTILL_PROVIDERS,
   getCloudBackendStatus,
   submitJob,
   getJobStatus,

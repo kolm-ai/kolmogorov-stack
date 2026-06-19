@@ -437,6 +437,18 @@
         "improvement_track": "split_or_add_generated_contract_map_before_growth"
       },
       {
+        "path": "src/cloud-distill.js",
+        "domain": "training_model_optimization",
+        "priority_score": 8,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
+          "large_component_contract_risk",
+          "network_or_provider_boundary"
+        ],
+        "improvement_track": "split_or_add_generated_contract_map_before_growth"
+      },
+      {
         "path": "apps/runtime/serve.py",
         "domain": "compile_artifact_runtime",
         "priority_score": 8,
@@ -461,18 +473,6 @@
           "network_or_provider_boundary"
         ],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
-      },
-      {
-        "path": "src/red-team.js",
-        "domain": "identity_access",
-        "priority_score": 8,
-        "risk_signals": [
-          "auth_or_tenant_boundary",
-          "cryptographic_or_proof_boundary",
-          "large_component_contract_risk",
-          "network_or_provider_boundary"
-        ],
-        "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests"
       }
     ]
   },
@@ -9666,10 +9666,10 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "1b67948ec02c4dc4e6ab60baf5007b0a78a060454fec7c1c7dea333aef69c5e1",
+      "sha256": "fa5c22726fcd3e2d4d8ceb2809fdef38152784cbfe3eff1d44359db0cad92e3a",
       "metrics": {
-        "bytes": 2653181,
-        "lines": 57699,
+        "bytes": 2654703,
+        "lines": 57716,
         "imports": 547,
         "exports": 1,
         "routes": 0,
@@ -22121,23 +22121,24 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "50f97b65cd08b6509b15a8df8bd2d3f542c83c874215b4ea74eb6bc199588235",
+      "sha256": "29b1b234d3e7f886328f80c14f784194ec7f6f12bc518a794914d25e06b12c62",
       "metrics": {
-        "bytes": 33684,
-        "lines": 923,
-        "imports": 5,
-        "exports": 14,
+        "bytes": 50189,
+        "lines": 1341,
+        "imports": 6,
+        "exports": 15,
         "routes": 0,
-        "env_refs": 11,
+        "env_refs": 16,
         "fs_writes": 0,
         "subprocess_refs": 0,
-        "network_refs": 3,
-        "crypto_refs": 3,
+        "network_refs": 6,
+        "crypto_refs": 6,
         "markers": 0
       },
       "test_refs": [
         "tests/finalized-c8-durable-compute-scheduler.test.js",
-        "tests/wave644-cloud-distill-bridge.test.js"
+        "tests/wave644-cloud-distill-bridge.test.js",
+        "tests/wave989-cloud-distill-managed-provider.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -22170,7 +22171,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
+      "improvement_track": "split_or_add_generated_contract_map_before_growth",
       "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
       "suggested_verification": [
         "npm run verify:quantize-worker-matrix",
@@ -23407,7 +23408,8 @@
       },
       "test_refs": [
         "tests/finalized-c8-durable-compute-scheduler.test.js",
-        "tests/wave644-cloud-distill-bridge.test.js"
+        "tests/wave644-cloud-distill-bridge.test.js",
+        "tests/wave989-cloud-distill-managed-provider.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -48361,10 +48363,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "b123157ed00c1ca1a2085ef299d2602a1e0bbb4179a3263fc4e217a8ecafbe82",
+      "sha256": "ec9d4c270de8def06a8ed594c48719f02053b554d0a277489006e165e89176ec",
       "metrics": {
-        "bytes": 1474492,
-        "lines": 30926,
+        "bytes": 1475308,
+        "lines": 30937,
         "imports": 536,
         "exports": 8,
         "routes": 810,

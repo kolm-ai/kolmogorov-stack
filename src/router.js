@@ -29762,6 +29762,17 @@ res.json({
         billing_token: typeof body.billing_token === 'string' ? body.billing_token : null,
         gpu_sku: typeof body.gpu_sku === 'string' ? body.gpu_sku : null,
         vram_tier: typeof body.vram_tier === 'string' ? body.vram_tier : null,
+        managed_provider: typeof body.managed_provider === 'string'
+          ? body.managed_provider
+          : (typeof body.provider === 'string' ? body.provider : null),
+        student: typeof body.student === 'string' ? body.student : null,
+        teacher: typeof body.teacher === 'string' ? body.teacher : null,
+        base_model: typeof body.base_model === 'string' ? body.base_model : null,
+        student_params_b: body.student_params_b != null ? Number(body.student_params_b) : null,
+        params_b: body.params_b != null ? Number(body.params_b) : null,
+        mode: typeof body.mode === 'string' ? body.mode : null,
+        corpus_url: typeof body.corpus_url === 'string' ? body.corpus_url : null,
+        training_file_id: typeof body.training_file_id === 'string' ? body.training_file_id : null,
         idempotency_key: typeof body.idempotency_key === 'string'
           ? body.idempotency_key
           : (typeof req.headers['idempotency-key'] === 'string' ? req.headers['idempotency-key'] : null),
