@@ -69,13 +69,13 @@
       "auth_or_tenant_boundary": 23,
       "cryptographic_or_proof_boundary": 475,
       "distribution_or_worker_surface": 306,
-      "environment_configuration_boundary": 369,
+      "environment_configuration_boundary": 370,
       "execution_or_subprocess_boundary": 313,
       "http_route_surface": 41,
       "large_component_contract_risk": 45,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 171,
-      "open_marker_requires_owner_review": 6,
+      "open_marker_requires_owner_review": 3,
       "stateful_storage_boundary": 125
     },
     "top_review_targets": [
@@ -47809,13 +47809,13 @@
       },
       "test_refs": [
         "tests/wave470-sdk-node-smoke.test.js",
+        "tests/wave826-runtime-placement.test.js",
         "tests/connector-mcp.test.js",
         "tests/connector-openai-agents.test.js",
         "tests/connectors.test.js",
         "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js",
         "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
-        "tests/finalized-c1-signed-artifact-packaging.test.js",
-        "tests/model-signing-build-sidecars.test.js"
+        "tests/finalized-c1-signed-artifact-packaging.test.js"
       ],
       "risk_signals": [],
       "priority_score": 0,
@@ -48860,9 +48860,9 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "36a435bcbec75147fc5506b4b87f19efe5455a5bcde1a1b0054b981a3a3c0365",
+      "sha256": "07b42cfdb9162e69ec2ea1650b2d97d715226cf89dd2400a92a6b9e82c3da59e",
       "metrics": {
-        "bytes": 8635,
+        "bytes": 8582,
         "lines": 210,
         "imports": 1,
         "exports": 5,
@@ -48872,15 +48872,13 @@
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 0,
-        "markers": 1
+        "markers": 0
       },
       "test_refs": [
         "tests/wave826-runtime-placement.test.js"
       ],
-      "risk_signals": [
-        "open_marker_requires_owner_review"
-      ],
-      "priority_score": 1,
+      "risk_signals": [],
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -48921,9 +48919,9 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "7a8d422ffce0444b279171290775881560db4900b0d0b57da090cda2f9b74414",
+      "sha256": "0ec9b9349cf83e98ef4a2c5ccc25007987d76c4672652e204d6157f06430f3ec",
       "metrics": {
-        "bytes": 12804,
+        "bytes": 12814,
         "lines": 326,
         "imports": 5,
         "exports": 7,
@@ -48933,17 +48931,16 @@
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 3,
-        "markers": 1
+        "markers": 0
       },
       "test_refs": [
         "tests/wave826-runtime-placement.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "open_marker_requires_owner_review"
+        "environment_configuration_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -49050,10 +49047,10 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "82c7f01a03869d3b9c1bf03ed92270001884fe85f939f7626c83e875416374ae",
+      "sha256": "c4845b08a308f74c355d52bc69cf5bf98d3ef4af59a0f2c10f13acd7da4af535",
       "metrics": {
-        "bytes": 14198,
-        "lines": 344,
+        "bytes": 14115,
+        "lines": 342,
         "imports": 1,
         "exports": 8,
         "routes": 0,
@@ -49062,15 +49059,13 @@
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 0,
-        "markers": 1
+        "markers": 0
       },
       "test_refs": [
         "tests/wave826-runtime-placement.test.js"
       ],
-      "risk_signals": [
-        "open_marker_requires_owner_review"
-      ],
-      "priority_score": 1,
+      "risk_signals": [],
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -49172,14 +49167,14 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "0184b90817cbaf2e52376f4df56777ef08f3a96c4e0748e388f24f21211ceff0",
+      "sha256": "452c572e13091730a20fd93ce65a1c699b6b2deba89b4fd7ddda482ec10ce4e8",
       "metrics": {
-        "bytes": 3884,
-        "lines": 112,
-        "imports": 5,
-        "exports": 4,
+        "bytes": 10246,
+        "lines": 316,
+        "imports": 9,
+        "exports": 9,
         "routes": 0,
-        "env_refs": 0,
+        "env_refs": 7,
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
@@ -49196,8 +49191,10 @@
         "tests/wave709-runtime-router.test.js",
         "tests/wave826-runtime-placement.test.js"
       ],
-      "risk_signals": [],
-      "priority_score": 0,
+      "risk_signals": [
+        "environment_configuration_boundary"
+      ],
+      "priority_score": 1,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

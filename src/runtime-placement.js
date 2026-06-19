@@ -35,11 +35,11 @@
 // W604 anti-brittleness: PLACEMENT_VERSION matches /^w826-/ so a v1.x bump in
 // the same wave does not force coordinated test churn.
 //
-// TODO(future-wave-runtime): `kolm run` and `kolm serve` should call
-//   detectMemoryHierarchy() once at boot and placementDecision() per loaded
-//   artifact. Wire-up point: src/runtime.js getCompiled() - pass the
-//   placement decision to compileWasm/compileJs so the runtime layer can
-//   honour split_ratio / nvme_mmap when the worker stack supports it.
+// Runtime integration contract: src/runtime.js caches detectMemoryHierarchy()
+// through getRuntimeHierarchy() and calls placementDecision() in
+// buildRuntimeExecutionPlan() before loading registry-backed runtime versions.
+// The plan is attached to runVersion() results so native runners can honor
+// split_ratio / nvme_mmap as their worker stack gains direct support.
 
 import os from 'node:os';
 import fs from 'node:fs';

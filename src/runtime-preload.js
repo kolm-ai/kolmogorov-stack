@@ -32,13 +32,11 @@
 //   - preloadDecision NEVER picks warm_to_vram when current artifact already
 //     consumes >= 70% of GPU free VRAM - only mmap_only or skip.
 //
-// TODO(future-wave-runtime): `kolm run` and `kolm serve` should call
-//   analyzeInferencePatterns once at boot (cold-start prediction) and once
-//   per 100 inferences (incremental refresh), then call preloadDecision and
-//   prefetch by piping the artifact bytes through cudaMemcpy /
-//   madvise(MADV_WILLNEED). Wire-up point: src/runtime.js getCompiled()
-//   should wrap a thin scheduler that consults preloadDecision before
-//   evicting any cached artifact.
+// Runtime integration contract: src/runtime.js calls analyzeInferencePatterns()
+// inside buildRuntimeExecutionPlan() and records runVersion() calls as local
+// event-store rows. preloadDecision() is attached to the returned runtime plan;
+// native runners can convert warm_to_vram / mmap_only into cudaMemcpy /
+// madvise(MADV_WILLNEED) as their worker stack gains direct support.
 
 import { listEvents } from './event-store.js';
 

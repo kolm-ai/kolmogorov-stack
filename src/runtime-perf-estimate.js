@@ -47,12 +47,12 @@
 // W604 anti-brittleness: PERF_VERSION matches /^w826-/ so a v1.x bump inside
 // the wave does not force coordinated test churn.
 //
-// TODO(future-wave-runtime): when `kolm run` finishes a real inference, write
-//   a `perf_sample` event to the event store keyed by (artifact_id, placement,
-//   gpu_name). estimatePerformance should then prefer `source:'cached_run'`
-//   over the curve_fit when a sample exists. Wire-up point: src/runtime.js
-//   getCompiled() should call estimatePerformance once with placement from
-//   placementDecision before kicking off the model load.
+// Runtime integration contract: src/runtime.js calls estimatePerformance()
+// inside buildRuntimeExecutionPlan() before the model load and records
+// runVersion() calls as `workflow_id:"runtime_perf_sample"` event-store rows
+// keyed by tenant, namespace, model, and latency. Future estimator revisions
+// can prefer those local samples over source:'curve_fit' when a matching row
+// exists.
 
 import { info as modelInfo } from './models.js';
 

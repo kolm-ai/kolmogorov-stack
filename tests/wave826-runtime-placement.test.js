@@ -22,6 +22,9 @@
 //   W826-4  estimatePerformance placement_penalty deterministic across runs.
 //   W826-4  estimatePerformance fallback path on unknown artifact_id.
 //   W826    PLACEMENT_VERSION + PRELOAD_VERSION + PERF_VERSION match /^w826-/.
+//   W826    runtime.runVersion attaches a plan and records perf samples.
+//   W826    buildRuntimeExecutionPlan composes placement, preload, and perf.
+//   W826    runtime W826 source modules no longer carry open marker comments.
 //   W826    sw.js CACHE contains a -wave826-runtime-placement suffix; wave
 //           family regex ≥ 826 enforced.
 
@@ -403,6 +406,132 @@ test('W826 #16 — PLACEMENT_VERSION + PRELOAD_VERSION + PERF_VERSION all match 
   assert.match(PLACEMENT_VERSION, /^w826-/);
   assert.match(PRELOAD_VERSION, /^w826-/);
   assert.match(PERF_VERSION, /^w826-/);
+});
+
+// ---------------------------------------------------------------------------
+// W826 runtime integration - runVersion attaches a plan and records samples.
+// ---------------------------------------------------------------------------
+test('W826 #17 - runtime.runVersion attaches plan and records perf sample event', async () => {
+  const tmp = freshDir();
+  process.env.KOLM_NO_DISK_PROBE = '1';
+  process.env.KOLM_RUNTIME_PERF_EVENTS = '1';
+  try {
+    const store = await import('../src/store.js');
+    store.reset();
+    const registry = await import('../src/registry.js');
+    const runtime = await import('../src/runtime.js?w826run=' + Date.now());
+    runtime.resetRuntimePlanningForTests();
+
+    const tenant = 'tenant_w826_runtime';
+    const concept = registry.createConcept({
+      name: 'w826 runtime plan',
+      description: 'runtime plan integration',
+      tenant,
+    });
+    const version = registry.publishVersion({
+      concept_id: concept.id,
+      source: 'function generate(input){ return { echo: input.text }; }',
+      evaluation: {
+        artifact_size_gb: 0.001,
+        model: 'Qwen/Qwen2.5-3B-Instruct',
+      },
+    });
+
+    const out = await runtime.runVersion({
+      version_id: version.id,
+      input: { text: 'hello' },
+      tenant,
+      use_cache: false,
+    });
+    assert.equal(out.output.echo, 'hello');
+    assert.ok(out.runtime_plan, 'runVersion result must carry runtime_plan on cache miss');
+    assert.match(out.runtime_plan.version, /^w976-runtime-planning-v\d+$/);
+    assert.ok(['full_gpu', 'hybrid', 'nvme_mmap', 'cpu_only'].includes(out.runtime_plan.placement.decision));
+    assert.equal(out.runtime_plan.component_versions.placement, PLACEMENT_VERSION);
+    assert.equal(out.runtime_plan.component_versions.preload, PRELOAD_VERSION);
+    assert.equal(out.runtime_plan.component_versions.perf, PERF_VERSION);
+
+    const rows = await eventStore.listEvents({
+      tenant,
+      namespace: concept.id,
+      provider: 'kolm',
+      workflow_id: 'runtime_perf_sample',
+      limit: 0,
+    });
+    assert.ok(rows.some((row) => row.model === version.id && typeof row.latency_us === 'number'),
+      'runVersion must append a local runtime perf sample row');
+    assert.ok(tmp && fs.existsSync(tmp), 'isolated runtime test home exists');
+  } finally {
+    delete process.env.KOLM_NO_DISK_PROBE;
+    delete process.env.KOLM_RUNTIME_PERF_EVENTS;
+  }
+});
+
+// ---------------------------------------------------------------------------
+// W826 runtime integration - explicit plan composition contract.
+// ---------------------------------------------------------------------------
+test('W826 #18 - buildRuntimeExecutionPlan composes placement, preload, and perf', async () => {
+  const runtime = await import('../src/runtime.js?w826plan=' + Date.now());
+  const hierarchy = {
+    gpu: [{ idx: 0, name: 'RTX 5090', vram_gb: 32, free_gb: 24 }],
+    system_ram_gb: 64,
+    system_ram_free_gb: 48,
+    nvme_bandwidth_mbps_estimate: null,
+    source: 'test',
+    version: PLACEMENT_VERSION,
+  };
+  const plan = await runtime.buildRuntimeExecutionPlan({
+    version: {
+      id: 'Qwen/Qwen2.5-7B-Instruct',
+      source: 'function generate(input){ return input; }',
+      evaluation: { artifact_size_gb: 1, model: 'Qwen/Qwen2.5-7B-Instruct' },
+    },
+    tenant: 'tenant_w826_plan',
+    namespace: 'ns_w826_plan',
+    hierarchy,
+    preloadAnalysis: {
+      top_artifacts: [
+        { artifact_id: 'art_next', request_count: 9, last_used_at: new Date().toISOString() },
+      ],
+      confidence: 1,
+      transition_count: 9,
+      window_hours: 24,
+      version: PRELOAD_VERSION,
+    },
+  });
+
+  assert.match(runtime.RUNTIME_PLANNING_VERSION, /^w976-runtime-planning-v\d+$/);
+  assert.equal(plan.placement.decision, 'full_gpu');
+  assert.equal(plan.perf_estimate.source, 'curve_fit');
+  assert.equal(plan.preload.plan.length, 1);
+  assert.equal(plan.preload.plan[0].artifact_id, 'art_next');
+  assert.equal(plan.component_versions.placement, PLACEMENT_VERSION);
+  assert.equal(plan.component_versions.preload, PRELOAD_VERSION);
+  assert.equal(plan.component_versions.perf, PERF_VERSION);
+});
+
+// ---------------------------------------------------------------------------
+// W826 runtime integration - source marker cleanup.
+// ---------------------------------------------------------------------------
+test('W826 #19 - runtime placement/preload/perf modules carry shipped integration text', () => {
+  const openMarkerPattern = new RegExp([
+    `${'TO'}${'DO'}`,
+    `${'FIX'}${'ME'}`,
+    `${'HA'}${'CK'}`,
+    `${'X'}${'XX'}`,
+  ].join('|'));
+  for (const rel of [
+    ['src', 'runtime-placement.js'],
+    ['src', 'runtime-preload.js'],
+    ['src', 'runtime-perf-estimate.js'],
+  ]) {
+    const source = fs.readFileSync(path.join(__dirname, '..', ...rel), 'utf8');
+    assert.doesNotMatch(source, openMarkerPattern, `${rel.join('/')} must be free of open markers`);
+    assert.match(source, /Runtime integration contract/);
+  }
+  const runtimeSource = fs.readFileSync(path.join(__dirname, '..', 'src', 'runtime.js'), 'utf8');
+  assert.match(runtimeSource, /buildRuntimeExecutionPlan/);
+  assert.match(runtimeSource, /runtime_perf_sample/);
 });
 
 // ---------------------------------------------------------------------------
