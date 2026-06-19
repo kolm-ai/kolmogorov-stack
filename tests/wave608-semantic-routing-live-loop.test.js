@@ -149,9 +149,10 @@ test('4. route train CLI persists the namespace snapshot consumed by dispatch', 
   assert.match(src, /startsWith\(name \+ '='/);
 });
 
-test('5. backend spec records W608 closure while leaving calibrated quality open', () => {
+test('5. backend spec records W608 live-loop closure and W991 calibrated quality closure', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
   assert.match(spec, /W608/);
   assert.match(spec, /Load trained ClusterRouterStats/);
+  assert.match(spec, /CLOSED W991/);
   assert.match(spec, /calibrated 'meets-bar' threshold/);
 });

@@ -68,6 +68,9 @@ export const ROUTE_QUALITY_VERSION = 'w921-rq-v1';
 // A win is realized_quality at/above this bar. Kept as a module constant (not a
 // magic number) and overridable per-call so a namespace can tune the bar.
 export const DEFAULT_WIN_THRESHOLD = 0.5;
+export const ROUTE_QUALITY_BAR_CALIBRATION_VERSION = 'w991-quality-bar-calibration-v1';
+const DEFAULT_QUALITY_BAR = 0.8;
+const DEFAULT_QUALITY_BAR_CONFIDENCE_Z = 1.281552;
 
 // --------------------------------------------------------------------------
 // small pure helpers (no clock / no RNG).
@@ -361,6 +364,105 @@ export async function getClusterQualityStats({
   return { n: total, by_cluster_model, cells, snapshot: { stats: snapStats } };
 }
 
+export async function calibrateQualityBar({
+  tenant,
+  namespace = null,
+  models = null,
+  max_rows = 50000,
+  quality_bar = DEFAULT_QUALITY_BAR,
+  holdout_fraction = 0.25,
+  min_train_samples = 4,
+  min_holdout_samples = 2,
+  confidence_z = DEFAULT_QUALITY_BAR_CONFIDENCE_Z,
+} = {}) {
+  const bar = _clamp01(quality_bar);
+  const empty = {
+    version: ROUTE_QUALITY_BAR_CALIBRATION_VERSION,
+    method: 'chronological_holdout_false_accept_margin',
+    quality_bar: bar,
+    calibrated_bar: bar,
+    calibration_margin: 0,
+    groups_evaluated: 0,
+    false_accepts: 0,
+    false_accept_rate: 0,
+    brier: null,
+    min_train_samples: Math.max(1, Math.trunc(_num(min_train_samples, 4))),
+    min_holdout_samples: Math.max(1, Math.trunc(_num(min_holdout_samples, 2))),
+    holdout_fraction: _clamp01(holdout_fraction),
+    confidence_z: Math.max(0, _num(confidence_z, DEFAULT_QUALITY_BAR_CONFIDENCE_Z)),
+  };
+  if (!tenant) return empty;
+
+  const limit = Math.max(0, Math.trunc(_num(max_rows, 50000)));
+  const rows = await listEvents({
+    tenant_id: tenant,
+    namespace: namespace || undefined,
+    provider: ROUTE_QUALITY_PROVIDER,
+    limit,
+    order: 'asc',
+  });
+  const modelFilter = Array.isArray(models) && models.length
+    ? new Set(models.map((m) => _modelKey(m)))
+    : null;
+
+  const byCell = new Map();
+  for (const row of rows || []) {
+    const o = _parseOutcomeRow(row, tenant);
+    if (!o) continue;
+    if (modelFilter && !modelFilter.has(o.model)) continue;
+    const key = `${o.cluster_id}\u0000${o.model}`;
+    let arr = byCell.get(key);
+    if (!arr) { arr = []; byCell.set(key, arr); }
+    arr.push(o);
+  }
+
+  const minTrain = empty.min_train_samples;
+  const minHoldout = empty.min_holdout_samples;
+  const frac = empty.holdout_fraction > 0 ? empty.holdout_fraction : 0.25;
+  let groups = 0;
+  let falseAccepts = 0;
+  let margin = 0;
+  let brierSum = 0;
+  for (const arr of byCell.values()) {
+    arr.sort((a, b) => {
+      const at = Date.parse(a.created_at || '');
+      const bt = Date.parse(b.created_at || '');
+      const aa = Number.isFinite(at) ? at : 0;
+      const bb = Number.isFinite(bt) ? bt : 0;
+      return aa - bb;
+    });
+    const n = arr.length;
+    const holdoutN = Math.max(minHoldout, Math.ceil(n * frac));
+    const split = Math.max(minTrain, n - holdoutN);
+    if (split >= n) continue;
+    const train = arr.slice(0, split);
+    const holdout = arr.slice(split);
+    if (train.length < minTrain || holdout.length < minHoldout) continue;
+    const trainWins = train.reduce((sum, r) => sum + (r.win === true ? 1 : 0), 0);
+    const holdoutWins = holdout.reduce((sum, r) => sum + (r.win === true ? 1 : 0), 0);
+    const predicted = trainWins / train.length;
+    const actual = holdoutWins / holdout.length;
+    groups += 1;
+    const err = predicted - actual;
+    brierSum += err * err;
+    if (predicted >= bar && actual < bar) {
+      falseAccepts += 1;
+      margin = Math.max(margin, predicted - actual);
+    }
+  }
+
+  const calibrationMargin = _clamp01(margin);
+  return {
+    ...empty,
+    calibrated_bar: _clamp01(bar + calibrationMargin),
+    calibration_margin: Number(calibrationMargin.toFixed(6)),
+    groups_evaluated: groups,
+    false_accepts: falseAccepts,
+    false_accept_rate: groups > 0 ? Number((falseAccepts / groups).toFixed(6)) : 0,
+    brier: groups > 0 ? Number((brierSum / groups).toFixed(6)) : null,
+  };
+}
+
 // --------------------------------------------------------------------------
 // trainRouteWeights - derive a SUGGESTED route_weights object (the multi-signal
 // blend weights src/semantic-router.js normalizeRouteWeights/scoreRoute
@@ -481,10 +583,12 @@ function _relSpread(values, relative) {
 export default {
   recordRouteOutcome,
   getClusterQualityStats,
+  calibrateQualityBar,
   trainRouteWeights,
   ROUTE_QUALITY_PROVIDER,
   ROUTE_QUALITY_WORKFLOW_PREFIX,
   ROUTE_QUALITY_KIND,
   ROUTE_QUALITY_VERSION,
+  ROUTE_QUALITY_BAR_CALIBRATION_VERSION,
   DEFAULT_WIN_THRESHOLD,
 };

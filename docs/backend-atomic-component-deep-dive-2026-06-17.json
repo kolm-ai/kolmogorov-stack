@@ -9666,9 +9666,9 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "fa5c22726fcd3e2d4d8ceb2809fdef38152784cbfe3eff1d44359db0cad92e3a",
+      "sha256": "54366b423872277b3efa12ddae2eb7383a0dd10f433cab623a0ef5f0e278bfa9",
       "metrics": {
-        "bytes": 2654703,
+        "bytes": 2654718,
         "lines": 57716,
         "imports": 547,
         "exports": 1,
@@ -31777,9 +31777,9 @@
         "tests/wave921-semantic-router.test.js",
         "tests/wave947-data-curate-matrix.test.js",
         "tests/wave954-learned-embedding-provider.test.js",
+        "tests/wave991-quality-bar-routing.test.js",
         "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
-        "tests/finalized-c5-calibration-set-construction.test.js",
-        "tests/finalized-c5-fixes-regression.test.js"
+        "tests/finalized-c5-calibration-set-construction.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -48244,12 +48244,12 @@
       "surface": "core-backend",
       "domain": "storage_state",
       "language": "javascript",
-      "sha256": "9fea55f696d25543f5ff2b99fcaeb086e7a1adcf6f2d6d41082a2cc3a1166b13",
+      "sha256": "ed6763444b56bb7564bd4b7ae23b84ed6af7a6225cb55fbf86074167629200e3",
       "metrics": {
-        "bytes": 23063,
-        "lines": 491,
+        "bytes": 26688,
+        "lines": 595,
         "imports": 1,
-        "exports": 9,
+        "exports": 11,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -48261,7 +48261,8 @@
       "test_refs": [
         "tests/wave608-semantic-routing-live-loop.test.js",
         "tests/wave921-route-quality-store.test.js",
-        "tests/wave988-route-training-promotion.test.js"
+        "tests/wave988-route-training-promotion.test.js",
+        "tests/wave991-quality-bar-routing.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -48304,10 +48305,10 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "cbdac0a70cb2ccad0a6ee3e64cb46c600b1c44524c54bab1d84e3e2cb3977fa5",
+      "sha256": "2ffad1e01b89ada49d64f53d7faa6e22eb6c3f0cba972c5192fbde00ba4258f8",
       "metrics": {
-        "bytes": 22905,
-        "lines": 661,
+        "bytes": 24950,
+        "lines": 697,
         "imports": 3,
         "exports": 17,
         "routes": 0,
@@ -48320,7 +48321,8 @@
       },
       "test_refs": [
         "tests/wave608-semantic-routing-live-loop.test.js",
-        "tests/wave988-route-training-promotion.test.js"
+        "tests/wave988-route-training-promotion.test.js",
+        "tests/wave991-quality-bar-routing.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary",
@@ -48366,9 +48368,9 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "ec9d4c270de8def06a8ed594c48719f02053b554d0a277489006e165e89176ec",
+      "sha256": "4f00195e11d8f7027e2f5ebc4ec50ceb9768e8e191b032021d4710382388520b",
       "metrics": {
-        "bytes": 1475308,
+        "bytes": 1475379,
         "lines": 30937,
         "imports": 536,
         "exports": 8,
@@ -50660,12 +50662,12 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "7a534dd6032cab9d085ce52c3e3816829cfd6535f4748ae8fa5de2d706478a3b",
+      "sha256": "b1dbbc7dbdd817318bfa927797c583fa9d01844918a4439ede63e2f8a44efc68",
       "metrics": {
-        "bytes": 53491,
-        "lines": 1184,
+        "bytes": 64756,
+        "lines": 1454,
         "imports": 7,
-        "exports": 13,
+        "exports": 15,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -50679,7 +50681,8 @@
         "tests/wave921-multi-signal-routing.test.js",
         "tests/wave921-route-quality-store.test.js",
         "tests/wave921-semantic-router-wiring.test.js",
-        "tests/wave921-semantic-router.test.js"
+        "tests/wave921-semantic-router.test.js",
+        "tests/wave991-quality-bar-routing.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -50710,7 +50713,7 @@
           "claim_scope_stays_local_until_external_evidence_exists"
         ]
       },
-      "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
+      "improvement_track": "split_or_add_generated_contract_map_before_growth",
       "innovation_opportunity": "Keep the generated auth/idempotency/error-shape route contract as the API growth guard and fail CI on unmapped routes.",
       "suggested_verification": [
         "npm run verify:api-contract-matrix",

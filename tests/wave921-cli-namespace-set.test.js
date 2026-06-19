@@ -86,7 +86,7 @@ test('W921-NS.3 the five policy flags are parsed into the PUT patch', () => {
 
 test('W921-NS.4 enum domains mirror the server PUT handler', () => {
   // src/router.js PUT /v1/namespaces/:slug ENUMS for the gateway opt-ins.
-  assert.match(SRC, /route_mode:\s*\['static', 'cost_quality', 'semantic'\]/);
+  assert.match(SRC, /route_mode:\s*\['static', 'cost_quality', 'semantic', 'quality_bar'\]/);
   assert.match(SRC, /cache_mode:\s*\['off', 'exact', 'semantic', 'verified'\]/);
   assert.match(SRC, /guardrail_mode:\s*\['off', 'detect_only', 'flag', 'block'\]/);
 });
@@ -124,7 +124,7 @@ test('W921-NS.9 invalid enum is rejected client-side with allowed list', () => {
   const r = runKolm(['namespace', 'set', 'support', '--route-mode', 'bogus', '--json']);
   assert.equal(r.json && r.json.error, 'invalid_value');
   assert.equal(r.json.field, 'route_mode');
-  assert.deepEqual(r.json.allowed, ['static', 'cost_quality', 'semantic']);
+  assert.deepEqual(r.json.allowed, ['static', 'cost_quality', 'semantic', 'quality_bar']);
   assert.equal(r.status, 1);
 });
 

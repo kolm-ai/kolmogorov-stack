@@ -16,7 +16,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ROUTER = fs.readFileSync(path.join(ROOT, 'src', 'router.js'), 'utf8');
 
 test('W921-ROUTE #1 — dispatch gates the semantic router on route_mode and imports it', () => {
-  assert.match(ROUTER, /nsConfig\.route_mode === 'cost_quality' \|\| nsConfig\.route_mode === 'semantic'/,
+  assert.match(ROUTER, /nsConfig\.route_mode === 'cost_quality' \|\| nsConfig\.route_mode === 'semantic' \|\| nsConfig\.route_mode === 'quality_bar'/,
     'the reorder must be gated behind an opt-in route_mode (default static = unchanged)');
   assert.match(ROUTER, /await import\('\.\/semantic-router\.js'\)/, 'dispatch must import semantic-router.js');
   assert.match(ROUTER, /_sr\.scoreRoute\(\{/, 'must call scoreRoute to reorder the chain');

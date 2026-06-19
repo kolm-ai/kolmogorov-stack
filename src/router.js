@@ -7014,7 +7014,7 @@ export function buildRouter() {
       // trained. The decision is stamped on the receipt additively (non-signed).
       let _routerDecision = null;
       let _routeTraining = null;
-      if (nsConfig.route_mode === 'cost_quality' || nsConfig.route_mode === 'semantic') {
+      if (nsConfig.route_mode === 'cost_quality' || nsConfig.route_mode === 'semantic' || nsConfig.route_mode === 'quality_bar') {
         try {
           const _sr = await import('./semantic-router.js');
           _routeTraining = await import('./route-training.js');
@@ -26316,7 +26316,7 @@ res.json({
         confidence_threshold: (typeof body.confidence_threshold === 'number' && Number.isFinite(body.confidence_threshold)) ? Math.max(0, Math.min(1, body.confidence_threshold)) : 0.7,
         // W921 gateway opt-ins (default = today's behavior): semantic cost<->quality
         // routing, semantic/exact prompt cache, prompt-injection guardrail.
-        route_mode: ['static', 'cost_quality', 'semantic'].includes(body.route_mode) ? body.route_mode : 'static',
+        route_mode: ['static', 'cost_quality', 'semantic', 'quality_bar'].includes(body.route_mode) ? body.route_mode : 'static',
         cache_mode: ['off', 'exact', 'semantic', 'verified'].includes(body.cache_mode) ? body.cache_mode : 'off',
         guardrail_mode: ['off', 'detect_only', 'flag', 'block'].includes(body.guardrail_mode) ? body.guardrail_mode : 'detect_only',
         artifact_id: null,
@@ -26364,7 +26364,7 @@ res.json({
       const ENUMS = {
         capture_mode: ['off', 'metadata_only', 'detect_only', 'redact_captures', 'redact_all', 'block'],
         redact_mode: ['detect_only', 'redact_captures', 'redact_all', 'block'],
-        route_mode: ['static', 'cost_quality', 'semantic'],
+        route_mode: ['static', 'cost_quality', 'semantic', 'quality_bar'],
         cache_mode: ['off', 'exact', 'semantic', 'verified'],
         guardrail_mode: ['off', 'detect_only', 'flag', 'block'],
       };

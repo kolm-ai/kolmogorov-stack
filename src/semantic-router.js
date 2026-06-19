@@ -11,7 +11,9 @@
 //   Offline: embed past prompts -> mini-batch k-means into k clusters.
 //   Per (cluster j, model i) record running accuracy p_ij + cost q_ij +
 //   latency l_ij from kolm's OWN captured outcomes (the data flywheel).
-//   Serve: embed prompt -> top-p nearest clusters by cosine -> per candidate
+//   Serve: embed prompt -> top-p nearest clusters by cosine -> either choose
+//   the cheapest candidate whose conservative predicted quality clears the
+//   calibrated bar, or fall back to the legacy/multi-signal score:
 //   x = alpha*p~ + (1-alpha)*(1 - q~) - beta*l~  (min-max normalized within
 //   the aggregated cluster window) -> reorder the static chain by x desc.
 //
@@ -20,8 +22,9 @@
 //   - cold-start guard: a cluster with < min_samples outcomes reverts to the
 //     static chain and stamps cold_start:true - NEVER silently downgrades a
 //     hard prompt on no data.
-//   - quality floor: a cheaper model whose measured cluster accuracy is below
-//     namespace.min_quality (default 0.8) is never placed first.
+//   - quality floor/bar: a cheaper model whose measured or predicted cluster
+//     quality is below namespace.min_quality (default 0.8) is never placed
+//     first in the corresponding mode.
 //   - caller x-kolm-confidence still wins (back-compat).
 //   - cost_usd of 0/missing is treated as UNKNOWN (skip the cost term) rather
 //     than "free" - guards the w920 estimator-returns-0 bug from corrupting
@@ -56,6 +59,9 @@ const DEFAULT_ALPHA = 0.5;
 const DEFAULT_BETA = 0.0;
 const DEFAULT_MIN_QUALITY = 0.8;
 const DEFAULT_MIN_SAMPLES = 20;
+const DEFAULT_QUALITY_BAR_CONFIDENCE_Z = 1.281552; // one-sided ~90%
+const DEFAULT_QUALITY_BAR_PRIOR_ALPHA = 1;
+const DEFAULT_QUALITY_BAR_PRIOR_BETA = 1;
 
 // --------------------------------------------------------------------------
 // MULTI-SIGNAL ROUTING (NEXT-5) - opt-in, additive.
@@ -486,6 +492,127 @@ function _clamp01(x) {
   return n < 0 ? 0 : n > 1 ? 1 : n;
 }
 
+function _finiteNum(v, fallback = null) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function _truthy(v) {
+  if (v === true) return true;
+  if (v === false || v == null) return false;
+  const s = String(v).trim().toLowerCase();
+  return ['1', 'true', 'yes', 'on', 'enabled'].includes(s);
+}
+
+function _qualityBarPolicySource(opts = {}, cfg = {}) {
+  if (opts && Object.prototype.hasOwnProperty.call(opts, 'quality_bar_policy')) return opts.quality_bar_policy;
+  if (opts && Object.prototype.hasOwnProperty.call(opts, 'route_quality_bar_policy')) return opts.route_quality_bar_policy;
+  if (opts && Object.prototype.hasOwnProperty.call(opts, 'quality_bar')) return opts.quality_bar;
+  if (cfg && Object.prototype.hasOwnProperty.call(cfg, 'route_quality_bar_policy')) return cfg.route_quality_bar_policy;
+  if (cfg && Object.prototype.hasOwnProperty.call(cfg, 'quality_bar_policy')) return cfg.quality_bar_policy;
+  if (cfg && Object.prototype.hasOwnProperty.call(cfg, 'route_quality_bar')) return cfg.route_quality_bar;
+  if (cfg && Object.prototype.hasOwnProperty.call(cfg, 'quality_bar')) return cfg.quality_bar;
+  return null;
+}
+
+export function normalizeQualityBarPolicy({ opts = {}, namespaceConfig = {}, minQuality = DEFAULT_MIN_QUALITY, minSamples = DEFAULT_MIN_SAMPLES } = {}) {
+  const cfg = namespaceConfig || {};
+  const raw = _qualityBarPolicySource(opts, cfg);
+  const rawObj = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const mode = String((opts && opts.route_mode) || cfg.route_mode || '').toLowerCase();
+  const rawMode = String(rawObj.mode || rawObj.selection_mode || rawObj.quality_bar_mode || '').toLowerCase();
+  const enabled = _truthy(rawObj.enabled)
+    || _truthy(rawObj.meets_bar)
+    || rawMode === 'meets_bar'
+    || rawMode === 'quality_bar'
+    || mode === 'semantic'
+    || mode === 'quality_bar'
+    || raw === true
+    || typeof raw === 'number';
+  if (!enabled) return null;
+
+  const calibration = rawObj.calibration && typeof rawObj.calibration === 'object'
+    ? rawObj.calibration
+    : ((cfg.route_quality_bar_calibration && typeof cfg.route_quality_bar_calibration === 'object')
+      ? cfg.route_quality_bar_calibration
+      : null);
+  const calibrationMargin = _clamp01(_finiteNum(
+    rawObj.calibration_margin
+      ?? rawObj.holdout_margin
+      ?? rawObj.false_accept_margin
+      ?? (calibration && (calibration.calibration_margin ?? calibration.holdout_margin ?? calibration.false_accept_margin)),
+    0,
+  ));
+  const rawBar = _finiteNum(
+    rawObj.bar
+      ?? rawObj.quality_bar
+      ?? rawObj.min_quality
+      ?? rawObj.threshold
+      ?? (typeof raw === 'number' ? raw : null)
+      ?? (calibration && (calibration.quality_bar ?? calibration.bar)),
+    minQuality,
+  );
+  const bar = _clamp01(rawBar);
+  const effectiveBar = _clamp01(_finiteNum(rawObj.effective_bar ?? rawObj.calibrated_bar ?? (bar + calibrationMargin), bar));
+  const confidenceZ = Math.max(0, _finiteNum(
+    rawObj.confidence_z ?? rawObj.z ?? (calibration && calibration.confidence_z),
+    DEFAULT_QUALITY_BAR_CONFIDENCE_Z,
+  ));
+  const priorAlpha = Math.max(0, _finiteNum(rawObj.prior_alpha, DEFAULT_QUALITY_BAR_PRIOR_ALPHA));
+  const priorBeta = Math.max(0, _finiteNum(rawObj.prior_beta, DEFAULT_QUALITY_BAR_PRIOR_BETA));
+  const perCandidateMinSamples = Math.max(1, Math.trunc(_finiteNum(
+    rawObj.min_samples ?? rawObj.min_candidate_samples ?? (calibration && calibration.min_train_samples),
+    minSamples,
+  )));
+  return {
+    enabled: true,
+    mode: 'meets_bar',
+    bar,
+    effective_bar: effectiveBar,
+    calibration_margin: calibrationMargin,
+    confidence_z: confidenceZ,
+    prior_alpha: priorAlpha,
+    prior_beta: priorBeta,
+    min_samples: perCandidateMinSamples,
+    calibration_version: calibration && calibration.version ? String(calibration.version) : null,
+    calibration_n: Math.max(0, Math.trunc(_finiteNum(calibration && calibration.groups_evaluated, 0))),
+  };
+}
+
+export function predictRouteQuality({
+  wins = 0,
+  n = 0,
+  confidence_z = DEFAULT_QUALITY_BAR_CONFIDENCE_Z,
+  prior_alpha = DEFAULT_QUALITY_BAR_PRIOR_ALPHA,
+  prior_beta = DEFAULT_QUALITY_BAR_PRIOR_BETA,
+} = {}) {
+  const nn = Math.max(0, Math.trunc(_finiteNum(n, 0)));
+  const ww = Math.max(0, Math.min(nn, Math.trunc(_finiteNum(wins, 0))));
+  const pa = Math.max(0, _finiteNum(prior_alpha, DEFAULT_QUALITY_BAR_PRIOR_ALPHA));
+  const pb = Math.max(0, _finiteNum(prior_beta, DEFAULT_QUALITY_BAR_PRIOR_BETA));
+  const empirical = nn > 0 ? ww / nn : null;
+  const posteriorDen = nn + pa + pb;
+  const posteriorMean = posteriorDen > 0 ? (ww + pa) / posteriorDen : 0.5;
+  const z = Math.max(0, _finiteNum(confidence_z, DEFAULT_QUALITY_BAR_CONFIDENCE_Z));
+  let lower = nn > 0 ? (empirical == null ? 0 : empirical) : 0;
+  if (nn > 0 && z > 0) {
+    const phat = ww / nn;
+    const z2 = z * z;
+    const denom = 1 + z2 / nn;
+    const centre = phat + z2 / (2 * nn);
+    const margin = z * Math.sqrt((phat * (1 - phat) + z2 / (4 * nn)) / nn);
+    lower = (centre - margin) / denom;
+  }
+  return {
+    n: nn,
+    wins: ww,
+    empirical_quality: empirical == null ? null : Number(_clamp01(empirical).toFixed(6)),
+    predicted_quality: Number(_clamp01(posteriorMean).toFixed(6)),
+    predicted_quality_lcb: Number(_clamp01(lower).toFixed(6)),
+    confidence_z: Number(z.toFixed(6)),
+  };
+}
+
 function _candidateClusterFit(stats, vec, clusterIds, model, fallback) {
   if (!stats || !Array.isArray(stats.centroids) || !Array.isArray(clusterIds)) return fallback;
   const key = String(model || '');
@@ -572,6 +699,12 @@ export function scoreRoute({
     : (Number.isFinite(Number(cfg.min_samples)) ? Number(cfg.min_samples) : DEFAULT_MIN_SAMPLES);
   const topP = Number.isFinite(Number(opts.top_p)) ? Number(opts.top_p)
     : (Number.isFinite(Number(cfg.top_p)) ? Number(cfg.top_p) : DEFAULT_TOP_P);
+  const qualityBarPolicy = normalizeQualityBarPolicy({
+    opts,
+    namespaceConfig: cfg,
+    minQuality,
+    minSamples,
+  });
 
   // (NEXT-5) Multi-signal weighted blend - OPT-IN. Resolved from opts first,
   // then namespaceConfig.route_weights. normalizeRouteWeights returns null when
@@ -654,7 +787,7 @@ export function scoreRoute({
 
   // route_mode must be opted into per namespace.
   const mode = String(cfg.route_mode || 'static');
-  if (mode !== 'cost_quality') {
+  if (mode !== 'cost_quality' && mode !== 'semantic' && mode !== 'quality_bar') {
     return buildStatic('route_mode_static');
   }
 
@@ -696,6 +829,7 @@ export function scoreRoute({
 
   const rows = [];
   let totalSamples = 0;
+  let candidateIndex = 0;
   for (const cand of staticChain) {
     const key = modelKey(cand.provider, cand.model);
     const agg = stats._aggregate(clusterIds, cand.model);
@@ -729,6 +863,7 @@ export function scoreRoute({
       key,
       cand,
       n: agg.n,
+      wins: agg.wins,
       accuracy: agg.accuracy,
       cost,
       latency,
@@ -738,6 +873,7 @@ export function scoreRoute({
         ? _candidateSafetySignal({ cand, key, safetyAnalysis: routeSafety, safetyTiers })
         : null,
       hasQuality: agg.n > 0,
+      index: candidateIndex++,
     });
   }
 
@@ -746,6 +882,13 @@ export function scoreRoute({
   const maxN = rows.reduce((m, r) => Math.max(m, r.n), 0);
   if (maxN < minSamples) {
     return buildStatic('cold_start_below_min_samples', { cluster_id: clusterId, n_samples: totalSamples });
+  }
+
+  if (qualityBarPolicy) {
+    return _scoreRouteQualityBar({
+      rows, policy: qualityBarPolicy, staticChain, clusterId, totalSamples,
+      alpha, beta, minQuality,
+    });
   }
 
   // ------------------------------------------------------------------------
@@ -859,6 +1002,129 @@ export function scoreRoute({
     embedder: EMBEDDER_ID,
     cold_start: false,
     reason: 'cost_quality_reorder',
+  };
+}
+
+function _knownCostValue(row) {
+  const c = Number(row && row.cost);
+  return Number.isFinite(c) && c > 0 ? c : Infinity;
+}
+
+function _qualityBarSort(a, b) {
+  const ac = _knownCostValue(a);
+  const bc = _knownCostValue(b);
+  if (ac !== bc) return ac - bc;
+  const al = Number(a.quality_prediction && a.quality_prediction.predicted_quality_lcb) || 0;
+  const bl = Number(b.quality_prediction && b.quality_prediction.predicted_quality_lcb) || 0;
+  if (bl !== al) return bl - al;
+  const ap = Number(a.quality_prediction && a.quality_prediction.predicted_quality) || 0;
+  const bp = Number(b.quality_prediction && b.quality_prediction.predicted_quality) || 0;
+  if (bp !== ap) return bp - ap;
+  return (a.index || 0) - (b.index || 0);
+}
+
+function _qualityFallbackSort(a, b) {
+  const al = Number(a.quality_prediction && a.quality_prediction.predicted_quality_lcb) || 0;
+  const bl = Number(b.quality_prediction && b.quality_prediction.predicted_quality_lcb) || 0;
+  if (bl !== al) return bl - al;
+  const ap = Number(a.quality_prediction && a.quality_prediction.predicted_quality) || 0;
+  const bp = Number(b.quality_prediction && b.quality_prediction.predicted_quality) || 0;
+  if (bp !== ap) return bp - ap;
+  return _qualityBarSort(a, b);
+}
+
+function _scoreRouteQualityBar({
+  rows, policy, staticChain, clusterId, totalSamples, alpha, beta, minQuality,
+}) {
+  const enriched = rows.map((r) => {
+    const prediction = predictRouteQuality({
+      wins: r.wins,
+      n: r.n,
+      confidence_z: policy.confidence_z,
+      prior_alpha: policy.prior_alpha,
+      prior_beta: policy.prior_beta,
+    });
+    const enoughSamples = r.n >= policy.min_samples;
+    const meets = enoughSamples && prediction.predicted_quality_lcb >= policy.effective_bar;
+    return {
+      ...r,
+      quality_prediction: prediction,
+      meets_quality_bar: meets,
+      below_quality_floor: r.hasQuality && r.accuracy < minQuality,
+      insufficient_quality_samples: !enoughSamples,
+    };
+  });
+
+  const eligible = enriched.filter((r) => r.meets_quality_bar).sort(_qualityBarSort);
+  const ineligible = enriched.filter((r) => !r.meets_quality_bar).sort(_qualityFallbackSort);
+  const ranked = eligible.length
+    ? [...eligible, ...ineligible]
+    : enriched.slice().sort(_qualityFallbackSort);
+  const ordered_chain = ranked.map((r) => r.cand);
+  const head = ranked[0] || {};
+  const headKey = head.key || modelKey(head.cand && head.cand.provider, head.cand && head.cand.model);
+  const selectedBy = eligible.length ? 'cheapest_meeting_quality_bar' : 'highest_predicted_quality_fallback';
+
+  const candidatesOut = enriched.map((r) => ({
+    provider: r.cand.provider,
+    model: r.cand.model,
+    n: r.n,
+    wins: r.wins,
+    empirical_quality: r.quality_prediction.empirical_quality,
+    predicted_quality: r.quality_prediction.predicted_quality,
+    predicted_quality_lcb: r.quality_prediction.predicted_quality_lcb,
+    cost: r.cost == null ? null : Number(Number(r.cost).toFixed(8)),
+    meets_quality_bar: r.meets_quality_bar,
+    insufficient_quality_samples: r.insufficient_quality_samples,
+  }));
+
+  const rejected = [];
+  for (const r of enriched) {
+    if (r.key === headKey) continue;
+    let reason = 'higher_cost_meets_bar';
+    if (!r.meets_quality_bar) {
+      reason = r.insufficient_quality_samples ? 'insufficient_quality_samples' : 'predicted_quality_below_bar';
+    } else if (!eligible.length) {
+      reason = 'lower_predicted_quality';
+    }
+    rejected.push({
+      provider: r.cand.provider,
+      model: r.cand.model,
+      score: r.quality_prediction.predicted_quality_lcb,
+      reason,
+    });
+  }
+
+  const headCand = head.cand || {};
+  const headIsLocal = String(headCand.route_decision || '') === 'local'
+    || String(headCand.provider || '').startsWith('local');
+  const headPrediction = head.quality_prediction || predictRouteQuality();
+
+  return {
+    route_decision: headIsLocal ? 'local' : 'frontier',
+    ordered_chain: ordered_chain.length ? ordered_chain : staticChain,
+    route_score: Number(_clamp01(headPrediction.predicted_quality_lcb).toFixed(6)),
+    alpha,
+    beta,
+    chosen: { provider: headCand.provider || null, model: headCand.model || '' },
+    rejected,
+    cluster_id: clusterId,
+    n_samples: totalSamples,
+    embedder: EMBEDDER_ID,
+    cold_start: false,
+    reason: eligible.length ? 'quality_bar_reorder' : 'quality_bar_no_eligible_fallback',
+    quality_bar: {
+      mode: 'meets_bar',
+      selection: selectedBy,
+      bar: Number(policy.bar.toFixed(6)),
+      effective_bar: Number(policy.effective_bar.toFixed(6)),
+      calibration_margin: Number(policy.calibration_margin.toFixed(6)),
+      confidence_z: Number(policy.confidence_z.toFixed(6)),
+      min_samples: policy.min_samples,
+      calibration_version: policy.calibration_version,
+      calibration_n: policy.calibration_n,
+      candidates: candidatesOut,
+    },
   };
 }
 
@@ -1033,6 +1299,7 @@ export function buildRouterDecisionBlock({ scored, alpha, beta = DEFAULT_BETA, c
   let routeMode = 'cost_quality';
   if (isCold) routeMode = 'static';
   else if (typeof s.reason === 'string' && s.reason.startsWith('multi_signal')) routeMode = 'semantic';
+  else if (typeof s.reason === 'string' && s.reason.startsWith('quality_bar')) routeMode = 'quality_bar';
   const block = {
     route_mode: routeMode,
     version: SEMANTIC_ROUTER_VERSION,
@@ -1058,6 +1325,9 @@ export function buildRouterDecisionBlock({ scored, alpha, beta = DEFAULT_BETA, c
   }
   if (s.route_safety && typeof s.route_safety === 'object') {
     block.route_safety = JSON.parse(JSON.stringify(s.route_safety));
+  }
+  if (s.quality_bar && typeof s.quality_bar === 'object') {
+    block.quality_bar = JSON.parse(JSON.stringify(s.quality_bar));
   }
   return block;
 }

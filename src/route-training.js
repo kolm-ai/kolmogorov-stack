@@ -15,6 +15,7 @@ import {
   trainClustersFromLake,
 } from './semantic-router.js';
 import {
+  calibrateQualityBar,
   getClusterQualityStats,
   recordRouteOutcome,
   trainRouteWeights,
@@ -252,6 +253,11 @@ export async function buildRouteTrainingSnapshot({
   const route_weights = weights && weights.route_weights && Object.keys(weights.route_weights).length
     ? weights.route_weights
     : null;
+  const route_quality_bar_calibration = await calibrateQualityBar({
+    tenant,
+    namespace: ns,
+    max_rows: maxRows,
+  });
   const trained_rows = Array.isArray(snapshot.counts)
     ? snapshot.counts.reduce((a, b) => a + (Number(b) || 0), 0)
     : 0;
@@ -265,6 +271,7 @@ export async function buildRouteTrainingSnapshot({
     route_quality_outcomes: qualityStats.n,
     route_weights,
     route_weight_basis: weights ? weights.basis : null,
+    route_quality_bar_calibration,
     snapshot,
   };
 }
@@ -363,6 +370,7 @@ export async function persistRouteTrainingSnapshot({
   namespace = 'default',
   snapshot,
   route_weights = null,
+  route_quality_bar_calibration = null,
   activate = false,
   promotion = null,
   policy = null,
@@ -394,11 +402,30 @@ export async function persistRouteTrainingSnapshot({
   if (route_weights && typeof route_weights === 'object' && Object.keys(route_weights).length) {
     patch.route_weights = { ...route_weights };
   }
+  if (route_quality_bar_calibration && typeof route_quality_bar_calibration === 'object') {
+    patch.route_quality_bar_calibration = { ...route_quality_bar_calibration };
+    patch.route_quality_bar_policy = {
+      enabled: true,
+      mode: 'meets_bar',
+      bar: Number(route_quality_bar_calibration.quality_bar) || 0.8,
+      calibrated_bar: Number(route_quality_bar_calibration.calibrated_bar) || Number(route_quality_bar_calibration.quality_bar) || 0.8,
+      calibration_margin: Number(route_quality_bar_calibration.calibration_margin) || 0,
+      confidence_z: Number(route_quality_bar_calibration.confidence_z) || 1.281552,
+      min_samples: Number(route_quality_bar_calibration.min_train_samples) || 4,
+      calibration: { ...route_quality_bar_calibration },
+    };
+  }
   if (activate) patch.route_mode = 'cost_quality';
   if (existing && _hasCentroids(existing.route_stats_snapshot)) {
     patch.route_stats_previous_snapshot = existing.route_stats_snapshot;
     patch.route_weights_previous = existing.route_weights && typeof existing.route_weights === 'object'
       ? { ...existing.route_weights }
+      : null;
+    patch.route_quality_bar_calibration_previous = existing.route_quality_bar_calibration && typeof existing.route_quality_bar_calibration === 'object'
+      ? { ...existing.route_quality_bar_calibration }
+      : null;
+    patch.route_quality_bar_policy_previous = existing.route_quality_bar_policy && typeof existing.route_quality_bar_policy === 'object'
+      ? { ...existing.route_quality_bar_policy }
       : null;
     patch.route_mode_previous = existing.route_mode || null;
     patch.route_stats_previous_trained_at = existing.route_stats_trained_at || null;
@@ -479,6 +506,7 @@ export async function runRouteRetrainPromotion({
       namespace: ns,
       snapshot: candidate.snapshot,
       route_weights: candidate.route_weights,
+      route_quality_bar_calibration: candidate.route_quality_bar_calibration,
       activate,
       promotion,
       policy: effectivePolicy,
@@ -582,10 +610,18 @@ export async function rollbackRouteTrainingSnapshot({
     route_weights: existing.route_weights_previous && typeof existing.route_weights_previous === 'object'
       ? { ...existing.route_weights_previous }
       : null,
+    route_quality_bar_calibration: existing.route_quality_bar_calibration_previous && typeof existing.route_quality_bar_calibration_previous === 'object'
+      ? { ...existing.route_quality_bar_calibration_previous }
+      : null,
+    route_quality_bar_policy: existing.route_quality_bar_policy_previous && typeof existing.route_quality_bar_policy_previous === 'object'
+      ? { ...existing.route_quality_bar_policy_previous }
+      : null,
     route_mode: existing.route_mode_previous || existing.route_mode || 'static',
     route_training_rollback_available: false,
     route_stats_previous_snapshot: null,
     route_weights_previous: null,
+    route_quality_bar_calibration_previous: null,
+    route_quality_bar_policy_previous: null,
     route_mode_previous: null,
     route_stats_previous_trained_at: null,
     route_training_rollback: {

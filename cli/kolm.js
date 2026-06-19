@@ -41795,7 +41795,7 @@ async function cmdNamespace(args) {
 //
 // Exit codes: 0 ok, 1 bad-args/invalid-value/not-found, 3 auth missing.
 const NS_SET_ENUMS = Object.freeze({
-  route_mode:     ['static', 'cost_quality', 'semantic'],
+  route_mode:     ['static', 'cost_quality', 'semantic', 'quality_bar'],
   cache_mode:     ['off', 'exact', 'semantic', 'verified'],
   guardrail_mode: ['off', 'detect_only', 'flag', 'block'],
 });

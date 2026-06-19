@@ -14,7 +14,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ROUTER = fs.readFileSync(path.join(ROOT, 'src', 'router.js'), 'utf8');
 
 test('W921-NSOPT #1 — namespace create persists route_mode/cache_mode/guardrail_mode with safe defaults', () => {
-  assert.match(ROUTER, /route_mode: \['static', 'cost_quality', 'semantic'\]\.includes\(body\.route_mode\) \? body\.route_mode : 'static'/,
+  assert.match(ROUTER, /route_mode: \['static', 'cost_quality', 'semantic', 'quality_bar'\]\.includes\(body\.route_mode\) \? body\.route_mode : 'static'/,
     'create must default route_mode to static');
   assert.match(ROUTER, /cache_mode: \['off', 'exact', 'semantic', 'verified'\]\.includes\(body\.cache_mode\) \? body\.cache_mode : 'off'/,
     'create must default cache_mode to off');
@@ -31,7 +31,7 @@ test('W921-NSOPT #2 — namespace patch allowlist accepts the three gateway opt-
 });
 
 test('W921-NSOPT #3 — patch rejects out-of-range enum values (no silent garbage)', () => {
-  assert.match(ROUTER, /const ENUMS = \{[\s\S]*?route_mode: \['static', 'cost_quality', 'semantic'\][\s\S]*?\};/,
+  assert.match(ROUTER, /const ENUMS = \{[\s\S]*?route_mode: \['static', 'cost_quality', 'semantic', 'quality_bar'\][\s\S]*?\};/,
     'patch must carry an ENUMS map covering route_mode');
   assert.match(ROUTER, /if \(ENUMS\[k\] && !ENUMS\[k\]\.includes\(patch\[k\]\)\) \{[\s\S]*?error: 'invalid_value'/,
     'patch must 400 on an invalid enum value');
