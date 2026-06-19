@@ -290,6 +290,183 @@ def _measure_peak_memory_mb() -> Optional[float]:
     return None
 
 
+def _cfg_get(config: Any, *names: str) -> Any:
+    if config is None:
+        return None
+    for name in names:
+        if isinstance(config, dict) and config.get(name) is not None:
+            return config.get(name)
+        value = getattr(config, name, None)
+        if value is not None:
+            return value
+    return None
+
+
+def _number_or_none(value: Any) -> Optional[float]:
+    try:
+        out = float(value)
+        return out if math.isfinite(out) else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _int_or_none(value: Any) -> Optional[int]:
+    n = _number_or_none(value)
+    return int(n) if n is not None else None
+
+
+def _dtype_bits(dtype_name: Any, kv_cache_dtype: Any = None) -> int:
+    label = f"{dtype_name or ''} {kv_cache_dtype or ''}".lower()
+    if "fp8" in label or "float8" in label or "int8" in label:
+        return 8
+    if "float32" in label or "fp32" in label:
+        return 32
+    return 16
+
+
+def _model_kv_bytes_per_token(config: Any, *, dtype_name: Any = None,
+                              kv_cache_dtype: Any = None) -> Optional[float]:
+    layers = _int_or_none(_cfg_get(config, "num_hidden_layers", "n_layer", "n_layers"))
+    kv_heads = _int_or_none(_cfg_get(config, "num_key_value_heads", "num_attention_heads", "n_head"))
+    attn_heads = _int_or_none(_cfg_get(config, "num_attention_heads", "n_head"))
+    head_dim = _int_or_none(_cfg_get(config, "head_dim"))
+    hidden = _int_or_none(_cfg_get(config, "hidden_size", "n_embd", "d_model"))
+    if head_dim is None and hidden is not None and attn_heads:
+        head_dim = max(1, int(hidden / attn_heads))
+    if not (layers and kv_heads and head_dim):
+        return None
+    return float(2 * layers * kv_heads * head_dim * (_dtype_bits(dtype_name, kv_cache_dtype) / 8.0))
+
+
+def _kv_policy_memory_fraction(policy: Dict[str, Any], active_policy: str,
+                               total_tokens: int, base_bits: int) -> Dict[str, Any]:
+    params = policy.get("params") or {}
+    name = str(active_policy or policy.get("policy") or "default").lower()
+    total = max(1, int(total_tokens))
+    retained = total
+    fraction = 1.0
+
+    if name in ("default", "off"):
+        pass
+    elif name == "streaming":
+        sink = max(0, _int_or_none(params.get("sink_tokens")) or 4)
+        window = max(1, _int_or_none(params.get("window_tokens")) or 1020)
+        retained = min(total, sink + window)
+        fraction = retained / total
+    elif name in ("snapkv", "h2o", "pyramidkv"):
+        budget = _number_or_none(params.get("budget"))
+        budget = budget if budget is not None and 0.0 < budget <= 1.0 else 0.5
+        retained = max(1, min(total, int(math.ceil(total * budget))))
+        if name in ("snapkv", "pyramidkv"):
+            retained = min(total, max(retained, _int_or_none(params.get("window_tokens")) or 64))
+        fraction = retained / total
+    elif name in ("kivi2", "kivi4"):
+        nbits = _int_or_none(params.get("nbits")) or (2 if name == "kivi2" else 4)
+        fraction = max(1.0 / max(1, base_bits), min(1.0, nbits / max(1, base_bits)))
+        retained = total
+    elif name == "shard":
+        ratio = _number_or_none(params.get("compression_ratio"))
+        ratio = ratio if ratio is not None and 0.0 < ratio <= 1.0 else 0.1
+        retained = total
+        fraction = ratio
+    evicted = max(0, total - retained)
+    return {"retained_tokens": retained, "evicted_tokens": evicted, "memory_fraction": fraction}
+
+
+class KvPolicyMeter:
+    """Runtime token counter + model-config KV accounting for /info."""
+
+    def __init__(self, *, config: Any, policy: Dict[str, Any], active_policy: str,
+                 dtype_name: Any = None, kv_cache_dtype: Any = None):
+        self.config = config
+        self.policy = policy or {"policy": "default", "kind": "off", "params": {}}
+        self.active_policy = str(active_policy or self.policy.get("policy") or "default").lower()
+        self.dtype_name = dtype_name
+        self.kv_cache_dtype = kv_cache_dtype
+        self.bytes_per_token = _model_kv_bytes_per_token(
+            config, dtype_name=dtype_name, kv_cache_dtype=kv_cache_dtype)
+        self.samples = 0
+        self.peak_total_tokens = 0
+        self.peak_retained_tokens = 0
+        self.peak_evicted_tokens = 0
+        self.peak_kv_mb: Optional[float] = None
+        self.peak_full_kv_mb: Optional[float] = None
+
+    def record(self, *, prompt_tokens: Any, output_tokens: Any) -> None:
+        prompt_n = _int_or_none(prompt_tokens)
+        output_n = _int_or_none(output_tokens)
+        if prompt_n is None and output_n is None:
+            return
+        total = max(0, (prompt_n or 0) + (output_n or 0))
+        if total <= 0:
+            return
+        self.samples += 1
+        base_bits = _dtype_bits(self.dtype_name, self.kv_cache_dtype)
+        effect = _kv_policy_memory_fraction(self.policy, self.active_policy, total, base_bits)
+        full_mb = None
+        active_mb = None
+        if self.bytes_per_token is not None:
+            full_mb = (self.bytes_per_token * total) / (1024.0 * 1024.0)
+            active_mb = full_mb * effect["memory_fraction"]
+        if total >= self.peak_total_tokens:
+            self.peak_total_tokens = total
+            self.peak_retained_tokens = int(effect["retained_tokens"])
+            self.peak_evicted_tokens = int(effect["evicted_tokens"])
+            self.peak_full_kv_mb = full_mb
+            self.peak_kv_mb = active_mb
+
+    def summary(self) -> Optional[Dict[str, Any]]:
+        requested = str(self.policy.get("policy") or "default").lower()
+        if self.samples <= 0:
+            return None
+        params = self.policy.get("params") if isinstance(self.policy.get("params"), dict) else {}
+        status = "tested"
+        reason = None
+        if requested not in ("default", "off") and self.active_policy in ("default", "off"):
+            status = "unmeasured"
+            reason = "kv_policy_not_active"
+        if self.peak_kv_mb is None or self.peak_full_kv_mb is None:
+            status = "unmeasured"
+            reason = reason or "model_kv_shape_unavailable"
+        compression = None
+        if self.peak_kv_mb and self.peak_full_kv_mb:
+            compression = self.peak_full_kv_mb / self.peak_kv_mb
+        return {
+            "policy": requested,
+            "policy_active": self.active_policy,
+            "kind": self.policy.get("kind"),
+            "params": params,
+            "status": status,
+            "reason": reason,
+            "samples": self.samples,
+            "source": "runtime_token_counter_model_config_accounting",
+            "peak_total_tokens": self.peak_total_tokens,
+            "retained_tokens": self.peak_retained_tokens,
+            "evicted_tokens": self.peak_evicted_tokens,
+            "peak_kv_mb": round(self.peak_kv_mb, 6) if self.peak_kv_mb is not None else None,
+            "full_cache_peak_kv_mb": round(self.peak_full_kv_mb, 6) if self.peak_full_kv_mb is not None else None,
+            "compression_ratio": round(compression, 6) if compression is not None else None,
+            "quality_delta": None,
+        }
+
+
+def _vllm_hf_config(llm: Any) -> Any:
+    for path in (
+        ("llm_engine", "model_config", "hf_config"),
+        ("llm_engine", "model_config"),
+        ("model_config", "hf_config"),
+        ("model_config",),
+    ):
+        cur = llm
+        for attr in path:
+            cur = getattr(cur, attr, None)
+            if cur is None:
+                break
+        if cur is not None:
+            return cur
+    return None
+
+
 def _engine_runtime_version(engine_name: str) -> Optional[str]:
     """Free-form runtime version string for the passport (vLLM/transformers)."""
     try:
@@ -519,6 +696,11 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
 
     llm = LLM(**llm_kwargs)
     lora_requests = _build_vllm_lora_requests(lora_modules) if lora_modules else {}
+    kv_policy_active = (
+        str(kv_policy.get("policy") or "default").lower()
+        if kv_policy.get("kind") == "quant" and str(kv_policy.get("policy") or "").lower() not in ("default", "off")
+        else "default"
+    )
 
     class VLLMEngine(Engine):
         name = "vllm"
@@ -532,6 +714,13 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
             self.speculative_config = speculative_config
             self.speculative_tree_policy = spec_tree_policy if draft_model else None
             self.lora_requests = lora_requests
+            self._kv_meter = KvPolicyMeter(
+                config=_vllm_hf_config(llm),
+                policy=kv_policy,
+                active_policy=kv_policy_active,
+                dtype_name="auto",
+                kv_cache_dtype=kv_cache_dtype,
+            )
             # Rolling counters for /info acceptance-rate reporting. vLLM's
             # internal metrics expose accepted tokens; we fall back to a
             # token-vs-step ratio when those aren't reachable.
@@ -546,9 +735,12 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
             elapsed = time.time() - t0
             text = outs[0].outputs[0].text
             tok_ids = outs[0].outputs[0].token_ids
+            prompt_ids = getattr(outs[0], "prompt_token_ids", None)
+            prompt_tokens = len(prompt_ids) if prompt_ids is not None else None
             self._req_count += 1
             self._tok_count += len(tok_ids)
             self._gen_s_sum += elapsed
+            self._kv_meter.record(prompt_tokens=prompt_tokens, output_tokens=len(tok_ids))
             ttft_ms = None
             try:
                 # vLLM 0.6+ exposes per-output time_to_first_token in metrics
@@ -636,6 +828,7 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
                 accepted_length = stats_accept_length
             avg_ttft = (self._ttft_ms_sum / self._req_count) if self._req_count > 0 else None
             avg_tok_s = (self._tok_count / self._gen_s_sum) if self._gen_s_sum > 0 else None
+            kv_summary = self._kv_meter.summary()
             spec_passport = None
             if self.draft is not None:
                 source = "vllm_prometheus" if prom.get("accepted_tokens") is not None else (
@@ -676,6 +869,9 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
                 "kv_cache_dtype": kv_cache_dtype,
                 "kv_cache_backend": kv_cache_backend,
                 "kv_policy": kv_policy.get("policy"),
+                "kv_policy_kind": kv_policy.get("kind"),
+                "kv_policy_params": kv_policy.get("params") or {},
+                "kv_policy_active": kv_policy_active,
                 "quantization": quantization,
                 "lora_enabled": bool(self.lora_requests) or bool(lora_dir),
                 "lora_adapters": sorted(self.lora_requests.keys()),
@@ -690,6 +886,7 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
                     "mean_accept_length": accepted_length,
                     "spec_decode": prom,
                     "prefix_cache_hit_rate": self.prefix_cache_hit_rate(),
+                    "kv_cache": kv_summary,
                 },
             }
 
@@ -758,6 +955,8 @@ def _try_transformers(target_model: str, draft_model: Optional[str], lora_dir: O
     # default cache so a missing optional dep never breaks serve.
     kv_policy = _resolve_kv_policy()
     kv_press, kv_quant_cache_fn, kv_policy_active = _build_kv_cache_for_policy(model, kv_policy)
+    if kv_cache_backend_active == "shard":
+        kv_policy_active = "shard"
 
     class HFEngine(Engine):
         name = "transformers"
@@ -767,6 +966,13 @@ def _try_transformers(target_model: str, draft_model: Optional[str], lora_dir: O
             self._tok_count = 0
             self._ttft_ms_sum = 0.0
             self._gen_s_sum = 0.0
+            self._kv_meter = KvPolicyMeter(
+                config=getattr(model, "config", None),
+                policy=kv_policy,
+                active_policy=kv_policy_active,
+                dtype_name=str(dtype),
+                kv_cache_dtype=None,
+            )
 
         def chat(self, messages, max_new_tokens=512, temperature=0.2, top_p=0.9):
             prompt = tok.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
@@ -850,11 +1056,13 @@ def _try_transformers(target_model: str, draft_model: Optional[str], lora_dir: O
             elapsed_total = (time.time() - t0)
             gen_only = time.time() - t1
             new_tokens = int(out.shape[1] - inputs["input_ids"].shape[1])
+            prompt_tokens = int(inputs["input_ids"].shape[1])
             text = tok.decode(out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)
             self._req_count += 1
             self._tok_count += new_tokens
             self._ttft_ms_sum += ttft_ms
             self._gen_s_sum += elapsed_total
+            self._kv_meter.record(prompt_tokens=prompt_tokens, output_tokens=new_tokens)
             return {
                 "text": text,
                 "tokens": new_tokens,
@@ -867,6 +1075,7 @@ def _try_transformers(target_model: str, draft_model: Optional[str], lora_dir: O
         def info(self):
             avg_ttft = (self._ttft_ms_sum / self._req_count) if self._req_count > 0 else None
             avg_tok_s = (self._tok_count / self._gen_s_sum) if self._gen_s_sum > 0 else None
+            kv_summary = self._kv_meter.summary()
             return {
                 "engine": "transformers",
                 "runtime_version": _engine_runtime_version("transformers"),
@@ -879,6 +1088,8 @@ def _try_transformers(target_model: str, draft_model: Optional[str], lora_dir: O
                 "kv_cache_backend_requested": kv_cache_backend_requested,
                 "kv_cache_backend_active": kv_cache_backend_active,
                 "kv_policy": kv_policy.get("policy"),
+                "kv_policy_kind": kv_policy.get("kind"),
+                "kv_policy_params": kv_policy.get("params") or {},
                 "kv_policy_active": kv_policy_active,
                 "peak_memory_mb": _measure_peak_memory_mb(),
                 "metrics": {
@@ -891,6 +1102,7 @@ def _try_transformers(target_model: str, draft_model: Optional[str], lora_dir: O
                     "acceptance_rate": None,
                     "mean_accept_length": None,
                     "prefix_cache_hit_rate": None,
+                    "kv_cache": kv_summary,
                 },
             }
 

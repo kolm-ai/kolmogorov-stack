@@ -62,12 +62,14 @@ test('3. vLLM eviction requests fall back to enforceable KIVI quant policy', () 
   assert.equal(applied.runtime_can_enforce, true);
 });
 
-test('4. backend spec records W607 closure while leaving KV measurement open', () => {
+test('4. backend spec records W607 closure and W1006 KV measurement closure', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
 
   assert.match(spec, /W607/);
   assert.match(spec, /real KV policy dispatcher into `kolm serve`/);
-  assert.match(spec, /No measurement: probe\.py records the kv_policy NAME/);
+  assert.match(spec, /W1006/);
+  assert.match(spec, /paired no-KV baseline/);
+  assert.match(spec, /probe\.py no longer records only the kv_policy name/);
 });
 
 test('5. ITKV kvpolicy sidecar mirrors serve.py policy builders and pins worker deps', () => {

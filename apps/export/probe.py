@@ -262,6 +262,67 @@ def _measured_speculative_from_pair(resolved: Dict[str, Any],
     }
 
 
+def _kv_pair_measurement(result: Dict[str, Any], workload_id: str,
+                         *, baseline: bool = False) -> Dict[str, Any]:
+    kv = result.get("kv_cache") if isinstance(result, dict) else {}
+    kv = kv if isinstance(kv, dict) else {}
+    return {
+        "id": "no-kv-baseline" if baseline else f"kv-{kv.get('policy') or result.get('kv_policy') or 'candidate'}",
+        "runtime": result.get("engine"),
+        "target_model": result.get("model"),
+        "workload_id": workload_id,
+        "policy": kv.get("policy") or result.get("kv_policy"),
+        "policy_active": kv.get("policy_active") or result.get("kv_policy_active"),
+        "peak_kv_mb": kv.get("peak_kv_mb"),
+        "compression_ratio": kv.get("compression_ratio"),
+        "retained_tokens": kv.get("retained_tokens"),
+        "evicted_tokens": kv.get("evicted_tokens"),
+        "max_context_at_vram": kv.get("max_context_at_vram"),
+        "memory_mb": result.get("memory_mb"),
+        "quality_score": result.get("quality_score"),
+        "source": kv.get("source"),
+    }
+
+
+def _measured_kv_policy_from_pair(policy: str, params: Dict[str, Any],
+                                  baseline: Dict[str, Any],
+                                  candidate: Dict[str, Any]) -> Dict[str, Any]:
+    pair = _derive_paired_runtime_deltas(
+        baseline, candidate, ["runtime", "target_model", "workload_id"])
+    compression_ratio = _numeric(candidate, ["compression_ratio"])
+    peak_kv_mb = _numeric(candidate, ["peak_kv_mb"])
+    retained_tokens = _numeric(candidate, ["retained_tokens"])
+    evicted_tokens = _numeric(candidate, ["evicted_tokens"])
+    quality_delta = _numeric(candidate, ["quality_delta"])
+    computed_quality_delta = quality_delta if quality_delta is not None else pair.get("quality_delta")
+
+    if not pair.get("ok") or not _finite_number(compression_ratio) or not _finite_number(peak_kv_mb):
+        return {
+            "policy": policy or candidate.get("policy"),
+            "params": params or {},
+            "status": "unmeasured",
+            "reason": pair.get("reason") or "compression_ratio_and_peak_kv_mb_required",
+            "version": PROBE_HARNESS_VERSION,
+        }
+
+    return {
+        "policy": policy or candidate.get("policy"),
+        "params": params or {},
+        "status": "tested",
+        "compression_ratio": compression_ratio,
+        "retained_tokens": retained_tokens,
+        "evicted_tokens": evicted_tokens,
+        "peak_kv_mb": peak_kv_mb,
+        "quality_delta": computed_quality_delta if _finite_number(computed_quality_delta) else None,
+        "max_context_at_vram": _numeric(candidate, ["max_context_at_vram"]),
+        "baseline_peak_kv_mb": _numeric(baseline, ["peak_kv_mb"]),
+        "memory_ratio": pair.get("memory_ratio"),
+        "workload_digest": _digest_object(candidate.get("workload_id")),
+        "source": candidate.get("source"),
+        "version": PROBE_HARNESS_VERSION,
+    }
+
+
 def _probe_workload(prompt: str, max_new_tokens: int, concurrency: int,
                     warmup: int, steady_requests: int,
                     steady_seconds: Optional[float]) -> Dict[str, Any]:
@@ -287,6 +348,8 @@ def _public_probe_summary(result: Dict[str, Any], workload_id: str) -> Dict[str,
         "precision": result.get("precision"),
         "tok_s": result.get("tok_s"),
         "memory_mb": result.get("memory_mb"),
+        "kv_policy": result.get("kv_policy"),
+        "kv_cache": result.get("kv_cache"),
         "workload_id": workload_id,
     }
 
@@ -337,7 +400,7 @@ def _attach_paired_speculative_speedup(candidate_result: Dict[str, Any],
         merged_spec["paired_measurement_reason"] = measured.get("reason")
     candidate_result["speculative_decoding"] = merged_spec
     candidate_result["paired_speculative_baseline"] = _public_probe_summary(baseline_result, workload_id)
-    candidate_result["probe_measurement_receipt"] = _build_probe_measurement_receipt(
+    receipt = _build_probe_measurement_receipt(
         "speculative-decoding",
         artifact={"id": os.path.basename(artifact_path), "path_sha256": _sha256hex(os.path.abspath(artifact_path))},
         config={"runtime": runtime, "baseline": "no-draft", "candidate": "speculative"},
@@ -346,6 +409,46 @@ def _attach_paired_speculative_speedup(candidate_result: Dict[str, Any],
         candidate=candidate_pair,
         metrics=merged_spec,
     )
+    candidate_result["probe_measurement_receipt"] = receipt
+    candidate_result.setdefault("probe_measurement_receipts", {})["speculative-decoding"] = receipt
+    return candidate_result
+
+
+def _attach_paired_kv_measurement(candidate_result: Dict[str, Any],
+                                  baseline_result: Dict[str, Any],
+                                  *, artifact_path: str,
+                                  runtime: Optional[str],
+                                  workload: Dict[str, Any]) -> Dict[str, Any]:
+    kv = candidate_result.get("kv_cache")
+    if not isinstance(kv, dict):
+        return candidate_result
+    policy = str(kv.get("policy") or candidate_result.get("kv_policy") or "").lower()
+    if policy in ("", "default", "off"):
+        return candidate_result
+    workload_id = candidate_result.get("workload_id") or f"probe-{_digest_object(workload)[:16]}"
+    baseline_pair = _kv_pair_measurement(baseline_result, workload_id, baseline=True)
+    candidate_pair = _kv_pair_measurement(candidate_result, workload_id, baseline=False)
+    measured = _measured_kv_policy_from_pair(policy, kv.get("params") or {}, baseline_pair, candidate_pair)
+    merged_kv = dict(kv)
+    if measured.get("status") == "tested":
+        merged_kv.update(measured)
+    else:
+        merged_kv["paired_measurement_status"] = "unmeasured"
+        merged_kv["paired_measurement_reason"] = measured.get("reason")
+    candidate_result["kv_cache"] = merged_kv
+    candidate_result["paired_kv_baseline"] = _public_probe_summary(baseline_result, workload_id)
+    receipt = _build_probe_measurement_receipt(
+        "kv-cache",
+        artifact={"id": os.path.basename(artifact_path), "path_sha256": _sha256hex(os.path.abspath(artifact_path))},
+        config={"runtime": runtime, "baseline": "kv-off", "candidate": policy},
+        workload=workload,
+        baseline=baseline_pair,
+        candidate=candidate_pair,
+        metrics=merged_kv,
+    )
+    candidate_result.setdefault("probe_measurement_receipts", {})["kv-cache"] = receipt
+    if not candidate_result.get("probe_measurement_receipt"):
+        candidate_result["probe_measurement_receipt"] = receipt
     return candidate_result
 
 
@@ -575,6 +678,7 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
                    prefix_cache_probe: bool = True, batching_probe: bool = True,
                    timeout_s: int = 300,
                    paired_speculative_baseline: bool = True,
+                   paired_kv_baseline: bool = True,
                    env_overrides: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     """Boot the real serve.py, drive warmup+steady-state, harvest counters.
 
@@ -670,6 +774,9 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
         batching = (_measure_batching(base_url, info.get("max_num_seqs") or 1,
                                       tok_s or 0, prompt, max_new_tokens)
                     if batching_probe else None)
+        kv_cache = None
+        if isinstance(m, dict) and isinstance(m.get("kv_cache"), dict):
+            kv_cache = dict(m["kv_cache"])
 
         result.update({
             "ok": True,
@@ -692,6 +799,10 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
             "prompt_cache": prompt_cache,
             "continuous_batching": batching,
             "kv_policy": info.get("kv_policy"),
+            "kv_policy_kind": info.get("kv_policy_kind"),
+            "kv_policy_params": info.get("kv_policy_params"),
+            "kv_policy_active": info.get("kv_policy_active"),
+            "kv_cache": kv_cache,
             "quantization": info.get("quantization"),
         })
         if not result["tested"]:
@@ -711,6 +822,7 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
                 batching_probe=False,
                 timeout_s=timeout_s,
                 paired_speculative_baseline=False,
+                paired_kv_baseline=False,
                 env_overrides={
                     "KOLM_SERVE_SPECULATIVE_DRAFT": "",
                     "KOLM_NUM_SPECULATIVE_TOKENS": "0",
@@ -720,6 +832,32 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
             _attach_paired_speculative_speedup(
                 result, baseline_result, artifact_path=artifact_path,
                 runtime=runtime, workload=workload)
+        if paired_kv_baseline and isinstance(result.get("kv_cache"), dict):
+            kv_policy = str(result["kv_cache"].get("policy") or result.get("kv_policy") or "").lower()
+            if kv_policy not in ("", "default", "off"):
+                baseline_result = probe_artifact(
+                    artifact_path,
+                    runtime=runtime,
+                    port=0,
+                    concurrency=concurrency,
+                    warmup=warmup,
+                    steady_requests=steady_requests,
+                    steady_seconds=steady_seconds,
+                    max_new_tokens=max_new_tokens,
+                    prompt=prompt,
+                    prefix_cache_probe=False,
+                    batching_probe=False,
+                    timeout_s=timeout_s,
+                    paired_speculative_baseline=False,
+                    paired_kv_baseline=False,
+                    env_overrides={
+                        "KOLM_KV_POLICY": json.dumps({"policy": "off", "kind": "off", "params": {}}),
+                        "KOLM_KV_CACHE_BACKEND": "default",
+                    },
+                )
+                _attach_paired_kv_measurement(
+                    result, baseline_result, artifact_path=artifact_path,
+                    runtime=runtime, workload=workload)
         return result
     finally:
         try:
@@ -770,10 +908,13 @@ def emit_passport_json(result: Dict[str, Any]) -> Dict[str, Any]:
         "time_to_first_token_ms": result.get("ttft_p50_ms"),
         "speculative_decoding": result.get("speculative_decoding"),
         "paired_speculative_baseline": result.get("paired_speculative_baseline"),
+        "paired_kv_baseline": result.get("paired_kv_baseline"),
         "probe_measurement_receipt": result.get("probe_measurement_receipt"),
+        "probe_measurement_receipts": result.get("probe_measurement_receipts"),
         "prompt_cache": result.get("prompt_cache"),
         "continuous_batching": result.get("continuous_batching"),
         "kv_policy": result.get("kv_policy"),
+        "kv_cache": result.get("kv_cache"),
         "serving_kernel": result.get("quantization"),
     }
     return out
@@ -877,6 +1018,60 @@ def _self_test() -> int:
     flat = json.dumps(receipt)
     assert "SECRET_PROMPT" not in flat
 
+    kv_candidate = {
+        "ok": True,
+        "tested": True,
+        "workload_id": f"probe-{_digest_object(workload)[:16]}",
+        "engine": "transformers",
+        "runtime_version": "transformers 4.46",
+        "model": "qwen-target",
+        "precision": "bf16",
+        "tok_s": 24.0,
+        "memory_mb": 900.0,
+        "kv_policy": "snapkv",
+        "kv_policy_active": "snapkv",
+        "kv_cache": {
+            "policy": "snapkv",
+            "policy_active": "snapkv",
+            "kind": "eviction",
+            "params": {"budget": 0.5},
+            "status": "tested",
+            "source": "runtime_token_counter_model_config_accounting",
+            "compression_ratio": 2.0,
+            "retained_tokens": 512,
+            "evicted_tokens": 512,
+            "peak_kv_mb": 128.0,
+        },
+    }
+    kv_baseline = {
+        "ok": True,
+        "tested": True,
+        "engine": "transformers",
+        "runtime_version": "transformers 4.46",
+        "model": "qwen-target",
+        "precision": "bf16",
+        "tok_s": 23.0,
+        "memory_mb": 1024.0,
+        "kv_policy": "off",
+        "kv_policy_active": "off",
+        "kv_cache": {
+            "policy": "off",
+            "policy_active": "off",
+            "status": "tested",
+            "compression_ratio": 1.0,
+            "retained_tokens": 1024,
+            "evicted_tokens": 0,
+            "peak_kv_mb": 256.0,
+        },
+    }
+    attached_kv = _attach_paired_kv_measurement(
+        kv_candidate, kv_baseline, artifact_path="artifact.kolm", runtime="transformers", workload=workload)
+    assert attached_kv["kv_cache"]["status"] == "tested", attached_kv
+    assert attached_kv["kv_cache"]["baseline_peak_kv_mb"] == 256.0, attached_kv
+    kv_receipt = attached_kv["probe_measurement_receipts"]["kv-cache"]
+    assert kv_receipt["domain"] == "kv-cache", kv_receipt
+    assert kv_receipt["claim_scope"] == "paired_measurement_receipt_digest_only", kv_receipt
+
     print("apps.export.probe self-test: OK")
     return 0
 
@@ -894,6 +1089,7 @@ def main() -> int:
     ap.add_argument("--no-prefix-cache-probe", action="store_true")
     ap.add_argument("--no-batching-probe", action="store_true")
     ap.add_argument("--no-paired-speculative-baseline", action="store_true")
+    ap.add_argument("--no-paired-kv-baseline", action="store_true")
     ap.add_argument("--timeout-s", type=int, default=300)
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
@@ -914,7 +1110,8 @@ def main() -> int:
         max_new_tokens=args.max_new_tokens,
         prefix_cache_probe=not args.no_prefix_cache_probe,
         batching_probe=not args.no_batching_probe, timeout_s=args.timeout_s,
-        paired_speculative_baseline=not args.no_paired_speculative_baseline)
+        paired_speculative_baseline=not args.no_paired_speculative_baseline,
+        paired_kv_baseline=not args.no_paired_kv_baseline)
     print(json.dumps(emit_passport_json(result)))
     return 0 if result.get("ok") else 2
 

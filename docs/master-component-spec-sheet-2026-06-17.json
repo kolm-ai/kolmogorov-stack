@@ -10,7 +10,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 100,
-    "frontier_product_score": 93.5,
+    "frontier_product_score": 94.4,
     "readiness_proof_surplus_score": 104.3,
     "readiness_proof_surplus_ceiling": 110,
     "score_notes": [
@@ -47,9 +47,9 @@
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 0,
-    "categories_with_major_frontier_work_open": 4,
+    "categories_with_major_frontier_work_open": 3,
     "critical_sota_category_closed_pct": 100,
-    "major_sota_category_closed_pct": 75,
+    "major_sota_category_closed_pct": 81.3,
     "readiness": {
       "total": 57,
       "closed": 49,
@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2060,
+          "js_family": 2061,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -176,11 +176,11 @@
     {
       "id": "kv-cache",
       "stack_area": "runtime",
-      "status": "sota_review_complete_major_frontier_work_open",
-      "already_at_frontier_count": 8,
+      "status": "sota_review_complete_external_or_release_gate_open",
+      "already_at_frontier_count": 9,
       "improvement_count": 2,
       "critical_gaps": 0,
-      "major_gaps": 2,
+      "major_gaps": 0,
       "minor_gaps": 2,
       "required_components": 4,
       "suggested_verification": [
@@ -1084,7 +1084,7 @@
         {
           "id": "kv-cache",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1158,7 +1158,7 @@
         {
           "id": "kv-cache",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1452,7 +1452,7 @@
         {
           "id": "kv-cache",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1599,7 +1599,7 @@
         {
           "id": "kv-cache",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1744,7 +1744,7 @@
         {
           "id": "kv-cache",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1946,102 +1946,38 @@
       ]
     },
     {
-      "path": "apps/trainer/inference_cache.py",
-      "domain": "storage_state",
-      "surface": "worker",
-      "priority_score": 7,
+      "path": "src/forge-experts.js",
+      "domain": "identity_access",
+      "surface": "core-backend",
+      "priority_score": 5,
       "risk_signals": [
+        "auth_or_tenant_boundary",
         "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "stateful_storage_boundary"
+        "environment_configuration_boundary"
       ],
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
       "category_links": [
         {
-          "id": "kv-cache",
-          "stack_area": "runtime",
+          "id": "moe-distill-quant",
+          "stack_area": "training",
           "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
+          "relation": "required"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: tenant_scoped_cas_storage_retention_and_migration_simulation.",
+      "next_best_action": "Execute the linked frontier track: extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests.",
       "suggested_verification": [
-        "node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js"
+        "npm run verify:auth-boundary-matrix",
+        "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
       ]
     },
     {
-      "path": "src/compile.js",
-      "domain": "compile_artifact_runtime",
+      "path": "src/quantization-oracle.js",
+      "domain": "training_model_optimization",
       "surface": "core-backend",
-      "priority_score": 7,
+      "priority_score": 4,
       "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "network_or_provider_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "kv-cache",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
-      "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
-      ]
-    },
-    {
-      "path": "src/kscore-axis-theory.js",
-      "domain": "compile_artifact_runtime",
-      "surface": "core-backend",
-      "priority_score": 7,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "large_component_contract_risk"
       ],
@@ -2050,206 +1986,128 @@
       ],
       "category_links": [
         {
-          "id": "kv-cache",
-          "stack_area": "runtime",
+          "id": "quantization",
+          "stack_area": "compiler-runtime",
           "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
+          "relation": "required"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
       "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
+        "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
+        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
+        "npm run verify:quant-oracle"
       ]
     },
     {
-      "path": "src/self-synthesis-engine.js",
-      "domain": "compile_artifact_runtime",
+      "path": "apps/trainer/moe_to_dense.py",
+      "domain": "training_model_optimization",
+      "surface": "worker",
+      "priority_score": 3,
+      "risk_signals": [
+        "distribution_or_worker_surface",
+        "execution_or_subprocess_boundary",
+        "stateful_storage_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "moe-distill-quant",
+          "stack_area": "training",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "required"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
+      "suggested_verification": [
+        "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
+        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
+        "npm run verify:quant-oracle"
+      ]
+    },
+    {
+      "path": "src/probe-harness.js",
+      "domain": "platform_support",
       "surface": "core-backend",
-      "priority_score": 7,
+      "priority_score": 3,
       "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "large_component_contract_risk"
+        "cryptographic_or_proof_boundary"
       ],
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
       "category_links": [
         {
+          "id": "quantization",
+          "stack_area": "compiler-runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "required"
+        },
+        {
           "id": "kv-cache",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "required"
         },
         {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
+          "id": "speculative-decoding",
+          "stack_area": "runtime",
           "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
+          "relation": "required"
         },
         {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
+          "id": "agent-security-eval",
+          "stack_area": "enterprise",
           "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
+          "relation": "required"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping.",
       "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
+        "npm run verify:daemon-connector-matrix",
+        "npm run verify:binder-contract-matrix",
+        "npm run verify:intent-contract-matrix",
+        "npm run verify:otel-matrix",
+        "npm run verify:codegraph"
       ]
     },
     {
-      "path": "workers/compile-server/server.mjs",
-      "domain": "compile_artifact_runtime",
-      "surface": "worker",
-      "priority_score": 7,
+      "path": "src/synthetic-data.js",
+      "domain": "capture_data_eval",
+      "surface": "core-backend",
+      "priority_score": 3,
       "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "network_or_provider_boundary"
+        "cryptographic_or_proof_boundary"
       ],
       "perfection_gaps": [
         "linked_frontier_work_open"
       ],
       "category_links": [
         {
-          "id": "kv-cache",
-          "stack_area": "runtime",
+          "id": "synthetic-data-curation",
+          "stack_area": "data",
           "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
+          "relation": "required"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "next_best_action": "Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards.",
       "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
+        "npm run verify:redaction-benchmark",
+        "npm run verify:quality-calibration",
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     },
     {
-      "path": "apps/trainer/backends/lambda_runner.py",
-      "domain": "compile_artifact_runtime",
-      "surface": "worker",
-      "priority_score": 6,
+      "path": "src/export-nvfp4.js",
+      "domain": "platform_support",
+      "surface": "core-backend",
+      "priority_score": 2,
       "risk_signals": [
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "http_route_surface"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "kv-cache",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
-      "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
-      ]
-    },
-    {
-      "path": "apps/trainer/backends/modal_runner.py",
-      "domain": "compile_artifact_runtime",
-      "surface": "worker",
-      "priority_score": 6,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
         "environment_configuration_boundary",
         "execution_or_subprocess_boundary"
       ],
@@ -2258,31 +2116,47 @@
       ],
       "category_links": [
         {
-          "id": "kv-cache",
-          "stack_area": "runtime",
+          "id": "quantization",
+          "stack_area": "compiler-runtime",
           "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
+          "relation": "required"
         }
       ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping.",
       "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
+        "npm run verify:daemon-connector-matrix",
+        "npm run verify:binder-contract-matrix",
+        "npm run verify:intent-contract-matrix",
+        "npm run verify:otel-matrix",
+        "npm run verify:codegraph"
+      ]
+    },
+    {
+      "path": "src/moe-to-dense.js",
+      "domain": "training_model_optimization",
+      "surface": "core-backend",
+      "priority_score": 2,
+      "risk_signals": [
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "moe-distill-quant",
+          "stack_area": "training",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "required"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
+      "suggested_verification": [
+        "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
+        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
+        "npm run verify:quant-oracle"
       ]
     }
   ],
@@ -3369,10 +3243,10 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 40038,
-          "lines": 924,
+          "bytes": 49208,
+          "lines": 1121,
           "imports": 0,
-          "exports": 31,
+          "exports": 34,
           "routes": 0,
           "env_refs": 1,
           "fs_writes": 0,
@@ -3390,7 +3264,7 @@
         ],
         "priority_score": 9,
         "priority_band": "high",
-        "sha256": "f46617ea13de9915cc107ddcbadb88bbba887d6b814ee9163f22e07ac88e93f3"
+        "sha256": "b238349f617ff59e49867308cba576eec824f8cbdfcdd8fd684242462174aad5"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -3399,14 +3273,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1006-runtime-probe-kv-baseline.test.js",
           "tests/wave957-apps-atomic-scope.test.js",
           "tests/wave994-runtime-probe-paired-baseline.test.js",
           "tests/active-redteam.test.js",
           "tests/agent-attestation-report.test.js",
           "tests/agent-audit-ingest.test.js",
           "tests/artifact-end-to-end.test.js",
-          "tests/connector-mcp.test.js",
-          "tests/connector-openai-agents.test.js"
+          "tests/connector-mcp.test.js"
         ],
         "category_links": [
           {
@@ -5922,10 +5796,10 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 56701,
-          "lines": 1287,
+          "bytes": 65954,
+          "lines": 1499,
           "imports": 0,
-          "exports": 50,
+          "exports": 61,
           "routes": 0,
           "env_refs": 33,
           "fs_writes": 1,
@@ -5944,7 +5818,7 @@
         ],
         "priority_score": 8,
         "priority_band": "high",
-        "sha256": "77ad0c522da486886b46578d076dc4dfaddbf9bb8120b9e8b6f59b154c806a54"
+        "sha256": "a6e4ff748a97f1fc7c6b7736da83a0110c2c0e6082b7c201d9595cc107a1c61e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -5953,14 +5827,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1006-runtime-probe-kv-baseline.test.js",
           "tests/wave921-serve-config.test.js",
           "tests/wave957-apps-atomic-scope.test.js",
           "tests/_spawn-helpers.js",
           "tests/active-redteam.test.js",
           "tests/agent-attestation-report.test.js",
           "tests/agent-audit-delta-badge-routes.test.js",
-          "tests/agent-audit-event.test.js",
-          "tests/agent-audit-ingest.test.js"
+          "tests/agent-audit-event.test.js"
         ],
         "category_links": [
           {
@@ -5978,7 +5852,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -6925,7 +6799,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -6951,10 +6825,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "apps/trainer/backends/local.py",
@@ -7129,7 +7001,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -7155,10 +7027,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "apps/trainer/backends/remote_ssh.py",
@@ -7308,7 +7178,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -7322,10 +7192,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "apps/trainer/backends/rocm.py",
@@ -7423,7 +7291,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -7437,10 +7305,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "apps/trainer/backends/together_runner.py",
@@ -7485,7 +7351,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -7499,10 +7365,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "apps/trainer/backends/vast_runner.py",
@@ -8408,7 +8272,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -8424,10 +8288,8 @@
           "node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: tenant_scoped_cas_storage_retention_and_migration_simulation."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep tenant_scoped_cas_storage_retention_and_migration_simulation current."
     },
     {
       "path": "apps/trainer/instant.py",
@@ -17320,7 +17182,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -21672,7 +21534,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -21921,7 +21783,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -21959,10 +21821,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/completions-api.js",
@@ -29079,7 +28939,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -29093,10 +28953,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/dunning.js",
@@ -33319,7 +33177,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -33330,10 +33188,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: closed_loop_routing_outcome_learning_and_verified_cache."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep closed_loop_routing_outcome_learning_and_verified_cache current."
     },
     {
       "path": "src/jobs.js",
@@ -34321,7 +34177,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -34359,10 +34215,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/kscore-bench.js",
@@ -34711,7 +34565,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -34721,10 +34575,8 @@
           "node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: tenant_scoped_cas_storage_retention_and_migration_simulation."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep tenant_scoped_cas_storage_retention_and_migration_simulation current."
     },
     {
       "path": "src/kv-cache-shard.js",
@@ -34768,7 +34620,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -34778,10 +34630,8 @@
           "node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: tenant_scoped_cas_storage_retention_and_migration_simulation."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep tenant_scoped_cas_storage_retention_and_migration_simulation current."
     },
     {
       "path": "src/label-queue.js",
@@ -40334,7 +40184,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           },
           {
@@ -45366,7 +45216,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -45404,10 +45254,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/semantic-cache.js",
@@ -46690,7 +46538,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -50532,7 +50380,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -51228,7 +51076,7 @@
           {
             "id": "kv-cache",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -51266,10 +51114,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "workers/constrained/constrained.mjs",

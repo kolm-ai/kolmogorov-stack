@@ -336,6 +336,19 @@
         "improvement_track": "maintain_generated_otel_matrix_and_privacy_safe_semconv_contract"
       },
       {
+        "path": "apps/export/probe.py",
+        "domain": "platform_support",
+        "priority_score": 9,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "distribution_or_worker_surface",
+          "environment_configuration_boundary",
+          "execution_or_subprocess_boundary",
+          "large_component_contract_risk"
+        ],
+        "improvement_track": "maintain_contract_tests_and_claim_scope_mapping"
+      },
+      {
         "path": "cli/kolm-tui.mjs",
         "domain": "developer_distribution",
         "priority_score": 9,
@@ -360,19 +373,6 @@
           "large_component_contract_risk"
         ],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
-      },
-      {
-        "path": "apps/export/probe.py",
-        "domain": "platform_support",
-        "priority_score": 9,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "distribution_or_worker_surface",
-          "environment_configuration_boundary",
-          "execution_or_subprocess_boundary",
-          "large_component_contract_risk"
-        ],
-        "improvement_track": "maintain_contract_tests_and_claim_scope_mapping"
       },
       {
         "path": "workers/distill/scripts/dedup_pairs.py",
@@ -450,18 +450,6 @@
         "improvement_track": "split_or_add_generated_contract_map_before_growth"
       },
       {
-        "path": "src/cloud-distill.js",
-        "domain": "training_model_optimization",
-        "priority_score": 8,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "environment_configuration_boundary",
-          "large_component_contract_risk",
-          "network_or_provider_boundary"
-        ],
-        "improvement_track": "split_or_add_generated_contract_map_before_growth"
-      },
-      {
         "path": "apps/runtime/serve.py",
         "domain": "compile_artifact_runtime",
         "priority_score": 8,
@@ -472,6 +460,18 @@
           "large_component_contract_risk",
           "network_or_provider_boundary",
           "stateful_storage_boundary"
+        ],
+        "improvement_track": "split_or_add_generated_contract_map_before_growth"
+      },
+      {
+        "path": "src/cloud-distill.js",
+        "domain": "training_model_optimization",
+        "priority_score": 8,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
+          "large_component_contract_risk",
+          "network_or_provider_boundary"
         ],
         "improvement_track": "split_or_add_generated_contract_map_before_growth"
       }
@@ -1807,12 +1807,12 @@
       "surface": "worker",
       "domain": "platform_support",
       "language": "python",
-      "sha256": "f46617ea13de9915cc107ddcbadb88bbba887d6b814ee9163f22e07ac88e93f3",
+      "sha256": "b238349f617ff59e49867308cba576eec824f8cbdfcdd8fd684242462174aad5",
       "metrics": {
-        "bytes": 40038,
-        "lines": 924,
+        "bytes": 49208,
+        "lines": 1121,
         "imports": 0,
-        "exports": 31,
+        "exports": 34,
         "routes": 0,
         "env_refs": 1,
         "fs_writes": 0,
@@ -1822,14 +1822,14 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave1006-runtime-probe-kv-baseline.test.js",
         "tests/wave957-apps-atomic-scope.test.js",
         "tests/wave994-runtime-probe-paired-baseline.test.js",
         "tests/active-redteam.test.js",
         "tests/agent-attestation-report.test.js",
         "tests/agent-audit-ingest.test.js",
         "tests/artifact-end-to-end.test.js",
-        "tests/connector-mcp.test.js",
-        "tests/connector-openai-agents.test.js"
+        "tests/connector-mcp.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -4829,12 +4829,12 @@
       "surface": "worker",
       "domain": "compile_artifact_runtime",
       "language": "python",
-      "sha256": "77ad0c522da486886b46578d076dc4dfaddbf9bb8120b9e8b6f59b154c806a54",
+      "sha256": "a6e4ff748a97f1fc7c6b7736da83a0110c2c0e6082b7c201d9595cc107a1c61e",
       "metrics": {
-        "bytes": 56701,
-        "lines": 1287,
+        "bytes": 65954,
+        "lines": 1499,
         "imports": 0,
-        "exports": 50,
+        "exports": 61,
         "routes": 0,
         "env_refs": 33,
         "fs_writes": 1,
@@ -4844,14 +4844,14 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave1006-runtime-probe-kv-baseline.test.js",
         "tests/wave921-serve-config.test.js",
         "tests/wave957-apps-atomic-scope.test.js",
         "tests/_spawn-helpers.js",
         "tests/active-redteam.test.js",
         "tests/agent-attestation-report.test.js",
         "tests/agent-audit-delta-badge-routes.test.js",
-        "tests/agent-audit-event.test.js",
-        "tests/agent-audit-ingest.test.js"
+        "tests/agent-audit-event.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface",
