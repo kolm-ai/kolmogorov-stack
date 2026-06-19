@@ -9,6 +9,16 @@ railway.toml
 ecosystem.config.cjs
 
 # Heavy dirs that don't need to ship to Vercel runtime
+node_modules/
+.git/
+.github/
+.agent/
+.claude/
+.local-runtime/
+.npm-cache/
+.ruff_cache/
+.vercel/
+.vt/
 tests/
 bench/
 workers/

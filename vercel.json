@@ -943,11 +943,6 @@
       "permanent": true
     },
     {
-      "source": "/studio",
-      "destination": "/platform",
-      "permanent": true
-    },
-    {
       "source": "/sustainability",
       "destination": "/",
       "permanent": true
@@ -1328,11 +1323,6 @@
       "permanent": true
     },
     {
-      "source": "/studio/:path(.+)",
-      "destination": "/platform",
-      "permanent": true
-    },
-    {
       "source": "/training/:path(.+)",
       "destination": "/how-it-works",
       "permanent": true
@@ -1380,6 +1370,14 @@
     {
       "source": "/v1/(.*)",
       "destination": "https://kolmogorov-stack-production.up.railway.app/v1/$1"
+    },
+    {
+      "source": "/studio",
+      "destination": "/studio.html"
+    },
+    {
+      "source": "/studio/:path*",
+      "destination": "/studio.html"
     },
     {
       "source": "/",
