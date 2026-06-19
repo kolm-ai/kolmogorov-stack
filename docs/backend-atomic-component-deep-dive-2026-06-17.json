@@ -9666,14 +9666,14 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "d5c06f29a8b9679f5304d28d206139212cc4c803732e74928c3d0916accbd480",
+      "sha256": "1b67948ec02c4dc4e6ab60baf5007b0a78a060454fec7c1c7dea333aef69c5e1",
       "metrics": {
-        "bytes": 2646777,
-        "lines": 57523,
-        "imports": 545,
+        "bytes": 2653181,
+        "lines": 57699,
+        "imports": 547,
         "exports": 1,
         "routes": 0,
-        "env_refs": 414,
+        "env_refs": 416,
         "fs_writes": 7,
         "subprocess_refs": 168,
         "network_refs": 185,
@@ -48255,7 +48255,8 @@
       },
       "test_refs": [
         "tests/wave608-semantic-routing-live-loop.test.js",
-        "tests/wave921-route-quality-store.test.js"
+        "tests/wave921-route-quality-store.test.js",
+        "tests/wave988-route-training-promotion.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -48298,12 +48299,12 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "537513aa37490ee7a1a8a7580d2e77cec59d4bb04fd33fbba9003740de1fa10e",
+      "sha256": "cbdac0a70cb2ccad0a6ee3e64cb46c600b1c44524c54bab1d84e3e2cb3977fa5",
       "metrics": {
-        "bytes": 8761,
-        "lines": 282,
+        "bytes": 22905,
+        "lines": 661,
         "imports": 3,
-        "exports": 10,
+        "exports": 17,
         "routes": 0,
         "env_refs": 1,
         "fs_writes": 0,
@@ -48313,7 +48314,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave608-semantic-routing-live-loop.test.js"
+        "tests/wave608-semantic-routing-live-loop.test.js",
+        "tests/wave988-route-training-promotion.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary",

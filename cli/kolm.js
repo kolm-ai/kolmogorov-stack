@@ -17044,13 +17044,45 @@ async function cmdRoute(args) {
   if (sub === 'train') {
     return cmdRouteTrain(rest);
   }
+  if (sub === 'retrain') {
+    return cmdRouteRetrain(rest);
+  }
+  if (sub === 'rollback') {
+    return cmdRouteRollback(rest);
+  }
   if (sub !== 'doctor') {
     console.error('unknown route subcommand: ' + (sub || ''));
     console.error('try: kolm route doctor [--profile <name>] [--namespace <ns>] [--tenant <id>] [--json]');
-    console.error('     kolm route train --namespace <ns> [--tenant <id>] [--k N] [--max-rows N] [--activate] [--json]');
+    console.error('     kolm route train --namespace <ns> [--tenant <id>] [--k N] [--max-rows N] [--activate] [--promote] [--json]');
+    console.error('     kolm route retrain [--namespace <ns>] [--tenant <id>] [--dry-run] [--force] [--json]');
+    console.error('     kolm route rollback --namespace <ns> [--tenant <id>] [--reason <text>] [--json]');
     process.exit(EXIT.BAD_ARGS);
   }
   return cmdRouteDoctor(rest);
+}
+
+function routePolicyFromFlags(args) {
+  const flag = (name) => {
+    const eq = args.find((a) => a.startsWith(name + '='));
+    if (eq) return eq.slice(name.length + 1);
+    return pickFlag(args, name);
+  };
+  const out = {};
+  const map = [
+    ['--min-interval-ms', 'min_interval_ms'],
+    ['--max-age-ms', 'max_snapshot_age_ms'],
+    ['--min-rows', 'min_trained_rows'],
+    ['--min-outcomes', 'min_route_quality_outcomes'],
+    ['--min-new-outcomes', 'min_new_quality_outcomes'],
+    ['--min-weight-signals', 'min_route_weight_signals'],
+    ['--min-cells', 'min_cluster_model_cells'],
+  ];
+  for (const [flagName, key] of map) {
+    const v = flag(flagName);
+    if (v != null && v !== '') out[key] = Number(v);
+  }
+  if (args.includes('--disable-policy')) out.enabled = false;
+  return Object.keys(out).length ? out : null;
 }
 
 async function cmdRouteTrain(args) {
@@ -17066,9 +17098,12 @@ async function cmdRouteTrain(args) {
   const kRaw = flag('--k');
   const rowsRaw = flag('--max-rows') || flag('--limit');
   const activate = args.includes('--activate') || args.includes('--enable');
+  const promote = args.includes('--promote') || args.includes('--promotion-gate');
+  const force = args.includes('--force');
   const dryRun = args.includes('--dry-run') || args.includes('--no-write');
   const k = kRaw != null && kRaw !== '' ? Math.max(1, Math.trunc(Number(kRaw))) : 32;
   const max_rows = rowsRaw != null && rowsRaw !== '' ? Math.max(0, Math.trunc(Number(rowsRaw))) : 50_000;
+  const policy = routePolicyFromFlags(args);
 
   const emit = (env, code = 0) => {
     if (wantJson) console.log(JSON.stringify(env, null, 2));
@@ -17080,6 +17115,7 @@ async function cmdRouteTrain(args) {
       console.log('  route_quality_outcomes: ' + (env.route_quality_outcomes || 0));
       console.log('  persisted:              ' + (env.persisted ? 'yes' : 'no'));
       console.log('  activated:              ' + (env.activated ? 'yes' : 'no'));
+      if (env.promotion) console.log('  promotion:              ' + env.promotion.reason + ' (' + (env.promotion.promote ? 'promote' : 'hold') + ')');
       if (env.route_weights) console.log('  route_weights:          ' + JSON.stringify(env.route_weights));
       if (!env.persisted) nextStep({ run: 'kolm route train --namespace ' + env.namespace, see: 'docs/reference/namespace-set.md' });
       else if (!env.activated) nextStep({ run: 'kolm namespace set ' + env.namespace + ' --route-mode cost_quality', see: 'docs/reference/namespace-set.md' });
@@ -17119,6 +17155,30 @@ async function cmdRouteTrain(args) {
   }
 
   try {
+    if (promote) {
+      const promoted = await mod.runRouteRetrainPromotion({
+        tenant,
+        namespace,
+        k,
+        max_rows,
+        activate,
+        force,
+        dry_run: dryRun,
+        policy,
+      });
+      const hasCentroids = !!(promoted && promoted.snapshot && Array.isArray(promoted.snapshot.centroids) && promoted.snapshot.centroids.length);
+      if (!hasCentroids) {
+        return emit({
+          ...promoted,
+          ok: false,
+          error: 'no_training_rows',
+          hint: 'capture gateway traffic for this tenant/namespace, then rerun route train',
+          persisted: false,
+          activated: false,
+        }, EXIT.GATE_FAIL);
+      }
+      return emit(promoted);
+    }
     const env = await mod.buildRouteTrainingSnapshot({ tenant, namespace, k, max_rows });
     const hasCentroids = !!(env && env.snapshot && Array.isArray(env.snapshot.centroids) && env.snapshot.centroids.length);
     if (!hasCentroids) {
@@ -17139,6 +17199,7 @@ async function cmdRouteTrain(args) {
         snapshot: env.snapshot,
         route_weights: env.route_weights,
         activate,
+        policy,
       });
     }
     return emit({
@@ -17153,6 +17214,121 @@ async function cmdRouteTrain(args) {
       error: e && e.code ? e.code : 'route_train_failed',
       detail: e && e.message ? e.message : String(e),
       version: 'w608-route-training-v1',
+    }, EXIT.EXECUTION);
+  }
+}
+
+async function cmdRouteRetrain(args) {
+  if (maybeHelp('route retrain', args)) return;
+  const wantJson = args.includes('--json');
+  const flag = (name) => {
+    const eq = args.find((a) => a.startsWith(name + '='));
+    if (eq) return eq.slice(name.length + 1);
+    return pickFlag(args, name);
+  };
+  const namespace = flag('--namespace') || flag('-n') || null;
+  const tenant = flag('--tenant') || flag('--tenant-id') || process.env.KOLM_TENANT_ID || 'local-tenant';
+  const kRaw = flag('--k');
+  const rowsRaw = flag('--max-rows') || flag('--limit');
+  const k = kRaw != null && kRaw !== '' ? Math.max(1, Math.trunc(Number(kRaw))) : 32;
+  const max_rows = rowsRaw != null && rowsRaw !== '' ? Math.max(0, Math.trunc(Number(rowsRaw))) : 50_000;
+  const dryRun = args.includes('--dry-run') || args.includes('--no-write');
+  const force = args.includes('--force');
+  const activate = !args.includes('--no-activate');
+  const policy = routePolicyFromFlags(args);
+  const emit = (env, code = 0) => {
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else if (env.ok) {
+      console.log('route retrain');
+      console.log('  tenant:    ' + env.tenant);
+      console.log('  scanned:   ' + env.scanned);
+      console.log('  due:       ' + env.due);
+      console.log('  promoted:  ' + env.promoted);
+      console.log('  persisted: ' + env.persisted);
+      if (env.dry_run) console.log('  dry_run:   yes');
+    } else {
+      console.error('route retrain: ' + (env.error || 'failed'));
+      if (env.hint) console.error('  hint: ' + env.hint);
+    }
+    if (code) process.exit(code);
+  };
+  let mod;
+  try { mod = await import('../src/route-training.js'); }
+  catch (e) {
+    return emit({
+      ok: false,
+      error: 'route_training_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w988-route-training-v2',
+    }, EXIT.MISSING_PREREQ);
+  }
+  try {
+    const env = await mod.runDueRouteRetraining({
+      tenant,
+      namespaces: namespace ? [namespace] : null,
+      k,
+      max_rows,
+      activate,
+      force,
+      dry_run: dryRun,
+      policy,
+    });
+    return emit(env);
+  } catch (e) {
+    return emit({
+      ok: false,
+      error: e && e.code ? e.code : 'route_retrain_failed',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w988-route-training-v2',
+    }, EXIT.EXECUTION);
+  }
+}
+
+async function cmdRouteRollback(args) {
+  if (maybeHelp('route rollback', args)) return;
+  const wantJson = args.includes('--json');
+  const flag = (name) => {
+    const eq = args.find((a) => a.startsWith(name + '='));
+    if (eq) return eq.slice(name.length + 1);
+    return pickFlag(args, name);
+  };
+  const namespace = flag('--namespace') || flag('-n') || null;
+  const tenant = flag('--tenant') || flag('--tenant-id') || process.env.KOLM_TENANT_ID || 'local-tenant';
+  const reason = flag('--reason') || 'manual_rollback';
+  const emit = (env, code = 0) => {
+    if (wantJson) console.log(JSON.stringify(env, null, 2));
+    else if (env.ok) {
+      console.log('route rollback');
+      console.log('  tenant:    ' + env.tenant);
+      console.log('  namespace: ' + env.namespace);
+      console.log('  restored:  yes');
+    } else {
+      console.error('route rollback: ' + (env.reason || env.error || 'failed'));
+    }
+    if (code) process.exit(code);
+  };
+  if (!namespace) {
+    return emit({ ok: false, error: 'missing_namespace', hint: 'pass --namespace <slug>' }, EXIT.BAD_ARGS);
+  }
+  let mod;
+  try { mod = await import('../src/route-training.js'); }
+  catch (e) {
+    return emit({
+      ok: false,
+      error: 'route_training_module_missing',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w988-route-training-v2',
+    }, EXIT.MISSING_PREREQ);
+  }
+  try {
+    const env = await mod.rollbackRouteTrainingSnapshot({ tenant, namespace, reason });
+    return emit(env, env.ok ? 0 : EXIT.GATE_FAIL);
+  } catch (e) {
+    return emit({
+      ok: false,
+      error: e && e.code ? e.code : 'route_rollback_failed',
+      detail: e && e.message ? e.message : String(e),
+      version: 'w988-route-training-v2',
     }, EXIT.EXECUTION);
   }
 }

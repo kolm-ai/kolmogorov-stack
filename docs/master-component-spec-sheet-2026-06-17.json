@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2035,
+          "js_family": 2036,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -273,10 +273,10 @@
       "id": "llm-routing",
       "stack_area": "gateway",
       "status": "sota_review_complete_major_frontier_work_open",
-      "already_at_frontier_count": 10,
+      "already_at_frontier_count": 11,
       "improvement_count": 1,
       "critical_gaps": 0,
-      "major_gaps": 2,
+      "major_gaps": 1,
       "minor_gaps": 0,
       "required_components": 3,
       "suggested_verification": [
@@ -10298,12 +10298,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 2646777,
-          "lines": 57523,
-          "imports": 545,
+          "bytes": 2653181,
+          "lines": 57699,
+          "imports": 547,
           "exports": 1,
           "routes": 0,
-          "env_refs": 414,
+          "env_refs": 416,
           "fs_writes": 7,
           "subprocess_refs": 168,
           "network_refs": 185,
@@ -10321,7 +10321,7 @@
         ],
         "priority_score": 11,
         "priority_band": "high",
-        "sha256": "d5c06f29a8b9679f5304d28d206139212cc4c803732e74928c3d0916accbd480"
+        "sha256": "1b67948ec02c4dc4e6ab60baf5007b0a78a060454fec7c1c7dea333aef69c5e1"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -43095,7 +43095,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave608-semantic-routing-live-loop.test.js",
-          "tests/wave921-route-quality-store.test.js"
+          "tests/wave921-route-quality-store.test.js",
+          "tests/wave988-route-training-promotion.test.js"
         ],
         "category_links": [
           {
@@ -43124,10 +43125,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 8761,
-          "lines": 282,
+          "bytes": 22905,
+          "lines": 661,
           "imports": 3,
-          "exports": 10,
+          "exports": 17,
           "routes": 0,
           "env_refs": 1,
           "fs_writes": 0,
@@ -43142,7 +43143,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "537513aa37490ee7a1a8a7580d2e77cec59d4bb04fd33fbba9003740de1fa10e"
+        "sha256": "cbdac0a70cb2ccad0a6ee3e64cb46c600b1c44524c54bab1d84e3e2cb3977fa5"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -43151,7 +43152,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave608-semantic-routing-live-loop.test.js"
+          "tests/wave608-semantic-routing-live-loop.test.js",
+          "tests/wave988-route-training-promotion.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",

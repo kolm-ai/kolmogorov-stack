@@ -54,7 +54,7 @@ test('W939 generated matrix is current and all hard CLI command gates are green'
   assert.equal(m.gates.ok, true, JSON.stringify(m.gates.failures, null, 2));
   assert.deepEqual(m.gates.failures, []);
   assert.equal(m.summary.dispatcher_case_count, 258);
-  assert.equal(m.summary.command_function_count, 331);
+  assert.equal(m.summary.command_function_count, 333);
   assert.equal(m.summary.completion_verb_count, 254);
   assert.equal(m.summary.product_graph_cli_commands, 64);
   assert.equal(m.summary.product_graph_cli_verbs, 40);
@@ -71,6 +71,9 @@ test('W939 generated matrix is current and all hard CLI command gates are green'
 test('W939 matrix captures product graph CLI commands and dispatcher families', () => {
   const m = matrix();
   const cases = new Map(m.dispatcher_cases.map((row) => [row.verb, row]));
+  const commandFunctions = new Set(m.command_functions.map((row) => row.name));
+  assert.ok(commandFunctions.has('cmdRouteRetrain'), 'route retrain handler must be in the CLI command matrix');
+  assert.ok(commandFunctions.has('cmdRouteRollback'), 'route rollback handler must be in the CLI command matrix');
   for (const verb of ['compile', 'run', 'serve', 'cloud', 'compute', 'devices', 'pipeline', 'receipts', 'packages', 'audio', 'video', 'vlm']) {
     assert.ok(cases.has(verb), `dispatcher missing ${verb}`);
     assert.equal(cases.get(verb).in_completion_verbs, true, `${verb} must be in completion verbs`);
