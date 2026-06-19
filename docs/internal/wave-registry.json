@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 413,
+    "orphan_tests": 414,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 416,
+    "state_local_green": 417,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 593,
-    "test_only_waves": 413,
-    "waves": 429
+    "test_files": 594,
+    "test_only_waves": 414,
+    "waves": 430
   },
-  "generated_at": "2026-06-18T23:43:26.604Z",
+  "generated_at": "2026-06-19T00:03:33.034Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -493,7 +493,8 @@
       "W959",
       "W966",
       "W967",
-      "W968"
+      "W968",
+      "W971"
     ],
     "plan_only_waves": [
       "W850",
@@ -915,7 +916,8 @@
       "W959",
       "W966",
       "W967",
-      "W968"
+      "W968",
+      "W971"
     ]
   },
   "schema": "kolm.wave_registry.v1",
@@ -3919,7 +3921,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -4296,7 +4298,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -7977,11 +7979,11 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         },
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8025,7 +8027,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8109,6 +8111,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave968-proven-compute-receipt.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W971",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "research",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js",
+          "script": "npm:verify:distill-strategy"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave971-dp-sgd-trainer.test.js"
       ],
       "test_letter_suffixes": []
     }

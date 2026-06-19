@@ -75,7 +75,7 @@ import math
 import os
 import random
 import sys
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict, field, replace
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
@@ -153,6 +153,19 @@ PROGRESSIVE_VERSION = "w712-v1"
 # produces a deterministic order rather than ValueError-ing the run.
 
 CURRICULUM_VERSION = "w717-v1"
+
+# W971 - DP-SGD fine-tuning path.
+#
+# src/dp-training.js already owns the JS-side DP-SGD/PATE accounting contract
+# and exports KOLM_DP_* env vars for this Python worker. This module now reads
+# the same knobs, prices the same RDP/moments-accountant budget locally, and
+# requires Opacus PrivacyEngine before any DP-SGD run starts. The important
+# honesty boundary: if DP-SGD is requested but Opacus is missing or cannot wrap
+# the trainer, the run fails loud instead of silently training non-DP weights.
+
+DP_TRAINING_VERSION = "finalized-c2-v1"
+DP_ACCOUNTANT = "rdp_moments_v1"
+DP_MECHANISM = "dp_sgd_sampled_gaussian"
 
 # W828-3/-4 — TRACE-AWARE LOSS.
 #
@@ -743,6 +756,253 @@ def _write_importance_run_meta(out_dir: str, meta: dict) -> Optional[str]:
         return None
 
 
+def _env_truthy(name: str, default: bool = False) -> bool:
+    v = os.environ.get(name)
+    if v is None:
+        return bool(default)
+    return str(v).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_float(name: str, default: Optional[float]) -> Optional[float]:
+    v = os.environ.get(name)
+    if v is None or str(v).strip() == "":
+        return default
+    try:
+        return float(v)
+    except ValueError:
+        return default
+
+
+def _env_int(name: str, default: Optional[int]) -> Optional[int]:
+    v = os.environ.get(name)
+    if v is None or str(v).strip() == "":
+        return default
+    try:
+        return int(round(float(v)))
+    except ValueError:
+        return default
+
+
+def _default_rdp_orders() -> list[int]:
+    return list(range(2, 129)) + [160, 192, 224, 256, 320, 384, 512]
+
+
+def _log_sum_exp(logs: Iterable[float]) -> float:
+    vals = list(logs)
+    if not vals:
+        return -math.inf
+    m = max(vals)
+    if not math.isfinite(m):
+        return m
+    return m + math.log(sum(math.exp(v - m) for v in vals))
+
+
+def _sgm_rdp_at_order(q: float, sigma: float, alpha: int) -> float:
+    """Integer-order RDP upper bound for the sampled Gaussian mechanism."""
+    if sigma <= 0:
+        return math.inf
+    if q <= 0:
+        return 0.0
+    if q >= 1:
+        return float(alpha) / (2.0 * sigma * sigma)
+    a = int(round(alpha))
+    if a < 2:
+        return 0.0
+    log1mq = math.log1p(-q)
+    logq = math.log(q)
+    sig2 = sigma * sigma
+    terms = []
+    for k in range(a + 1):
+        log_comb = math.lgamma(a + 1) - math.lgamma(k + 1) - math.lgamma(a - k + 1)
+        log_prob = (a - k) * log1mq + k * logq
+        gauss_term = (k * k - k) / (2.0 * sig2)
+        terms.append(log_comb + log_prob + gauss_term)
+    return _log_sum_exp(terms) / (a - 1)
+
+
+def compute_dp_sgd_budget(
+    *,
+    noise_multiplier: float,
+    sample_rate: float,
+    steps: int,
+    delta: float = 1e-5,
+    orders: Optional[Iterable[int]] = None,
+) -> dict[str, Any]:
+    """Return the conservative (epsilon, delta) DP-SGD budget for a run."""
+    sigma = float(noise_multiplier)
+    q = float(sample_rate)
+    t = int(round(steps))
+    d = float(delta)
+    if not (0 <= q <= 1):
+        raise ValueError("sample_rate must be in [0,1]")
+    if t < 0:
+        raise ValueError("steps must be a non-negative integer")
+    if not (0 < d < 1):
+        raise ValueError("delta must be in (0,1)")
+    if not math.isfinite(sigma) or sigma <= 0:
+        return {
+            "epsilon": math.inf,
+            "delta": d,
+            "noise_multiplier": sigma if math.isfinite(sigma) else 0.0,
+            "sample_rate": q,
+            "steps": t,
+            "dp_effective": False,
+            "mechanism": DP_MECHANISM,
+            "accountant": DP_ACCOUNTANT,
+            "note": "noise_multiplier<=0: no calibrated noise added, epsilon is infinite.",
+            "version": DP_TRAINING_VERSION,
+        }
+    best_eps = math.inf
+    best_order = None
+    scanned = list(orders or _default_rdp_orders())
+    for alpha in scanned:
+        a = int(alpha)
+        rdp_total = _sgm_rdp_at_order(q, sigma, a) * t
+        eps = (
+            rdp_total
+            + math.log((a - 1) / a)
+            - (math.log(d) + math.log(a)) / (a - 1)
+        )
+        if math.isfinite(eps) and eps < best_eps:
+            best_eps = eps
+            best_order = a
+    return {
+        "epsilon": best_eps,
+        "delta": d,
+        "optimal_order": best_order,
+        "noise_multiplier": sigma,
+        "sample_rate": q,
+        "steps": t,
+        "dp_effective": True,
+        "mechanism": DP_MECHANISM,
+        "accountant": DP_ACCOUNTANT,
+        "orders_scanned": len(scanned),
+        "version": DP_TRAINING_VERSION,
+    }
+
+
+def _json_epsilon(value: Any) -> Any:
+    try:
+        v = float(value)
+    except (TypeError, ValueError):
+        return value
+    return "Infinity" if math.isinf(v) else v
+
+
+def _build_privacy_budget_block(
+    *,
+    path: str = "none",
+    budget: Optional[dict[str, Any]] = None,
+    teacher_source: Optional[str] = None,
+    region: Optional[str] = None,
+    cross_region: Optional[bool] = None,
+    l2_clip: Optional[float] = None,
+    implementation: Optional[str] = None,
+) -> dict[str, Any]:
+    base = {
+        "privacy_path": path,
+        "teacher_source": teacher_source,
+        "region": region,
+        "accountant": DP_ACCOUNTANT,
+        "version": DP_TRAINING_VERSION,
+    }
+    if path == "none" or not budget:
+        return {
+            **base,
+            "privacy_path": "none",
+            "dp_effective": False,
+            "epsilon": None,
+            "delta": None,
+            "note": "No differential-privacy training path was applied to this artifact.",
+        }
+    eps = float(budget.get("epsilon", math.inf))
+    block = {
+        **base,
+        "dp_effective": bool(budget.get("dp_effective") is not False and not math.isinf(eps)),
+        "epsilon": _json_epsilon(eps),
+        "delta": budget.get("delta"),
+        "mechanism": budget.get("mechanism"),
+        "noise_multiplier": budget.get("noise_multiplier"),
+        "sample_rate": budget.get("sample_rate"),
+        "steps": budget.get("steps"),
+        "n_queries": budget.get("n_queries"),
+        "optimal_order": budget.get("optimal_order"),
+        "region_allocation": None,
+        "cross_region": cross_region,
+    }
+    if l2_clip is not None:
+        block["l2_clip"] = float(l2_clip)
+    if implementation:
+        block["implementation"] = implementation
+    if budget.get("note"):
+        block["note"] = budget.get("note")
+    if budget.get("opacus_epsilon") is not None:
+        block["opacus_epsilon"] = _json_epsilon(budget.get("opacus_epsilon"))
+    return block
+
+
+def _dp_sample_rate(cfg: "DistillConfig", n_train: int) -> tuple[float, str]:
+    if cfg.dp_sample_rate is not None:
+        return float(cfg.dp_sample_rate), "config"
+    if n_train <= 0:
+        return 0.0, "empty_train_set"
+    physical_batch = max(1, min(int(cfg.batch_size), int(n_train)))
+    return min(1.0, physical_batch / float(n_train)), "batch_size_over_n_train"
+
+
+def _estimate_optimizer_steps(cfg: "DistillConfig", n_train: int) -> int:
+    if cfg.dp_steps is not None:
+        return max(0, int(cfg.dp_steps))
+    if n_train <= 0:
+        return 0
+    physical_batch = max(1, int(cfg.batch_size))
+    batches_per_epoch = max(1, math.ceil(n_train / physical_batch))
+    accum = 1 if cfg.dp_sgd else max(1, int(cfg.grad_accum))
+    return int(math.ceil(batches_per_epoch / accum) * max(1, int(cfg.num_epochs)))
+
+
+def _validate_dp_config(cfg: "DistillConfig") -> None:
+    if not cfg.dp_sgd:
+        return
+    if not (float(cfg.dp_l2_clip) > 0):
+        raise ValueError("distill.py: --dp-l2-clip must be > 0")
+    if not (float(cfg.dp_noise_multiplier) > 0):
+        raise ValueError(
+            "distill.py: DP-SGD requested but dp_noise_multiplier must be > 0 "
+            "to provide a finite privacy guarantee"
+        )
+    if not (0 < float(cfg.dp_delta) < 1):
+        raise ValueError("distill.py: --dp-delta must be in (0,1)")
+    if cfg.dp_sample_rate is not None and not (0 < float(cfg.dp_sample_rate) <= 1):
+        raise ValueError("distill.py: --dp-sample-rate must be in (0,1]")
+    if cfg.dp_steps is not None and int(cfg.dp_steps) < 0:
+        raise ValueError("distill.py: --dp-steps must be >= 0")
+
+
+def _write_dp_run_meta(out_dir: str, meta: dict) -> Optional[str]:
+    try:
+        os.makedirs(out_dir, exist_ok=True)
+        p = os.path.join(out_dir, "run-meta.dp.json")
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(meta, f, indent=2, sort_keys=True)
+        return p
+    except OSError as e:
+        print(f"distill.py: could not write run-meta.dp.json: {e}", file=sys.stderr)
+        return None
+
+
+def _require_opacus_privacy_engine():
+    try:
+        from opacus import PrivacyEngine  # type: ignore
+    except ImportError as e:
+        raise RuntimeError(
+            "distill.py: DP-SGD requested (KOLM_DP_SGD=1 or --dp-sgd) but "
+            "Opacus is not installed. Install with: pip install 'opacus>=1.4'. "
+            "The trainer refuses to run without real DP-SGD."
+        ) from e
+    return PrivacyEngine
+
+
 class KDObjective(str, enum.Enum):
     """Which divergence to minimize between student and teacher."""
     FORWARD_KL = "forward_kl"
@@ -814,6 +1074,16 @@ class DistillConfig:
     bf16: bool = True
     save_steps: int = 200
     eval_split: float = 0.05
+
+    dp_sgd: bool = False
+    """If True, run the student update under Opacus DP-SGD. This is fail-loud:
+    missing Opacus or invalid noise/clip settings abort before model download."""
+
+    dp_l2_clip: float = 1.0
+    dp_noise_multiplier: float = 0.0
+    dp_delta: float = 1e-5
+    dp_sample_rate: Optional[float] = None
+    dp_steps: Optional[int] = None
 
 
 # -- Loss functions. Each one takes student_logits and teacher_logits at the
@@ -1109,6 +1379,9 @@ class DistillSession:
     _importance_weights: dict = field(default_factory=dict)
     _train_rows: Any = None
     _out_dir: Optional[str] = None
+    _dp_meta: dict = field(default_factory=dict)
+    _dp_meta_path: Optional[str] = None
+    _dp_privacy_engine: Any = None
     # W921-NEXT4: MoE-student metadata. When the student is dense these stay at
     # their defaults and train() omits the moe:{...} block entirely (dense path
     # surface is unchanged). _moe_aux_ref is the mutable container compute_loss
@@ -1127,6 +1400,9 @@ class DistillSession:
             "loss_final": float(result.training_loss) if result.training_loss is not None else None,
             "global_step": int(result.global_step),
         }
+        dp_budget = self._finalize_dp_budget(summary["global_step"])
+        if dp_budget is not None:
+            summary["privacy_budget"] = dp_budget
         try:
             metrics = self._trainer.evaluate()
             summary["ppl_eval"] = float(math.exp(metrics["eval_loss"])) if "eval_loss" in metrics else None
@@ -1164,6 +1440,54 @@ class DistillSession:
                 "moe_version": MOE_VERSION,
             }
         return summary
+
+    def _finalize_dp_budget(self, observed_steps: int) -> Optional[dict[str, Any]]:
+        if not self.config.dp_sgd:
+            return None
+        q, q_source = _dp_sample_rate(self.config, self.n_train)
+        steps = max(0, int(observed_steps))
+        budget = compute_dp_sgd_budget(
+            noise_multiplier=float(self.config.dp_noise_multiplier),
+            sample_rate=q,
+            steps=steps,
+            delta=float(self.config.dp_delta),
+        )
+        engine = self._dp_privacy_engine
+        opacus_eps = None
+        if engine is not None and hasattr(engine, "get_epsilon"):
+            try:
+                opacus_eps = float(engine.get_epsilon(float(self.config.dp_delta)))
+            except Exception:
+                opacus_eps = None
+        if opacus_eps is not None:
+            budget["opacus_epsilon"] = opacus_eps
+            local_eps = float(budget.get("epsilon", math.inf))
+            if math.isfinite(opacus_eps) and opacus_eps > local_eps:
+                budget["epsilon"] = opacus_eps
+                budget["note"] = (
+                    "Opacus observed epsilon exceeded the local integer-order "
+                    "accountant; stamped the larger privacy spend."
+                )
+        block = _build_privacy_budget_block(
+            path="dp_sgd",
+            budget=budget,
+            l2_clip=float(self.config.dp_l2_clip),
+            implementation="opacus_privacy_engine",
+        )
+        block["sample_rate_source"] = q_source
+        block["requested_steps"] = self._dp_meta.get("requested_steps")
+        block["observed_steps"] = steps
+        block["grad_accum_effective"] = int(self.config.grad_accum)
+        existing = dict(self._dp_meta or {})
+        existing["privacy_budget"] = block
+        existing["observed_steps"] = steps
+        if self._dp_meta_path:
+            try:
+                with open(self._dp_meta_path, "w", encoding="utf-8") as f:
+                    json.dump(existing, f, indent=2, sort_keys=True)
+            except OSError as e:
+                print(f"distill.py: could not finalize run-meta.dp.json: {e}", file=sys.stderr)
+        return block
 
     def _compute_importance_feedback(self, summary: dict) -> Optional[dict]:
         """Estimate the loss with vs. without importance weighting.
@@ -1345,6 +1669,18 @@ def distill_trainer(
         ) from e
 
     cfg = config or DistillConfig()
+    if cfg.dp_sgd and cfg.grad_accum != 1:
+        # Opacus accounts physical private batches. HF gradient accumulation
+        # would change the realized mechanism, so DP-SGD forces the effective
+        # accumulation to 1 and records that in the config/receipt.
+        cfg = replace(cfg, grad_accum=1)
+    _validate_dp_config(cfg)
+    PrivacyEngine = _require_opacus_privacy_engine() if cfg.dp_sgd else None
+    if cfg.dp_sgd and (importance_weights_path or curriculum):
+        raise ValueError(
+            "distill.py: DP-SGD uses Opacus' private sampler; disable "
+            "--importance-weights and --curriculum for this run."
+        )
     torch.manual_seed(cfg.seed)
 
     teacher_tok = AutoTokenizer.from_pretrained(teacher_model, use_fast=True)
@@ -1508,6 +1844,12 @@ def distill_trainer(
     _moe_aux_last = {"value": None}
 
     class _DistillTrainer(Trainer):
+        def get_train_dataloader(self):
+            dp_loader = getattr(self, "_kolm_dp_train_dataloader", None)
+            if dp_loader is not None:
+                return dp_loader
+            return super().get_train_dataloader()
+
         def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
             labels = inputs.pop("labels")
             input_ids = inputs["input_ids"]
@@ -1673,6 +2015,58 @@ def distill_trainer(
             data_collator=collator,
         )
 
+    dp_privacy_engine = None
+    dp_meta: dict[str, Any] = {
+        "dp_sgd_requested": bool(cfg.dp_sgd),
+        "dp_training_version": DP_TRAINING_VERSION,
+    }
+    dp_meta_path: Optional[str] = None
+    if cfg.dp_sgd:
+        q, q_source = _dp_sample_rate(cfg, len(rows))
+        requested_steps = _estimate_optimizer_steps(cfg, len(rows))
+        requested_budget = compute_dp_sgd_budget(
+            noise_multiplier=float(cfg.dp_noise_multiplier),
+            sample_rate=q,
+            steps=requested_steps,
+            delta=float(cfg.dp_delta),
+        )
+        dp_meta.update({
+            "implementation": "opacus_privacy_engine",
+            "sample_rate": q,
+            "sample_rate_source": q_source,
+            "requested_steps": requested_steps,
+            "noise_multiplier": float(cfg.dp_noise_multiplier),
+            "l2_clip": float(cfg.dp_l2_clip),
+            "delta": float(cfg.dp_delta),
+            "requested_privacy_budget": _build_privacy_budget_block(
+                path="dp_sgd",
+                budget=requested_budget,
+                l2_clip=float(cfg.dp_l2_clip),
+                implementation="opacus_privacy_engine",
+            ),
+        })
+        dp_meta_path = _write_dp_run_meta(out_dir, dp_meta)
+        try:
+            trainer.create_optimizer()
+            base_loader = trainer.get_train_dataloader()
+            dp_privacy_engine = PrivacyEngine(accountant="rdp")
+            private_model, private_optimizer, private_loader = dp_privacy_engine.make_private(
+                module=trainer.model,
+                optimizer=trainer.optimizer,
+                data_loader=base_loader,
+                noise_multiplier=float(cfg.dp_noise_multiplier),
+                max_grad_norm=float(cfg.dp_l2_clip),
+            )
+            trainer.model = private_model
+            trainer.model_wrapped = private_model
+            trainer.optimizer = private_optimizer
+            trainer._kolm_dp_train_dataloader = private_loader
+        except Exception as e:
+            raise RuntimeError(
+                "distill.py: DP-SGD requested but Opacus could not wrap the "
+                f"trainer: {e}. Refusing to continue without real DP-SGD."
+            ) from e
+
     # Stamp run-meta.importance.json now (pre-train) so the path is recoverable
     # even if training crashes; the feedback block is appended post-train.
     importance_meta_path = _write_importance_run_meta(out_dir, importance_meta)
@@ -1714,6 +2108,9 @@ def distill_trainer(
         _importance_weights=importance_weights,
         _train_rows=rows,
         _out_dir=out_dir,
+        _dp_meta=dp_meta,
+        _dp_meta_path=dp_meta_path,
+        _dp_privacy_engine=dp_privacy_engine,
         # W921-NEXT4: thread MoE-student metadata + the mutable aux container
         # so train() can surface moe:{...} (dense students leave these default).
         _moe_is_moe=_moe_on,
@@ -1793,6 +2190,9 @@ def receipt_block(session: DistillSession, train_summary: dict) -> dict:
             "arXiv:1701.06538",  # Shazeer 2017 — sparsely-gated MoE + load balance
             "arXiv:2101.03961",  # Fedus 2021 — Switch Transformer aux loss
         ]
+    privacy_budget = train_summary.get("privacy_budget")
+    if privacy_budget:
+        block["privacy_budget"] = privacy_budget
     return block
 
 
@@ -1802,6 +2202,8 @@ __all__ = [
     "KDObjective",
     "distill_trainer",
     "receipt_block",
+    "compute_dp_sgd_budget",
+    "DP_TRAINING_VERSION",
     # W828-3 — trace-aware loss exposed so a worker harness can call the
     # primitive directly without invoking the full trainer (the bench scaffold
     # bench_trace_aware.py uses this path).
@@ -1813,6 +2215,66 @@ __all__ = [
     "MOE_VERSION",
     "MOE_DEFAULT_ROUTER_AUX_LOSS_COEF",
 ]
+
+
+def _self_test_dp() -> dict[str, Any]:
+    checks: list[dict[str, Any]] = []
+
+    def _check(name: str, cond: bool, detail: str = "") -> None:
+        checks.append({"name": name, "pass": bool(cond), "detail": detail})
+        assert cond, f"dp self-test FAILED: {name} ({detail})"
+
+    ref = compute_dp_sgd_budget(
+        noise_multiplier=1.1,
+        sample_rate=0.01,
+        steps=1000,
+        delta=1e-5,
+    )
+    _check(
+        "reference_epsilon_conservative",
+        1.0 < float(ref["epsilon"]) < 2.2,
+        f"epsilon={ref['epsilon']}",
+    )
+    low_noise = compute_dp_sgd_budget(
+        noise_multiplier=0.7, sample_rate=0.01, steps=1000, delta=1e-5,
+    )
+    high_noise = compute_dp_sgd_budget(
+        noise_multiplier=2.0, sample_rate=0.01, steps=1000, delta=1e-5,
+    )
+    _check(
+        "epsilon_monotone_noise",
+        float(high_noise["epsilon"]) < float(low_noise["epsilon"]),
+        f"low={low_noise['epsilon']} high={high_noise['epsilon']}",
+    )
+    few = compute_dp_sgd_budget(
+        noise_multiplier=1.1, sample_rate=0.01, steps=100, delta=1e-5,
+    )
+    many = compute_dp_sgd_budget(
+        noise_multiplier=1.1, sample_rate=0.01, steps=10000, delta=1e-5,
+    )
+    _check(
+        "epsilon_monotone_steps",
+        float(many["epsilon"]) > float(few["epsilon"]),
+        f"few={few['epsilon']} many={many['epsilon']}",
+    )
+    zero = compute_dp_sgd_budget(
+        noise_multiplier=0, sample_rate=0.01, steps=10, delta=1e-5,
+    )
+    zero_block = _build_privacy_budget_block(path="dp_sgd", budget=zero, l2_clip=1.0)
+    _check("zero_noise_not_effective", zero_block["dp_effective"] is False)
+    _check("infinity_serializes", zero_block["epsilon"] == "Infinity")
+    roundtrip = json.loads(json.dumps(
+        _build_privacy_budget_block(path="dp_sgd", budget=ref, l2_clip=1.0)
+    ))
+    _check("privacy_block_json_roundtrip", roundtrip["version"] == DP_TRAINING_VERSION)
+    return {
+        "ok": True,
+        "dp_training_version": DP_TRAINING_VERSION,
+        "accountant": DP_ACCOUNTANT,
+        "reference_epsilon": ref["epsilon"],
+        "checks": checks,
+        "n_checks": len(checks),
+    }
 
 
 def _self_test_moe() -> dict[str, Any]:
@@ -1981,6 +2443,8 @@ def _build_argparser() -> argparse.ArgumentParser:
                    help="KD divergence to minimize.")
     p.add_argument("--num-epochs", type=int, default=DistillConfig.num_epochs)
     p.add_argument("--batch-size", type=int, default=DistillConfig.batch_size)
+    p.add_argument("--grad-accum", type=int, default=DistillConfig.grad_accum,
+                   help="Gradient accumulation steps. DP-SGD forces the effective value to 1.")
     p.add_argument("--learning-rate", type=float, default=DistillConfig.learning_rate)
     p.add_argument("--lora-r", type=int, default=DistillConfig.lora_r)
     p.add_argument("--lora-alpha", type=int, default=DistillConfig.lora_alpha)
@@ -1993,6 +2457,35 @@ def _build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--self-test-moe", dest="self_test_moe", action="store_true",
                    help="Run the synthetic MoE load-balancing self-test (no torch model "
                         "download, no network) and exit. Exit 0 pass / 5 fail.")
+    p.add_argument("--self-test-dp", dest="self_test_dp", action="store_true",
+                   help="Run the synthetic DP-SGD accountant self-test (no model download, "
+                        "no Opacus import) and exit. Exit 0 pass / 5 fail.")
+    p.set_defaults(dp_sgd=_env_truthy("KOLM_DP_SGD", False))
+    p.add_argument("--dp-sgd", dest="dp_sgd", action="store_true",
+                   help="Enable Opacus DP-SGD for the student trainer. Fails loud if Opacus "
+                        "is unavailable or the DP knobs are invalid. Also enabled by "
+                        "KOLM_DP_SGD=1.")
+    p.add_argument("--no-dp-sgd", dest="dp_sgd", action="store_false",
+                   help="Disable DP-SGD even if KOLM_DP_SGD is set.")
+    p.add_argument("--dp-l2-clip", dest="dp_l2_clip", type=float,
+                   default=_env_float("KOLM_DP_L2_CLIP", DistillConfig.dp_l2_clip),
+                   help="DP-SGD per-example L2 clipping norm. Env: KOLM_DP_L2_CLIP.")
+    p.add_argument("--dp-noise-multiplier", dest="dp_noise_multiplier", type=float,
+                   default=_env_float("KOLM_DP_NOISE_MULTIPLIER", DistillConfig.dp_noise_multiplier),
+                   help="DP-SGD Gaussian noise multiplier. Must be >0 when DP is enabled. "
+                        "Env: KOLM_DP_NOISE_MULTIPLIER.")
+    p.add_argument("--dp-delta", dest="dp_delta", type=float,
+                   default=_env_float("KOLM_DP_DELTA", DistillConfig.dp_delta),
+                   help="Target DP delta. Env: KOLM_DP_DELTA.")
+    p.add_argument("--dp-sample-rate", dest="dp_sample_rate", type=float,
+                   default=_env_float("KOLM_DP_SAMPLE_RATE", DistillConfig.dp_sample_rate),
+                   help="Override DP sample rate q. Defaults to batch_size/n_train. "
+                        "Env: KOLM_DP_SAMPLE_RATE.")
+    p.add_argument("--dp-steps", dest="dp_steps", type=int,
+                   default=_env_int("KOLM_DP_STEPS", DistillConfig.dp_steps),
+                   help="Override requested DP optimizer steps for pre-run accounting. "
+                        "The final receipt reconciles against observed global_step. "
+                        "Env: KOLM_DP_STEPS.")
     # W711-2: importance-weighted sampling. JSONL produced by
     # src/capture-importance.js (one row per capture: {capture_id, importance}).
     # When omitted, sampling is uniform (existing behavior preserved verbatim).
@@ -2055,9 +2548,16 @@ def _config_from_args(args: argparse.Namespace) -> DistillConfig:
         lora_alpha=args.lora_alpha,
         max_length=args.max_length,
         batch_size=args.batch_size,
+        grad_accum=args.grad_accum,
         num_epochs=args.num_epochs,
         seed=args.seed,
         eval_split=args.eval_split,
+        dp_sgd=bool(args.dp_sgd),
+        dp_l2_clip=args.dp_l2_clip,
+        dp_noise_multiplier=args.dp_noise_multiplier,
+        dp_delta=args.dp_delta,
+        dp_sample_rate=args.dp_sample_rate,
+        dp_steps=args.dp_steps,
     )
 
 
@@ -2076,7 +2576,26 @@ def main(argv: Optional[list[str]] = None) -> int:
             return 5
         print(json.dumps(env, indent=2))
         return 0 if env.get("ok") else 5
+    if getattr(args, "self_test_dp", False):
+        try:
+            env = _self_test_dp()
+        except AssertionError as e:
+            print(json.dumps(
+                {"ok": False, "error": "self_test_dp_failed", "detail": str(e),
+                 "dp_training_version": DP_TRAINING_VERSION},
+                indent=2,
+            ))
+            return 5
+        print(json.dumps(env, indent=2))
+        return 0 if env.get("ok") else 5
     cfg = _config_from_args(args)
+    if cfg.dp_sgd and cfg.grad_accum != 1:
+        cfg = replace(cfg, grad_accum=1)
+    try:
+        _validate_dp_config(cfg)
+    except ValueError as e:
+        print(str(e), file=sys.stderr)
+        return 2
     if args.print_config:
         cfg_dict = asdict(cfg)
         cfg_dict["objective"] = cfg.objective.value
