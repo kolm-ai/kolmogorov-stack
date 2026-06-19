@@ -9,7 +9,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { methodAvailability, quantizationOracleCatalog, rankQuantizationStrategies } from '../src/quantization-oracle.js';
+import {
+  buildMoeQuantCalibrationProfile,
+  methodAvailability,
+  quantizationOracleCatalog,
+  rankQuantizationStrategies,
+} from '../src/quantization-oracle.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..');
@@ -227,4 +232,57 @@ test('7. MoE input routes to router-fp16 advisory policy and names external expe
   assert.ok(mc.warnings.includes('requires_external_research_repo'));
   assert.equal(mc.warnings.includes('external_runner_not_wired'), false);
   assert.ok(mc.warnings.some((w) => w.includes('KOLM_ENABLE_EXPERIMENTAL_QUANTS')));
+});
+
+test('8. MoE quant quality estimates can be calibrated from measured receipts', () => {
+  const receipt = 'a'.repeat(64);
+  const calibration = buildMoeQuantCalibrationProfile([
+    {
+      method: 'moe_mixed_policy',
+      baseline_kscore: 0.92,
+      quantized_kscore: 0.89,
+      receipt_sha256: receipt,
+      moe_family: 'mixtral-8x7b',
+    },
+    {
+      method: 'moe_mixed_policy',
+      quality_loss: 0.02,
+      receipt_sha256: 'not-a-sha',
+    },
+  ]);
+  assert.equal(calibration.source, 'measured_moe_calibration');
+  assert.equal(calibration.by_method.moe_mixed_policy.quality_loss, 0.0255);
+  assert.deepEqual(calibration.by_method.moe_mixed_policy.receipt_sha256, [receipt]);
+
+  const plan = rankQuantizationStrategies({
+    task: 'chat',
+    runtime: 'vllm',
+    memory_gb: 24,
+    params_b: 47,
+    context_tokens: 8192,
+    calibration_rows: 256,
+    moe_info: {
+      is_moe: true,
+      family: 'mixtral-8x7b',
+      num_experts: 8,
+      experts_per_token: 2,
+      params: 47,
+    },
+    moe_calibration_rows: [
+      {
+        method: 'moe_mixed_policy',
+        baseline_kscore: 0.92,
+        quantized_kscore: 0.89,
+        receipt_sha256: receipt,
+        moe_family: 'mixtral-8x7b',
+      },
+    ],
+  });
+  const primary = plan.recommendation.primary;
+  assert.equal(primary.method, 'moe_mixed_policy');
+  assert.equal(primary.estimates.quality_loss_source, 'measured_moe_calibration');
+  assert.equal(primary.estimates.quality_loss_prior, 0.03);
+  assert.equal(primary.estimates.quality_loss_band.row_count, 1);
+  assert.deepEqual(primary.estimates.quality_loss_band.receipt_sha256, [receipt]);
+  assert.equal(plan.recommendation.moe_quantization.calibration.row_count, 1);
 });

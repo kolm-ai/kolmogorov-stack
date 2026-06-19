@@ -26,7 +26,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | Category | Area | Status | Frontier | Required Components | Verification |
 | --- | --- | --- | --- | --- | --- |
 | distillation | training | sota_review_complete_local_frontier_aligned | at=14 open=0/0/0 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
-| moe-distill-quant | training | sota_review_complete_local_frontier_aligned | at=11 open=0/0/1 | 6 | npm run verify:stack-sota<br>npm run verify:inventions |
+| moe-distill-quant | training | sota_review_complete_local_frontier_aligned | at=12 open=0/0/0 | 6 | npm run verify:stack-sota<br>npm run verify:inventions |
 | quantization | compiler-runtime | sota_review_complete_external_or_release_gate_open | at=16 open=0/0/0 | 4 | npm run verify:stack-sota<br>npm run verify:quant-oracle |
 | kv-cache | runtime | sota_review_complete_external_or_release_gate_open | at=9 open=0/0/0 | 4 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | speculative-decoding | runtime | sota_review_complete_external_or_release_gate_open | at=9 open=0/0/0 | 5 | npm run verify:stack-sota<br>npm run verify:surfaces |

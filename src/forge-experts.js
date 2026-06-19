@@ -85,6 +85,65 @@ function _round3(value) {
   return Math.round(value * 1000) / 1000;
 }
 
+function _finiteNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function _activationShareFromRow(row) {
+  const explicit = _finiteNumber(row?.pruned_activation_share ?? row?.activation_share ?? row?.pruned_pct_sum);
+  if (explicit != null) return explicit > 1 ? explicit / 100 : explicit;
+  const prunedPct = Array.isArray(row?.prune_candidates)
+    ? row.prune_candidates.reduce((sum, candidate) => sum + (Number(candidate?.pct) || 0), 0)
+    : null;
+  return prunedPct == null ? null : prunedPct / 100;
+}
+
+function _impactFromRow(row) {
+  const explicit = _finiteNumber(row?.actual_kscore_impact ?? row?.kscore_impact ?? row?.quality_loss);
+  if (explicit != null) return Math.max(0, explicit);
+  const baseline = _finiteNumber(row?.baseline_kscore ?? row?.baseline_quality);
+  const pruned = _finiteNumber(row?.pruned_kscore ?? row?.candidate_kscore ?? row?.measured_kscore);
+  if (baseline == null || pruned == null) return null;
+  return Math.max(0, baseline - pruned);
+}
+
+export function buildPruneImpactCalibrationProfile(rows = []) {
+  const list = Array.isArray(rows) ? rows : [];
+  const factors = [];
+  const impacts = [];
+  const receipts = [];
+  for (const row of list) {
+    const share = _activationShareFromRow(row);
+    const impact = _impactFromRow(row);
+    if (share == null || share <= 0 || impact == null) continue;
+    factors.push(Math.max(0, impact / share));
+    impacts.push(impact);
+    if (typeof row.receipt_sha256 === 'string' && HEX_RE.test(row.receipt_sha256)) receipts.push(row.receipt_sha256);
+  }
+  if (!factors.length) {
+    return Object.freeze({
+      source: 'heuristic_default',
+      row_count: 0,
+      impact_factor: 1.5,
+      impact_cap: 0.05,
+      receipt_sha256: [],
+    });
+  }
+  factors.sort((a, b) => a - b);
+  impacts.sort((a, b) => a - b);
+  const median = factors[Math.floor(factors.length / 2)];
+  const maxImpact = impacts[impacts.length - 1];
+  return Object.freeze({
+    source: 'measured_prune_calibration',
+    row_count: factors.length,
+    impact_factor: _round3(Math.max(0.01, Math.min(5, median))),
+    impact_cap: _round3(Math.max(0.01, Math.min(0.25, maxImpact * 1.1))),
+    observed_impact_max: _round3(maxImpact),
+    receipt_sha256: receipts.slice(0, 8),
+  });
+}
+
 function _canonicalize(value) {
   if (Array.isArray(value)) return value.map((v) => _canonicalize(v));
   if (value && typeof value === 'object') {
@@ -406,7 +465,13 @@ export async function analyzeExperts(artifactPath, opts = {}) {
   const prune_candidates = expert_activations.filter((row) => (row.pct / 100) < threshold);
   const pruned_size_pct_reduction = _round2((prune_candidates.length / numExperts) * 0.55 * 100);
   const prunedPctSum = prune_candidates.reduce((sum, row) => sum + row.pct, 0);
-  const estimated_kscore_impact = Math.min(_round3((prunedPctSum / 100) * 1.5), 0.05);
+  const calibration = buildPruneImpactCalibrationProfile(
+    opts.prune_calibration_rows ?? opts.pruneCalibrationRows ?? opts.moe_prune_calibration_rows ?? [],
+  );
+  const estimated_kscore_impact = Math.min(
+    _round3((prunedPctSum / 100) * calibration.impact_factor),
+    calibration.impact_cap,
+  );
 
   return _withAnalysisHash({
     is_moe: true,
@@ -418,6 +483,8 @@ export async function analyzeExperts(artifactPath, opts = {}) {
     prune_threshold: threshold,
     pruned_size_pct_reduction,
     estimated_kscore_impact,
+    estimated_kscore_impact_source: calibration.source,
+    prune_impact_calibration: calibration,
     source: 'cached_router_decisions',
     router_decision_summary: cached.summary,
     forge_experts_version: EXPERTS_VERSION,
@@ -534,6 +601,7 @@ export default {
   executeExpertPrune,
   defaultAllowedArtifactRoots,
   expertErrorStatus,
+  buildPruneImpactCalibrationProfile,
   normalizeArtifactPath,
   readCachedRouterDecisions,
   renderActivationBars,

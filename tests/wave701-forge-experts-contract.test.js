@@ -17,6 +17,7 @@ import {
   EXPERTS_LIMITS,
   EXPERTS_VERSION,
   analyzeExperts,
+  buildPruneImpactCalibrationProfile,
   executeExpertPrune,
   expertErrorStatus,
   normalizeArtifactPath,
@@ -143,6 +144,12 @@ test('W701 analyzeExperts parses bounded router receipts and emits a digest-back
   const analysis = await analyzeExperts(artifactDir, {
     allowed_root: root,
     threshold: 0.25,
+    prune_calibration_rows: [{
+      pruned_activation_share: 0.5,
+      baseline_kscore: 0.9,
+      pruned_kscore: 0.87,
+      receipt_sha256: 'b'.repeat(64),
+    }],
   });
 
   assert.equal(analysis.is_moe, true);
@@ -155,10 +162,32 @@ test('W701 analyzeExperts parses bounded router receipts and emits a digest-back
   assert.equal(analysis.router_decision_summary.skipped_out_of_range_ids, 1);
   assert.equal(analysis.router_decision_summary.skipped_invalid_ids, 1);
   assert.equal(analysis.router_decision_summary.skipped_duplicate_ids, 1);
+  assert.equal(analysis.estimated_kscore_impact, 0.03);
+  assert.equal(analysis.estimated_kscore_impact_source, 'measured_prune_calibration');
+  assert.equal(analysis.prune_impact_calibration.row_count, 1);
+  assert.equal(analysis.prune_impact_calibration.impact_factor, 0.06);
   assert.equal(analysis.source, 'cached_router_decisions');
   assert.equal(analysis.contract_version, 'w701-v1');
   assert.match(analysis.analysis_sha256, HEX64_RE);
   assert.equal(JSON.stringify(analysis).includes(artifactDir), false);
+});
+
+test('W1019 prune-impact calibration profile falls back honestly without measured rows', () => {
+  const fallback = buildPruneImpactCalibrationProfile([]);
+  assert.equal(fallback.source, 'heuristic_default');
+  assert.equal(fallback.impact_factor, 1.5);
+
+  const measured = buildPruneImpactCalibrationProfile([
+    {
+      pruned_pct_sum: 25,
+      actual_kscore_impact: 0.02,
+      receipt_sha256: 'c'.repeat(64),
+    },
+  ]);
+  assert.equal(measured.source, 'measured_prune_calibration');
+  assert.equal(measured.row_count, 1);
+  assert.equal(measured.impact_factor, 0.08);
+  assert.deepEqual(measured.receipt_sha256, ['c'.repeat(64)]);
 });
 
 test('W701 path, threshold, manifest, and router-log boundaries fail closed', async (t) => {

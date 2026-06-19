@@ -371,6 +371,7 @@ const RUNTIME_ALIASES = Object.freeze({
 // KOLM_ENABLE_EXPERIMENTAL_QUANTS=1. Default-off keeps the always-on set to the
 // four pip-only worker methods (int4, int8, gptq, awq) plus the baselines.
 const EXPERIMENTAL_ENV = 'KOLM_ENABLE_EXPERIMENTAL_QUANTS';
+const HEX64_RE = /^[a-f0-9]{64}$/;
 
 export function experimentalQuantsEnabled(env = process.env) {
   const v = String((env && env[EXPERIMENTAL_ENV]) || '').trim().toLowerCase();
@@ -387,6 +388,67 @@ function clamp(n, lo, hi) {
 
 function round(n, digits = 4) {
   return Number(Number(n).toFixed(digits));
+}
+
+function _finiteNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function _methodKey(value) {
+  return String(value || '').trim().toLowerCase().replace(/[^a-z0-9_+-]+/g, '_');
+}
+
+function _lossFromCalibrationRow(row) {
+  if (!row || typeof row !== 'object') return null;
+  const explicit = _finiteNumber(row.quality_loss ?? row.loss ?? row.quality_drop ?? row.kscore_drop);
+  if (explicit != null) return clamp(explicit, 0, 0.5);
+  const baseline = _finiteNumber(row.baseline_kscore ?? row.baseline_quality ?? row.fp16_kscore ?? row.fp16_quality);
+  const measured = _finiteNumber(row.quantized_kscore ?? row.candidate_kscore ?? row.measured_kscore ?? row.quality);
+  if (baseline == null || measured == null) return null;
+  return clamp(baseline - measured, 0, 0.5);
+}
+
+export function buildMoeQuantCalibrationProfile(rows = []) {
+  const list = Array.isArray(rows) ? rows : [];
+  const groups = new Map();
+  for (const row of list) {
+    const method = _methodKey(row?.method ?? row?.quant_method ?? row?.candidate_method);
+    if (!method) continue;
+    const loss = _lossFromCalibrationRow(row);
+    if (loss == null) continue;
+    if (!groups.has(method)) groups.set(method, []);
+    groups.get(method).push({
+      loss,
+      receipt_sha256: typeof row.receipt_sha256 === 'string' && HEX64_RE.test(row.receipt_sha256)
+        ? row.receipt_sha256
+        : null,
+      model: row.model || row.model_id || null,
+      moe_family: row.moe_family || row.family || null,
+    });
+  }
+  const byMethod = {};
+  for (const [method, values] of groups.entries()) {
+    const losses = values.map((row) => row.loss).sort((a, b) => a - b);
+    const avg = losses.reduce((sum, n) => sum + n, 0) / losses.length;
+    const max = losses[losses.length - 1];
+    byMethod[method] = Object.freeze({
+      method,
+      row_count: values.length,
+      quality_loss: round(Math.max(avg, max * 0.85), 4),
+      observed_loss_avg: round(avg, 4),
+      observed_loss_max: round(max, 4),
+      source: 'measured_moe_calibration',
+      receipt_sha256: values.map((row) => row.receipt_sha256).filter(Boolean).slice(0, 8),
+      moe_families: [...new Set(values.map((row) => row.moe_family).filter(Boolean))].slice(0, 8),
+      models: [...new Set(values.map((row) => row.model).filter(Boolean))].slice(0, 8),
+    });
+  }
+  return Object.freeze({
+    source: Object.keys(byMethod).length ? 'measured_moe_calibration' : 'unavailable',
+    row_count: Object.values(byMethod).reduce((sum, row) => sum + row.row_count, 0),
+    by_method: Object.freeze(byMethod),
+  });
 }
 
 function buildFp4CalibrationPlan(candidate) {
@@ -474,7 +536,24 @@ function qualityFloorFor(task, floor) {
   return clamp(floor ?? defaultFloor, 0.7, 0.999);
 }
 
-function qualityLossForMethod(method, paramsB) {
+function qualityLossForMethod(method, paramsB, methodId = null, moeCalibration = null) {
+  const calibrated = method?.moe_only === true && methodId
+    ? moeCalibration?.by_method?.[_methodKey(methodId)]
+    : null;
+  if (calibrated) {
+    return {
+      quality_loss: calibrated.quality_loss,
+      source: calibrated.source,
+      band: {
+        row_count: calibrated.row_count,
+        observed_loss_avg: calibrated.observed_loss_avg,
+        observed_loss_max: calibrated.observed_loss_max,
+        receipt_sha256: calibrated.receipt_sha256,
+        moe_families: calibrated.moe_families,
+        models: calibrated.models,
+      },
+    };
+  }
   const curve = method?.quality_loss_model_size_curve;
   if (!Array.isArray(curve) || curve.length === 0) {
     return {
@@ -495,9 +574,9 @@ function qualityLossForMethod(method, paramsB) {
   };
 }
 
-function estimateQuality(method, task, calibrationRows, preferenceTuned, paramsB) {
+function estimateQuality(method, task, calibrationRows, preferenceTuned, paramsB, { methodId = null, moeCalibration = null } = {}) {
   const sens = TASK_SENSITIVITY[normalizeTask(task)] || TASK_SENSITIVITY.chat;
-  const lossPrior = qualityLossForMethod(method, paramsB);
+  const lossPrior = qualityLossForMethod(method, paramsB, methodId, moeCalibration);
   let loss = lossPrior.quality_loss * sens;
   if (method.calibration_required && calibrationRows < 64) loss += 0.035;
   if (method.training_required && !preferenceTuned) loss += 0.02;
@@ -570,8 +649,8 @@ function buildMoeQuantPolicy(moeInfo, device) {
   }
 }
 
-function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens, calibrationRows, qualityFloor, privacyMode, preferenceTuned, experimentalEnabled, moeInfo, moePolicy }) {
-  const qualityEstimate = estimateQuality(method, task, calibrationRows, preferenceTuned, paramsB);
+function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens, calibrationRows, qualityFloor, privacyMode, preferenceTuned, experimentalEnabled, moeInfo, moePolicy, moeCalibration }) {
+  const qualityEstimate = estimateQuality(method, task, calibrationRows, preferenceTuned, paramsB, { methodId, moeCalibration });
   let quality = qualityEstimate.quality;
   let memory = estimateMemoryGb(method, paramsB, contextTokens);
   let latency = estimateLatencyMs(method, device, paramsB);
@@ -700,6 +779,7 @@ export function rankQuantizationStrategies(input = {}) {
   const preferenceTuned = !!(input.preference_tuned ?? input.preferenceTuned);
   const moeInfo = resolveMoeInfo(input, paramsB);
   const moePolicy = buildMoeQuantPolicy(moeInfo, device);
+  const moeCalibration = buildMoeQuantCalibrationProfile(input.moe_calibration_rows ?? input.moeCalibrationRows ?? []);
   let moeRuntimePlan = null;
   if (moeInfo) {
     try {
@@ -734,6 +814,7 @@ export function rankQuantizationStrategies(input = {}) {
       experimentalEnabled,
       moeInfo,
       moePolicy,
+      moeCalibration,
     }))
     .sort((a, b) => b.score - a.score || Number(b.feasible) - Number(a.feasible) || a.method.localeCompare(b.method));
 
@@ -760,6 +841,7 @@ export function rankQuantizationStrategies(input = {}) {
       privacy_mode: privacyMode,
       experimental_enabled: experimentalEnabled,
       moe: moeInfo,
+      moe_calibration: moeCalibration,
       device,
     },
     experimental_gate: {
@@ -782,6 +864,7 @@ export function rankQuantizationStrategies(input = {}) {
         detected: true,
         info: moeInfo,
         policy: moePolicy && moePolicy.ok !== false ? moePolicy : null,
+        calibration: moeCalibration,
         runtime_plan: moeRuntimePlan,
         external_candidates: candidates
           .filter((c) => c.moe_only && c.method !== 'moe_mixed_policy')
@@ -918,6 +1001,7 @@ export function methodAvailability(methodId, env = process.env) {
 export default {
   rankQuantizationStrategies,
   quantizationOracleCatalog,
+  buildMoeQuantCalibrationProfile,
   methodAvailability,
   experimentalQuantsEnabled,
 };
