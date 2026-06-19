@@ -8,9 +8,9 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 
 - Local engineering perfection: **100/100**
 - Frontier/product perfection: **83.2/100**
-- Atomic components inventoried: **969**
+- Atomic components inventoried: **970**
 - Atomic deep dives complete: **100%**
-- Direct test referenced: **969/969 (100%)**
+- Direct test referenced: **970/970 (100%)**
 - High-priority direct test referenced: **66/66 (100%)**
 - Local readiness proof coverage: **57/57 (100%)**
 - Claimable readiness closed locally: **49/57 (86%)**
@@ -25,7 +25,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 
 | Category | Area | Status | Frontier | Required Components | Verification |
 | --- | --- | --- | --- | --- | --- |
-| distillation | training | sota_review_complete_local_frontier_aligned | at=12 open=0/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
+| distillation | training | sota_review_complete_local_frontier_aligned | at=13 open=0/0/1 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | moe-distill-quant | training | sota_review_complete_major_frontier_work_open | at=7 open=0/4/2 | 6 | npm run verify:stack-sota<br>npm run verify:inventions |
 | quantization | compiler-runtime | sota_review_complete_major_frontier_work_open | at=12 open=0/3/1 | 3 | npm run verify:stack-sota<br>npm run verify:quant-oracle |
 | kv-cache | runtime | sota_review_complete_major_frontier_work_open | at=8 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |

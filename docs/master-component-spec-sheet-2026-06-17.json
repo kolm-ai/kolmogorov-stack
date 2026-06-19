@@ -36,10 +36,10 @@
     }
   },
   "summary": {
-    "component_count": 969,
-    "atomic_deep_dive_complete": 969,
+    "component_count": 970,
+    "atomic_deep_dive_complete": 970,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 969,
+    "direct_test_referenced_components": 970,
     "direct_test_reference_pct": 100,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 66,
@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2023,
+          "js_family": 2026,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -111,13 +111,13 @@
       "platform_support": 221,
       "runtime_serving_routing": 26,
       "storage_state": 28,
-      "training_model_optimization": 173,
+      "training_model_optimization": 174,
       "trust_security_compliance": 64
     },
     "components_by_surface": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 629,
+      "core-backend": 630,
       "package-distribution": 92,
       "service": 3,
       "worker": 211
@@ -129,11 +129,11 @@
       "id": "distillation",
       "stack_area": "training",
       "status": "sota_review_complete_local_frontier_aligned",
-      "already_at_frontier_count": 12,
+      "already_at_frontier_count": 13,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 2,
+      "minor_gaps": 1,
       "required_components": 3,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -27330,6 +27330,55 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave782-approval-queue.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
+        "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
+        "suggested_verification": [
+          "npm run verify:quantize-worker-matrix",
+          "npm run verify:distill-pipeline-matrix",
+          "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
+          "npm run verify:quant-oracle"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
+    },
+    {
+      "path": "src/distill-bakeoff.js",
+      "id": "src-distill-bakeoff-js",
+      "surface": "core-backend",
+      "domain": "training_model_optimization",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 14427,
+          "lines": 450,
+          "imports": 1,
+          "exports": 6,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 10,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary"
+        ],
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "1c07c5e90b375cc8267c4cab873941ad39a6575ec1d6fa5514357cdd7d68c9ba"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave972-distill-method-bakeoff.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",

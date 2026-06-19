@@ -39,8 +39,8 @@
     "frontier_improvement_or_invention"
   ],
   "summary": {
-    "component_count": 969,
-    "test_referenced_components": 969,
+    "component_count": 970,
+    "test_referenced_components": 970,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 66,
     "domains": {
@@ -54,20 +54,20 @@
       "platform_support": 221,
       "runtime_serving_routing": 26,
       "storage_state": 28,
-      "training_model_optimization": 173,
+      "training_model_optimization": 174,
       "trust_security_compliance": 64
     },
     "surfaces": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 629,
+      "core-backend": 630,
       "package-distribution": 92,
       "service": 3,
       "worker": 211
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 474,
+      "cryptographic_or_proof_boundary": 475,
       "distribution_or_worker_surface": 306,
       "environment_configuration_boundary": 368,
       "execution_or_subprocess_boundary": 313,
@@ -29582,6 +29582,66 @@
         "network_or_provider_boundary"
       ],
       "priority_score": 6,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
+      "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
+      "suggested_verification": [
+        "npm run verify:quantize-worker-matrix",
+        "npm run verify:distill-pipeline-matrix",
+        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
+        "npm run verify:quant-oracle"
+      ]
+    },
+    {
+      "path": "src/distill-bakeoff.js",
+      "id": "src-distill-bakeoff-js",
+      "surface": "core-backend",
+      "domain": "training_model_optimization",
+      "language": "javascript",
+      "sha256": "1c07c5e90b375cc8267c4cab873941ad39a6575ec1d6fa5514357cdd7d68c9ba",
+      "metrics": {
+        "bytes": 14427,
+        "lines": 450,
+        "imports": 1,
+        "exports": 6,
+        "routes": 0,
+        "env_refs": 0,
+        "fs_writes": 0,
+        "subprocess_refs": 0,
+        "network_refs": 0,
+        "crypto_refs": 10,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/wave972-distill-method-bakeoff.test.js"
+      ],
+      "risk_signals": [
+        "cryptographic_or_proof_boundary"
+      ],
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
