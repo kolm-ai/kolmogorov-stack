@@ -34,13 +34,14 @@ export const RECOMMENDER_VERSION = 'w716-v1';
 // =============================================================================
 
 const ARCH_1B = Object.freeze({
-  family: 'lfm2.5-1.2b-class',
-  backbone_id: 'LiquidAI/LFM2.5-1.2B-Instruct',
+  family: 'minicpm5-1b-class',
+  backbone_id: 'openbmb/MiniCPM5-1B',
   size_label: '1B',
-  depth: 16,
+  depth: 24,
   width: 2048,
   hidden_dim: 2048,
-  num_attention_heads: 32,
+  num_attention_heads: 16,
+  num_key_value_heads: 2,
   quant: 'int4',
 });
 

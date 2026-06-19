@@ -40,6 +40,9 @@ const FRONTIER_STUDENT_IDS = [
   'microsoft/Phi-4-mini-instruct',
   'HuggingFaceTB/SmolLM3-3B',
   'LiquidAI/LFM2.5-1.2B-Instruct',
+  'openbmb/MiniCPM5-1B',
+  'google/gemma-4-E2B-it',
+  'google/gemma-4-E4B-it',
 ];
 
 test('W610 #1 - 2026 frontier student rows exist in the default registry', () => {
@@ -93,7 +96,7 @@ test('W610 #5 - pull-backbone registry also names the new student rows', () => {
 
 test('W610 #6 - TAAS architecture catalog links each class to a real model row', () => {
   const expected = {
-    ARCH_1B: 'LiquidAI/LFM2.5-1.2B-Instruct',
+    ARCH_1B: 'openbmb/MiniCPM5-1B',
     ARCH_3B: 'Qwen/Qwen3-4B-Instruct-2507',
     ARCH_7B: 'Qwen/Qwen3-8B',
     ARCH_MOE_8x3: 'Qwen/Qwen3-4B-Instruct-2507',
@@ -135,7 +138,7 @@ test('W977 #8 - recommend() can rank by a sourced benchmark metric', () => {
   assert.equal(normalizeBenchmarkMetric('MMLU-Pro'), 'mmlu_pro');
   assert.equal(normalizeBenchmarkMetric('not-a-real-metric'), null);
 
-  const rec = recommend({ use: 'edge', vram_gb: 2, optimize_for: 'ifeval' });
+  const rec = recommend({ use: 'mobile', vram_gb: 2, optimize_for: 'ifeval' });
   assert.equal(rec.benchmark_metric, 'ifeval');
   assert.equal(rec.benchmark_optimized, true);
   assert.equal(rec.pick, 'LiquidAI/LFM2.5-1.2B-Instruct');
@@ -148,12 +151,52 @@ test('W977 #8 - recommend() can rank by a sourced benchmark metric', () => {
   assert.equal(picked.benchmark_source_scope, 'exact_instruct_model_card');
 });
 
-test('W610/W977 #9 - backend spec marks small-LLM registry and benchmark work closed', () => {
+test('W978 #9 - edge and multimodal frontier tiers name MiniCPM5 and Gemma 4', () => {
+  const mini = info('openbmb/MiniCPM5-1B');
+  assert.equal(mini.license, 'apache-2.0');
+  assert.equal(mini.context_tokens, 131072);
+  assert.equal(mini.tool_use, 'native');
+  assert.equal(mini.benchmarks.metrics.mmlu_pro, 48.85);
+  assert.equal(mini.benchmarks.metrics.ifeval, 80.41);
+  assert.equal(mini.benchmarks.metrics.bfcl, 25.15);
+
+  const e2b = info('google/gemma-4-E2B-it');
+  assert.equal(e2b.license, 'apache-2.0');
+  assert.equal(e2b.params_b_raw, 5.1);
+  assert.equal(e2b.context_tokens, 131072);
+  assert.deepEqual(e2b.modalities, ['text', 'image', 'audio']);
+  assert.equal(e2b.benchmarks.metrics.mmlu_pro, 60.0);
+
+  const e4b = info('google/gemma-4-E4B-it');
+  assert.equal(e4b.license, 'apache-2.0');
+  assert.equal(e4b.params_b_raw, 8.0);
+  assert.equal(e4b.context_tokens, 131072);
+  assert.deepEqual(e4b.modalities, ['text', 'image', 'audio']);
+  assert.equal(e4b.benchmarks.metrics.mmlu_pro, 69.4);
+
+  assert.equal(TIER_BY_USE.edge, 'openbmb/MiniCPM5-1B');
+  assert.equal(TIER_BY_USE.wasm, 'Qwen/Qwen2.5-0.5B-Instruct');
+  assert.equal(TIER_BY_USE.multimodal, 'google/gemma-4-E4B-it');
+  assert.equal(TIER_BY_USE['on-device-multimodal-frontier'], 'google/gemma-4-E2B-it');
+  assert.equal(ARCH_CATALOG.ARCH_1B.backbone_id, 'openbmb/MiniCPM5-1B');
+
+  const edge = recommend({ use: 'edge', vram_gb: 2, permissive: true, optimize_for: 'mmlu_pro' });
+  assert.equal(edge.pick, 'openbmb/MiniCPM5-1B');
+  assert.match(edge.summary, /benchmark_mmlu_pro: 48\.85/);
+
+  const mm = recommend({ use: 'multimodal', optimize_for: 'mmlu_pro' });
+  assert.equal(mm.pick, 'google/gemma-4-E4B-it');
+  assert.match(mm.summary, /benchmark_mmlu_pro: 69\.4/);
+});
+
+test('W610/W977/W978 #10 - backend spec marks small-LLM registry and benchmark work closed', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
   assert.match(spec, /CLOSED W610: add 2026 frontier students/i);
   assert.match(spec, /CLOSED W610: re-point default\/3-4B tier picks off Qwen2\.5/i);
   assert.match(spec, /LFM-1\.0/i, 'spec must record the current LFM license instead of Apache');
   assert.match(spec, /CLOSED W977: Add benchmark score fields/i);
+  assert.match(spec, /CLOSED W978: Add MiniCPM5 and Gemma 4 edge frontier rows/i);
   assert.doesNotMatch(spec, /\[minor\] No benchmark\/score fields/i);
+  assert.doesNotMatch(spec, /MiniCPM5-1B and Gemma-4 E2B\/E4B .*absent/i);
   assert.match(spec, /real neural-distillation path/i, 'neural training gap must remain tracked');
 });

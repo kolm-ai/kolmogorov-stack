@@ -2828,6 +2828,79 @@
     {
       "capabilities": {
         "catalog": "baseline",
+        "family": "gemma4",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Apache 2.0 Gemma 4 E2B multimodal edge row. Keep mobile default on Gemma 3n until equivalent phone-runtime proof exists.",
+        "params_b": 2.3,
+        "tier": "on-device-multimodal-frontier",
+        "tokenizer_vocab": 262144,
+        "tool_use": "native",
+        "use_for": [
+          "on-device-multimodal-frontier",
+          "edge-vision",
+          "frontier-student"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-4-E2B-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 2.8,
+        "vram_gb_bf16": 4.8
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "gemma4",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Apache 2.0 Gemma 4 E4B multimodal frontier row for richer edge/laptop vision+audio workloads.",
+        "params_b": 4.5,
+        "tier": "multimodal-frontier",
+        "tokenizer_vocab": 262144,
+        "tool_use": "native",
+        "use_for": [
+          "multimodal",
+          "multimodal-frontier",
+          "edge-vision",
+          "frontier-student"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:google/gemma-4-E4B-it",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 4.8,
+        "vram_gb_bf16": 8
+      },
+      "source_url": null,
+      "status": "available"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
         "family": "medgemma",
         "license": "health-ai-developer-foundations",
         "multilingual": false,
@@ -3473,6 +3546,46 @@
       },
       "source_url": "https://huggingface.co/nvidia",
       "status": "candidate"
+    },
+    {
+      "capabilities": {
+        "catalog": "baseline",
+        "family": "minicpm5",
+        "license": "apache-2.0",
+        "multilingual": true,
+        "notes": "Apache 2.0 1B-class local assistant/coding-agent student. Use as the permissive edge default; LFM2.5 remains available when its license is acceptable and IFEval score is the main goal.",
+        "params_b": 1.080632832,
+        "tier": "edge-frontier-permissive",
+        "tokenizer_vocab": null,
+        "tool_use": "native",
+        "use_for": [
+          "edge",
+          "edge-agent",
+          "laptop",
+          "classifier",
+          "extractor",
+          "agent",
+          "frontier-student"
+        ]
+      },
+      "checked_at": "2026-05-25",
+      "consumer_paths": [
+        "src/models.js",
+        "cli/kolm.js (compile, train)"
+      ],
+      "device_fit": null,
+      "freshness_ttl_days": 90,
+      "id": "local_model:openbmb/MiniCPM5-1B",
+      "kind": "local_model",
+      "license_url": null,
+      "pricing": null,
+      "runtime_fit": {
+        "context_tokens": 131072,
+        "vram_gb_4bit": 1.1,
+        "vram_gb_bf16": 2.3
+      },
+      "source_url": null,
+      "status": "available"
     },
     {
       "capabilities": {
@@ -5670,7 +5783,7 @@
       "status": "available"
     }
   ],
-  "generated_at": "2026-06-19T02:23:14.026Z",
+  "generated_at": "2026-06-19T02:39:18.526Z",
   "schema": "kolm.catalog_manifest.v1",
   "source_evidence": [
     {
@@ -5679,14 +5792,14 @@
       "sha1_short": "1e53e5290552"
     },
     {
-      "bytes": 69961,
+      "bytes": 71935,
       "path": "src/model-registry.js",
-      "sha1_short": "2070bdc91cb1"
+      "sha1_short": "2c71075e71a2"
     },
     {
-      "bytes": 39726,
+      "bytes": 44271,
       "path": "src/models.js",
-      "sha1_short": "2e09e68a53b7"
+      "sha1_short": "7e3953ad43ce"
     },
     {
       "bytes": 25107,
@@ -5708,15 +5821,15 @@
     "by_kind": {
       "device": 25,
       "hardware": 14,
-      "local_model": 56,
+      "local_model": 59,
       "provider": 12,
       "provider_model": 58,
       "runtime": 4
     },
     "by_status": {
-      "available": 152,
+      "available": 155,
       "candidate": 17
     },
-    "total": 169
+    "total": 172
   }
 }

@@ -876,6 +876,38 @@ export const BACKBONES = [
     verified_at: null,
     notes: 'Gemma 3n E4B - larger phone-class target. Galaxy S24 Ultra / Pixel 9 Pro / iPhone 16 Pro.',
   },
+  {
+    id: 'google/gemma-4-E2B-it',
+    family: 'gemma-4',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 4, gpu_class: 'mobile-npu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    modalities: ['text', 'image', 'audio'],
+    ctx_k: 128,
+    official_source_url: 'https://huggingface.co/google/gemma-4-E2B-it',
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Gemma 4 E2B - Apache 2.0 multimodal edge row, 2.3B effective / 5.1B total parameters, 128K ctx.',
+  },
+  {
+    id: 'google/gemma-4-E4B-it',
+    family: 'gemma-4',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 6, gpu_class: 'laptop-igpu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    modalities: ['text', 'image', 'audio'],
+    ctx_k: 128,
+    official_source_url: 'https://huggingface.co/google/gemma-4-E4B-it',
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'Gemma 4 E4B - Apache 2.0 multimodal frontier row, 4.5B effective / 8B total parameters, 128K ctx.',
+  },
 
   // ===== Qwen family =====
   {
@@ -1184,6 +1216,24 @@ export const BACKBONES = [
     recommended_for_target: [],
     verified_at: null,
     notes: 'SmolLM2 135M; the smallest backbone we ship. Tiny enough for browser hot-reload.',
+  },
+
+  // ===== OpenBMB / MiniCPM =====
+  {
+    id: 'openbmb/MiniCPM5-1B',
+    family: 'minicpm',
+    license: 'Apache-2.0',
+    runtime_compatibility: ['gguf', 'onnx', 'native'],
+    device_constraints: { min_ram_gb: 2, gpu_class: 'mobile-cpu', mobile_ok: true },
+    quantization_support: ['Q2', 'Q4', 'Q6', 'Q8', 'fp16', 'bf16'],
+    modalities: ['text'],
+    ctx_k: 128,
+    official_source_url: 'https://huggingface.co/openbmb/MiniCPM5-1B',
+    pull_status: 'registered',
+    local_path: null,
+    recommended_for_target: [],
+    verified_at: null,
+    notes: 'MiniCPM5 1B; Apache 2.0 edge/agentic student with 131K context and native tool-call parser support.',
   },
 
   // ===== Liquid AI / LFM =====
