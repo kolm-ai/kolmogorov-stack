@@ -215,9 +215,9 @@ test('AC2: kolm-audit-1 registry export is byte-identical to legacy receiptSubje
 });
 
 // ---------------------------------------------------------------------------
-// AC3 - mcp-tool-call-1 fidelity.
+// AC3 - MCP tool-call fidelity.
 // ---------------------------------------------------------------------------
-test('AC3: mcp-tool-call-1 exports faithful in-toto Statement with args/result subjects and full predicate', () => {
+test('AC3: mcp-tool-call-2 exports faithful in-toto Statement with args/result subjects and full predicate', () => {
   const signer = freshSigner();
   const built = buildMcpReceipt({
     tool: 'search_web',
@@ -266,9 +266,11 @@ test('AC3: mcp-tool-call-1 exports faithful in-toto Statement with args/result s
   const env = buildDsseEnvelope({ statement, privateKey: signer.privateKey, publicKey: signer.publicKey, key_fingerprint: signer.key_fingerprint });
   assert.equal(verifyDsseEnvelope(env, { publicKey: signer.publicKey }).ok, true, 'mcp in-toto bundle verifies ok');
 
-  // mcp-tool-call-1 is a registered class.
+  // Both legacy and current MCP receipt classes are registered.
   assert.ok(listReceiptClasses().includes('mcp-tool-call-1'));
+  assert.ok(listReceiptClasses().includes('mcp-tool-call-2'));
   assert.equal(getReceiptDescriptor('mcp-tool-call-1').idField, 'call_id');
+  assert.equal(getReceiptDescriptor('mcp-tool-call-2').idField, 'call_id');
 });
 
 // ---------------------------------------------------------------------------
@@ -311,7 +313,7 @@ test('AC4: unknown receipt class exports a VALID single-subject in-toto Statemen
 // ---------------------------------------------------------------------------
 // AC5 - anchor parity across receipt classes (secret-free verify).
 // ---------------------------------------------------------------------------
-test('AC5: kolm-audit-1 and mcp-tool-call-1 both anchor + verify level_a/level_b with no kolm secret', async () => {
+test('AC5: kolm-audit-1 and MCP tool-call receipts both anchor + verify level_a/level_b with no kolm secret', async () => {
   const logSigner = freshSigner();
   const batcher = new ReceiptAnchorBatcher({ signer: logSigner, maxLeaves: 1024 });
 

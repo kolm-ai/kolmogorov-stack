@@ -27,12 +27,14 @@ import {
   KOLM_RECEIPT_PREDICATE_TYPE,
 } from '../src/receipt-export-registry.js';
 
-test('registry has kolm-audit-1 + mcp-tool-call-1 built-in', () => {
+test('registry has kolm-audit-1 + MCP tool-call descriptors built in', () => {
   const classes = listReceiptClasses();
   assert.ok(classes.includes('kolm-audit-1'));
   assert.ok(classes.includes('mcp-tool-call-1'));
+  assert.ok(classes.includes('mcp-tool-call-2'));
   assert.equal(getReceiptDescriptor('kolm-audit-1').predicateType, KOLM_INFERENCE_PREDICATE_TYPE);
   assert.equal(getReceiptDescriptor('mcp-tool-call-1').predicateType, KOLM_TOOLCALL_PREDICATE_TYPE);
+  assert.equal(getReceiptDescriptor('mcp-tool-call-2').predicateType, KOLM_TOOLCALL_PREDICATE_TYPE);
 });
 
 test('kolm-audit-1 generic functions == legacy intoto-receipt functions', () => {

@@ -76,12 +76,14 @@ test('1. router mounts MCP and in-toto receipt routes with prod store/signer/anc
   assert.match(src, /policy: __w981McpToolPolicy\.evaluate/);
 });
 
-test('1b. backend spec records MCP closures and leaves session provenance open', () => {
+test('1b. backend spec records MCP closures and leaves transcript continuity open', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
   assert.match(spec, /CLOSED W609: wire MCP gateway to durable store \+ signer in prod/);
   assert.match(spec, /CLOSED W609: anchor MCP receipts into the existing Merkle transparency log/);
   assert.match(spec, /CLOSED W640: let the in-toto route resolve mcp_tool_receipts by call_id/i);
   assert.match(spec, /CLOSED W641: wire a production upstream MCP executor\/registry/i);
+  assert.match(spec, /CLOSED W982: Bind caller, agent, MCP session, and upstream response provenance into signed MCP receipts/i);
+  assert.match(spec, /Full MCP session transcript continuity is still not first-class/i);
   assert.doesNotMatch(spec, /\[major\] No production upstream MCP client registry\/executor/);
   assert.doesNotMatch(spec, /\(surgical-now, S\/low, v7\) \*\*Let the in-toto route resolve mcp_tool_receipts by call_id/);
 });

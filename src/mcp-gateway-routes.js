@@ -44,7 +44,7 @@ import {
 } from './mcp-gateway.js';
 import { anchorLeafHash } from './transparency-anchor.js';
 
-export const MCP_GATEWAY_ROUTES_VERSION = 'w981-mcp-gateway-routes-v2';
+export const MCP_GATEWAY_ROUTES_VERSION = 'w982-mcp-gateway-routes-v3';
 const MCP_RECEIPT_TABLE = 'mcp_tool_receipts';
 
 function _tenantIdOf(req) {
@@ -77,14 +77,27 @@ function _upstreamErrorStatus(code) {
   return null;
 }
 
+function _headerValue(req, name) {
+  const headers = req && req.headers && typeof req.headers === 'object' ? req.headers : {};
+  const want = String(name || '').toLowerCase();
+  for (const [k, v] of Object.entries(headers)) {
+    if (String(k).toLowerCase() !== want) continue;
+    if (Array.isArray(v)) return v.find((x) => typeof x === 'string' && x) || null;
+    return typeof v === 'string' && v ? v : null;
+  }
+  return null;
+}
+
 function _callerPolicyContext(req) {
   const tr = req && req.tenant_record && typeof req.tenant_record === 'object' ? req.tenant_record : {};
   const auth = req && req.auth && typeof req.auth === 'object' ? req.auth : {};
   const scopes = Array.isArray(auth.scopes) ? auth.scopes
     : (Array.isArray(tr.scopes) ? tr.scopes : []);
   return {
-    subject_id: tr.user_id || tr.owner_id || auth.subject_id || auth.user_id || null,
+    subject_id: tr.user_id || tr.owner_id || auth.subject_id || auth.user_id || auth.sub || null,
     api_key_id: tr.api_key_id || auth.api_key_id || null,
+    agent_id: tr.mcp_agent_id || tr.agent_id || auth.mcp_agent_id || auth.agent_id || auth.client_id || req?.mcp_agent_id || req?.agent_id || null,
+    mcp_session_id: tr.mcp_session_id || tr.session_id || auth.mcp_session_id || auth.session_id || req?.mcp_session_id || _headerValue(req, 'mcp-session-id') || _headerValue(req, 'x-mcp-session-id') || null,
     trust_level: tr.mcp_trust_level || tr.trust_level || auth.mcp_trust_level || auth.trust_level || req?.mcp_trust_level || null,
     scopes: scopes.map((s) => String(s)).slice(0, 64),
   };
@@ -245,9 +258,9 @@ export function register(r, deps = {}) {
     const server_id = body.server_id != null ? String(body.server_id) : null;
     const transport = body.transport != null ? String(body.transport) : null;
 
+    const caller = _callerPolicyContext(req);
     let policyDecision = null;
     if (policy) {
-      const caller = _callerPolicyContext(req);
       try {
         policyDecision = _safePolicyDecision(await policy({
           tenant,
@@ -317,6 +330,10 @@ export function register(r, deps = {}) {
         transport,
         server_id,
         guardrail,
+        caller,
+        upstream_request_id: body.upstream_request_id || body.upstreamRequestId || null,
+        upstream_request_hash: body.upstream_request_hash || body.upstreamRequestHash || null,
+        upstream_response_hash: body.upstream_response_hash || body.upstreamResponseHash || null,
       });
 
       if (policyDecision) out.receipt.policy = policyDecision;

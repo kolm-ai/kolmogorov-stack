@@ -188,12 +188,12 @@ function looksLangfuse(root, recs) {
 
 // MCP server logs are JSON-RPC 2.0 rows whose method lives under tools/*
 // (or a result.content[] paired by id), plus kolm's own mcp-gateway receipts
-// (schema 'mcp-tool-call-1'). Checked BEFORE the generic OTLP sniff so a
+// (schema 'mcp-tool-call-1'/'mcp-tool-call-2'). Checked BEFORE the generic OTLP sniff so a
 // JSON-RPC log is never mistaken for loose spans.
 function looksMcp(root, recs) {
   const rowLooksMcp = (r) => {
     const o = obj(r); if (!o) return false;
-    if (o.schema === 'mcp-tool-call-1' || o.receipt_version === 'mcp-tool-call-1') return true;
+    if (o.schema === 'mcp-tool-call-1' || o.schema === 'mcp-tool-call-2' || o.receipt_version === 'mcp-tool-call-1' || o.receipt_version === 'mcp-tool-call-2') return true;
     if (o.jsonrpc === '2.0') {
       if (typeof o.method === 'string' && o.method.startsWith('tools/')) return true;
       const res = obj(o.result);

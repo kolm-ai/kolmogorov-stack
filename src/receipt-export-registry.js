@@ -155,25 +155,41 @@ registerReceiptClass('kolm-audit-1', {
 });
 
 // ---------------------------------------------------------------------------
-// mcp-tool-call-1 descriptor. Closes the gap: id = call_id, content subjects =
-// args (tool_input) + result (tool_output), and the predicate keeps the tool /
-// args_hash / result_hash / tenant_id / is_error / transport / server_id fields.
+// MCP tool-call descriptors. v1 is the original signed receipt; v2 adds signed
+// actor/session/upstream JSON-RPC provenance fields while preserving the same
+// subject and predicate type shape.
 // ---------------------------------------------------------------------------
-registerReceiptClass('mcp-tool-call-1', {
-  idField: 'call_id',
-  idPrefix: 'receipt',
-  contentDigests: [
-    { nameTag: 'args', hashField: 'args_hash', kind: 'tool_input' },
-    { nameTag: 'result', hashField: 'result_hash', kind: 'tool_output' },
-  ],
-  predicateFields: [
-    'call_id', 'timestamp', 'tenant_id', 'tool', 'args_hash', 'result_hash',
-    'is_error', 'transport', 'server_id',
-  ],
-  predicateType: KOLM_TOOLCALL_PREDICATE_TYPE,
-  builderId: 'https://kolm.ai/mcp-gateway',
-  predicateKey: 'tool_call',
-});
+const MCP_TOOLCALL_CONTENT_DIGESTS = Object.freeze([
+  { nameTag: 'args', hashField: 'args_hash', kind: 'tool_input' },
+  { nameTag: 'result', hashField: 'result_hash', kind: 'tool_output' },
+]);
+
+const MCP_TOOLCALL_PREDICATE_FIELDS = Object.freeze([
+  'call_id', 'timestamp', 'tenant_id', 'tool', 'args_hash', 'result_hash',
+  'is_error', 'transport', 'server_id',
+]);
+
+const MCP_TOOLCALL_V2_PREDICATE_FIELDS = Object.freeze([
+  ...MCP_TOOLCALL_PREDICATE_FIELDS,
+  'caller_subject_hash', 'caller_api_key_hash', 'caller_agent_hash',
+  'mcp_session_hash', 'caller_trust_level', 'caller_scopes_hash',
+  'upstream_request_id', 'upstream_request_hash', 'upstream_response_hash',
+]);
+
+for (const [schema, predicateFields] of [
+  ['mcp-tool-call-1', MCP_TOOLCALL_PREDICATE_FIELDS],
+  ['mcp-tool-call-2', MCP_TOOLCALL_V2_PREDICATE_FIELDS],
+]) {
+  registerReceiptClass(schema, {
+    idField: 'call_id',
+    idPrefix: 'receipt',
+    contentDigests: MCP_TOOLCALL_CONTENT_DIGESTS,
+    predicateFields,
+    predicateType: KOLM_TOOLCALL_PREDICATE_TYPE,
+    builderId: 'https://kolm.ai/mcp-gateway',
+    predicateKey: 'tool_call',
+  });
+}
 
 // ---------------------------------------------------------------------------
 // GENERIC fallback descriptor for an unknown receipt class (AC4). idField is

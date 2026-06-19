@@ -2,7 +2,7 @@
 //
 // Pins src/connectors/mcp.js: JSON-RPC tools/call traffic (request/result
 // paired by id), tools/list declared tool surfaces, initialize serverInfo,
-// kolm mcp-gateway receipts (mcp-tool-call-1), and the {server, entries[]}
+// kolm mcp-gateway receipts (mcp-tool-call-1/2), and the {server, entries[]}
 // wrapper - all normalized to canonical AuditEvents with action.server set
 // (the field the red-team mcp-discovery probe and model-provenance mcp_servers
 // surface read). Plus: detection via the registry, end-to-end runAudit, and
@@ -32,9 +32,10 @@ const MCP_JSONRPC = [
   { jsonrpc: '2.0', id: 3, result: { content: [{ type: 'text', text: 'delivered' }], isError: false } },
 ];
 
-// kolm's own mcp-gateway receipt shape (src/mcp-gateway.js, mcp-tool-call-1).
+// kolm's own mcp-gateway receipt shape (src/mcp-gateway.js, mcp-tool-call-2;
+// legacy mcp-tool-call-1 remains accepted).
 const MCP_RECEIPT = {
-  schema: 'mcp-tool-call-1',
+  schema: 'mcp-tool-call-2',
   call_id: 'mtc_01JTESTRECEIPT0000000000',
   timestamp: '2026-06-11T10:00:00.000Z',
   tenant_id: 'tn_acme',
@@ -44,6 +45,9 @@ const MCP_RECEIPT = {
   is_error: false,
   transport: 'http',
   server_id: 'mail-server',
+  caller_agent_hash: 'sha256:' + 'c'.repeat(64),
+  mcp_session_hash: 'sha256:' + 'd'.repeat(64),
+  upstream_response_hash: 'sha256:' + 'e'.repeat(64),
 };
 
 /* ----------------------------------- tests ------------------------------------ */
@@ -96,7 +100,7 @@ test('mcp: tools/list -> granted scopes on calls + a discovery event', () => {
   assert.equal(probe.status, 'exposed', 'tool-surface enumeration (list_tools) is the discovery signal');
 });
 
-test('mcp: gateway receipt shape (mcp-tool-call-1) is absorbed', () => {
+test('mcp: gateway receipt shape (mcp-tool-call-2) is absorbed', () => {
   const events = mcp.normalize([MCP_RECEIPT]);
   assert.equal(events.length, 1);
   const ev = events[0];
@@ -110,7 +114,7 @@ test('mcp: gateway receipt shape (mcp-tool-call-1) is absorbed', () => {
   assert.equal(ev.meta.is_error, false);
   assert.equal(ev.data.has_sensitive, false, 'hash-only receipt carries no scannable content');
 
-  // The legacy receipt_version field name is tolerated too.
+  // The legacy receipt_version field name and v1 schema are tolerated too.
   const alt = { ...MCP_RECEIPT };
   delete alt.schema;
   alt.receipt_version = 'mcp-tool-call-1';

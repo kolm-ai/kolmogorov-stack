@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2030,
+          "js_family": 2032,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -289,7 +289,7 @@
       "id": "mcp-tool-gateway-receipts",
       "stack_area": "agent-integrations",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 13,
+      "already_at_frontier_count": 14,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
@@ -23805,7 +23805,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 12231,
+          "bytes": 12326,
           "lines": 279,
           "imports": 7,
           "exports": 6,
@@ -23820,7 +23820,7 @@
         "risk_signals": [],
         "priority_score": 0,
         "priority_band": "normal",
-        "sha256": "17521bb4b33c403c2579c4de9f2f473d0c2f5504bf462a34f33c007c9c43fe95"
+        "sha256": "68dcf16edbe08356ca1527f5cee114e03643d8e7e11ec33d262b8bc61379b8f3"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -23960,7 +23960,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 14536,
+          "bytes": 14589,
           "lines": 339,
           "imports": 2,
           "exports": 2,
@@ -23978,7 +23978,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "faa8abc9e0e2023e6c558b7a963a4ef79161044f2e79c42ceea235cc7a714032"
+        "sha256": "93cda0a3ec3ce2634740d7075de91da33190b773e9c24fa974235dc55cb80342"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -33034,7 +33034,8 @@
           "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
           "tests/model-signing-sidecars.test.js",
           "tests/receipt-export-registry.test.js",
-          "tests/wave921-intoto-attestation.test.js"
+          "tests/wave921-intoto-attestation.test.js",
+          "tests/wave982-mcp-provenance-binding.test.js"
         ],
         "category_links": [
           {
@@ -35939,8 +35940,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 17030,
-          "lines": 431,
+          "bytes": 18129,
+          "lines": 448,
           "imports": 2,
           "exports": 3,
           "routes": 2,
@@ -35958,7 +35959,7 @@
         ],
         "priority_score": 7,
         "priority_band": "high",
-        "sha256": "29243be0846fe2ab44f6486be848a6cdaf1f9a14e1dabb9debd0e817c1f85ac3"
+        "sha256": "ee5a70502e052ee5382198d21b1fe491ce3b9698eeaec381feff291087b33569"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -35972,7 +35973,8 @@
           "tests/wave641-mcp-upstream-registry.test.js",
           "tests/wave921-mcp-signed-receipts.test.js",
           "tests/wave966-mcp-tool-contract-pinning.test.js",
-          "tests/wave981-mcp-tool-policy.test.js"
+          "tests/wave981-mcp-tool-policy.test.js",
+          "tests/wave982-mcp-provenance-binding.test.js"
         ],
         "category_links": [
           {
@@ -36015,10 +36017,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 25081,
-          "lines": 596,
+          "bytes": 30519,
+          "lines": 732,
           "imports": 4,
-          "exports": 14,
+          "exports": 21,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -36033,7 +36035,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "5b9a76a3f7f455039405ddc224355bac04b2186aa6c3ddd5c59b567e56703bff"
+        "sha256": "01c87921e5b22a14b5e634849a1ef011fcc2d413ecdd5b7d83cc574283c4ee1e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -36175,8 +36177,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 12860,
-          "lines": 325,
+          "bytes": 13334,
+          "lines": 339,
           "imports": 1,
           "exports": 8,
           "routes": 0,
@@ -36193,7 +36195,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "732fd2f04ac1d7fe10786b696bbb38d722fbac378afc91c1006c4110e480c91d"
+        "sha256": "a3095ef0aa6ced8e3c9f5a93b13f27353a8797ee7a1eded88a050154273075f7"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -36203,7 +36205,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave641-mcp-upstream-registry.test.js",
-          "tests/wave966-mcp-tool-contract-pinning.test.js"
+          "tests/wave966-mcp-tool-contract-pinning.test.js",
+          "tests/wave982-mcp-provenance-binding.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -42000,8 +42003,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 23901,
-          "lines": 524,
+          "bytes": 24456,
+          "lines": 540,
           "imports": 2,
           "exports": 19,
           "routes": 0,
@@ -42018,7 +42021,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "f24a5b51504e98b016c8286e2651bcb727f798898e8a11627e42cdd48d31071d"
+        "sha256": "124cbf833644d27c8ec467fc02fdb4a76aad7d8564df1ea1bbc9c9a4ca67e92d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -42030,7 +42033,8 @@
           "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
           "tests/model-signing-build-sidecars.test.js",
           "tests/receipt-export-registry.test.js",
-          "tests/wave921-intoto-attestation.test.js"
+          "tests/wave921-intoto-attestation.test.js",
+          "tests/wave982-mcp-provenance-binding.test.js"
         ],
         "category_links": [],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",

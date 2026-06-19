@@ -24,7 +24,7 @@
 //     the caller are exactly what the tool produced - the receipt binds those
 //     exact bytes via their hash so a verifier can confirm no middle layer
 //     altered them.
-//   - buildMcpReceipt({...}) -> unsigned mcp-tool-call-1 receipt object
+//   - buildMcpReceipt({...}) -> unsigned mcp-tool-call-2 receipt object
 //   - signMcpReceipt(receipt, signer) -> receipt with signature_ed25519 tail
 //   - verifyMcpReceipt(receipt) -> { ok, key_fingerprint?, reason? }
 //   - hashMcpArgs(args) / hashMcpResult(result) -> "sha256:<64-hex>"
@@ -123,8 +123,11 @@ function _guardrailBlockError(stage, verdict) {
   return e;
 }
 
-export const MCP_RECEIPT_SCHEMA = 'mcp-tool-call-1';
-export const MCP_GATEWAY_VERSION = 'w921-mcp-gateway-v1';
+export const MCP_LEGACY_RECEIPT_SCHEMA = 'mcp-tool-call-1';
+export const MCP_RECEIPT_SCHEMA = 'mcp-tool-call-2';
+export const MCP_ACCEPTED_RECEIPT_SCHEMAS = Object.freeze([MCP_LEGACY_RECEIPT_SCHEMA, MCP_RECEIPT_SCHEMA]);
+export const MCP_UPSTREAM_PROVENANCE_FIELD = '__kolm_mcp_upstream_provenance';
+export const MCP_GATEWAY_VERSION = 'w982-mcp-gateway-v2';
 
 // Crockford-style base32 (no I, L, O, U) - same alphabet family as
 // gateway-receipt.js so receipt ids read consistently across the product.
@@ -134,7 +137,7 @@ const ULID_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
 // keys anyway (via cid.canonicalJson), but listing the contract here documents
 // exactly what a verifier is trusting. signature_ed25519 is NEVER in this set - 
 // a signature cannot cover itself.
-export const MCP_SIGNED_FIELDS = Object.freeze([
+export const MCP_SIGNED_FIELDS_V1 = Object.freeze([
   'schema',
   'call_id',
   'timestamp',
@@ -147,6 +150,19 @@ export const MCP_SIGNED_FIELDS = Object.freeze([
   'is_error',
   'transport',
   'server_id',
+]);
+
+export const MCP_SIGNED_FIELDS = Object.freeze([
+  ...MCP_SIGNED_FIELDS_V1,
+  'caller_subject_hash',
+  'caller_api_key_hash',
+  'caller_agent_hash',
+  'mcp_session_hash',
+  'caller_trust_level',
+  'caller_scopes_hash',
+  'upstream_request_id',
+  'upstream_request_hash',
+  'upstream_response_hash',
 ]);
 
 const TOOL_CONTRACT_SOURCE_RE = /^[A-Za-z0-9_.:-]{1,64}$/;
@@ -177,6 +193,98 @@ function _normalizeSha256Hash(v) {
   if (v == null || v === '') return null;
   const s = String(v).trim();
   return /^sha256:[0-9a-f]{64}$/.test(s) ? s : null;
+}
+
+function _coalesce(...values) {
+  return values.find((v) => v !== undefined && v !== null && v !== '');
+}
+
+export function hashMcpProvenanceValue(value) {
+  if (value == null || value === '') return null;
+  return _hashCanonical(value);
+}
+
+function _normalizeProvenanceHash(hashValue, rawValue) {
+  const h = _normalizeSha256Hash(hashValue);
+  if (h) return h;
+  const raw = _coalesce(rawValue);
+  return raw == null ? null : hashMcpProvenanceValue(raw);
+}
+
+function _normalizeScopeHash(hashValue, scopes) {
+  const h = _normalizeSha256Hash(hashValue);
+  if (h) return h;
+  const rows = Array.isArray(scopes)
+    ? scopes.map((s) => (typeof s === 'string' ? s.trim() : String(s || '').trim())).filter(Boolean).sort()
+    : [];
+  return rows.length ? hashMcpProvenanceValue(rows) : null;
+}
+
+function _normalizeCallerProvenance(opts = {}) {
+  const caller = _plainObject(opts.caller) ? opts.caller : {};
+  return {
+    caller_subject_hash: _normalizeProvenanceHash(
+      opts.caller_subject_hash,
+      _coalesce(opts.caller_subject_id, caller.subject_id, caller.user_id, caller.sub),
+    ),
+    caller_api_key_hash: _normalizeProvenanceHash(
+      opts.caller_api_key_hash,
+      _coalesce(opts.caller_api_key_id, caller.api_key_id),
+    ),
+    caller_agent_hash: _normalizeProvenanceHash(
+      opts.caller_agent_hash,
+      _coalesce(opts.caller_agent_id, opts.agent_id, caller.agent_id, caller.client_id),
+    ),
+    mcp_session_hash: _normalizeProvenanceHash(
+      opts.mcp_session_hash,
+      _coalesce(opts.mcp_session_id, opts.session_id, caller.mcp_session_id, caller.session_id),
+    ),
+    caller_trust_level: _optionalString(_coalesce(opts.caller_trust_level, caller.trust_level), 64),
+    caller_scopes_hash: _normalizeScopeHash(opts.caller_scopes_hash, _coalesce(opts.caller_scopes, caller.scopes)),
+  };
+}
+
+function _normalizeUpstreamProvenance(opts = {}) {
+  const p = _plainObject(opts.upstream_provenance) ? opts.upstream_provenance : {};
+  const requestId = _coalesce(opts.upstream_request_id, p.upstream_request_id, p.request_id);
+  return {
+    upstream_request_id: requestId == null ? null : String(requestId).slice(0, 128),
+    upstream_request_hash: _normalizeProvenanceHash(
+      _coalesce(opts.upstream_request_hash, p.upstream_request_hash, p.request_hash),
+      _coalesce(opts.upstream_request, p.request),
+    ),
+    upstream_response_hash: _normalizeProvenanceHash(
+      _coalesce(opts.upstream_response_hash, p.upstream_response_hash, p.response_hash),
+      _coalesce(opts.upstream_response, p.response),
+    ),
+  };
+}
+
+export function attachMcpUpstreamProvenance(result, provenance = {}) {
+  const target = _plainObject(result) ? result : _normalizeResult(result);
+  try {
+    Object.defineProperty(target, MCP_UPSTREAM_PROVENANCE_FIELD, {
+      value: _normalizeUpstreamProvenance({ upstream_provenance: provenance }),
+      enumerable: false,
+      configurable: true,
+    });
+  } catch {
+    // Frozen results are rare; fall back to an enumerable-free shallow wrapper.
+    const clone = { ...target };
+    Object.defineProperty(clone, MCP_UPSTREAM_PROVENANCE_FIELD, {
+      value: _normalizeUpstreamProvenance({ upstream_provenance: provenance }),
+      enumerable: false,
+      configurable: true,
+    });
+    return clone;
+  }
+  return target;
+}
+
+export function getMcpUpstreamProvenance(result) {
+  return _plainObject(result) && _plainObject(result[MCP_UPSTREAM_PROVENANCE_FIELD])
+    ? result[MCP_UPSTREAM_PROVENANCE_FIELD]
+    : null;
 }
 
 function _normalizeToolContractSource(v, hasContract) {
@@ -318,7 +426,7 @@ function _isoFrom(now) {
 }
 
 /**
- * buildMcpReceipt - assemble (but DO NOT sign) an mcp-tool-call-1 receipt.
+ * buildMcpReceipt - assemble (but DO NOT sign) an mcp-tool-call-2 receipt.
  *
  * Inputs:
  *   - tool         (string, REQUIRED) - MCP tool name (tools/call params.name)
@@ -365,9 +473,10 @@ export function buildMcpReceipt(opts = {}) {
 
   const transport = opts.transport == null ? null : String(opts.transport).slice(0, 32);
   const server_id = opts.server_id == null ? null : String(opts.server_id).slice(0, 256);
+  const schema = opts.schema === MCP_LEGACY_RECEIPT_SCHEMA ? MCP_LEGACY_RECEIPT_SCHEMA : MCP_RECEIPT_SCHEMA;
 
-  return {
-    schema: MCP_RECEIPT_SCHEMA,
+  const receipt = {
+    schema,
     call_id: opts.call_id ? String(opts.call_id) : mcpToolCallId(typeof opts.now === 'number' ? opts.now : undefined),
     timestamp: _isoFrom(opts.now),
     tenant_id: tenant,
@@ -380,6 +489,10 @@ export function buildMcpReceipt(opts = {}) {
     transport,
     server_id,
   };
+  if (schema !== MCP_LEGACY_RECEIPT_SCHEMA) {
+    Object.assign(receipt, _normalizeCallerProvenance(opts), _normalizeUpstreamProvenance(opts));
+  }
+  return receipt;
 }
 
 // canonicalForSigning - emit ONLY the signed fields, in a deterministic byte
@@ -387,7 +500,8 @@ export function buildMcpReceipt(opts = {}) {
 // keys) so the bytes match across implementations.
 function _canonicalForSigning(receipt) {
   const subset = {};
-  for (const k of MCP_SIGNED_FIELDS) {
+  const fields = receipt && receipt.schema === MCP_LEGACY_RECEIPT_SCHEMA ? MCP_SIGNED_FIELDS_V1 : MCP_SIGNED_FIELDS;
+  for (const k of fields) {
     if (k in receipt) subset[k] = receipt[k];
   }
   return canonicalJson(subset);
@@ -444,8 +558,8 @@ export function verifyMcpReceipt(receipt) {
   if (!receipt || typeof receipt !== 'object') {
     return { ok: false, reason: 'receipt missing or not an object' };
   }
-  if (receipt.schema !== MCP_RECEIPT_SCHEMA) {
-    return { ok: false, reason: `schema must be "${MCP_RECEIPT_SCHEMA}", got ${JSON.stringify(receipt.schema)}` };
+  if (!MCP_ACCEPTED_RECEIPT_SCHEMAS.includes(receipt.schema)) {
+    return { ok: false, reason: `schema must be one of ${JSON.stringify(MCP_ACCEPTED_RECEIPT_SCHEMAS)}, got ${JSON.stringify(receipt.schema)}` };
   }
   const sigBlock = receipt.signature_ed25519;
   if (!sigBlock) return { ok: false, reason: 'receipt has no signature_ed25519 block' };
@@ -526,6 +640,9 @@ export async function wrapToolCall(opts = {}) {
       result = { content: [], isError: false };
     }
   }
+  const upstreamProvenance = _plainObject(opts.upstream_provenance)
+    ? _normalizeUpstreamProvenance({ upstream_provenance: opts.upstream_provenance })
+    : (getMcpUpstreamProvenance(result) || _normalizeUpstreamProvenance(opts));
 
   // OUTPUT screen (over the tool result text) - runs AFTER execution; a 'block'
   // verdict rejects an output-poisoning attempt before the bytes reach the model.
@@ -550,6 +667,19 @@ export async function wrapToolCall(opts = {}) {
     call_id: opts.call_id,
     transport: opts.transport,
     server_id: opts.server_id,
+    caller: opts.caller,
+    caller_subject_id: opts.caller_subject_id,
+    caller_subject_hash: opts.caller_subject_hash,
+    caller_api_key_id: opts.caller_api_key_id,
+    caller_api_key_hash: opts.caller_api_key_hash,
+    caller_agent_id: opts.caller_agent_id,
+    caller_agent_hash: opts.caller_agent_hash,
+    mcp_session_id: opts.mcp_session_id,
+    mcp_session_hash: opts.mcp_session_hash,
+    caller_trust_level: opts.caller_trust_level,
+    caller_scopes: opts.caller_scopes,
+    caller_scopes_hash: opts.caller_scopes_hash,
+    upstream_provenance: upstreamProvenance,
   });
   const receipt = signMcpReceipt(unsigned, opts.signer, { signed_at: opts.signed_at });
 
@@ -579,13 +709,19 @@ export async function wrapToolCall(opts = {}) {
 
 export default {
   MCP_RECEIPT_SCHEMA,
+  MCP_LEGACY_RECEIPT_SCHEMA,
+  MCP_ACCEPTED_RECEIPT_SCHEMAS,
   MCP_GATEWAY_VERSION,
   MCP_SIGNED_FIELDS,
+  MCP_SIGNED_FIELDS_V1,
   hashMcpArgs,
   hashMcpResult,
+  hashMcpProvenanceValue,
   normalizeMcpToolContract,
   hashMcpToolContract,
   verifyMcpToolContract,
+  attachMcpUpstreamProvenance,
+  getMcpUpstreamProvenance,
   mcpToolCallId,
   buildMcpReceipt,
   signMcpReceipt,

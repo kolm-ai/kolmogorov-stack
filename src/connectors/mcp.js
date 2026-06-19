@@ -14,7 +14,7 @@
 //                           protocolVersion}} - which server, which version
 //
 // Also absorbed: kolm's own mcp-gateway receipts (src/mcp-gateway.js,
-// schema 'mcp-tool-call-1': {tool, args_hash, result_hash, is_error,
+// schema 'mcp-tool-call-1'/'mcp-tool-call-2': {tool, args_hash, result_hash, is_error,
 // server_id, tenant_id, timestamp, call_id}) and a generic wrapper
 // {server, entries[]}. Requests pair with results by JSON-RPC id; an unpaired
 // request still emits its event.
@@ -36,7 +36,7 @@ import { scanPii } from '../pii-redactor.js';
 
 const SOURCE = 'mcp';
 const CONTENT_CAP = 16 * 1024;
-const RECEIPT_SCHEMA = 'mcp-tool-call-1';
+const RECEIPT_SCHEMAS = new Set(['mcp-tool-call-1', 'mcp-tool-call-2']);
 
 // Field names that commonly carry a destination URL/host inside tool arguments
 // (the URL_ARG_KEYS idiom shared with src/audit-ingest.js and the connectors).
@@ -125,7 +125,7 @@ function records(raw) {
 }
 
 function isReceipt(row) {
-  return row.schema === RECEIPT_SCHEMA || row.receipt_version === RECEIPT_SCHEMA;
+  return RECEIPT_SCHEMAS.has(row.schema) || RECEIPT_SCHEMAS.has(row.receipt_version);
 }
 
 /* --------------------------- event construction --------------------------- */

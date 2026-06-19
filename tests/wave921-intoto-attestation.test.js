@@ -117,7 +117,7 @@ test('statement: an output subject carries the receipt output_hash hex', () => {
   assert.equal(outSubj.digest.blake2b, undefined, 'do not fabricate BLAKE2b without output bytes');
 });
 
-test('statement: mcp-tool-call-1 uses call_id subjects and the tool-call predicate descriptor', () => {
+test('statement: MCP tool-call receipts use call_id subjects and the tool-call predicate descriptor', () => {
   const signer = freshSigner();
   const built = buildMcpReceipt({
     tenant: 'tenant_w640',

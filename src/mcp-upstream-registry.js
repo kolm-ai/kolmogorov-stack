@@ -13,7 +13,11 @@
 //   - JSON-RPC errors become signed MCP tool error results; transport errors
 //     remain route errors because no tool result was produced
 
-import { normalizeMcpToolContract } from './mcp-gateway.js';
+import {
+  attachMcpUpstreamProvenance,
+  hashMcpProvenanceValue,
+  normalizeMcpToolContract,
+} from './mcp-gateway.js';
 
 export const MCP_UPSTREAM_REGISTRY_VERSION = 'w641-mcp-upstream-registry-v1';
 export const MCP_LATEST_PROTOCOL_VERSION = '2025-11-25';
@@ -210,6 +214,14 @@ function _normalizeToolResult(result) {
   return { content: [], structuredContent: result == null ? null : result, isError: false };
 }
 
+function _upstreamProvenance(payload, responseBody) {
+  return {
+    request_id: payload && payload.id != null ? String(payload.id).slice(0, 128) : null,
+    request_hash: hashMcpProvenanceValue(payload),
+    response_hash: hashMcpProvenanceValue(responseBody),
+  };
+}
+
 async function _postJsonRpc(server, payload, fetchImpl) {
   const controller = typeof AbortController === 'function' ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), server.timeout_ms) : null;
@@ -233,12 +245,14 @@ async function _postJsonRpc(server, payload, fetchImpl) {
         throw _err('mcp_upstream_bad_json', `MCP upstream ${server.id} returned non-JSON response`, { server_id: server.id });
       }
     }
-    if (body && body.error) return _toolErrorResult(body.error);
+    if (body && body.error) {
+      return attachMcpUpstreamProvenance(_toolErrorResult(body.error), _upstreamProvenance(payload, body));
+    }
     if (!res.ok) throw _err('mcp_upstream_http_error', `MCP upstream ${server.id} returned HTTP ${res.status}`, { status: res.status, server_id: server.id });
     if (!body || body.jsonrpc !== '2.0' || !('result' in body)) {
       throw _err('mcp_upstream_bad_response', `MCP upstream ${server.id} response is not a JSON-RPC result`, { server_id: server.id });
     }
-    return _normalizeToolResult(body.result);
+    return attachMcpUpstreamProvenance(_normalizeToolResult(body.result), _upstreamProvenance(payload, body));
   } catch (e) {
     if (e && e.name === 'AbortError') {
       throw _err('mcp_upstream_timeout', `MCP upstream ${server.id} timed out after ${server.timeout_ms}ms`, { server_id: server.id });
