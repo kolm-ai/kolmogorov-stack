@@ -21,6 +21,7 @@ import { compileSpec } from './spec-compile.js';
 import { prepareSeedSplit, hashSeeds } from './seeds.js';
 import { TEMPLATES as CHAT_TEMPLATES, pickTemplate, manifestBlock } from './chat-templates.js';
 import { DEFAULT_MODEL } from './models.js';
+import { buildNeuralCompileProvisioningPlan } from './neural-compile-provisioning.js';
 
 // W234 - resolve the chat_template block that gets stamped into the artifact
 // manifest. Callers can either name a template explicitly (chat_template) or
@@ -550,8 +551,38 @@ export async function runJob(job, ctx) {
     //   2. measured student holdout metric
     //   3. portable weight file (.gguf/.onnx/.wasm) bundled into .kolm
     if (job.recipe_class === 'distilled_model') {
+      const provisioning = buildNeuralCompileProvisioningPlan({
+        job,
+        train_count: trainForSynthesis.length,
+        holdout_eval_count: holdoutForEval.length,
+      }, ctx.neuralProvisioning || {});
+      setStage(job, 'distill.neural.provisioning', {
+        ok: provisioning.ok,
+        code: provisioning.code,
+        student_base: provisioning.student_base,
+        portable_target: provisioning.portable_target,
+        runtime_weight_manifest: provisioning.runtime_weight_manifest,
+        execution_lane: provisioning.execution_lane,
+        required_pretrain_checks: provisioning.required_pretrain_checks,
+        post_train_signing_gates: provisioning.post_train_signing_gates,
+      });
+      if (!provisioning.ok) {
+        try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup
+        setStatus(job, 'failed', {
+          error: provisioning.error,
+          error_code: provisioning.code,
+          progress: 45,
+          failed_at: new Date().toISOString(),
+          neural_compile: {
+            requested: true,
+            provisioning,
+            holdout_eval_count: holdoutForEval.length,
+          },
+        });
+        return;
+      }
       setStage(job, 'distill.neural.start', {
-        student_base: job.base_model && job.base_model !== 'none' ? job.base_model : DEFAULT_MODEL,
+        student_base: provisioning.student_base,
         train_count: trainForSynthesis.length,
         holdout_eval_count: holdoutForEval.length,
       });
@@ -581,6 +612,7 @@ export async function runJob(job, ctx) {
             student_path: neural.done?.student_path || null,
             portable_export: neural.manifest?.portable_export || null,
             holdout_eval_count: holdoutForEval.length,
+            provisioning,
           },
         });
         return;
@@ -679,6 +711,7 @@ export async function runJob(job, ctx) {
           portable_export: neural.manifest?.portable_export || null,
           student_holdout_accuracy: neural.studentHoldout,
           holdout_eval_count: neural.holdoutEvalCount ?? holdoutForEval.length,
+          provisioning,
         },
       }));
       try { fs.rmSync(seedsDir, { recursive: true, force: true }); } catch {} // deliberate: cleanup

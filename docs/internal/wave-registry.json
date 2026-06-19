@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 433,
+    "orphan_tests": 434,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 9,
-    "state_local_green": 436,
+    "state_local_green": 437,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 613,
-    "test_only_waves": 433,
-    "waves": 450
+    "test_files": 614,
+    "test_only_waves": 434,
+    "waves": 451
   },
-  "generated_at": "2026-06-19T09:38:59.820Z",
+  "generated_at": "2026-06-19T09:51:56.571Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -513,7 +513,8 @@
       "W996",
       "W998",
       "W999",
-      "W1000"
+      "W1000",
+      "W1001"
     ],
     "plan_only_waves": [
       "W850",
@@ -955,7 +956,8 @@
       "W996",
       "W998",
       "W999",
-      "W1000"
+      "W1000",
+      "W1001"
     ]
   },
   "schema": "kolm.wave_registry.v1",
@@ -1876,7 +1878,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js",
+          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js tests/wave1001-neural-compile-provisioning.test.js",
           "script": "npm:verify:small-llm"
         }
       ],
@@ -2218,7 +2220,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js",
+          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js tests/wave1001-neural-compile-provisioning.test.js",
           "script": "npm:verify:small-llm"
         }
       ],
@@ -2673,7 +2675,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js",
+          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js tests/wave1001-neural-compile-provisioning.test.js",
           "script": "npm:verify:small-llm"
         }
       ],
@@ -4450,7 +4452,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js",
+          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js tests/wave1001-neural-compile-provisioning.test.js",
           "script": "npm:verify:small-llm"
         }
       ],
@@ -6057,7 +6059,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js",
+          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js tests/wave1001-neural-compile-provisioning.test.js",
           "script": "npm:verify:small-llm"
         }
       ],
@@ -8551,6 +8553,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave1000-llamaweb-runner.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W1001",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "research",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node --test --test-concurrency=1 tests/wc04-models.test.js tests/wave295-model-registry-split.test.js tests/wave349-mobile-recommender.test.js tests/wave390-mobile-device-fit.test.js tests/wave409rs-models-devices.test.js tests/wave716-taas-arch-search.test.js tests/wave610-small-llm-frontier-registry.test.js tests/wave1001-neural-compile-provisioning.test.js",
+          "script": "npm:verify:small-llm"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave1001-neural-compile-provisioning.test.js"
       ],
       "test_letter_suffixes": []
     }

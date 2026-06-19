@@ -189,14 +189,15 @@ test('W978 #9 - edge and multimodal frontier tiers name MiniCPM5 and Gemma 4', (
   assert.match(mm.summary, /benchmark_mmlu_pro: 69\.4/);
 });
 
-test('W610/W977/W978 #10 - backend spec marks small-LLM registry and benchmark work closed', () => {
+test('W610/W977/W978/W1001 #10 - backend spec marks small-LLM registry, benchmark, and provisioning work closed', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
   assert.match(spec, /CLOSED W610: add 2026 frontier students/i);
   assert.match(spec, /CLOSED W610: re-point default\/3-4B tier picks off Qwen2\.5/i);
   assert.match(spec, /LFM-1\.0/i, 'spec must record the current LFM license instead of Apache');
   assert.match(spec, /CLOSED W977: Add benchmark score fields/i);
   assert.match(spec, /CLOSED W978: Add MiniCPM5 and Gemma 4 edge frontier rows/i);
+  assert.match(spec, /CLOSED W1001: Add fail-closed neural compile provisioning contract/i);
   assert.doesNotMatch(spec, /\[minor\] No benchmark\/score fields/i);
   assert.doesNotMatch(spec, /MiniCPM5-1B and Gemma-4 E2B\/E4B .*absent/i);
-  assert.match(spec, /real neural-distillation path/i, 'neural training gap must remain tracked');
+  assert.match(spec, /\[external\] Claimable turnkey small-LLM training/i, 'external neural training execution gate must remain tracked');
 });
