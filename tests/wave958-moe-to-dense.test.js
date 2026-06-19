@@ -14,9 +14,11 @@ import { fileURLToPath } from 'node:url';
 
 import {
   MOE_TO_DENSE_VERSION,
+  MOE_TO_DENSE_RECOVERY_VERSION,
   resolveMoeToDenseTrainer,
   doctorMoeToDense,
   runMoeToDense,
+  runMoeToDenseRecoveryPipeline,
 } from '../src/moe-to-dense.js';
 import { distillStrategyCatalog, planDistillStrategy } from '../src/distill-strategy.js';
 
@@ -54,6 +56,8 @@ function tmpFixture() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w958-moe-'));
   const checkpoint = path.join(dir, 'moe.json');
   const stats = path.join(dir, 'router-stats.json');
+  const pairs = path.join(dir, 'pairs.jsonl');
+  const holdout = path.join(dir, 'holdout.jsonl');
   const state = {};
   for (let e = 0; e < 4; e += 1) {
     state[`model.layers.0.block_sparse_moe.experts.${e}.gate_proj.weight`] = [[e + 0.1, e + 0.2], [e + 0.3, e + 0.4]];
@@ -70,7 +74,9 @@ function tmpFixture() {
       [0.05, 0.05, 0.2, 1],
     ],
   }, null, 2));
-  return { dir, checkpoint, stats, out: path.join(dir, 'out') };
+  fs.writeFileSync(pairs, '{"prompt":"add 1+1","response":"2"}\n');
+  fs.writeFileSync(holdout, '{"prompt":"add 2+2","response":"4"}\n');
+  return { dir, checkpoint, stats, pairs, holdout, out: path.join(dir, 'out') };
 }
 
 test('1. moe_to_dense.py self-test covers DO-ACP selection and FFN concat', (t) => {
@@ -240,10 +246,10 @@ test('6. CLI distill moe-to-dense dispatches and returns manifest JSON', (t) => 
   }
 });
 
-test('7. distill strategy marks MoE-to-dense as worker-ready structural collapse', () => {
+test('7. distill strategy marks MoE-to-dense as worker-ready structural collapse plus recovery plan', () => {
   const catalog = distillStrategyCatalog();
   const moe = catalog.strategies.find((s) => s.id === 'moe_to_dense_distill');
-  assert.equal(moe.execution_status, 'worker_ready_structural_collapse');
+  assert.equal(moe.execution_status, 'worker_ready_structural_collapse_recovery_plan');
   assert.ok(moe.references.some((r) => r.paper === 'arXiv:2605.28207'));
 
   const plan = planDistillStrategy({
@@ -257,7 +263,87 @@ test('7. distill strategy marks MoE-to-dense as worker-ready structural collapse
     base_model: 'Qwen/Qwen3-8B',
   }, {});
   assert.equal(plan.recommendation.id, 'moe_to_dense_distill');
-  assert.equal(plan.recommendation.execution_status, 'worker_ready_structural_collapse');
+  assert.equal(plan.recommendation.execution_status, 'worker_ready_structural_collapse_recovery_plan');
+  assert.match(plan.recommendation.command, /--pipeline/);
   assert.match(plan.recommendation.command, /--checkpoint <moe-checkpoint>/);
+  assert.match(plan.recommendation.command, /--pairs <pairs\.jsonl>/);
+  assert.match(plan.recommendation.command, /--holdout <holdout\.jsonl>/);
   assert.doesNotMatch(plan.recommendation.command, /--plan-only/);
+});
+
+test('8. recovery pipeline chains structural collapse into staged KD plan', (t) => {
+  const py = requirePython(t);
+  if (!py) return;
+  const fixture = tmpFixture();
+  const prev = process.env.KOLM_MOE_TO_DENSE_TRAINER;
+  const prevRecovery = process.env.KOLM_MOE_RECOVERY_TRAINER;
+  const prevNo = process.env.KOLM_MOE_TO_DENSE_NO_TRAINER;
+  process.env.KOLM_MOE_TO_DENSE_TRAINER = JSON.stringify([py, PY_WORKER]);
+  process.env.KOLM_MOE_RECOVERY_TRAINER = JSON.stringify([py, path.join(REPO, 'apps', 'trainer', 'distill.py')]);
+  delete process.env.KOLM_MOE_TO_DENSE_NO_TRAINER;
+  try {
+    const r = runMoeToDenseRecoveryPipeline({
+      checkpointPath: fixture.checkpoint,
+      routerStatsPath: fixture.stats,
+      pairsPath: fixture.pairs,
+      holdoutPath: fixture.holdout,
+      outDir: fixture.out,
+      selectedExperts: 2,
+      teacher: 'Qwen/Qwen3-30B-A3B-MoE',
+      studentBase: 'Qwen/Qwen3-8B',
+      namespace: 'w980',
+    });
+    assert.equal(r.ok, true, JSON.stringify(r, null, 2));
+    assert.equal(r.version, MOE_TO_DENSE_RECOVERY_VERSION);
+    assert.equal(r.structural_collapse.manifest.recovery_distillation.required, true);
+    assert.equal(r.recovery_plan.status, 'ready_to_run');
+    assert.deepEqual(r.recovery_plan.stages.map((s) => s.id), ['lm_warmup', 'forward_kl_recovery']);
+    assert.match(r.recovery_plan.stages[0].command.join(' '), /--alpha 0/);
+    assert.match(r.recovery_plan.stages[1].command.join(' '), /--objective forward_kl/);
+    assert.equal(r.recovery_plan.measured_quality.status, 'pending_recovery_run');
+    assert.equal(r.recovery.status, 'planned_only');
+    assert.ok(fs.existsSync(path.join(fixture.out, 'pipeline-manifest.json')));
+  } finally {
+    if (prev === undefined) delete process.env.KOLM_MOE_TO_DENSE_TRAINER;
+    else process.env.KOLM_MOE_TO_DENSE_TRAINER = prev;
+    if (prevRecovery === undefined) delete process.env.KOLM_MOE_RECOVERY_TRAINER;
+    else process.env.KOLM_MOE_RECOVERY_TRAINER = prevRecovery;
+    if (prevNo === undefined) delete process.env.KOLM_MOE_TO_DENSE_NO_TRAINER;
+    else process.env.KOLM_MOE_TO_DENSE_NO_TRAINER = prevNo;
+    fs.rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test('9. CLI distill moe-to-dense --pipeline returns recovery manifest JSON', (t) => {
+  const py = requirePython(t);
+  if (!py) return;
+  const fixture = tmpFixture();
+  const env = {
+    ...process.env,
+    KOLM_MOE_TO_DENSE_TRAINER: JSON.stringify([py, PY_WORKER]),
+    KOLM_MOE_RECOVERY_TRAINER: JSON.stringify([py, path.join(REPO, 'apps', 'trainer', 'distill.py')]),
+  };
+  const r = spawnSync(process.execPath, [
+    CLI,
+    'distill',
+    'moe-to-dense',
+    '--pipeline',
+    '--checkpoint', fixture.checkpoint,
+    '--router-stats', fixture.stats,
+    '--pairs', fixture.pairs,
+    '--holdout', fixture.holdout,
+    '--out', fixture.out,
+    '--selected-experts', '2',
+    '--json',
+  ], { cwd: REPO, env, encoding: 'utf8', timeout: 60000 });
+  try {
+    assert.equal(r.status, 0, r.stderr || r.stdout);
+    const body = JSON.parse(r.stdout);
+    assert.equal(body.ok, true);
+    assert.equal(body.kind, 'moe_to_dense_recovery_pipeline');
+    assert.equal(body.recovery_plan.status, 'ready_to_run');
+    assert.equal(body.recovery_plan.artifact_signing.status, 'pending_recovery_output');
+  } finally {
+    fs.rmSync(fixture.dir, { recursive: true, force: true });
+  }
 });

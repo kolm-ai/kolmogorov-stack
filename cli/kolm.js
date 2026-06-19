@@ -2307,6 +2307,8 @@ USAGE
   kolm distill --namespace <n> [--base-model <name>] [--target <size>]
   kolm distill strategy [--task <t>] [--real-pairs N] [--holdout-pairs N] [--json]
   kolm distill strategy --catalog [--json]
+  kolm distill moe-to-dense --pipeline --checkpoint <moe> --router-stats <json>
+                            --pairs <jsonl> --holdout <jsonl> --out <dir>
   kolm distill --local-worker --spec <file> --seeds <file> --out <dir>
                               [--mode stub|collect|full|doctor]
                               [--teacher <vendor:model>] [--student-base <name>]
@@ -2318,6 +2320,8 @@ USAGE
                               [--no-redact]
   kolm distill --local-worker --list-catalog
                               show the teacher + student-base + method catalog and exit
+  kolm distill moe-to-dense doctor
+                              probe the MoE structural-collapse worker.
 
 DEFAULTS
   --base-model Qwen/Qwen2.5-3B-Instruct
@@ -2466,6 +2470,17 @@ LOCAL-WORKER OBJECTIVE + TRAINER VARIANTS (wave 921)
                        backend defaults to inductor.
   Recipe \`train\` blocks carrying these keys are auto-mapped to the same
   trainer env; explicit flags override the recipe.
+
+MOE-TO-DENSE RECOVERY (wave 980)
+  kolm distill moe-to-dense --pipeline --teacher <moe> --student-base <dense>
+    --checkpoint <moe-checkpoint> --router-stats <router-stats.json>
+    --pairs <pairs.jsonl> --holdout <holdout.jsonl> --out <run-dir> [--json]
+
+  Runs the structural-collapse worker, then emits a staged recovery-KD plan:
+  LM warmup with alpha=0 followed by forward-KL recovery through
+  apps/trainer/distill.py. Add --run-recovery only when the Python ML stack and
+  model files are present; otherwise the command writes an honest manifest with
+  measured_quality/artifact_signing still pending.
 `,
   gate: `kolm gate - explain the conformal gate decision for an artifact.
 
@@ -22256,9 +22271,12 @@ async function cmdDistillMoeToDense(args) {
   const wantJson = args.includes('--json');
   const doctor = args.includes('--doctor') || args.includes('doctor');
   const dryRun = args.includes('--dry-run') || args.includes('--plan-only');
+  const pipeline = args.includes('--pipeline') || args.includes('--recovery-kd');
+  const runRecovery = args.includes('--run-recovery');
   const checkpointPath = pickFlag(args, '--checkpoint') || pickFlag(args, '--moe-checkpoint');
   const routerStatsPath = pickFlag(args, '--router-stats') || pickFlag(args, '--stats');
   const pairsPath = pickFlag(args, '--pairs') || pickFlag(args, '--seeds');
+  const holdoutPath = pickFlag(args, '--holdout') || pickFlag(args, '--eval-jsonl') || pickFlag(args, '--student-holdout');
   const outDir = pickFlag(args, '--out') || pickFlag(args, '--out-dir');
   const teacher = pickFlag(args, '--teacher') || 'local-moe-teacher';
   const studentBase = pickFlag(args, '--student-base') || pickFlag(args, '--base') || 'dense-student';
@@ -22266,6 +22284,10 @@ async function cmdDistillMoeToDense(args) {
   const tenant = pickFlag(args, '--tenant') || pickFlag(args, '--tenant-id') || 'local';
   const selectedFlag = pickFlag(args, '--selected-experts') || pickFlag(args, '--experts');
   const selectedExperts = selectedFlag == null ? 2 : Number(selectedFlag);
+  const warmupEpochs = Number(pickFlag(args, '--warmup-epochs') || 1);
+  const kdEpochs = Number(pickFlag(args, '--kd-epochs') || pickFlag(args, '--recovery-epochs') || 1);
+  const kdAlpha = Number(pickFlag(args, '--kd-alpha') || 0.8);
+  const temperature = Number(pickFlag(args, '--temperature') || 2.0);
   const keepExperts = args.includes('--keep-experts');
   const mod = await import('../src/moe-to-dense.js');
 
@@ -22276,7 +22298,25 @@ async function cmdDistillMoeToDense(args) {
     return;
   }
 
-  const result = mod.runMoeToDense({
+  const result = pipeline ? mod.runMoeToDenseRecoveryPipeline({
+    checkpointPath,
+    routerStatsPath,
+    pairsPath,
+    holdoutPath,
+    outDir,
+    teacher,
+    studentBase,
+    namespace,
+    tenant_id: tenant,
+    selectedExperts,
+    dryRun,
+    keepExperts,
+    runRecovery,
+    warmupEpochs,
+    kdEpochs,
+    temperature,
+    kdAlpha,
+  }) : mod.runMoeToDense({
     checkpointPath,
     routerStatsPath,
     pairsPath,
@@ -22294,6 +22334,15 @@ async function cmdDistillMoeToDense(args) {
   } else {
     console.log(`moe-to-dense: ${result.deferred ? 'deferred' : 'ok'}`);
     console.log(`  run_dir: ${result.run_dir}`);
+    if (pipeline) {
+      console.log(`  pipeline: ${result.version}`);
+      console.log(`  recovery_status: ${result.recovery_plan?.status || '-'}`);
+      if (result.recovery_plan?.blocked_reasons?.length) {
+        console.log(`  blocked: ${result.recovery_plan.blocked_reasons.join(',')}`);
+      }
+      console.log(`  recovery: ${result.recovery?.status || 'planned_only'}`);
+      return;
+    }
     if (result.deferred) {
       console.log('  status: trainer not installed; no dense checkpoint written');
       if (result.install_hint) console.log('  hint: ' + result.install_hint.split('\n')[0]);

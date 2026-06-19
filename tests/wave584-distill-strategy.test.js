@@ -63,7 +63,7 @@ test('W584 #2 - catalog exposes spec id, family coverage, and teacher_required f
   assert.ok(catalog.strategies.some((s) => s.id === 'ropd' && s.teacher_required && !s.requires_teacher_logits));
   assert.ok(catalog.strategies.some((s) => s.id === 'gad' && s.teacher_required && !s.requires_teacher_logits));
   const moe = catalog.strategies.find((s) => s.id === 'moe_to_dense_distill');
-  assert.equal(moe.execution_status, 'worker_ready_structural_collapse');
+  assert.equal(moe.execution_status, 'worker_ready_structural_collapse_recovery_plan');
   assert.equal(moe.requires_moe, true);
   assert.ok(moe.references.some((r) => /moe-to-dense/i.test(r.name)));
 });
@@ -316,9 +316,12 @@ test('W584 #15 - local MoE teacher routes to the MoE-to-dense worker-ready strat
   assert.equal(plan.profile.moe.teacher_is_moe, true);
   assert.equal(plan.profile.moe.teacher_family, 'qwen3-moe-a3b');
   assert.equal(plan.recommendation.id, 'moe_to_dense_distill');
-  assert.equal(plan.recommendation.execution_status, 'worker_ready_structural_collapse');
+  assert.equal(plan.recommendation.execution_status, 'worker_ready_structural_collapse_recovery_plan');
   assert.match(plan.recommendation.command, /kolm distill moe-to-dense/);
+  assert.match(plan.recommendation.command, /--pipeline/);
   assert.match(plan.recommendation.command, /--checkpoint <moe-checkpoint>/);
+  assert.match(plan.recommendation.command, /--pairs <pairs\.jsonl>/);
+  assert.match(plan.recommendation.command, /--holdout <holdout\.jsonl>/);
   assert.doesNotMatch(plan.recommendation.command, /--plan-only/);
 });
 
