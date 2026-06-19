@@ -18,6 +18,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { inspectArtifact } from './forge-inspect.js';
+import { runMoeResidualPrune } from './moe-to-dense.js';
 
 export const EXPERTS_VERSION = 'forge-experts-v1';
 export const EXPERTS_CONTRACT_VERSION = 'w701-v1';
@@ -424,6 +425,62 @@ export async function analyzeExperts(artifactPath, opts = {}) {
   });
 }
 
+export async function executeExpertPrune(artifactPath, opts = {}) {
+  const threshold = _normalizeThreshold(opts.threshold);
+  const safePath = normalizeArtifactPath(artifactPath, opts);
+  const analysis = opts.analysis || await analyzeExperts(safePath.path, { ...opts, threshold });
+  if (!analysis.is_moe) {
+    return _withAnalysisHash({
+      ok: false,
+      kind: 'expert_prune_execution',
+      reason: analysis.reason || 'artifact_is_dense_not_moe',
+      analysis,
+      forge_experts_version: EXPERTS_VERSION,
+      contract_version: EXPERTS_CONTRACT_VERSION,
+    });
+  }
+  if (!Array.isArray(analysis.expert_activations)) {
+    return _withAnalysisHash({
+      ok: false,
+      kind: 'expert_prune_execution',
+      reason: analysis.reason || 'no_expert_activation_table',
+      analysis,
+      forge_experts_version: EXPERTS_VERSION,
+      contract_version: EXPERTS_CONTRACT_VERSION,
+    });
+  }
+  const pruneIds = new Set((analysis.prune_candidates || []).map((row) => Number(row.expert_id)));
+  const keepExpertIds = analysis.expert_activations
+    .map((row) => Number(row.expert_id))
+    .filter((eid) => Number.isInteger(eid) && !pruneIds.has(eid));
+  const checkpointPath = opts.checkpoint_path || opts.checkpointPath;
+  const routerStatsPath = opts.router_stats_path || opts.routerStatsPath
+    || path.join(safePath.artifact_dir, 'receipts', 'router.jsonl');
+  const outDir = opts.out_dir || opts.outDir
+    || path.join(os.tmpdir(), `kolm-pruned-moe-${Date.now()}`);
+  const prune = runMoeResidualPrune({
+    checkpointPath,
+    routerStatsPath,
+    outDir,
+    keepExpertIds,
+    pruneThreshold: threshold,
+    minKeepExperts: opts.min_keep_experts || opts.minKeepExperts || 1,
+    dryRun: Boolean(opts.dry_run || opts.dryRun),
+    timeoutMs: opts.timeout_ms || opts.timeoutMs || 60 * 60 * 1000,
+  });
+  return _withAnalysisHash({
+    ok: prune.ok === true,
+    kind: 'expert_prune_execution',
+    threshold,
+    planned_keep_expert_ids: keepExpertIds,
+    planned_prune_expert_ids: [...pruneIds].sort((a, b) => a - b),
+    source_analysis_sha256: analysis.analysis_sha256,
+    prune,
+    forge_experts_version: EXPERTS_VERSION,
+    contract_version: EXPERTS_CONTRACT_VERSION,
+  });
+}
+
 export function renderActivationBars(analysis, opts = {}) {
   if (!analysis || !analysis.is_moe || !Array.isArray(analysis.expert_activations)) {
     return (analysis && analysis.hint) || 'no_moe_data';
@@ -474,6 +531,7 @@ export default {
   DEFAULT_PRUNE_THRESHOLD,
   EXPERTS_LIMITS,
   analyzeExperts,
+  executeExpertPrune,
   defaultAllowedArtifactRoots,
   expertErrorStatus,
   normalizeArtifactPath,

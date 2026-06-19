@@ -54,10 +54,10 @@ test('W941 generated matrix is current and all hard quantize worker gates are gr
   assert.equal(m.gates.ok, true, JSON.stringify(m.gates.failures, null, 2));
   assert.deepEqual(m.gates.failures, []);
   assert.deepEqual(m.gates.warnings, []);
-  assert.equal(m.summary.method_count, 13);
+  assert.equal(m.summary.method_count, 15);
   assert.equal(m.summary.stable_method_count, 4);
-  assert.equal(m.summary.experimental_method_count, 9);
-  assert.equal(m.summary.dispatch_covered_methods, 13);
+  assert.equal(m.summary.experimental_method_count, 11);
+  assert.equal(m.summary.dispatch_covered_methods, 15);
   assert.equal(m.summary.run_function_count, 12);
   assert.equal(m.summary.cli_flag_count, 13);
   assert.equal(m.summary.receipt_field_count, 19);
@@ -72,8 +72,8 @@ test('W941 generated matrix is current and all hard quantize worker gates are gr
 test('W941 matrix captures methods, flags, dispatch coverage, and receipt fields', () => {
   const m = matrix();
   assert.deepEqual(m.stable_methods, ['awq', 'gptq', 'int4', 'int8']);
-  assert.deepEqual(m.experimental_methods, ['aqlm', 'exl2', 'exl3', 'hqq', 'infoquant', 'qat', 'quip', 'respinquant', 'spinquant']);
-  for (const method of ['int4', 'int8', 'gptq', 'awq', 'aqlm', 'quip', 'exl2', 'exl3', 'hqq', 'qat', 'spinquant', 'respinquant', 'infoquant']) {
+  assert.deepEqual(m.experimental_methods, ['aqlm', 'exl2', 'exl3', 'gemq', 'hqq', 'infoquant', 'mc_moe', 'qat', 'quip', 'respinquant', 'spinquant']);
+  for (const method of ['int4', 'int8', 'gptq', 'awq', 'aqlm', 'quip', 'exl2', 'exl3', 'hqq', 'qat', 'spinquant', 'respinquant', 'infoquant', 'mc_moe', 'gemq']) {
     assert.ok(m.methods.includes(method), `missing method ${method}`);
     const row = m.method_dispatch.find((x) => x.method === method);
     assert.equal(row.dispatch_present, true, `${method} must have dispatch coverage`);

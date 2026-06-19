@@ -251,10 +251,10 @@ function quantizeWorkerMatrixOk() {
       && matrix.gates
       && matrix.gates.ok === true
       && matrix.summary
-      && matrix.summary.method_count === 13
+      && matrix.summary.method_count === 15
       && matrix.summary.stable_method_count === 4
-      && matrix.summary.experimental_method_count === 9
-      && matrix.summary.dispatch_covered_methods === 13
+      && matrix.summary.experimental_method_count === 11
+      && matrix.summary.dispatch_covered_methods === 15
       && matrix.summary.cli_flag_count >= 13
       && matrix.summary.required_receipt_field_gaps === 0
       && matrix.summary.subprocess_boundary_count >= 4

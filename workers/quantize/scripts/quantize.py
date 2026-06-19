@@ -61,7 +61,8 @@ def parse_args():
     p.add_argument("--method", required=req,
                    choices=["int4", "int8", "gptq", "awq",
                             "aqlm", "quip", "exl2", "exl3", "hqq", "qat",
-                            "spinquant", "respinquant", "infoquant"])
+                            "spinquant", "respinquant", "infoquant",
+                            "mc_moe", "gemq"])
     p.add_argument("--in", dest="src", required=req, help="HF model directory")
     p.add_argument("--out", dest="dst", required=req, help="output directory")
     p.add_argument("--calib", default=None,
@@ -176,7 +177,7 @@ def fail(code, msg, extra=None):
 # the experimental flag in src/quantization-oracle.js METHOD_CATALOG.
 _EXPERIMENTAL_METHODS = frozenset((
     "hqq", "exl2", "exl3", "aqlm", "quip", "qat",
-    "spinquant", "respinquant", "infoquant",
+    "spinquant", "respinquant", "infoquant", "mc_moe", "gemq",
 ))
 
 
@@ -612,6 +613,16 @@ _ROTATION_EXTERNAL_RUNNERS = {
         "scheme": "infoquant-psot-w4a4kv4",
         "hint": "set KOLM_INFOQUANT_CMD to a command that writes a HF artifact to {dst}",
     },
+    "mc_moe": {
+        "env": "KOLM_MC_MOE_CMD",
+        "scheme": "mc-moe-expert-1.5-2.5b",
+        "hint": "set KOLM_MC_MOE_CMD to a command that writes a HF MoE artifact to {dst}",
+    },
+    "gemq": {
+        "env": "KOLM_GEMQ_CMD",
+        "scheme": "gemq-global-expert-mixed-precision",
+        "hint": "set KOLM_GEMQ_CMD to a command that writes a HF MoE artifact to {dst}",
+    },
 }
 
 
@@ -623,11 +634,12 @@ def _expand_external_command(template, values):
 
 
 def run_rotation_external(method, src, dst, calib, bits, group_size, device, trust_remote_code=False):
-    """Run SpinQuant/ReSpinQuant/InfoQuant through an operator command.
+    """Run frontier research quantizers through an operator command.
 
-    These repos do not expose a stable shared Python API, so the worker lane is
-    an honest adapter. The command must write files under dst or the run fails
-    closed before a success receipt can be emitted.
+    SpinQuant/ReSpinQuant/InfoQuant and MC-MoE/GEMQ do not expose one stable
+    shared Python API, so this worker lane is an adapter. The command must
+    write files under dst or the run fails closed before a success receipt can
+    be emitted.
     """
     meta = _ROTATION_EXTERNAL_RUNNERS.get(method)
     if not meta:
@@ -926,6 +938,8 @@ _BACKEND_SUPPORTED_BITS = {
     "spinquant": [4],
     "respinquant": [3, 4],
     "infoquant": [4],
+    "mc_moe": [2],
+    "gemq": [2, 3, 4],
 }
 
 
@@ -1195,7 +1209,7 @@ def _group_precision_from_profile(daq_profile, method):
     profile says — rounding the router breaks routing.
 
     Returns dict {router, shared, experts, expert_weight_bits, shared_weight_bits,
-    source}. When no profile (or no per-group signal) is given we fall back to a
+    expert_precision_by_id, source}. When no profile (or no per-group signal) is given we fall back to a
     safe default: router=fp16, shared=q4, experts=int4 (the aggressive default
     src/moe-support.js recommends for the bulk of the parameters).
     """
@@ -1219,12 +1233,15 @@ def _group_precision_from_profile(daq_profile, method):
         "router_weight_bits": 16,
         "shared_weight_bits": 4,
         "expert_weight_bits": 4,
+        "expert_precision_by_id": {},
+        "expert_weight_bits_by_id": {},
         "source": "default_moe_split",
     }
     if not daq_profile:
         return plan
 
     expert_bits = []
+    expert_bits_by_id = {}
     shared_bits = []
     for layer in daq_profile:
         if not isinstance(layer, dict):
@@ -1233,9 +1250,11 @@ def _group_precision_from_profile(daq_profile, method):
         wb = layer.get("weight_bits")
         if not isinstance(wb, (int, float)):
             continue
-        group, _eid = _classify_tensor(lid)
+        group, eid = _classify_tensor(lid)
         if group == "expert":
             expert_bits.append(int(wb))
+            if eid is not None:
+                expert_bits_by_id.setdefault(int(eid), []).append(int(wb))
         elif group == "shared":
             shared_bits.append(int(wb))
         # router entries in the profile are ignored — router stays fp16.
@@ -1255,10 +1274,24 @@ def _group_precision_from_profile(daq_profile, method):
         plan["expert_weight_bits"] = eb
         plan["experts"] = _bits_to_tag(eb, aggressive=True)
         plan["source"] = "daq_profile"
+    if expert_bits_by_id:
+        bits_by_id = {}
+        tags_by_id = {}
+        for eid, bits in sorted(expert_bits_by_id.items()):
+            chosen = _majority(bits)
+            if chosen is None:
+                continue
+            bits_by_id[str(eid)] = chosen
+            tags_by_id[str(eid)] = _bits_to_tag(chosen, aggressive=True)
+        if tags_by_id:
+            plan["expert_weight_bits_by_id"] = bits_by_id
+            plan["expert_precision_by_id"] = tags_by_id
+            plan["source"] = "daq_profile_per_expert"
     if sb is not None:
         plan["shared_weight_bits"] = sb
         plan["shared"] = _bits_to_tag(sb, aggressive=False)
-        plan["source"] = "daq_profile"
+        if plan["source"] != "daq_profile_per_expert":
+            plan["source"] = "daq_profile"
     return plan
 
 
@@ -1307,6 +1340,8 @@ def plan_moe_quantization(grouping, group_precision, tensor_numels,
     router_after_tag = "fp16"  # SACRED
     shared_after_tag = group_precision.get("shared", "q4_k_m")
     expert_after_tag = group_precision.get("experts", "int4")
+    expert_precision_by_id = group_precision.get("expert_precision_by_id") or {}
+    expert_weight_bits_by_id = group_precision.get("expert_weight_bits_by_id") or {}
 
     # Router group.
     router_numel = sum(_numel(n) for n in grouping["router"])
@@ -1324,8 +1359,10 @@ def plan_moe_quantization(grouping, group_precision, tensor_numels,
     experts_after = 0.0
     for eid in grouping["covered_expert_ids"]:
         e_numel = sum(_numel(n) for n in grouping["experts"][eid])
+        eid_key = str(eid)
+        eid_tag = expert_precision_by_id.get(eid_key, expert_after_tag)
         e_before = e_numel * src_bytes_per_param
-        e_after = _bytes_for(e_numel, expert_after_tag)
+        e_after = _bytes_for(e_numel, eid_tag)
         experts_before += e_before
         experts_after += e_after
         per_expert.append({
@@ -1334,7 +1371,8 @@ def plan_moe_quantization(grouping, group_precision, tensor_numels,
             "numel": e_numel,
             "bytes_before": round(e_before, 3),
             "bytes_after": round(e_after, 3),
-            "precision": expert_after_tag,
+            "precision": eid_tag,
+            "weight_bits": expert_weight_bits_by_id.get(eid_key, group_precision.get("expert_weight_bits")),
             "compression": round(e_before / e_after, 4) if e_after > 0 else 0.0,
         })
 
@@ -1345,6 +1383,7 @@ def plan_moe_quantization(grouping, group_precision, tensor_numels,
         "num_experts": grouping["num_experts_seen"],
         "router_precision": router_after_tag,
         "expert_precision": expert_after_tag,
+        "expert_precision_by_id": {str(row["expert_id"]): row["precision"] for row in per_expert},
         "shared_precision": shared_after_tag,
         "precision_source": group_precision.get("source", "default_moe_split"),
         "per_group_bytes": {
@@ -1536,9 +1575,10 @@ def self_test_moe(num_experts=8, num_layers=2):
                                 "weight_bits": 4, "activation_bits": 8,
                                 "kv_bits": 8, "group_size": 128})
         for e in range(num_experts):
+            ebits = [8, 4, 3, 2][e % 4]
             daq_profile.append({
                 "layer_id": f"{pfx}.block_sparse_moe.experts.{e}.w1.weight",
-                "weight_bits": 4, "activation_bits": 4, "kv_bits": 8,
+                "weight_bits": ebits, "activation_bits": 4, "kv_bits": 8,
                 "group_size": 128})
     group_precision = _group_precision_from_profile(daq_profile, "int4")
 
@@ -1555,14 +1595,18 @@ def self_test_moe(num_experts=8, num_layers=2):
         failures.append(
             f"per_expert_bytes has {len(meta['per_expert_bytes'])} entries != {num_experts}")
     for pe in meta["per_expert_bytes"]:
-        if pe["precision"] != group_precision["experts"]:
+        expected_precision = group_precision["expert_precision_by_id"].get(
+            str(pe["expert_id"]), group_precision["experts"])
+        if pe["precision"] != expected_precision:
             failures.append(
                 f"expert {pe['expert_id']} precision {pe['precision']} != "
-                f"{group_precision['experts']}")
+                f"{expected_precision}")
         if pe["bytes_after"] >= pe["bytes_before"]:
             failures.append(
                 f"expert {pe['expert_id']} did not shrink: "
                 f"{pe['bytes_after']} >= {pe['bytes_before']}")
+    if len(set(meta["expert_precision_by_id"].values())) < 3:
+        failures.append("per-expert precision map did not preserve mixed expert bits")
     if meta["router_precision"] != "fp16":
         failures.append(f"run-meta router_precision {meta['router_precision']} != fp16")
 
@@ -1590,10 +1634,12 @@ def self_test_moe(num_experts=8, num_layers=2):
         "expert_layer_count": grouping["expert_layer_count"],
         "router_precision": meta["router_precision"],
         "expert_precision": meta["expert_precision"],
+        "expert_precision_by_id": meta["expert_precision_by_id"],
+        "per_expert_precision_count": len(set(meta["expert_precision_by_id"].values())),
         "shared_precision": meta["shared_precision"],
         "total_compression": meta["total_compression"],
         "precision_source": group_precision["source"],
-        "checks": 4,
+        "checks": 5,
         "failures": failures,
     }
 
@@ -1724,7 +1770,7 @@ def main():
             tool_info = run_hqq(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         elif args.method == "qat":
             tool_info = run_qat(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
-        elif args.method in ("spinquant", "respinquant", "infoquant"):
+        elif args.method in ("spinquant", "respinquant", "infoquant", "mc_moe", "gemq"):
             tool_info = run_rotation_external(args.method, str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         else:
             fail(2, f"unknown method: {args.method}")

@@ -10,7 +10,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 100,
-    "frontier_product_score": 96.3,
+    "frontier_product_score": 97.2,
     "readiness_proof_surplus_score": 104.3,
     "readiness_proof_surplus_ceiling": 110,
     "score_notes": [
@@ -47,9 +47,9 @@
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 0,
-    "categories_with_major_frontier_work_open": 1,
+    "categories_with_major_frontier_work_open": 0,
     "critical_sota_category_closed_pct": 100,
-    "major_sota_category_closed_pct": 93.8,
+    "major_sota_category_closed_pct": 100,
     "readiness": {
       "total": 57,
       "closed": 49,
@@ -122,7 +122,7 @@
       "service": 3,
       "worker": 211
     },
-    "top_gap_count": 22
+    "top_gap_count": 0
   },
   "category_targets": [
     {
@@ -144,12 +144,12 @@
     {
       "id": "moe-distill-quant",
       "stack_area": "training",
-      "status": "sota_review_complete_major_frontier_work_open",
-      "already_at_frontier_count": 8,
-      "improvement_count": 3,
+      "status": "sota_review_complete_local_frontier_aligned",
+      "already_at_frontier_count": 11,
+      "improvement_count": 1,
       "critical_gaps": 0,
-      "major_gaps": 4,
-      "minor_gaps": 2,
+      "major_gaps": 0,
+      "minor_gaps": 1,
       "required_components": 6,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -161,7 +161,7 @@
       "id": "quantization",
       "stack_area": "compiler-runtime",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 14,
+      "already_at_frontier_count": 15,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
@@ -382,1395 +382,7 @@
       ]
     }
   ],
-  "top_component_gaps": [
-    {
-      "path": "apps/trainer/distill.py",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 12,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "http_route_surface",
-        "large_component_contract_risk"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "apps/trainer/main.py",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 10,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "http_route_surface",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/airgap-distill.js",
-      "domain": "training_model_optimization",
-      "surface": "core-backend",
-      "priority_score": 10,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk",
-        "network_or_provider_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "workers/distill/distill.mjs",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 10,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "workers/quantize/scripts/quantize.py",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 10,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_quantize_worker_matrix_and_frontier_method_contract.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "apps/trainer/multinode_launch.py",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 9,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/distill-pipeline.js",
-      "domain": "training_model_optimization",
-      "surface": "core-backend",
-      "priority_score": 9,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "required"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/spec-compile.js",
-      "domain": "compile_artifact_runtime",
-      "surface": "core-backend",
-      "priority_score": 9,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "kv-cache",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract.",
-      "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
-      ]
-    },
-    {
-      "path": "src/wrapper-cli.js",
-      "domain": "compile_artifact_runtime",
-      "surface": "core-backend",
-      "priority_score": 9,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk",
-        "network_or_provider_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "kv-cache",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract.",
-      "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
-      ]
-    },
-    {
-      "path": "workers/distill/scripts/dedup_pairs.py",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 9,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "http_route_surface"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "workers/distill/scripts/train_lora.py",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 9,
-      "risk_signals": [
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "http_route_surface",
-        "large_component_contract_risk"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "workers/distill/scripts/train_preference.py",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 9,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "http_route_surface"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "apps/runtime/serve.py",
-      "domain": "compile_artifact_runtime",
-      "surface": "worker",
-      "priority_score": 8,
-      "risk_signals": [
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk",
-        "network_or_provider_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "kv-cache",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
-      "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
-      ]
-    },
-    {
-      "path": "apps/trainer/backends/remote_ssh.py",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 8,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "network_or_provider_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/artifact.js",
-      "domain": "compile_artifact_runtime",
-      "surface": "core-backend",
-      "priority_score": 8,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "large_component_contract_risk",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "kv-cache",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract.",
-      "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
-      ]
-    },
-    {
-      "path": "src/cloud-distill.js",
-      "domain": "training_model_optimization",
-      "surface": "core-backend",
-      "priority_score": 8,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "large_component_contract_risk",
-        "network_or_provider_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "distillation",
-          "stack_area": "training",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "synthetic-data-curation",
-          "stack_area": "data",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "small-llm-students",
-          "stack_area": "model-registry",
-          "status": "sota_review_complete_local_frontier_aligned",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/compile-pipeline.js",
-      "domain": "compile_artifact_runtime",
-      "surface": "core-backend",
-      "priority_score": 8,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "kv-cache",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
-      "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
-      ]
-    },
-    {
-      "path": "src/forge-experts.js",
-      "domain": "identity_access",
-      "surface": "core-backend",
-      "priority_score": 5,
-      "risk_signals": [
-        "auth_or_tenant_boundary",
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests.",
-      "suggested_verification": [
-        "npm run verify:auth-boundary-matrix",
-        "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
-      ]
-    },
-    {
-      "path": "apps/trainer/moe_to_dense.py",
-      "domain": "training_model_optimization",
-      "surface": "worker",
-      "priority_score": 3,
-      "risk_signals": [
-        "distribution_or_worker_surface",
-        "execution_or_subprocess_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/moe-to-dense.js",
-      "domain": "training_model_optimization",
-      "surface": "core-backend",
-      "priority_score": 2,
-      "risk_signals": [
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/moe-support.js",
-      "domain": "training_model_optimization",
-      "surface": "core-backend",
-      "priority_score": 1,
-      "risk_signals": [
-        "execution_or_subprocess_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/moe-registry.js",
-      "domain": "compile_artifact_runtime",
-      "surface": "core-backend",
-      "priority_score": 0,
-      "risk_signals": [],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "moe-distill-quant",
-          "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
-      "suggested_verification": [
-        "npm run verify:inventions",
-        "npm run verify:benchmark-evidence",
-        "npm run verify:wrapper-cli-matrix",
-        "npm run verify:spec-compile-matrix",
-        "npm run verify:artifact-matrix"
-      ]
-    }
-  ],
+  "top_component_gaps": [],
   "components": [
     {
       "path": "api/cf-config.js",
@@ -5447,7 +4059,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -5503,10 +4115,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep split_or_add_generated_contract_map_before_growth current."
     },
     {
       "path": "apps/runtime/streaming_load_bench.py",
@@ -6686,7 +5296,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -6735,10 +5345,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "apps/trainer/backends/replicate_runner.py",
@@ -7396,7 +6004,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -7445,10 +6053,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep split_or_add_generated_contract_map_before_growth current."
     },
     {
       "path": "apps/trainer/Dockerfile",
@@ -8107,7 +6713,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -8156,10 +6762,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "apps/trainer/merge.py",
@@ -8341,10 +6945,10 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 22397,
-          "lines": 597,
+          "bytes": 32109,
+          "lines": 841,
           "imports": 0,
-          "exports": 25,
+          "exports": 32,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 3,
@@ -8360,7 +6964,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "157829a3eca92a7518074557ceb4809cefb45cf190cdab876c08abfdccca4a31"
+        "sha256": "96bdcb4d923461f735466e4603acbc78f6a45237fd1dd43071aaeeb0da0968ef"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8371,13 +6975,14 @@
         "direct_test_refs": [
           "tests/wave957-apps-atomic-scope.test.js",
           "tests/wave958-moe-to-dense.test.js",
-          "tests/wave584-distill-strategy.test.js"
+          "tests/wave584-distill-strategy.test.js",
+          "tests/wave701-forge-experts-contract.test.js"
         ],
         "category_links": [
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "required"
           }
         ],
@@ -8390,10 +6995,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "apps/trainer/moe.py",
@@ -8500,7 +7103,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -8549,10 +7152,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "apps/trainer/nvfp4.py",
@@ -9864,9 +8465,9 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 2655745,
-          "lines": 57735,
-          "imports": 547,
+          "bytes": 2658896,
+          "lines": 57801,
+          "imports": 548,
           "exports": 1,
           "routes": 0,
           "env_refs": 416,
@@ -9887,7 +8488,7 @@
         ],
         "priority_score": 11,
         "priority_band": "high",
-        "sha256": "95415ef2b4f2d9700105c1ae493608d101ac92ab6aee507e1b6d22cb28dfe813"
+        "sha256": "c036b2075c771bdfc975088ef37c50f6801d56fa66db224ed1aabc0730555376"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -16156,7 +14757,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -16205,10 +14806,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "src/airgap-mode.js",
@@ -16775,7 +15374,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -16831,10 +15430,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_artifact_matrix_and_signed_artifact_runtime_contract current."
     },
     {
       "path": "src/asr-billing.js",
@@ -20494,7 +19091,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -20549,10 +19146,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep split_or_add_generated_contract_map_before_growth current."
     },
     {
       "path": "src/cloud-providers/cerebras.js",
@@ -21131,7 +19726,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -21175,10 +19770,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep split_or_add_generated_contract_map_before_growth current."
     },
     {
       "path": "src/compile-simulator.js",
@@ -27399,7 +25992,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -27454,10 +26047,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract current."
     },
     {
       "path": "src/distill-preference.js",
@@ -30848,10 +29439,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 16733,
-          "lines": 484,
-          "imports": 5,
-          "exports": 13,
+          "bytes": 19020,
+          "lines": 542,
+          "imports": 6,
+          "exports": 14,
           "routes": 0,
           "env_refs": 6,
           "fs_writes": 0,
@@ -30867,7 +29458,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "162028557e0fe4fdf31e1b6f36ef7b7335350b5a526a40ce83069aaab99abd5d"
+        "sha256": "d2bd74178b80f3a4feb3113cffec3110e210c45a41344c0530d63a11614e378f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -30883,7 +29474,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "required"
           }
         ],
@@ -30894,10 +29485,8 @@
           "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests current."
     },
     {
       "path": "src/forge-fit.js",
@@ -37126,7 +35715,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "required"
           }
         ],
@@ -37140,10 +35729,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/moe-support.js",
@@ -37153,10 +35740,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 24654,
-          "lines": 669,
+          "bytes": 27507,
+          "lines": 740,
           "imports": 3,
-          "exports": 7,
+          "exports": 8,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -37170,7 +35757,7 @@
         ],
         "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "01d07d223d3835d81422a20154659906b7f6fd19cdcf7a39de08959293d11b0e"
+        "sha256": "35d93984a10c6fe9e21895f109fa9d114082f9cb5aff873155547125e9ce0e51"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -37186,7 +35773,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "required"
           }
         ],
@@ -37199,10 +35786,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "src/moe-to-dense.js",
@@ -37212,14 +35797,14 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 16761,
-          "lines": 502,
+          "bytes": 22653,
+          "lines": 649,
           "imports": 6,
-          "exports": 9,
+          "exports": 12,
           "routes": 0,
           "env_refs": 6,
           "fs_writes": 0,
-          "subprocess_refs": 5,
+          "subprocess_refs": 6,
           "network_refs": 0,
           "crypto_refs": 0,
           "markers": 0
@@ -37230,7 +35815,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "72dfbc9778f1ef166dcba1c605577f666a04ebd23de8cbe994dfa3d6538d4935"
+        "sha256": "f7180f163ba17f649fc1bc3d01202d0047812aa74121154902a68ddfb5ad10c0"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -37247,7 +35832,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "required"
           }
         ],
@@ -37260,10 +35845,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "src/moe.js",
@@ -41376,8 +39959,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 33054,
-          "lines": 905,
+          "bytes": 33557,
+          "lines": 920,
           "imports": 3,
           "exports": 5,
           "routes": 0,
@@ -41394,7 +39977,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "78cb38e66a965b4b223faba2174d459250026a17e84de151c1eae0dde13e447e"
+        "sha256": "4e6147005cf1c8430fa2977175c653509e058d1fc7608f0ce38dce5ad68c0ed0"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -46123,7 +44706,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -46179,10 +44762,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract current."
     },
     {
       "path": "src/spec-decode-eval.js",
@@ -49963,7 +48544,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -50019,10 +48600,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract current."
     },
     {
       "path": "src/xlang-bakeoff.js",
@@ -51356,7 +49935,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -51405,10 +49984,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/distill/package.json",
@@ -51668,7 +50245,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -51717,10 +50294,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/distill/scripts/eval_adapter.py",
@@ -52362,7 +50937,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -52411,10 +50986,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/distill/scripts/train_preference.py",
@@ -52468,7 +51041,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "sampled"
           },
           {
@@ -52517,10 +51090,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/distill/scripts/train_rejection.py",
@@ -53707,8 +52278,8 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 80474,
-          "lines": 1785,
+          "bytes": 82773,
+          "lines": 1831,
           "imports": 0,
           "exports": 46,
           "routes": 0,
@@ -53729,7 +52300,7 @@
         ],
         "priority_score": 10,
         "priority_band": "high",
-        "sha256": "7940fa60886f9a1737af33a781f9985156123f863fa70316a924ba6e287ffb4b"
+        "sha256": "815ed47a76faec327c0fe941e6e976f6049fda5e96c6cd13e5f5105616a42b09"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -53757,7 +52328,7 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_local_frontier_aligned",
             "relation": "required"
           },
           {
@@ -53806,10 +52377,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_quantize_worker_matrix_and_frontier_method_contract."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_quantize_worker_matrix_and_frontier_method_contract current."
     },
     {
       "path": "workers/quantize/scripts/test_fp4_calib.py",

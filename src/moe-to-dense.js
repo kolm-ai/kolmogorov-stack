@@ -15,6 +15,7 @@ const _repoRoot = path.resolve(_here, '..');
 
 export const MOE_TO_DENSE_VERSION = 'w958-moe-to-dense-v1';
 export const MOE_TO_DENSE_RECOVERY_VERSION = 'w980-moe-to-dense-recovery-v1';
+export const MOE_RESIDUAL_PRUNE_VERSION = 'w1012-moe-residual-prune-v1';
 
 const INSTALL_HINT = [
   'MoE-to-dense structural collapse requires the in-repo Python worker or a compatible external trainer.',
@@ -285,6 +286,149 @@ export function runMoeToDense({
   };
 }
 
+export function runMoeResidualPrune({
+  checkpointPath = null,
+  routerStatsPath = null,
+  outDir = null,
+  teacher = 'local-moe-teacher',
+  studentBase = 'sparse-moe-student',
+  namespace = 'default',
+  tenant_id = 'local',
+  keepExpertIds = null,
+  pruneThreshold = null,
+  minKeepExperts = 1,
+  dryRun = false,
+  timeoutMs = 60 * 60 * 1000,
+} = {}) {
+  if (!checkpointPath && !dryRun) {
+    return { ok: false, error: 'checkpoint_missing', detail: 'checkpointPath required unless dryRun=true' };
+  }
+  if (checkpointPath && !fs.existsSync(checkpointPath)) {
+    return { ok: false, error: 'checkpoint_missing', detail: `checkpoint not found: ${checkpointPath}` };
+  }
+  if (routerStatsPath && !fs.existsSync(routerStatsPath)) {
+    return { ok: false, error: 'router_stats_missing', detail: `router stats not found: ${routerStatsPath}` };
+  }
+  const minKeep = Number(minKeepExperts);
+  if (!Number.isInteger(minKeep) || minKeep < 1 || minKeep > 4096) {
+    return { ok: false, error: 'bad_min_keep_experts', detail: 'minKeepExperts must be an integer in [1,4096]' };
+  }
+  const threshold = pruneThreshold == null ? null : Number(pruneThreshold);
+  if (threshold != null && (!Number.isFinite(threshold) || threshold < 0 || threshold > 1)) {
+    return { ok: false, error: 'bad_prune_threshold', detail: 'pruneThreshold must be in [0,1]' };
+  }
+  const ids = keepExpertIds == null
+    ? null
+    : (Array.isArray(keepExpertIds) ? keepExpertIds : String(keepExpertIds).split(','))
+      .map((v) => Number(v))
+      .filter((v) => Number.isInteger(v) && v >= 0);
+  const t = resolveMoeToDenseTrainer();
+  const runDir = _mkRunDir(outDir);
+  fs.mkdirSync(runDir, { recursive: true });
+  if (!t) {
+    return {
+      ok: true,
+      deferred: true,
+      kind: 'moe_residual_prune',
+      version: MOE_RESIDUAL_PRUNE_VERSION,
+      error: 'no_trainer_installed',
+      trainer_kicked: false,
+      run_dir: runDir,
+      install_hint: INSTALL_HINT,
+    };
+  }
+  const args = [...t.argv.slice(1),
+    '--residual-prune',
+    '--out', runDir,
+    '--teacher', String(teacher || 'local-moe-teacher'),
+    '--student-base', String(studentBase || 'sparse-moe-student'),
+    '--namespace', String(namespace || 'default'),
+    '--tenant', String(tenant_id || 'local'),
+    '--min-keep-experts', String(minKeep),
+  ];
+  if (checkpointPath) args.push('--checkpoint', checkpointPath);
+  if (routerStatsPath) args.push('--router-stats', routerStatsPath);
+  if (ids && ids.length) args.push('--keep-expert-ids', ids.join(','));
+  if (threshold != null) args.push('--prune-threshold', String(threshold));
+  if (dryRun) args.push('--dry-run');
+  const result = spawnSync(t.argv[0], args, {
+    encoding: 'utf8',
+    timeout: timeoutMs,
+    shell: process.platform === 'win32' && /\.(cmd|bat)$/i.test(t.argv[0]),
+  });
+  if (result.status !== 0) {
+    return {
+      ok: false,
+      kind: 'moe_residual_prune',
+      version: MOE_RESIDUAL_PRUNE_VERSION,
+      error: result.status === null ? 'trainer_timeout' : 'trainer_failed',
+      exit_code: result.status,
+      trainer_source: t.source,
+      run_dir: runDir,
+      stdout: String(result.stdout || '').slice(-2000),
+      stderr: String(result.stderr || '').slice(-2000),
+    };
+  }
+  return {
+    ok: true,
+    kind: 'moe_residual_prune',
+    version: MOE_RESIDUAL_PRUNE_VERSION,
+    trainer_source: t.source,
+    trainer: _trainerLabel(t),
+    run_dir: runDir,
+    manifest: _readManifest(runDir),
+    stdout: String(result.stdout || '').slice(-2000),
+  };
+}
+
+export function evaluateMoeRecoveryEvidence({
+  metrics = null,
+  metricPath = null,
+  retentionFloor = 0.7,
+  maxKscoreDrop = 0.03,
+  recoveredCheckpoint = null,
+  artifactReceipt = null,
+} = {}) {
+  let body = metrics;
+  if (!body && metricPath) {
+    body = JSON.parse(fs.readFileSync(metricPath, 'utf8'));
+  }
+  const m = body || {};
+  const teacher = Number(m.teacher_kscore ?? m.teacher_score ?? m.teacher_holdout_accuracy);
+  const student = Number(m.student_kscore ?? m.student_score ?? m.student_holdout_accuracy);
+  const retention = Number.isFinite(Number(m.retention))
+    ? Number(m.retention)
+    : (Number.isFinite(teacher) && teacher > 0 && Number.isFinite(student) ? student / teacher : NaN);
+  const kscoreDrop = Number.isFinite(Number(m.kscore_drop))
+    ? Number(m.kscore_drop)
+    : (Number.isFinite(teacher) && Number.isFinite(student) ? Math.max(0, teacher - student) : NaN);
+  const blocked = [];
+  if (!Number.isFinite(retention)) blocked.push('retention_metric_missing');
+  else if (retention < retentionFloor) blocked.push('retention_below_floor');
+  if (!Number.isFinite(kscoreDrop)) blocked.push('kscore_drop_missing');
+  else if (kscoreDrop > maxKscoreDrop) blocked.push('kscore_drop_exceeds_floor');
+  if (recoveredCheckpoint && !fs.existsSync(recoveredCheckpoint)) blocked.push('recovered_checkpoint_missing');
+  const pass = blocked.length === 0;
+  return {
+    ok: pass,
+    kind: 'moe_recovery_quality_gate',
+    version: MOE_TO_DENSE_RECOVERY_VERSION,
+    retention: Number.isFinite(retention) ? Number(retention.toFixed(6)) : null,
+    kscore_drop: Number.isFinite(kscoreDrop) ? Number(kscoreDrop.toFixed(6)) : null,
+    retention_floor: retentionFloor,
+    max_kscore_drop: maxKscoreDrop,
+    blocked_reasons: blocked,
+    artifact_signing: {
+      status: pass ? 'ready_to_sign' : 'blocked_by_quality_gate',
+      recovered_checkpoint: recoveredCheckpoint ? path.resolve(recoveredCheckpoint) : null,
+      artifact_receipt: artifactReceipt || null,
+      note: pass
+        ? 'Metrics pass the local gate; artifact signing may proceed through the normal compile/sign path.'
+        : 'No signed recovered artifact should be promoted until the measured recovery gate passes.',
+    },
+  };
+}
+
 export function buildMoeToDenseRecoveryPlan({
   collapseManifest = null,
   denseInitPath = null,
@@ -492,10 +636,13 @@ export function runMoeToDenseRecoveryPipeline({
 export default {
   MOE_TO_DENSE_VERSION,
   MOE_TO_DENSE_RECOVERY_VERSION,
+  MOE_RESIDUAL_PRUNE_VERSION,
   resolveMoeToDenseTrainer,
   resolveMoeRecoveryTrainer,
   doctorMoeToDense,
   runMoeToDense,
+  runMoeResidualPrune,
+  evaluateMoeRecoveryEvidence,
   buildMoeToDenseRecoveryPlan,
   runMoeToDenseRecoveryPipeline,
 };

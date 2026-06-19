@@ -2,42 +2,42 @@
   "cli_flags": [
     {
       "flag": "--bits",
-      "line": 72,
+      "line": 73,
       "opt_in": false
     },
     {
       "flag": "--calib",
-      "line": 67,
+      "line": 68,
       "opt_in": false
     },
     {
       "flag": "--calib-fp4",
-      "line": 95,
+      "line": 96,
       "opt_in": true
     },
     {
       "flag": "--calib-fp4-block",
-      "line": 105,
+      "line": 106,
       "opt_in": true
     },
     {
       "flag": "--calib-fp4-max-layers",
-      "line": 109,
+      "line": 110,
       "opt_in": true
     },
     {
       "flag": "--device",
-      "line": 74,
+      "line": 75,
       "opt_in": false
     },
     {
       "flag": "--group-size",
-      "line": 70,
+      "line": 71,
       "opt_in": false
     },
     {
       "flag": "--in",
-      "line": 65,
+      "line": 66,
       "opt_in": false
     },
     {
@@ -47,22 +47,22 @@
     },
     {
       "flag": "--mixed-precision",
-      "line": 77,
+      "line": 78,
       "opt_in": false
     },
     {
       "flag": "--out",
-      "line": 66,
+      "line": 67,
       "opt_in": false
     },
     {
       "flag": "--self-test-moe",
-      "line": 114,
+      "line": 115,
       "opt_in": true
     },
     {
       "flag": "--trust-remote-code",
-      "line": 86,
+      "line": 87,
       "opt_in": true
     }
   ],
@@ -88,8 +88,10 @@
     "aqlm",
     "exl2",
     "exl3",
+    "gemq",
     "hqq",
     "infoquant",
+    "mc_moe",
     "qat",
     "quip",
     "respinquant",
@@ -123,6 +125,11 @@
       "method": "exl3"
     },
     {
+      "dispatch_function": "run_rotation_external",
+      "dispatch_present": true,
+      "method": "gemq"
+    },
+    {
       "dispatch_function": "run_gptq",
       "dispatch_present": true,
       "method": "gptq"
@@ -146,6 +153,11 @@
       "dispatch_function": "run_int_bnb",
       "dispatch_present": true,
       "method": "int8"
+    },
+    {
+      "dispatch_function": "run_rotation_external",
+      "dispatch_present": true,
+      "method": "mc_moe"
     },
     {
       "dispatch_function": "run_qat",
@@ -173,11 +185,13 @@
     "awq",
     "exl2",
     "exl3",
+    "gemq",
     "gptq",
     "hqq",
     "infoquant",
     "int4",
     "int8",
+    "mc_moe",
     "qat",
     "quip",
     "respinquant",
@@ -227,51 +241,51 @@
   ],
   "run_functions": [
     {
-      "line": 446,
+      "line": 447,
       "name": "_run_exllamav2"
     },
     {
-      "line": 341,
+      "line": 342,
       "name": "run_aqlm"
     },
     {
-      "line": 311,
+      "line": 312,
       "name": "run_awq"
     },
     {
-      "line": 480,
+      "line": 481,
       "name": "run_exl2"
     },
     {
-      "line": 486,
+      "line": 487,
       "name": "run_exl3"
     },
     {
-      "line": 730,
+      "line": 742,
       "name": "run_fp4_calibration"
     },
     {
-      "line": 277,
+      "line": 278,
       "name": "run_gptq"
     },
     {
-      "line": 492,
+      "line": 493,
       "name": "run_hqq"
     },
     {
-      "line": 238,
+      "line": 239,
       "name": "run_int_bnb"
     },
     {
-      "line": 533,
+      "line": 534,
       "name": "run_qat"
     },
     {
-      "line": 396,
+      "line": 397,
       "name": "run_quip"
     },
     {
-      "line": 625,
+      "line": 636,
       "name": "run_rotation_external"
     }
   ],
@@ -318,7 +332,7 @@
     {
       "check_false": true,
       "function": "_run_exllamav2",
-      "line": 446,
+      "line": 447,
       "module_names": [
         "exllamav2.conversion.convert"
       ],
@@ -328,7 +342,7 @@
     {
       "check_false": true,
       "function": "run_aqlm",
-      "line": 341,
+      "line": 342,
       "module_names": [
         "aqlm.main"
       ],
@@ -340,7 +354,7 @@
     {
       "check_false": true,
       "function": "run_qat",
-      "line": 533,
+      "line": 534,
       "module_names": [
         "efficient_qat.main_block_ap"
       ],
@@ -352,7 +366,7 @@
     {
       "check_false": true,
       "function": "run_quip",
-      "line": 396,
+      "line": 397,
       "module_names": [
         "quip_sharp.quantize_llama"
       ],
@@ -364,7 +378,7 @@
     {
       "check_false": true,
       "function": "run_rotation_external",
-      "line": 625,
+      "line": 636,
       "module_names": [],
       "repo_envs": [],
       "returncode_checked": true
@@ -372,14 +386,14 @@
   ],
   "summary": {
     "cli_flag_count": 13,
-    "dispatch_covered_methods": 13,
+    "dispatch_covered_methods": 15,
     "exit_code_count": 4,
-    "experimental_method_count": 9,
+    "experimental_method_count": 11,
     "failed_safety_guards": 0,
-    "method_count": 13,
+    "method_count": 15,
     "missing_test_evidence": 0,
-    "quantize_bytes": 80474,
-    "quantize_lines": 1785,
+    "quantize_bytes": 82773,
+    "quantize_lines": 1831,
     "receipt_field_count": 19,
     "required_receipt_field_gaps": 0,
     "run_function_count": 12,

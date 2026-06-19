@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple
 
 VERSION = "w958-moe-to-dense-v1"
+PRUNE_VERSION = "w1012-moe-residual-prune-v1"
 DEFAULT_SELECTED_EXPERTS = 2
 EPS = 1e-8
 
@@ -102,6 +103,20 @@ def _cat_cols(values: Sequence[Any]) -> Any:
             row.extend(v[r])
         out.append(row)
     return out
+
+
+def _take_rows(value: Any, rows: Sequence[int]) -> Any:
+    if _is_tensor(value):
+        idx = torch.tensor(list(rows), dtype=torch.long, device=value.device)  # type: ignore[union-attr]
+        return value.index_select(0, idx)
+    return [value[i] for i in rows]
+
+
+def _take_cols(value: Any, cols: Sequence[int]) -> Any:
+    if _is_tensor(value):
+        idx = torch.tensor(list(cols), dtype=torch.long, device=value.device)  # type: ignore[union-attr]
+        return value.index_select(1, idx)
+    return [[row[i] for i in cols] for row in value]
 
 
 def _zeros(rows: int, cols: int) -> List[List[float]]:
@@ -318,6 +333,163 @@ def _dense_key(expert_key: str, expert_id: int, proj: str) -> str:
     return key
 
 
+def _remap_expert_key(expert_key: str, old_id: int, new_id: int) -> str:
+    escaped = re.escape(f".experts.{old_id}.")
+    return re.sub(escaped, f".experts.{new_id}.", expert_key, count=1)
+
+
+def _parse_expert_ids(raw: Optional[str]) -> Optional[List[int]]:
+    if raw is None or str(raw).strip() == "":
+        return None
+    text = str(raw).strip()
+    if text.startswith("["):
+        vals = json.loads(text)
+    else:
+        vals = [x.strip() for x in text.split(",") if x.strip()]
+    out = []
+    for value in vals:
+        eid = int(value)
+        if eid < 0:
+            raise ValueError("expert ids must be non-negative")
+        out.append(eid)
+    return sorted(set(out))
+
+
+def _select_keep_experts(
+    complete: Sequence[int],
+    counts: Sequence[float],
+    keep_expert_ids: Optional[Sequence[int]],
+    prune_threshold: Optional[float],
+    min_keep: int,
+) -> List[int]:
+    complete_set = set(complete)
+    if keep_expert_ids:
+        kept = [eid for eid in keep_expert_ids if eid in complete_set]
+    else:
+        total = sum(max(0.0, float(counts[eid] if eid < len(counts) else 0.0)) for eid in complete)
+        if total > 0 and prune_threshold is not None:
+            kept = [
+                eid for eid in complete
+                if (max(0.0, float(counts[eid] if eid < len(counts) else 0.0)) / total) >= prune_threshold
+            ]
+        else:
+            kept = list(complete)
+    min_keep = max(1, min(int(min_keep), len(complete)))
+    if len(kept) < min_keep:
+        hot = sorted(
+            complete,
+            key=lambda eid: (float(counts[eid] if eid < len(counts) else 0.0), -eid),
+            reverse=True,
+        )
+        for eid in hot:
+            if eid not in kept:
+                kept.append(eid)
+            if len(kept) >= min_keep:
+                break
+    return sorted(set(kept))
+
+
+def _maybe_prune_router_tensor(value: Any, old_ids: Sequence[int], keep_ids: Sequence[int]) -> Tuple[Any, Optional[str]]:
+    shape = _shape(value)
+    if len(shape) != 2:
+        return value, None
+    max_old = max(old_ids) if old_ids else -1
+    expert_axis = max_old + 1
+    if shape[0] == expert_axis:
+        return _take_rows(value, keep_ids), "rows"
+    if shape[1] == expert_axis:
+        return _take_cols(value, keep_ids), "cols"
+    return value, None
+
+
+def prune_residual_moe_state_dict(
+    state: Mapping[str, Any],
+    stats: Optional[Mapping[str, Any]] = None,
+    keep_expert_ids: Optional[Sequence[int]] = None,
+    prune_threshold: Optional[float] = None,
+    min_keep: int = 1,
+) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Write a smaller sparse-MoE state dict by dropping cold experts.
+
+    Unlike collapse_state_dict(), this preserves the sparse-MoE layout:
+    surviving experts are remapped to contiguous ids and router/gate tensors
+    with an expert axis are trimmed to the same survivor set.
+    """
+    index = _expert_index(state)
+    if not index:
+        raise ValueError("no MoE expert FFN weights found in checkpoint")
+
+    out: Dict[str, Any] = {}
+    handled_expert_keys = set()
+    layer_reports: List[Dict[str, Any]] = []
+    router_remaps: List[Dict[str, Any]] = []
+
+    for layer in sorted(index):
+        experts = index[layer]
+        expert_ids = sorted(experts)
+        complete = [
+            eid for eid in expert_ids
+            if {"gate_proj", "up_proj", "down_proj"}.issubset(set(experts[eid]))
+        ]
+        if not complete:
+            raise ValueError(f"layer {layer} has no complete gate/up/down expert triplets")
+        counts, _gram = _layer_stats(stats or {}, layer, max(complete) + 1)
+        kept = _select_keep_experts(complete, counts, keep_expert_ids, prune_threshold, min_keep)
+        remap = {old: new for new, old in enumerate(kept)}
+        pruned = [eid for eid in expert_ids if eid not in remap]
+
+        for old_id in kept:
+            for key in experts[old_id].values():
+                out[_remap_expert_key(key, old_id, remap[old_id])] = state[key]
+                handled_expert_keys.add(key)
+        for old_id in pruned:
+            for key in experts[old_id].values():
+                handled_expert_keys.add(key)
+
+        layer_reports.append({
+            "layer": layer,
+            "num_experts_before": len(expert_ids),
+            "num_experts_after": len(kept),
+            "kept_experts": kept,
+            "pruned_experts": pruned,
+            "expert_id_remap": {str(old): new for old, new in remap.items()},
+        })
+
+    for key, value in state.items():
+        if key in handled_expert_keys:
+            continue
+        new_value = value
+        for report in layer_reports:
+            layer = report["layer"]
+            if f"layers.{layer}." not in key:
+                continue
+            if "router" not in key and ".gate." not in key and "gate.weight" not in key:
+                continue
+            old_ids = report["kept_experts"] + report["pruned_experts"]
+            new_value, axis = _maybe_prune_router_tensor(new_value, old_ids, report["kept_experts"])
+            if axis:
+                router_remaps.append({
+                    "layer": layer,
+                    "key": key,
+                    "axis": axis,
+                    "kept_experts": report["kept_experts"],
+                })
+            break
+        out[key] = new_value
+
+    report = {
+        "version": PRUNE_VERSION,
+        "algorithm": "moe_residual_prune_router_remap",
+        "layers": layer_reports,
+        "num_layers": len(layer_reports),
+        "router_remaps": router_remaps,
+        "keep_expert_ids": list(keep_expert_ids) if keep_expert_ids else None,
+        "prune_threshold": prune_threshold,
+        "min_keep": min_keep,
+    }
+    return out, report
+
+
 def collapse_state_dict(
     state: Mapping[str, Any],
     stats: Optional[Mapping[str, Any]] = None,
@@ -396,11 +568,16 @@ def collapse_state_dict(
 
 
 def _manifest(args: argparse.Namespace, report: Dict[str, Any], out_checkpoint: Optional[Path], mode: str) -> Dict[str, Any]:
+    is_prune = "residual_prune" in mode
+    objective = "moe_residual_prune" if is_prune else "moe_to_dense"
+    algorithm = report.get("algorithm") or (
+        "moe_residual_prune_router_remap" if is_prune else "moe_to_dense_do_acp_ffn_concat"
+    )
     return {
         "ok": True,
-        "version": VERSION,
-        "objective": "moe_to_dense",
-        "algorithm": "moe_to_dense_do_acp_ffn_concat",
+        "version": PRUNE_VERSION if is_prune else VERSION,
+        "objective": objective,
+        "algorithm": algorithm,
         "mode": mode,
         "created_at": int(time.time()),
         "namespace": args.namespace,
@@ -409,17 +586,18 @@ def _manifest(args: argparse.Namespace, report: Dict[str, Any], out_checkpoint: 
         "checkpoint": os.path.abspath(args.checkpoint) if args.checkpoint else None,
         "router_stats": os.path.abspath(args.router_stats) if args.router_stats else None,
         "out_checkpoint": str(out_checkpoint.resolve()) if out_checkpoint else None,
-        "structural_collapse": report,
+        "structural_collapse": None if is_prune else report,
+        "residual_moe_prune": report if is_prune else None,
         "recovery_distillation": {
-            "required": True,
+            "required": not is_prune,
             "recommended_objective": "forward_kl",
             "trainer": "apps/trainer/distill.py",
             "pairs": os.path.abspath(args.pairs) if args.pairs else None,
-            "status": "ready_for_recovery_kd" if args.pairs else "needs_pairs",
+            "status": "ready_for_recovery_kd" if args.pairs else ("optional_after_prune" if is_prune else "needs_pairs"),
         },
         "frontier_reference": {
             "paper": "arXiv:2605.28207",
-            "method": "score_select_group_concat_then_forward_kl",
+            "method": "residual_moe_prune_router_remap" if is_prune else "score_select_group_concat_then_forward_kl",
         },
     }
 
@@ -457,6 +635,34 @@ def run(args: argparse.Namespace) -> Dict[str, Any]:
         raise ValueError("--checkpoint is required unless --dry-run has router stats only")
 
     state, kind = _load_checkpoint(args.checkpoint)
+    if args.residual_prune:
+        keep_ids = _parse_expert_ids(args.keep_expert_ids)
+        if args.prune_threshold is not None and not (0 <= args.prune_threshold <= 1):
+            raise ValueError("--prune-threshold must be in [0,1]")
+        pruned, report = prune_residual_moe_state_dict(
+            state,
+            stats=stats,
+            keep_expert_ids=keep_ids,
+            prune_threshold=args.prune_threshold,
+            min_keep=args.min_keep_experts,
+        )
+        out_name = {
+            "json": "reduced-moe.json",
+            "torch": "reduced-moe.pt",
+            "safetensors": "reduced-moe.safetensors",
+        }[kind]
+        out_checkpoint = out_dir / out_name
+        if args.dry_run:
+            mode = "dry_run_residual_prune"
+            out_checkpoint = None
+        else:
+            _save_checkpoint(pruned, out_checkpoint, kind)
+            mode = "residual_prune"
+        meta = _manifest(args, report, out_checkpoint, mode)
+        _write_json(out_dir / "run-meta.json", meta)
+        _write_json(out_dir / "manifest.json", meta)
+        return meta
+
     collapsed, report = collapse_state_dict(
         state,
         stats=stats,
@@ -520,6 +726,20 @@ def self_test() -> Dict[str, Any]:
     checks.append("ffn_concat_shapes")
     checks.append("expert_keys_removed")
 
+    pruned, prune_report = prune_residual_moe_state_dict(
+        state,
+        {"activation_counts": counts, "activation_gram": gram},
+        prune_threshold=0.2,
+        min_keep=2,
+    )
+    kept = prune_report["layers"][0]["kept_experts"]
+    assert len(kept) == 3
+    assert any(".experts.0." in key for key in pruned)
+    assert any(".experts.1." in key for key in pruned)
+    assert any(".experts.2." in key for key in pruned)
+    assert not any(".experts.3." in key for key in pruned)
+    checks.append("residual_prune_remaps_experts")
+
     tmp = Path(tempfile.mkdtemp(prefix="kolm-moe-to-dense-"))
     try:
         ckpt = tmp / "moe.json"
@@ -539,6 +759,21 @@ def self_test() -> Dict[str, Any]:
         assert meta["recovery_distillation"]["recommended_objective"] == "forward_kl"
         checks.append("json_checkpoint_roundtrip")
         checks.append("manifest_recovery_kd")
+
+        prune_out = tmp / "prune-out"
+        prune_args = parse_args([
+            "--checkpoint", str(ckpt),
+            "--router-stats", str(stats),
+            "--out", str(prune_out),
+            "--residual-prune",
+            "--prune-threshold", "0.2",
+            "--min-keep-experts", "2",
+        ])
+        prune_meta = run(prune_args)
+        assert prune_meta["mode"] == "residual_prune"
+        assert Path(prune_meta["out_checkpoint"]).exists()
+        assert prune_meta["residual_moe_prune"]["layers"][0]["num_experts_after"] == 3
+        checks.append("residual_prune_checkpoint_roundtrip")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -563,6 +798,15 @@ def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
     p.add_argument("--namespace", default="default")
     p.add_argument("--tenant", default="local")
     p.add_argument("--keep-experts", action="store_true")
+    p.add_argument("--residual-prune", action="store_true",
+                   help="preserve sparse-MoE architecture while dropping cold experts, "
+                        "remapping surviving experts to contiguous ids and trimming router axes")
+    p.add_argument("--keep-expert-ids",
+                   help="comma-separated or JSON array of expert ids to keep for --residual-prune")
+    p.add_argument("--prune-threshold", type=float, default=None,
+                   help="activation-probability floor for --residual-prune when --keep-expert-ids is omitted")
+    p.add_argument("--min-keep-experts", type=int, default=1,
+                   help="minimum experts to keep per layer for --residual-prune")
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--preflight-only", action="store_true")
     p.add_argument("--self-test", action="store_true")

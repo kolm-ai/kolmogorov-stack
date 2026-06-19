@@ -14,6 +14,7 @@
 //   (3) quantizes each expert block independently + records per-expert
 //       bytes-before/after;
 //   (4) emits run-meta {moe, num_experts, router_precision, expert_precision,
+//       expert_precision_by_id,
 //       per_group_bytes, total_compression}.
 //
 // A full MoE model run needs a large model (infra tail), so this locks the
@@ -87,7 +88,7 @@ test('SRC #3 — three parameter groups: router (sacred fp16), shared, per-exper
 
 test('SRC #4 — run-meta records the required NEXT-4 fields', () => {
   for (const field of ['"moe": True', '"num_experts"', '"router_precision"',
-                       '"expert_precision"', '"per_group_bytes"', '"total_compression"',
+                       '"expert_precision"', '"expert_precision_by_id"', '"per_group_bytes"', '"total_compression"',
                        '"per_expert_bytes"']) {
     assert.ok(QUANTIZE.includes(field), `run-meta must record ${field}`);
   }
@@ -116,15 +117,17 @@ test('LIVE #1 — --self-test-moe passes (CPU, deterministic, 4 invariants)', ()
   assert.equal(out.ok, true, `self-test failures: ${JSON.stringify(out.failures)}`);
   // Invariant 1: router stays fp16 (sacred).
   assert.equal(out.router_precision, 'fp16', 'router must stay fp16');
-  // Invariant 2: every expert grouped + aggressive precision (int4 here).
-  assert.equal(out.expert_precision, 'int4', 'experts must get the aggressive precision');
+  // Invariant 2: every expert grouped + per-expert precision preserved.
+  assert.ok(out.per_expert_precision_count >= 3, 'experts must keep mixed per-expert precision');
+  assert.equal(out.expert_precision_by_id['0'], 'q8_0');
+  assert.equal(out.expert_precision_by_id['2'], 'iq3_xxs');
   // Invariant 3: grouping covers all expert layers (8 experts x 2 layers x 3 w-matrices).
   assert.equal(out.expert_layer_count, 48, 'grouping must cover all expert FFN tensors');
   assert.equal(out.num_experts, 8, 'all 8 synthetic experts must be seen');
   // Invariant 4: real compression (> 1).
   assert.ok(out.total_compression > 1.0, `compression must exceed 1: ${out.total_compression}`);
   // Per-group precision came from the DAQ profile, not the default fallback.
-  assert.equal(out.precision_source, 'daq_profile');
+  assert.equal(out.precision_source, 'daq_profile_per_expert');
 });
 
 test('LIVE #2 — --self-test-moe is deterministic (identical JSON across runs)', () => {

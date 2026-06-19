@@ -74,13 +74,14 @@ function extractRunFunctions(src) {
 }
 
 function methodDispatchCoverage(src, choices) {
+  const externalCommandMethods = ['spinquant', 'respinquant', 'infoquant', 'mc_moe', 'gemq'];
   const rotationDispatchPresent = src.includes('def run_rotation_external(')
-    && src.includes('elif args.method in ("spinquant", "respinquant", "infoquant"):')
+    && src.includes('elif args.method in ("spinquant", "respinquant", "infoquant", "mc_moe", "gemq"):')
     && src.includes('tool_info = run_rotation_external(');
   return choices.map((method) => {
     let dispatch = null;
     if (method === 'int4' || method === 'int8') dispatch = 'run_int_bnb';
-    else if (['spinquant', 'respinquant', 'infoquant'].includes(method) && rotationDispatchPresent) dispatch = 'run_rotation_external';
+    else if (externalCommandMethods.includes(method) && rotationDispatchPresent) dispatch = 'run_rotation_external';
     else {
       const re = new RegExp(`elif args\\.method == ["']${method}["']:\\s*\\n\\s*tool_info = (run_[a-z0-9_]+)\\(`);
       const m = src.match(re);
@@ -160,7 +161,7 @@ function safetyGuards(src) {
   const mainIdx = src.indexOf('def main():');
   const mainBlock = mainIdx >= 0 ? src.slice(mainIdx) : '';
   return {
-    method_choices_argparse: src.includes('choices=["int4", "int8", "gptq", "awq"') && src.includes('"qat"') && src.includes('"spinquant"'),
+    method_choices_argparse: src.includes('choices=["int4", "int8", "gptq", "awq"') && src.includes('"qat"') && src.includes('"spinquant"') && src.includes('"mc_moe"') && src.includes('"gemq"'),
     experimental_methods_env_gated: src.includes('KOLM_ENABLE_EXPERIMENTAL_QUANTS') && src.includes('guard_experimental_method(args.method)'),
     stable_methods_fail_hint: src.includes('"stable_methods": ["int4", "int8", "gptq", "awq"]'),
     lazy_imports_per_method: src.includes('def run_int_bnb') && src.includes('except ImportError as e') && src.includes('missing python deps'),
@@ -250,9 +251,9 @@ function buildMatrix() {
   };
 
   const failures = [];
-  if (summary.method_count !== 13) failures.push({ gate: 'method_count', expected: 13, actual: summary.method_count });
+  if (summary.method_count !== 15) failures.push({ gate: 'method_count', expected: 15, actual: summary.method_count });
   if (summary.stable_method_count !== 4) failures.push({ gate: 'stable_methods', expected: 4, actual: summary.stable_method_count });
-  if (summary.experimental_method_count !== 9) failures.push({ gate: 'experimental_methods', expected: 9, actual: summary.experimental_method_count });
+  if (summary.experimental_method_count !== 11) failures.push({ gate: 'experimental_methods', expected: 11, actual: summary.experimental_method_count });
   if (missingDispatch.length) failures.push({ gate: 'method_dispatch', missing: missingDispatch });
   if (summary.cli_flag_count < 13) failures.push({ gate: 'cli_flags', count: summary.cli_flag_count });
   if (missingReceiptFields.length) failures.push({ gate: 'receipt_fields', missing: missingReceiptFields });

@@ -498,6 +498,76 @@ export function pinExperts({ artifact, expert_ids, runtime } = {}) {
   };
 }
 
+export function recommendMoeRuntimePlan({
+  moe_info,
+  runtime = 'vllm',
+  gpu_count = 1,
+  target_vram_gb = 24,
+  hot_expert_ids = [],
+  latency_priority = 'balanced',
+} = {}) {
+  if (!moe_info || typeof moe_info !== 'object') {
+    throw new Error('recommendMoeRuntimePlan: moe_info object required');
+  }
+  const numExperts = moe_info.num_experts || moe_info.experts || 0;
+  const topK = moe_info.experts_per_token || moe_info.top_k || 0;
+  if (!Number.isFinite(numExperts) || numExperts < 2 || !Number.isFinite(topK) || topK < 1) {
+    throw new Error('recommendMoeRuntimePlan: moe_info needs num_experts>=2 and experts_per_token>=1');
+  }
+  const gpus = Math.max(1, Math.trunc(Number(gpu_count) || 1));
+  const target = Math.max(1, Number(target_vram_gb) || 24);
+  const validRuntime = String(runtime || 'vllm').toLowerCase();
+  const epCapable = ['vllm', 'sglang', 'tensorrt', 'tensorrt-llm'].includes(validRuntime);
+  const policy = recommendQuantPolicy({ moe_info, target_vram_gb: target });
+  const hotIds = [...new Set((hot_expert_ids || [])
+    .map((v) => Number(v))
+    .filter((v) => Number.isInteger(v) && v >= 0 && v < numExperts))]
+    .sort((a, b) => a - b);
+  const hotBudget = hotIds.length || Math.min(numExperts, Math.max(topK, gpus * topK));
+  const offload = policy.projected_hot_vram_gb > target || hotBudget < numExperts;
+  const placement = epCapable && gpus > 1
+    ? 'expert_parallel_all_to_all'
+    : offload
+      ? 'hot_expert_pin_with_cpu_offload'
+      : 'single_device_all_experts_resident';
+  const dynamicPrecision = {
+    algorithm: 'dynaexq_budgeted_precision',
+    router: 'fp16',
+    hot_experts: policy.experts === 'iq2_xxs' && latency_priority === 'quality' ? 'iq3_xxs' : policy.experts,
+    warm_experts: policy.experts,
+    cold_experts: policy.experts === 'q4_k_m' ? 'iq4_xs' : 'iq2_xxs',
+    budget_source: 'target_vram_gb',
+  };
+  const runtimeArgs = [];
+  if (placement === 'expert_parallel_all_to_all') {
+    runtimeArgs.push('--enable-expert-parallel', '--tensor-parallel-size', String(gpus));
+  }
+  if (offload && validRuntime === 'vllm') {
+    runtimeArgs.push('--cpu-offload-gb', String(Math.max(1, Math.ceil(policy.projected_cold_dram_gb || 1))));
+  }
+  return {
+    ok: true,
+    runtime: validRuntime,
+    placement,
+    gpu_count: gpus,
+    target_vram_gb: target,
+    expert_parallelism: {
+      enabled: placement === 'expert_parallel_all_to_all',
+      strategy: epCapable ? 'runtime_native_ep' : 'not_supported_by_runtime',
+      all_to_all: epCapable && gpus > 1,
+    },
+    offload: {
+      enabled: offload,
+      cold_experts: Math.max(0, numExperts - hotBudget),
+      hot_expert_budget: hotBudget,
+    },
+    dynamic_precision: dynamicPrecision,
+    quant_policy: policy,
+    runtime_args: runtimeArgs,
+    moe_support_version: MOE_SUPPORT_VERSION,
+  };
+}
+
 /**
  * Aggregate inference traces into a per-expert hit-count table.
  *
@@ -663,6 +733,7 @@ export default {
   detectMoE,
   estimateMoEMemory,
   pinExperts,
+  recommendMoeRuntimePlan,
   expertHotness,
   recommendQuantPolicy,
 };

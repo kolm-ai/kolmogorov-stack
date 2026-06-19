@@ -9,6 +9,7 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import express from 'express';
+import { spawnSync } from 'node:child_process';
 
 import {
   DEFAULT_PRUNE_THRESHOLD,
@@ -16,6 +17,7 @@ import {
   EXPERTS_LIMITS,
   EXPERTS_VERSION,
   analyzeExperts,
+  executeExpertPrune,
   expertErrorStatus,
   normalizeArtifactPath,
   renderActivationBars,
@@ -23,6 +25,7 @@ import {
 } from '../src/forge-experts.js';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
+const PY_WORKER = path.join(ROOT, 'apps', 'trainer', 'moe_to_dense.py');
 const HEX64_RE = /^[a-f0-9]{64}$/;
 
 function read(rel) {
@@ -59,6 +62,34 @@ function writeArtifactDir(base, name = 'artifact') {
 
 function writeRouterLog(artifactDir, lines) {
   fs.writeFileSync(path.join(artifactDir, 'receipts', 'router.jsonl'), lines.join('\n') + '\n');
+}
+
+function pythonBin() {
+  const candidates = [
+    process.env.KOLM_PYTHON,
+    process.env.PYTHON,
+    path.join(os.homedir(), '.cache', 'codex-runtimes', 'codex-primary-runtime', 'dependencies', 'python',
+      process.platform === 'win32' ? 'python.exe' : 'bin/python'),
+    process.platform === 'win32' ? 'python' : 'python3',
+    'python3',
+  ].filter(Boolean);
+  for (const candidate of candidates) {
+    const r = spawnSync(candidate, ['--version'], { encoding: 'utf8', timeout: 10000 });
+    if (!r.error && r.status === 0) return candidate;
+  }
+  return null;
+}
+
+function writeMoeCheckpoint(dir) {
+  const checkpoint = path.join(dir, 'moe.json');
+  const state = {};
+  for (let e = 0; e < 4; e += 1) {
+    state[`model.layers.0.block_sparse_moe.experts.${e}.gate_proj.weight`] = [[e + 0.1, e + 0.2], [e + 0.3, e + 0.4]];
+    state[`model.layers.0.block_sparse_moe.experts.${e}.up_proj.weight`] = [[e + 1.1, e + 1.2], [e + 1.3, e + 1.4]];
+    state[`model.layers.0.block_sparse_moe.experts.${e}.down_proj.weight`] = [[e + 2.1, e + 2.2], [e + 2.3, e + 2.4]];
+  }
+  fs.writeFileSync(checkpoint, JSON.stringify({ state_dict: state }, null, 2));
+  return checkpoint;
 }
 
 async function withServer(app, fn) {
@@ -178,6 +209,44 @@ test('W701 renderActivationBars is ASCII and clamps width', () => {
   assert.doesNotMatch(rendered, /[^\x00-\x7F]/);
   assert.match(rendered, /Expert\s+0\s+#{80}\s+100\.0%/);
   assert.match(rendered, /Expert\s+1\s+#{20}-{60}\s+25\.0%  prune\?/);
+});
+
+test('W1012 executeExpertPrune writes a reduced residual-MoE checkpoint', async (t) => {
+  const py = pythonBin();
+  if (!py) {
+    t.skip('python not available');
+    return;
+  }
+  const root = freshDir('kolm-w1012-forge-prune-');
+  const prev = process.env.KOLM_MOE_TO_DENSE_TRAINER;
+  t.after(() => {
+    if (prev === undefined) delete process.env.KOLM_MOE_TO_DENSE_TRAINER;
+    else process.env.KOLM_MOE_TO_DENSE_TRAINER = prev;
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+  process.env.KOLM_MOE_TO_DENSE_TRAINER = JSON.stringify([py, PY_WORKER]);
+  const artifactDir = writeArtifactDir(root);
+  writeRouterLog(artifactDir, [
+    JSON.stringify({ experts_activated: [0, 1] }),
+    JSON.stringify({ experts_activated: [1, 3] }),
+    JSON.stringify({ experts_activated: [1, 2] }),
+  ]);
+  const checkpoint = writeMoeCheckpoint(root);
+  const outDir = path.join(root, 'pruned');
+  const result = await executeExpertPrune(artifactDir, {
+    allowed_root: root,
+    threshold: 0.25,
+    checkpointPath: checkpoint,
+    outDir,
+    minKeepExperts: 2,
+  });
+  assert.equal(result.ok, true, JSON.stringify(result, null, 2));
+  assert.equal(result.kind, 'expert_prune_execution');
+  assert.match(result.analysis_sha256, HEX64_RE);
+  assert.match(result.source_analysis_sha256, HEX64_RE);
+  assert.equal(result.prune.manifest.objective, 'moe_residual_prune');
+  assert.equal(result.prune.manifest.residual_moe_prune.layers[0].num_experts_after, 2);
+  assert.ok(fs.existsSync(result.prune.manifest.out_checkpoint));
 });
 
 test('W701 /v1/experts fences artifact roots and redacts filesystem paths', async (t) => {

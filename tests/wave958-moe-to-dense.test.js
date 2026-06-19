@@ -15,9 +15,12 @@ import { fileURLToPath } from 'node:url';
 import {
   MOE_TO_DENSE_VERSION,
   MOE_TO_DENSE_RECOVERY_VERSION,
+  MOE_RESIDUAL_PRUNE_VERSION,
   resolveMoeToDenseTrainer,
   doctorMoeToDense,
+  evaluateMoeRecoveryEvidence,
   runMoeToDense,
+  runMoeResidualPrune,
   runMoeToDenseRecoveryPipeline,
 } from '../src/moe-to-dense.js';
 import { distillStrategyCatalog, planDistillStrategy } from '../src/distill-strategy.js';
@@ -90,6 +93,7 @@ test('1. moe_to_dense.py self-test covers DO-ACP selection and FFN concat', (t) 
   assert.equal(env.version, MOE_TO_DENSE_VERSION);
   assert.ok(env.checks.includes('do_acp_diverse_selection'));
   assert.ok(env.checks.includes('ffn_concat_shapes'));
+  assert.ok(env.checks.includes('residual_prune_checkpoint_roundtrip'));
   assert.ok(env.checks.includes('manifest_recovery_kd'));
 });
 
@@ -346,4 +350,53 @@ test('9. CLI distill moe-to-dense --pipeline returns recovery manifest JSON', (t
   } finally {
     fs.rmSync(fixture.dir, { recursive: true, force: true });
   }
+});
+
+test('10. residual MoE prune writes a reduced sparse-MoE checkpoint', (t) => {
+  const py = requirePython(t);
+  if (!py) return;
+  const fixture = tmpFixture();
+  const prev = process.env.KOLM_MOE_TO_DENSE_TRAINER;
+  process.env.KOLM_MOE_TO_DENSE_TRAINER = JSON.stringify([py, PY_WORKER]);
+  try {
+    const r = runMoeResidualPrune({
+      checkpointPath: fixture.checkpoint,
+      routerStatsPath: fixture.stats,
+      outDir: fixture.out,
+      pruneThreshold: 0.2,
+      minKeepExperts: 2,
+      namespace: 'w1012',
+    });
+    assert.equal(r.ok, true, JSON.stringify(r, null, 2));
+    assert.equal(r.version, MOE_RESIDUAL_PRUNE_VERSION);
+    assert.equal(r.manifest.objective, 'moe_residual_prune');
+    assert.equal(r.manifest.residual_moe_prune.layers[0].num_experts_before, 4);
+    assert.equal(r.manifest.residual_moe_prune.layers[0].num_experts_after, 3);
+    const reduced = JSON.parse(fs.readFileSync(r.manifest.out_checkpoint, 'utf8')).state_dict;
+    assert.equal(Object.keys(reduced).some((key) => key.includes('.experts.3.')), false);
+    assert.equal(Object.keys(reduced).some((key) => key.includes('.experts.2.')), true);
+  } finally {
+    if (prev === undefined) delete process.env.KOLM_MOE_TO_DENSE_TRAINER;
+    else process.env.KOLM_MOE_TO_DENSE_TRAINER = prev;
+    fs.rmSync(fixture.dir, { recursive: true, force: true });
+  }
+});
+
+test('11. recovery evidence gate blocks signing until measured retention passes', () => {
+  const blocked = evaluateMoeRecoveryEvidence({
+    metrics: { teacher_kscore: 0.9, student_kscore: 0.6 },
+    retentionFloor: 0.8,
+    maxKscoreDrop: 0.03,
+  });
+  assert.equal(blocked.ok, false);
+  assert.equal(blocked.artifact_signing.status, 'blocked_by_quality_gate');
+  assert.ok(blocked.blocked_reasons.includes('retention_below_floor'));
+
+  const pass = evaluateMoeRecoveryEvidence({
+    metrics: { teacher_kscore: 0.9, student_kscore: 0.885 },
+    retentionFloor: 0.8,
+    maxKscoreDrop: 0.03,
+  });
+  assert.equal(pass.ok, true);
+  assert.equal(pass.artifact_signing.status, 'ready_to_sign');
 });

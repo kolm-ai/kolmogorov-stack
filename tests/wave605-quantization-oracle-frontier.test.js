@@ -35,12 +35,14 @@ test('1. catalog exposes Blackwell FP4 export methods and device presets', () =>
   assert.equal(catalog.methods.gemq.execution_status, 'worker_external_repo');
   assert.equal(catalog.methods.gemq.moe_only, true);
 
-  for (const method of ['spinquant', 'respinquant', 'infoquant']) {
+  for (const method of ['spinquant', 'respinquant', 'infoquant', 'mc_moe', 'gemq']) {
     assert.equal(catalog.methods[method].execution_status, 'worker_external_repo');
     assert.equal(catalog.methods[method].worker_method, method);
     assert.equal(catalog.methods[method].experimental, true);
-    assert.equal(catalog.methods[method].activation_quantization, true);
-    assert.equal(catalog.methods[method].kv_quantization, true);
+    if (['spinquant', 'respinquant', 'infoquant'].includes(method)) {
+      assert.equal(catalog.methods[method].activation_quantization, true);
+      assert.equal(catalog.methods[method].kv_quantization, true);
+    }
   }
 
   assert.equal(catalog.devices['b200-180gb'].blackwell, true);
@@ -177,8 +179,10 @@ test('6. W4A4 rotation frontier methods are command-backed experimental worker l
   assert.equal(availability.reason, 'experimental_enabled');
 
   const worker = fs.readFileSync(path.join(ROOT, 'workers', 'quantize', 'scripts', 'quantize.py'), 'utf8');
-  assert.match(worker, /"spinquant", "respinquant", "infoquant"/);
+  assert.match(worker, /"spinquant", "respinquant", "infoquant", "mc_moe", "gemq"/);
   assert.match(worker, /KOLM_SPINQUANT_CMD/);
+  assert.match(worker, /KOLM_MC_MOE_CMD/);
+  assert.match(worker, /KOLM_GEMQ_CMD/);
   assert.match(worker, /run_rotation_external/);
 });
 
@@ -207,11 +211,14 @@ test('7. MoE input routes to router-fp16 advisory policy and names external expe
   assert.equal(plan.recommendation.command, null);
   assert.equal(plan.recommendation.moe_quantization.policy.router, 'fp16');
   assert.ok(plan.recommendation.moe_quantization.policy.experts);
+  assert.equal(plan.recommendation.moe_quantization.runtime_plan.placement, 'hot_expert_pin_with_cpu_offload');
+  assert.equal(plan.recommendation.moe_quantization.runtime_plan.dynamic_precision.algorithm, 'dynaexq_budgeted_precision');
   assert.ok(plan.recommendation.proof.some((line) => /router fp16/.test(line)));
 
   const external = plan.recommendation.moe_quantization.external_candidates.map((c) => c.method).sort();
   assert.deepEqual(external, ['gemq', 'mc_moe']);
   const mc = plan.candidates.find((c) => c.method === 'mc_moe');
   assert.ok(mc.warnings.includes('requires_external_research_repo'));
+  assert.equal(mc.warnings.includes('external_runner_not_wired'), false);
   assert.ok(mc.warnings.some((w) => w.includes('KOLM_ENABLE_EXPERIMENTAL_QUANTS')));
 });

@@ -150,17 +150,19 @@ test('5c. CLI quantization oracle accepts MoE topology flags', () => {
   assert.equal(plan.recommendation.primary.method, 'moe_mixed_policy');
   assert.equal(plan.recommendation.command, null);
   assert.equal(plan.recommendation.moe_quantization.policy.router, 'fp16');
+  assert.equal(plan.recommendation.moe_quantization.runtime_plan.runtime, 'vllm');
+  assert.equal(plan.recommendation.moe_quantization.runtime_plan.dynamic_precision.algorithm, 'dynaexq_budgeted_precision');
 });
 
-test('5d. external-only quant methods stay gated, while rotation adapters become worker-addressable when enabled', () => {
+test('5d. external quant methods stay gated, then become worker-addressable when enabled', () => {
   const gated = methodAvailability('mc_moe', {});
   assert.equal(gated.available, false);
   assert.equal(gated.reason, 'experimental_gated');
 
   const enabled = methodAvailability('mc_moe', { KOLM_ENABLE_EXPERIMENTAL_QUANTS: '1' });
   assert.equal(enabled.known, true);
-  assert.equal(enabled.available, false);
-  assert.equal(enabled.reason, 'external_repo_only');
+  assert.equal(enabled.available, true);
+  assert.equal(enabled.reason, 'experimental_enabled');
 
   const rotation = methodAvailability('infoquant', { KOLM_ENABLE_EXPERIMENTAL_QUANTS: '1' });
   assert.equal(rotation.known, true);

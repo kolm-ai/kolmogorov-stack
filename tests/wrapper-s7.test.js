@@ -46,6 +46,7 @@ import {
   estimateMoEMemory,
   pinExperts,
   expertHotness,
+  recommendMoeRuntimePlan,
   recommendQuantPolicy,
   MOE_SUPPORT_VERSION,
 } from '../src/moe-support.js';
@@ -318,6 +319,24 @@ test('S-7 #13: pinExperts emits vllm pin config + --enable-expert-parallel', () 
   assert.ok(got.runtime_args.includes('--enable-expert-parallel'));
   assert.ok(got.envelope.vllm_expert_pin_json);
   assert.deepEqual(got.envelope.vllm_expert_pin_json.pin_to_gpu, [3, 7, 41]);
+});
+
+test('S-7 #13b: recommendMoeRuntimePlan emits EP, offload, and DynaExq-style precision', () => {
+  const plan = recommendMoeRuntimePlan({
+    moe_info: { num_experts: 8, experts_per_token: 2, params: 47, family: 'mixtral-8x7b' },
+    runtime: 'vllm',
+    gpu_count: 2,
+    target_vram_gb: 24,
+    hot_expert_ids: [3, 7, 3],
+  });
+  assert.equal(plan.ok, true);
+  assert.equal(plan.placement, 'expert_parallel_all_to_all');
+  assert.equal(plan.expert_parallelism.enabled, true);
+  assert.equal(plan.expert_parallelism.all_to_all, true);
+  assert.equal(plan.offload.enabled, true);
+  assert.equal(plan.dynamic_precision.algorithm, 'dynaexq_budgeted_precision');
+  assert.equal(plan.dynamic_precision.router, 'fp16');
+  assert.ok(plan.runtime_args.includes('--enable-expert-parallel'));
 });
 
 test('S-7 #14: pinExperts emits llama.cpp --override-tensor for each pinned id', () => {

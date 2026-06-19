@@ -7,7 +7,7 @@
 // the actual quantize/export surfaces can execute or honestly mark external.
 
 import { buildFp4CalibPlan } from './fp4-calib-plan.js';
-import { detectMoE, recommendQuantPolicy } from './moe-support.js';
+import { detectMoE, recommendMoeRuntimePlan, recommendQuantPolicy } from './moe-support.js';
 import { getFamily } from './moe-registry.js';
 
 // W964 - FP4 quality is model-size sensitive. These are conservative planning
@@ -274,7 +274,7 @@ const METHOD_CATALOG = Object.freeze({
   },
   mc_moe: {
     label: 'MC-MoE 1.5-2.5-bit expert quant',
-    worker_method: null,
+    worker_method: 'mc_moe',
     execution_status: 'worker_external_repo',
     experimental: true,
     moe_only: true,
@@ -288,7 +288,7 @@ const METHOD_CATALOG = Object.freeze({
   },
   gemq: {
     label: 'GEMQ expert-aware MoE quant',
-    worker_method: null,
+    worker_method: 'gemq',
     execution_status: 'worker_external_repo',
     experimental: true,
     moe_only: true,
@@ -696,6 +696,20 @@ export function rankQuantizationStrategies(input = {}) {
   const preferenceTuned = !!(input.preference_tuned ?? input.preferenceTuned);
   const moeInfo = resolveMoeInfo(input, paramsB);
   const moePolicy = buildMoeQuantPolicy(moeInfo, device);
+  let moeRuntimePlan = null;
+  if (moeInfo) {
+    try {
+      moeRuntimePlan = recommendMoeRuntimePlan({
+        moe_info: moeInfo,
+        runtime: device.runtime,
+        gpu_count: input.gpu_count ?? input.gpuCount ?? 1,
+        target_vram_gb: device.memory_gb,
+        hot_expert_ids: input.hot_expert_ids ?? input.hotExpertIds ?? [],
+      });
+    } catch (e) {
+      moeRuntimePlan = { ok: false, error: e.message };
+    }
+  }
   // Explicit boolean override wins (used by callers/tests); otherwise read env.
   const experimentalEnabled = (input.experimental_enabled ?? input.experimentalEnabled) != null
     ? Boolean(input.experimental_enabled ?? input.experimentalEnabled)
@@ -764,6 +778,7 @@ export function rankQuantizationStrategies(input = {}) {
         detected: true,
         info: moeInfo,
         policy: moePolicy && moePolicy.ok !== false ? moePolicy : null,
+        runtime_plan: moeRuntimePlan,
         external_candidates: candidates
           .filter((c) => c.moe_only && c.method !== 'moe_mixed_policy')
           .map((c) => ({

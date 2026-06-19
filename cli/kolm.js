@@ -16516,6 +16516,7 @@ async function cmdExperts(args) {
   if (sub === 'list')    return cmdExpertsList(args.slice(1));
   if (sub === 'inspect') return cmdExpertsInspect(args.slice(1));
   if (sub === 'pin')     return cmdExpertsPin(args.slice(1));
+  if (sub === 'prune')   return cmdExpertsPrune(args.slice(1));
 
   const wantJson = args.includes('--json');
   const wantBars = args.includes('--bars');
@@ -16532,6 +16533,7 @@ async function cmdExperts(args) {
     console.error('  kolm experts list                              # known MoE families');
     console.error('  kolm experts inspect <family|dir>              # topology + memory estimate');
     console.error('  kolm experts pin --runtime vllm|llama.cpp|tgi --artifact <ref> --ids 3,7,41');
+    console.error('  kolm experts prune --artifact <dir> --checkpoint <moe.json> --out <dir>');
     console.error('  kolm experts <artifact.kolm> [--threshold 0.01] [--bars] [--json]');
     process.exit(EXIT.NOT_FOUND);
   }
@@ -16618,6 +16620,44 @@ async function cmdExpertsList(args) {
   console.log('');
   console.log('  next: kolm experts inspect <id>           # topology + memory estimate');
   console.log('        kolm experts pin --runtime vllm ... # pin hot experts to GPU');
+}
+
+async function cmdExpertsPrune(args) {
+  const wantJson = args.includes('--json');
+  const artifact = pickFlag(args, '--artifact') || args.find((a) => !a.startsWith('--'));
+  const checkpointPath = pickFlag(args, '--checkpoint') || pickFlag(args, '--moe-checkpoint');
+  const routerStatsPath = pickFlag(args, '--router-stats') || pickFlag(args, '--stats');
+  const outDir = pickFlag(args, '--out') || pickFlag(args, '--out-dir');
+  const thresholdFlag = pickFlag(args, '--threshold') || pickFlag(args, '--prune-threshold');
+  const threshold = thresholdFlag == null ? 0.01 : Number(thresholdFlag);
+  const minKeepFlag = pickFlag(args, '--min-keep-experts');
+  if (!artifact || !checkpointPath || !outDir) {
+    console.error('usage: kolm experts prune --artifact <artifact-dir> --checkpoint <moe.json> --out <dir> [--threshold 0.01] [--json]');
+    process.exit(EXIT.BAD_ARGS);
+  }
+  const { executeExpertPrune } = await import('../src/forge-experts.js');
+  let result;
+  try {
+    result = await executeExpertPrune(resolveArtifact(artifact) || artifact, {
+      threshold,
+      checkpointPath,
+      routerStatsPath,
+      outDir,
+      minKeepExperts: minKeepFlag == null ? 1 : Number(minKeepFlag),
+    });
+  } catch (e) {
+    console.error(`experts prune: ${e.message}`);
+    process.exit(EXIT.EXECUTION);
+  }
+  if (wantJson || !result.ok) {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log('experts prune: ok');
+    console.log(`  kept:   ${result.planned_keep_expert_ids.join(',')}`);
+    console.log(`  pruned: ${result.planned_prune_expert_ids.join(',') || '-'}`);
+    if (result.prune?.manifest?.out_checkpoint) console.log(`  reduced_moe: ${result.prune.manifest.out_checkpoint}`);
+  }
+  if (!result.ok) process.exit(EXIT.EXECUTION);
 }
 
 async function cmdExpertsInspect(args) {
@@ -22474,6 +22514,7 @@ async function cmdDistillMoeToDense(args) {
   const doctor = args.includes('--doctor') || args.includes('doctor');
   const dryRun = args.includes('--dry-run') || args.includes('--plan-only');
   const pipeline = args.includes('--pipeline') || args.includes('--recovery-kd');
+  const residualPrune = args.includes('--residual-prune') || args.includes('--prune');
   const runRecovery = args.includes('--run-recovery');
   const checkpointPath = pickFlag(args, '--checkpoint') || pickFlag(args, '--moe-checkpoint');
   const routerStatsPath = pickFlag(args, '--router-stats') || pickFlag(args, '--stats');
@@ -22491,6 +22532,9 @@ async function cmdDistillMoeToDense(args) {
   const kdAlpha = Number(pickFlag(args, '--kd-alpha') || 0.8);
   const temperature = Number(pickFlag(args, '--temperature') || 2.0);
   const keepExperts = args.includes('--keep-experts');
+  const keepExpertIds = pickFlag(args, '--keep-expert-ids') || pickFlag(args, '--ids');
+  const pruneThresholdFlag = pickFlag(args, '--prune-threshold') || pickFlag(args, '--threshold');
+  const minKeepFlag = pickFlag(args, '--min-keep-experts');
   const mod = await import('../src/moe-to-dense.js');
 
   if (doctor) {
@@ -22500,7 +22544,19 @@ async function cmdDistillMoeToDense(args) {
     return;
   }
 
-  const result = pipeline ? mod.runMoeToDenseRecoveryPipeline({
+  const result = residualPrune ? mod.runMoeResidualPrune({
+    checkpointPath,
+    routerStatsPath,
+    outDir,
+    teacher,
+    studentBase,
+    namespace,
+    tenant_id: tenant,
+    keepExpertIds,
+    pruneThreshold: pruneThresholdFlag == null ? null : Number(pruneThresholdFlag),
+    minKeepExperts: minKeepFlag == null ? 1 : Number(minKeepFlag),
+    dryRun,
+  }) : pipeline ? mod.runMoeToDenseRecoveryPipeline({
     checkpointPath,
     routerStatsPath,
     pairsPath,
@@ -22536,6 +22592,16 @@ async function cmdDistillMoeToDense(args) {
   } else {
     console.log(`moe-to-dense: ${result.deferred ? 'deferred' : 'ok'}`);
     console.log(`  run_dir: ${result.run_dir}`);
+    if (residualPrune) {
+      console.log(`  residual_prune: ${result.version}`);
+      if (result.manifest?.residual_moe_prune?.layers) {
+        const first = result.manifest.residual_moe_prune.layers[0];
+        console.log(`  layers: ${result.manifest.residual_moe_prune.layers.length}`);
+        console.log(`  layer0 experts: ${first.num_experts_before} -> ${first.num_experts_after}`);
+      }
+      if (result.manifest?.out_checkpoint) console.log(`  reduced_moe: ${result.manifest.out_checkpoint}`);
+      return;
+    }
     if (pipeline) {
       console.log(`  pipeline: ${result.version}`);
       console.log(`  recovery_status: ${result.recovery_plan?.status || '-'}`);
