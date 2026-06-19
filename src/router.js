@@ -24481,8 +24481,9 @@ res.json({
 
   // ============== W709-5: routing decision summary ==============
   // Reads the routing_decisions store (written by the W709 runtime router)
-  // and returns counts, local_ratio, est_cost_saved_usd for the caller's
-  // tenant. The /account/routing dashboard polls this endpoint.
+  // and returns counts, local_ratio, escalation_rate, cascade rollups, and
+  // est_cost_saved_usd for the caller's tenant. The /account/routing
+  // dashboard polls this endpoint.
   //
   // Tenant fence: tenant_id is forced from req.tenant_record.id - never
   // read from query string or body. namespace + since are optional

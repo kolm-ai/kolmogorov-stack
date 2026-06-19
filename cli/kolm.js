@@ -17199,7 +17199,8 @@ async function cmdRouteDoctor(args) {
   try {
     summary = reMod.summarizeRouting(tenant, namespace, null) || {
       total: 0, by_route: { student: 0, teacher: 0, mixed: 0 },
-      local_ratio: 0, teacher_calls_saved: 0, est_cost_saved_usd: 0,
+      local_ratio: 0, escalation_rate: 0, splice_ratio: 0,
+      teacher_calls_saved: 0, est_cost_saved_usd: 0,
       last_decision_at: null,
     };
   } catch (e) {
@@ -17219,8 +17220,12 @@ async function cmdRouteDoctor(args) {
   const br = summary.by_route || { student: 0, teacher: 0, mixed: 0 };
   const localCount = (br.student || 0) + (br.mixed || 0);
   const spliceCount = (br.mixed || 0) + (br.teacher || 0);
-  const localRatio = total > 0 ? localCount / total : 0;
-  const spliceRatio = total > 0 ? spliceCount / total : 0;
+  const localRatio = Number.isFinite(Number(summary.local_ratio))
+    ? Number(summary.local_ratio)
+    : (total > 0 ? localCount / total : 0);
+  const escalationRate = Number.isFinite(Number(summary.escalation_rate))
+    ? Number(summary.escalation_rate)
+    : (total > 0 ? spliceCount / total : 0);
 
   const env = {
     ok: true,
@@ -17234,7 +17239,9 @@ async function cmdRouteDoctor(args) {
       total,
       by_route: br,
       local_ratio: Math.round(localRatio * 1e4) / 1e4,
-      splice_ratio: Math.round(spliceRatio * 1e4) / 1e4,
+      escalation_rate: Math.round(escalationRate * 1e4) / 1e4,
+      splice_ratio: Math.round(escalationRate * 1e4) / 1e4,
+      cascade_rollups: summary.cascade_rollups || null,
       est_cost_saved_usd: summary.est_cost_saved_usd || 0,
       last_decision_at: summary.last_decision_at || null,
     },
@@ -17260,7 +17267,7 @@ async function cmdRouteDoctor(args) {
     + ' mixed=' + (br.mixed || 0)
     + ' teacher=' + (br.teacher || 0));
   console.log('  local_ratio:       ' + (env.summary.local_ratio * 100).toFixed(2) + '%');
-  console.log('  splice_ratio:      ' + (env.summary.splice_ratio * 100).toFixed(2) + '%');
+  console.log('  escalation_rate:   ' + (env.summary.escalation_rate * 100).toFixed(2) + '%');
   console.log('  est_cost_saved:    $' + (env.summary.est_cost_saved_usd || 0).toFixed(4));
   console.log('  last_decision_at:  ' + (env.summary.last_decision_at || '(none)'));
 }

@@ -41,6 +41,7 @@ const W709_TEST_TENANTS = [
   'tenant_w709_c2',
   'tenant_w709_d',
   'tenant_w709_e',
+  'tenant_w709_f',
 ];
 
 function freshDir() {
@@ -157,10 +158,19 @@ test('W709 #2 — summarizeRouting counts by_route + local_ratio over 100 rows',
   assert.equal(s.by_route.mixed, 25);
   assert.equal(s.by_route.teacher, 15);
   assert.equal(s.teacher_calls_saved, 85);
+  assert.equal(s.escalation_count, 40);
   assert.ok(Math.abs(s.local_ratio - 0.85) < 1e-9, 'local_ratio ~= 0.85');
+  assert.ok(Math.abs(s.escalation_rate - 0.4) < 1e-9, 'escalation_rate ~= 0.4');
+  assert.ok(Math.abs(s.splice_ratio - 0.4) < 1e-9, 'splice_ratio alias ~= 0.4');
+  assert.ok(Math.abs(s.student_rate - 0.6) < 1e-9, 'student_rate ~= 0.6');
+  assert.ok(Math.abs(s.mixed_rate - 0.25) < 1e-9, 'mixed_rate ~= 0.25');
+  assert.ok(Math.abs(s.teacher_only_rate - 0.15) < 1e-9, 'teacher_only_rate ~= 0.15');
+  assert.deepEqual(s.cascade_health.by_route, { student: 60, teacher: 15, mixed: 25 });
+  assert.equal(s.cascade_health.escalation_count, 40);
   // est_cost_saved_usd = (60 * 2000 + 25 * 1500) / 1_000_000 = 0.1575
   assert.ok(Math.abs(s.est_cost_saved_usd - 0.1575) < 1e-6, 'est_cost_saved_usd ~= 0.1575');
   assert.ok(s.last_decision_at, 'last_decision_at set');
+  assert.equal(s.version, 'w985-v1');
 });
 
 // =============================================================================
@@ -266,10 +276,53 @@ test('W709 #6 — recordRoutingDecision throws on missing tenant_id', async () =
 });
 
 // =============================================================================
-// 7) GET /v1/routing/summary is auth-gated.
+// 7) Cascade rollups expose 1h/24h/7d escalation windows.
 // =============================================================================
 
-test('W709 #7 — GET /v1/routing/summary returns 401 without bearer', async () => {
+test('W709 #7 - summarizeRouting exposes rolling cascade escalation windows', async () => {
+  freshDir();
+  const now = Date.now();
+  const rows = [
+    { route: 'mixed', ageMs: 30 * 60 * 1000 },
+    { route: 'teacher', ageMs: 3 * 60 * 60 * 1000 },
+    { route: 'student', ageMs: 2 * 24 * 60 * 60 * 1000 },
+    { route: 'teacher', ageMs: 9 * 24 * 60 * 60 * 1000 },
+  ];
+  for (const [i, r] of rows.entries()) {
+    await recordRoutingDecision({
+      tenant_id: 'tenant_w709_f',
+      namespace: 'ns_f',
+      decision: {
+        route: r.route,
+        reason: 'rollup_' + i,
+        ts: new Date(now - r.ageMs).toISOString(),
+      },
+    });
+  }
+
+  const s = summarizeRouting('tenant_w709_f', 'ns_f');
+  assert.equal(s.total, 4);
+  assert.equal(s.escalation_count, 3);
+  assert.ok(Math.abs(s.escalation_rate - 0.75) < 1e-9);
+
+  assert.equal(s.cascade_rollups.last_1h.total, 1);
+  assert.equal(s.cascade_rollups.last_1h.escalation_count, 1);
+  assert.equal(s.cascade_rollups.last_1h.escalation_rate, 1);
+
+  assert.equal(s.cascade_rollups.last_24h.total, 2);
+  assert.equal(s.cascade_rollups.last_24h.escalation_count, 2);
+  assert.equal(s.cascade_rollups.last_24h.escalation_rate, 1);
+
+  assert.equal(s.cascade_rollups.last_7d.total, 3);
+  assert.equal(s.cascade_rollups.last_7d.escalation_count, 2);
+  assert.ok(Math.abs(s.cascade_rollups.last_7d.escalation_rate - (2 / 3)) < 1e-9);
+});
+
+// =============================================================================
+// 8) GET /v1/routing/summary is auth-gated.
+// =============================================================================
+
+test('W709 #8 - GET /v1/routing/summary returns 401 without bearer', async () => {
   const { app } = await buildApp();
   const { srv, base } = await listen(app);
   try {

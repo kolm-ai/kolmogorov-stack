@@ -32,6 +32,12 @@ import { findByTenant, insert, remove } from './store.js';
 
 export const ROUTING_DECISIONS_TABLE = 'routing_decisions';
 export const ROUTES = Object.freeze(['student', 'teacher', 'mixed']);
+export const ROUTING_EVENTS_VERSION = 'w985-v1';
+export const CASCADE_ROLLUP_WINDOWS = Object.freeze([
+  Object.freeze({ id: 'last_1h', label: 'Last 1h', ms: 60 * 60 * 1000 }),
+  Object.freeze({ id: 'last_24h', label: 'Last 24h', ms: 24 * 60 * 60 * 1000 }),
+  Object.freeze({ id: 'last_7d', label: 'Last 7d', ms: 7 * 24 * 60 * 60 * 1000 }),
+]);
 
 function _now() { return new Date().toISOString(); }
 
@@ -47,6 +53,96 @@ function _num(v, fallback = 0) {
 
 function _validRoute(r) {
   return ROUTES.includes(r);
+}
+
+function _rowTimeMs(r) {
+  const t = new Date((r && (r.ts || r.created_at)) || 0).getTime();
+  return Number.isFinite(t) ? t : null;
+}
+
+function _routeCounters(rows) {
+  const by_route = { student: 0, teacher: 0, mixed: 0 };
+  let est_cost_saved_micro_usd = 0;
+  let last_decision_at = null;
+  for (const r of rows) {
+    const route = ROUTES.includes(r.route) ? r.route : 'student';
+    by_route[route]++;
+    if (route !== 'teacher') {
+      // The teacher-cost field on a non-teacher row records what would
+      // have been spent if the router had escalated. summing it gives a
+      // conservative "estimated saved" number.
+      est_cost_saved_micro_usd += _num(r.teacher_cost_micro_usd, 0);
+    }
+    const t = r.ts || r.created_at || null;
+    if (t && (!last_decision_at || t > last_decision_at)) last_decision_at = t;
+  }
+  const total = rows.length;
+  const teacher_calls_saved = by_route.student + by_route.mixed;
+  const escalation_count = by_route.mixed + by_route.teacher;
+  const local_ratio = total === 0 ? 0 : teacher_calls_saved / total;
+  const escalation_rate = total === 0 ? 0 : escalation_count / total;
+  const teacher_only_rate = total === 0 ? 0 : by_route.teacher / total;
+  const mixed_rate = total === 0 ? 0 : by_route.mixed / total;
+  const student_rate = total === 0 ? 0 : by_route.student / total;
+  return {
+    total,
+    by_route,
+    local_ratio,
+    teacher_calls_saved,
+    escalation_count,
+    escalation_rate,
+    // Backward-compatible alias for older CLI/docs language. Here "splice"
+    // means any route that escalated beyond pure student execution.
+    splice_ratio: escalation_rate,
+    student_rate,
+    mixed_rate,
+    teacher_only_rate,
+    est_cost_saved_usd: est_cost_saved_micro_usd / 1_000_000,
+    last_decision_at,
+    cascade_health: {
+      total,
+      by_route,
+      escalation_count,
+      escalation_rate,
+      student_rate,
+      mixed_rate,
+      teacher_only_rate,
+    },
+  };
+}
+
+function _cascadeRollup(rows, nowMs, windowSpec) {
+  const sinceMs = nowMs - windowSpec.ms;
+  const scoped = rows.filter((r) => {
+    const t = _rowTimeMs(r);
+    return t != null && t >= sinceMs && t <= nowMs;
+  });
+  const c = _routeCounters(scoped);
+  return {
+    id: windowSpec.id,
+    label: windowSpec.label,
+    since: new Date(sinceMs).toISOString(),
+    until: new Date(nowMs).toISOString(),
+    total: c.total,
+    by_route: c.by_route,
+    escalation_count: c.escalation_count,
+    escalation_rate: c.escalation_rate,
+    local_ratio: c.local_ratio,
+    student_rate: c.student_rate,
+    mixed_rate: c.mixed_rate,
+    teacher_only_rate: c.teacher_only_rate,
+  };
+}
+
+function _emptyRoutingSummary(nowMs = Date.now()) {
+  const base = _routeCounters([]);
+  return {
+    ...base,
+    cascade_rollups: Object.fromEntries(
+      CASCADE_ROLLUP_WINDOWS.map((w) => [w.id, _cascadeRollup([], nowMs, w)]),
+    ),
+    version: ROUTING_EVENTS_VERSION,
+  };
 }
 
 // recordRoutingDecision({tenant_id, namespace, decision, student_tokens,
@@ -210,6 +306,8 @@ export async function recordRoutingDecision({
 //
 //   { total, by_route: {student, teacher, mixed},
 //     local_ratio,                // (student + mixed) / total
+//     escalation_rate,            // (mixed + teacher) / total
+//     cascade_rollups,            // fixed 1h/24h/7d escalation windows
 //     teacher_calls_saved,        // student + mixed (i.e. NOT teacher)
 //     est_cost_saved_usd,         // sum of (teacher_cost_micro_usd) on
 //                                 // non-teacher rows / 1_000_000
@@ -219,14 +317,8 @@ export async function recordRoutingDecision({
 // indexed primitive). Foreign-tenant rows can never enter the result
 // because findByTenant filters at the source.
 export function summarizeRouting(tenant_id, namespace = null, sinceTimestamp = null) {
-  const empty = {
-    total: 0,
-    by_route: { student: 0, teacher: 0, mixed: 0 },
-    local_ratio: 0,
-    teacher_calls_saved: 0,
-    est_cost_saved_usd: 0,
-    last_decision_at: null,
-  };
+  const nowMs = Date.now();
+  const empty = _emptyRoutingSummary(nowMs);
   if (!tenant_id) return empty;
   let rows = [];
   try { rows = findByTenant(ROUTING_DECISIONS_TABLE, tenant_id) || []; } catch (_) { rows = []; }
@@ -236,41 +328,24 @@ export function summarizeRouting(tenant_id, namespace = null, sinceTimestamp = n
   // both 'tenant' and 'tenant_id' in case a future writer drops one.
   rows = rows.filter(r => r && (r.tenant === tenant_id || r.tenant_id === tenant_id));
   if (namespace) rows = rows.filter(r => r.namespace === namespace);
+  const rollupRows = rows;
   if (sinceTimestamp) {
     const cutoff = new Date(sinceTimestamp).getTime();
     if (Number.isFinite(cutoff)) {
       rows = rows.filter(r => {
-        const t = new Date(r.ts || r.created_at || 0).getTime();
-        return Number.isFinite(t) && t >= cutoff;
+        const t = _rowTimeMs(r);
+        return t != null && t >= cutoff;
       });
     }
   }
 
-  const by_route = { student: 0, teacher: 0, mixed: 0 };
-  let est_cost_saved_micro_usd = 0;
-  let last_decision_at = null;
-  for (const r of rows) {
-    const route = ROUTES.includes(r.route) ? r.route : 'student';
-    by_route[route]++;
-    if (route !== 'teacher') {
-      // The teacher-cost field on a non-teacher row records what would
-      // have been spent if the router had escalated. summing it gives a
-      // conservative "estimated saved" number.
-      est_cost_saved_micro_usd += _num(r.teacher_cost_micro_usd, 0);
-    }
-    const t = r.ts || r.created_at || null;
-    if (t && (!last_decision_at || t > last_decision_at)) last_decision_at = t;
-  }
-  const total = rows.length;
-  const teacher_calls_saved = by_route.student + by_route.mixed;
-  const local_ratio = total === 0 ? 0 : teacher_calls_saved / total;
+  const summary = _routeCounters(rows);
   return {
-    total,
-    by_route,
-    local_ratio,
-    teacher_calls_saved,
-    est_cost_saved_usd: est_cost_saved_micro_usd / 1_000_000,
-    last_decision_at,
+    ...summary,
+    cascade_rollups: Object.fromEntries(
+      CASCADE_ROLLUP_WINDOWS.map((w) => [w.id, _cascadeRollup(rollupRows, nowMs, w)]),
+    ),
+    version: ROUTING_EVENTS_VERSION,
   };
 }
 
@@ -310,6 +385,8 @@ export default {
   summarizeRouting,
   recentRoutingDecisions,
   ROUTING_DECISIONS_TABLE,
+  ROUTING_EVENTS_VERSION,
+  CASCADE_ROLLUP_WINDOWS,
   ROUTES,
   _resetForTests,
 };
