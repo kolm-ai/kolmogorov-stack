@@ -7025,12 +7025,30 @@ export function buildRouter() {
             namespaceConfig: nsConfig,
             candidates: chain,
           });
+          let _routePromptVector = null;
+          let _routeEmbedderId = null;
+          const _routeEmbeddingBackend = nsConfig.route_embedding_backend
+            || nsConfig.routeEmbeddingBackend
+            || nsConfig.embedding_backend
+            || nsConfig.embeddingBackend
+            || (nsConfig.route_embedder === 'provider' ? process.env.KOLM_EMBED_BACKEND : null);
+          if (_routeEmbeddingBackend || nsConfig.route_embedder === 'provider') {
+            try {
+              const _emb = await import('./embedding.js');
+              const _embRes = await _emb.embedBatchAsync([inputText], { backend: _routeEmbeddingBackend || undefined });
+              if (_embRes && _embRes.ok === true && Array.isArray(_embRes.vectors) && Array.isArray(_embRes.vectors[0])) {
+                _routePromptVector = _embRes.vectors[0];
+                _routeEmbedderId = `provider:${_embRes.backend_used || _routeEmbeddingBackend || 'configured'}`;
+              }
+            } catch (_) { _routePromptVector = null; _routeEmbedderId = null; }
+          }
           const _scored = _sr.scoreRoute({
             namespaceConfig: _routeCfg,
             prompt: inputText,
             candidates: chain,
             callerConfidence: confidence,
             stats: _trained && _trained.stats ? _trained.stats : null,
+            opts: _routePromptVector ? { prompt_vector: _routePromptVector, embedder_id: _routeEmbedderId } : {},
           });
           if (_scored && Array.isArray(_scored.ordered_chain) && _scored.ordered_chain.length) {
             chain = _scored.ordered_chain;

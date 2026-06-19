@@ -7117,7 +7117,7 @@
         "tests/finalized-c5-fixes-regression.test.js",
         "tests/offline-inclusion-proof.test.js",
         "tests/sota-capturedata.test.js",
-        "tests/wave144-moe-compose.test.js"
+        "tests/wave1008-embedding-provider-routing-cache.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface",
@@ -27236,6 +27236,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave1007-data-engine-self-synthesis-route.test.js",
         "tests/wave921-data-engine-orchestrator.test.js",
         "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js",
         "tests/wave921-data-curate-modules.test.js"
@@ -31847,13 +31848,13 @@
       },
       "test_refs": [
         "tests/finalized-c3-data-shapley-marginal-contribution-valuation.test.js",
+        "tests/wave1008-embedding-provider-routing-cache.test.js",
         "tests/wave921-multi-signal-routing.test.js",
         "tests/wave921-semantic-router.test.js",
         "tests/wave947-data-curate-matrix.test.js",
         "tests/wave954-learned-embedding-provider.test.js",
         "tests/wave991-quality-bar-routing.test.js",
-        "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js",
-        "tests/finalized-c5-calibration-set-construction.test.js"
+        "tests/finalized-c3-semdedup-embedding-semantic-deduplication.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -48698,14 +48699,14 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "e5afc55b493ce27c33165b5a37841d465f84723ad3225d771fb51fa43a17d014",
+      "sha256": "f94a96786f82d0b5d5012d11f2b5650ebdf2b33616674ecdbf0352dbdb233084",
       "metrics": {
-        "bytes": 1476084,
-        "lines": 30952,
-        "imports": 537,
+        "bytes": 1477259,
+        "lines": 30970,
+        "imports": 538,
         "exports": 8,
         "routes": 810,
-        "env_refs": 197,
+        "env_refs": 198,
         "fs_writes": 1,
         "subprocess_refs": 44,
         "network_refs": 34,
@@ -50885,7 +50886,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js"
+        "tests/finalized-c1-live-magpie-autoevol-self-synthesis.test.js",
+        "tests/wave1007-data-engine-self-synthesis-route.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -50933,10 +50935,10 @@
       "surface": "core-backend",
       "domain": "storage_state",
       "language": "javascript",
-      "sha256": "708a76a684a950a3c9e0704a4735ba4bcf6b4a3814a8e618ecbcd7ea04ac572b",
+      "sha256": "5f4d092dadb9990abdc38bab2c813625c141ceb179a89d99efd9de2e39374b24",
       "metrics": {
-        "bytes": 27435,
-        "lines": 704,
+        "bytes": 28242,
+        "lines": 721,
         "imports": 4,
         "exports": 15,
         "routes": 0,
@@ -50948,6 +50950,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave1008-embedding-provider-routing-cache.test.js",
         "tests/wave921-semantic-cache-wiring.test.js",
         "tests/wave921-semantic-cache.test.js"
       ],
@@ -50992,10 +50995,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "b1dbbc7dbdd817318bfa927797c583fa9d01844918a4439ede63e2f8a44efc68",
+      "sha256": "085ec409f9605af9eb4d4efe684d3e94355fc6e3cb88c72261531a50b648964e",
       "metrics": {
-        "bytes": 64756,
-        "lines": 1454,
+        "bytes": 66049,
+        "lines": 1481,
         "imports": 7,
         "exports": 15,
         "routes": 0,
@@ -51007,6 +51010,7 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave1008-embedding-provider-routing-cache.test.js",
         "tests/wave608-semantic-routing-live-loop.test.js",
         "tests/wave921-multi-signal-routing.test.js",
         "tests/wave921-route-quality-store.test.js",
@@ -57966,6 +57970,7 @@
         "tests/finalized-c1-synthetic-provenance-contamination-moat.test.js",
         "tests/offline-inclusion-proof.test.js",
         "tests/sota-capturedata.test.js",
+        "tests/wave1008-embedding-provider-routing-cache.test.js",
         "tests/wave658-forge-inspect-contract.test.js",
         "tests/wave954-learned-embedding-provider.test.js"
       ],

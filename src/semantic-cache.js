@@ -26,7 +26,7 @@
 // sensitive/adversarial prompts by default so semantic caching cannot become a
 // prompt-leak amplifier when a namespace enables the cache.
 
-import { embed, cosine, DIMENSIONS } from './embedding.js';
+import { embed, embedBatchAsync, cosine, DIMENSIONS } from './embedding.js';
 import { cacheKey } from './cache.js';
 import { classifyPromptAdversarial, ADVERSARIAL_PROMPTS_VERSION } from './adversarial-prompts.js';
 import { scanSensitive } from './sensitive-data.js';
@@ -211,6 +211,8 @@ export function namespaceCacheConfig(nsConfig = {}) {
   maxEntries = Math.round(clamp(maxEntries, ENTRIES_MIN, ENTRIES_MAX));
 
   const embedder = (raw.embedder === 'provider') ? 'provider' : 'hashed-ngram';
+  const embedding_backend = raw.embedding_backend || raw.embeddingBackend || raw.providerId || raw.backend || null;
+  const embedding_strict = parseBool(raw.embedding_strict ?? raw.strict_embeddings, false);
   const verified_only = mode === 'verified' || raw.verified_only === true;
   const category_aware = parseBool(raw.category_aware, DEFAULTS.category_aware);
   const cache_sensitive = parseBool(raw.cache_sensitive ?? raw.allow_sensitive, DEFAULTS.cache_sensitive);
@@ -223,6 +225,8 @@ export function namespaceCacheConfig(nsConfig = {}) {
     ttl_s: ttl,
     max_entries: maxEntries,
     embedder,
+    embedding_backend: embedding_backend == null ? null : String(embedding_backend),
+    embedding_strict,
     verified_only,
     category_aware,
     cache_sensitive,
@@ -491,6 +495,19 @@ export function embedForCache(text, embedderName = 'hashed-ngram') {
   return embed(s);
 }
 
+async function vectorForCache(text, cfg = {}) {
+  const s = typeof text === 'string' ? text : String(text ?? '');
+  if (!cfg || cfg.embedder !== 'provider') return embedForCache(s);
+  const res = await embedBatchAsync([s], {
+    backend: cfg.embedding_backend || undefined,
+    strict: cfg.embedding_strict === true,
+  });
+  if (res && res.ok === true && Array.isArray(res.vectors) && Array.isArray(res.vectors[0])) {
+    return res.vectors[0];
+  }
+  return embedForCache(s);
+}
+
 export function nearestNeighbour(queryVec, candidates, threshold) {
   if (!Array.isArray(queryVec) || !Array.isArray(candidates) || candidates.length === 0) return null;
   const th = Number.isFinite(threshold) ? threshold : DEFAULTS.similarity_threshold;
@@ -590,7 +607,7 @@ export async function semanticCacheLookup({ tenant, namespace, model, category, 
   // STAGE L1 (semantic): brute-force cosine over live (non-expired) candidates.
   const qText = typeof userText === 'string' && userText.length ? userText : extractUserText(canonicalInput && canonicalInput.messages);
   if (!qText) return miss;
-  const queryVec = embedForCache(qText, cfg.embedder);
+  const queryVec = await vectorForCache(qText, cfg);
 
   const candidates = [];
   for (const [k, entry] of p) {
@@ -630,7 +647,7 @@ export async function semanticCacheWrite({ tenant, namespace, model, category, c
 
   const exactKey = cacheKey(model || '', canonicalInput);
   const qText = typeof userText === 'string' && userText.length ? userText : extractUserText(canonicalInput && canonicalInput.messages);
-  const vector = embedForCache(qText, cfg.embedder);
+  const vector = await vectorForCache(qText, cfg);
   const now = Date.now();
 
   const p = partition(tenant, namespace, model, cacheCategory, true);

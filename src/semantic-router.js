@@ -132,6 +132,20 @@ function _stableList(values) {
   return Array.from(new Set(values.map((v) => String(v || '').trim()).filter(Boolean))).sort();
 }
 
+function _normalizedPromptVector(raw, expectedDim) {
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  if (expectedDim && raw.length !== expectedDim) return null;
+  const out = raw.map((v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : 0;
+  });
+  let norm = 0;
+  for (const v of out) norm += v * v;
+  norm = Math.sqrt(norm);
+  if (!Number.isFinite(norm) || norm <= 0) return null;
+  return out.map((v) => v / norm);
+}
+
 function _safeSafetyTierValue(raw) {
   if (raw == null) return null;
   if (typeof raw === 'object') {
@@ -804,7 +818,19 @@ export function scoreRoute({
     return buildStatic('no_cluster_stats');
   }
 
-  const vec = embed(String(prompt == null ? '' : prompt));
+  const expectedDim = Array.isArray(stats.centroids[0]) ? stats.centroids[0].length : DIMENSIONS;
+  const providedVector = opts.prompt_vector || opts.promptVector || opts.vector || null;
+  const normalizedProvidedVector = _normalizedPromptVector(providedVector, expectedDim);
+  if (providedVector && !normalizedProvidedVector && expectedDim !== DIMENSIONS) {
+    return buildStatic('prompt_vector_dim_mismatch');
+  }
+  if (!normalizedProvidedVector && expectedDim !== DIMENSIONS) {
+    return buildStatic('prompt_vector_required_for_nondefault_embedder');
+  }
+  const vec = normalizedProvidedVector || embed(String(prompt == null ? '' : prompt));
+  const embedderId = normalizedProvidedVector
+    ? String(opts.embedder_id || opts.embedderId || cfg.route_embedder_id || cfg.embedder_id || 'provider-vector')
+    : EMBEDDER_ID;
   const clusterIds = stats.topPClusters(vec, topP);
   if (!clusterIds.length) {
     return buildStatic('no_clusters');
@@ -887,7 +913,7 @@ export function scoreRoute({
   if (qualityBarPolicy) {
     return _scoreRouteQualityBar({
       rows, policy: qualityBarPolicy, staticChain, clusterId, totalSamples,
-      alpha, beta, minQuality,
+      alpha, beta, minQuality, embedderId,
     });
   }
 
@@ -902,7 +928,7 @@ export function scoreRoute({
   if (routeWeights) {
     return _scoreRouteMultiSignal({
       rows, routeWeights, clusterSimilarity, routeSafety, minQuality, alpha, beta,
-      staticChain, clusterId, totalSamples,
+      staticChain, clusterId, totalSamples, embedderId,
     });
   }
 
@@ -999,7 +1025,7 @@ export function scoreRoute({
     rejected,
     cluster_id: clusterId,
     n_samples: totalSamples,
-    embedder: EMBEDDER_ID,
+    embedder: embedderId,
     cold_start: false,
     reason: 'cost_quality_reorder',
   };
@@ -1035,6 +1061,7 @@ function _qualityFallbackSort(a, b) {
 
 function _scoreRouteQualityBar({
   rows, policy, staticChain, clusterId, totalSamples, alpha, beta, minQuality,
+  embedderId = EMBEDDER_ID,
 }) {
   const enriched = rows.map((r) => {
     const prediction = predictRouteQuality({
@@ -1110,7 +1137,7 @@ function _scoreRouteQualityBar({
     rejected,
     cluster_id: clusterId,
     n_samples: totalSamples,
-    embedder: EMBEDDER_ID,
+    embedder: embedderId,
     cold_start: false,
     reason: eligible.length ? 'quality_bar_reorder' : 'quality_bar_no_eligible_fallback',
     quality_bar: {
@@ -1152,7 +1179,7 @@ function _scoreRouteQualityBar({
 // --------------------------------------------------------------------------
 function _scoreRouteMultiSignal({
   rows, routeWeights, clusterSimilarity, routeSafety, minQuality, alpha, beta,
-  staticChain, clusterId, totalSamples,
+  staticChain, clusterId, totalSamples, embedderId = EMBEDDER_ID,
 }) {
   // Helper: min-max normalize ONE raw dimension across rows that have a value,
   // optionally inverting (lower-is-better). Rows with null value -> null. When
@@ -1273,7 +1300,7 @@ function _scoreRouteMultiSignal({
     rejected,
     cluster_id: clusterId,
     n_samples: totalSamples,
-    embedder: EMBEDDER_ID,
+    embedder: embedderId,
     cold_start: false,
     reason: 'multi_signal_reorder',
     // Additive audit block - the kolm moat: a SIGNED, inspectable record of
