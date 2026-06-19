@@ -125,7 +125,8 @@
     if (keyRows.length){
       html += keyRows.map(function(k){ return '<div class="row"><span class="mono">'+esc(k.provider||'?')+'</span><span class="chip">'+esc(k.key_prefix||k.scope||'stored')+'</span></div>'; }).join('');
     } else {
-      html += '<p class="muted">No provider keys stored yet. Add one in <a href="/account/api-control-center">API control</a> and your traffic routes on your own key.</p>';
+      html += '<p class="muted">No provider keys stored yet. Add one in <a href="/account/api-control-center">API control</a>
+        <a href="/studio">Distill Studio</a> and your traffic routes on your own key.</p>';
     }
     html += '</div>';
 

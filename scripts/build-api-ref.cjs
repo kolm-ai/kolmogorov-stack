@@ -940,6 +940,7 @@ ${groupsHtml}
         <h3>Compiler</h3>
         <a href="/#pipeline">Pipeline</a>
         <a href="/account/api-control-center">API control</a>
+        <a href="/studio">Distill Studio</a>
         <a href="/integrations">Integrations</a>
         <a href="/compare">Compare</a>
         <a href="/runtimes">Runtime targets</a>
