@@ -8,7 +8,7 @@
 //   (A) absent route_weights => BYTE-IDENTICAL to the legacy cost_quality path
 //       (same ordered_chain / route_score / reason / no extra fields).
 //   (B) the weighted blend ranks candidates correctly per the requested signals
-//       (quality-only, cost-heavy, latency, load, similarity).
+//       (quality-only, cost-heavy, latency, load, per-model similarity).
 //   (C) every result is DETERMINISTIC (no clock / RNG; injected latencyFn).
 //   (D) the safety contract is preserved in multi-signal mode: quality floor,
 //       cold-start/static fallback, chain never emptied, caller-confidence wins.
@@ -24,7 +24,7 @@
 //   #5  cost-heavy weights -> cheaper model leads on a quality tie
 //   #6  latency signal (injected latencyFn) -> faster provider leads
 //   #7  load signal (passed load map) -> less-loaded provider leads
-//   #8  similarity weight changes the absolute route_score by cluster fit
+//   #8  similarity weight can discriminate candidates by model-specific cluster fit
 //   #9  quality floor still blocks a sub-floor cheap model from the head
 //   #10 deterministic: identical inputs -> identical output across runs
 //   #11 buildRouterDecisionBlock carries route_mode 'semantic' + audit fields
@@ -45,7 +45,7 @@ import {
   ROUTE_SIGNALS,
   EMBEDDER_ID,
 } from '../src/semantic-router.js';
-import { DIMENSIONS } from '../src/embedding.js';
+import { DIMENSIONS, embed } from '../src/embedding.js';
 
 // ---- fixtures -------------------------------------------------------------
 function unitVec(dim) {
@@ -223,24 +223,33 @@ test('#7 load weight with a passed load map picks the less-loaded provider', () 
 });
 
 // -------------------------------------------------------------------------
-// #8 similarity weight changes the absolute route_score by cluster fit
+// #8 similarity weight discriminates candidates by model-specific cluster fit
 // -------------------------------------------------------------------------
-test('#8 similarity contributes a cluster-fit confidence term to route_score', () => {
-  const stats = statsWithTwoModels();
-  // similarity is shared across candidates; with quality+similarity weights the
-  // route_score blends in the cosine-to-centroid. It must be in [0,1] and the
-  // decision must carry cluster_similarity.
+test('#8 similarity is per-candidate cluster fit, not a shared request scalar', () => {
+  const prompt = 'reset password account support';
+  const near = embed(prompt);
+  const far = near.map((x) => -x);
+  const stats = new ClusterRouterStats({ k: 2, centroids: [near, far] });
+  for (let i = 0; i < 25; i++) {
+    stats.update({ clusterId: 0, model: 'gpt-4o-mini', won: true, cost_usd: 0.01, latency_ms: 100 });
+    stats.update({ clusterId: 1, model: 'claude-opus-4-7', won: true, cost_usd: 0.01, latency_ms: 100 });
+  }
+  const stub = Object.assign(Object.create(ClusterRouterStats.prototype), stats);
+  stub.topPClusters = () => [0, 1];
   const out = scoreRoute({
-    namespaceConfig: CFG, prompt: 'reset my password', stats,
-    opts: { min_samples: 20, route_weights: { quality: 1, similarity: 1 } },
+    namespaceConfig: CFG, prompt, stats: stub,
+    opts: { min_samples: 20, route_weights: { similarity: 1 } },
   });
   assert.equal(out.reason, 'multi_signal_reorder');
+  assert.equal(out.chosen.provider, 'openai');
+  assert.equal(out.chosen.model, 'gpt-4o-mini');
   assert.ok(out.cluster_similarity != null && out.cluster_similarity >= 0 && out.cluster_similarity <= 1);
   assert.ok(out.route_score >= 0 && out.route_score <= 1);
-  // Every candidate's signal detail includes the similarity field.
-  for (const s of out.route_signals) {
-    assert.ok(Object.prototype.hasOwnProperty.call(s, 'similarity'));
-  }
+  const openaiSig = out.route_signals.find((s) => s.provider === 'openai');
+  const anthropicSig = out.route_signals.find((s) => s.provider === 'anthropic');
+  assert.ok(Object.prototype.hasOwnProperty.call(openaiSig, 'similarity'));
+  assert.ok(Object.prototype.hasOwnProperty.call(anthropicSig, 'similarity'));
+  assert.ok(openaiSig.similarity > anthropicSig.similarity, `${openaiSig.similarity} <= ${anthropicSig.similarity}`);
 });
 
 // -------------------------------------------------------------------------

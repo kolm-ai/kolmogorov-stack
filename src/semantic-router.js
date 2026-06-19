@@ -45,7 +45,7 @@ import { buildChainFromNamespace, selectRoute, parseChainEntry } from './gateway
 // singleton. Importing the function (not calling a mutator) keeps this additive.
 import { ewmaLatencyMs as _ewmaLatencyMs } from './provider-health.js';
 
-export const SEMANTIC_ROUTER_VERSION = 'w921-v1';
+export const SEMANTIC_ROUTER_VERSION = 'w984-v2';
 export const EMBEDDER_ID = 'hashed-ngram-256';
 
 const DEFAULT_K = 32;
@@ -73,7 +73,8 @@ const DEFAULT_MIN_SAMPLES = 20;
 //   cost       lower USD better -> normalized then INVERTED (1 - cost~).
 //   latency    lower ms better  -> normalized then INVERTED (1 - lat~).
 //   load       lower in-flight/util better -> normalized then INVERTED.
-//   similarity cosine(prompt, assigned-cluster centroid); higher better.
+//   similarity cosine(prompt, each candidate's historical cluster window);
+//              higher better.
 //
 // Final per-candidate score = sum_s w_s * signal_s~  /  sum_s w_s  (weights
 // renormalized over the signals actually present so an absent signal neither
@@ -380,6 +381,25 @@ function _clamp01(x) {
   return n < 0 ? 0 : n > 1 ? 1 : n;
 }
 
+function _candidateClusterFit(stats, vec, clusterIds, model, fallback) {
+  if (!stats || !Array.isArray(stats.centroids) || !Array.isArray(clusterIds)) return fallback;
+  const key = String(model || '');
+  let num = 0;
+  let den = 0;
+  for (const cid of clusterIds) {
+    const centroid = stats.centroids[cid];
+    if (!Array.isArray(centroid)) continue;
+    const byModel = stats.stats instanceof Map ? stats.stats.get(cid) : null;
+    const cell = byModel && typeof byModel.get === 'function' ? byModel.get(key) : null;
+    const n = Number(cell && cell.n);
+    if (!Number.isFinite(n) || n <= 0) continue;
+    const sim = _clamp01((cosine(vec, centroid) + 1) / 2);
+    num += sim * n;
+    den += n;
+  }
+  return den > 0 ? _clamp01(num / den) : fallback;
+}
+
 // --------------------------------------------------------------------------
 // reorderChainByScore - pure reorder/trim of a static chain by per-model
 // score. NEVER empties the chain and never drops the only viable provider.
@@ -555,12 +575,13 @@ export function scoreRoute({
   const estOut = Math.max(1, Math.round(estIn * 0.5)); // rough completion estimate
   const priceFn = typeof costFn === 'function' ? costFn : estimateModelCost;
 
-  // similarity (NEXT-5): cosine of the prompt vector to the assigned cluster
-  // centroid - the Avengers-Pro/RouteLLM "embedding-similarity-to-cluster"
-  // signal. Per-candidate similarity is identical here (all candidates share
-  // the same top cluster), so it acts as a confidence weight on this cluster's
-  // learned stats rather than a per-model discriminator; it still varies the
-  // ABSOLUTE route_score (low similarity => low confidence). Computed once.
+  // similarity (W984): keep the head-cluster request fit for audit, but score
+  // each candidate with its own observed fit over the top-p cluster window.
+  // A model whose historical wins/cost/latency come from clusters closer to
+  // this prompt gets a higher similarity signal than a model whose evidence is
+  // mostly in farther clusters. When a candidate has no cluster-local history,
+  // fall back to the request-level head-cluster fit rather than fabricating a
+  // preference.
   const headCentroid = (Array.isArray(stats.centroids) && stats.centroids[clusterId]) || null;
   const clusterSimilarity = headCentroid ? _clamp01((cosine(vec, headCentroid) + 1) / 2) : null;
 
@@ -603,6 +624,7 @@ export function scoreRoute({
       cost,
       latency,
       load,
+      similarity: _candidateClusterFit(stats, vec, clusterIds, cand.model, clusterSimilarity),
       hasQuality: agg.n > 0,
     });
   }
@@ -742,8 +764,9 @@ export function scoreRoute({
 //   cost:       min-max(cost) then INVERT -> cheaper scores higher.
 //   latency:    min-max(latency) then INVERT -> faster scores higher.
 //   load:       min-max(load) then INVERT -> less-loaded scores higher.
-//   similarity: shared clusterSimilarity for every candidate (cluster-fit
-//               confidence; constant within the set => normalizes to itself).
+//   similarity: per-candidate cluster-fit over that model's historical samples
+//               in the top-p window. This is intentionally not min-maxed again:
+//               it is already an absolute [0,1] confidence/similarity score.
 // A candidate missing a signal gets null for it (blendSignals renormalizes the
 // weights over only the present signals - never penalized into oblivion).
 // --------------------------------------------------------------------------
@@ -791,7 +814,7 @@ function _scoreRouteMultiSignal({
     if (routeWeights.cost) sig.cost = costMap.get(r.key);
     if (routeWeights.latency) sig.latency = latMap.get(r.key);
     if (routeWeights.load) sig.load = loadMap.get(r.key);
-    if (routeWeights.similarity) sig.similarity = clusterSimilarity; // shared; null-safe in blend
+    if (routeWeights.similarity) sig.similarity = r.similarity == null ? clusterSimilarity : r.similarity;
     normedSignalsByKey.set(r.key, sig);
   }
 
