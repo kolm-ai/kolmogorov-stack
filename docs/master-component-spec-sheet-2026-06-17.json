@@ -369,11 +369,11 @@
       "id": "compile-api-to-model-competitors",
       "stack_area": "compiler-platform",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 11,
+      "already_at_frontier_count": 12,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 4,
+      "minor_gaps": 3,
       "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -25949,10 +25949,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 80683,
-          "lines": 1643,
+          "bytes": 85980,
+          "lines": 1772,
           "imports": 18,
-          "exports": 20,
+          "exports": 21,
           "routes": 0,
           "env_refs": 23,
           "fs_writes": 1,
@@ -25970,7 +25970,7 @@
         ],
         "priority_score": 9,
         "priority_band": "high",
-        "sha256": "1b2aced8a699e3bcc0ed302a26b93cd50c4fd2edfe20dd8fcf406ced86fc4e42"
+        "sha256": "bea1eb5780654ca7f157746947bec1fd593cbc24763d851416609018054345f6"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -50839,10 +50839,10 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 20726,
-          "lines": 474,
+          "bytes": 21669,
+          "lines": 498,
           "imports": 0,
-          "exports": 6,
+          "exports": 9,
           "routes": 0,
           "env_refs": 7,
           "fs_writes": 0,
@@ -50859,7 +50859,7 @@
         ],
         "priority_score": 6,
         "priority_band": "medium",
-        "sha256": "ffeb840d3646fb4f752abd4eef7d9dd071e7ce84e04522223bc77a7a859c5370"
+        "sha256": "4c2813241f033742a133fb0593fcfefebffc9cef944a60e58d4139fd40ffcef5"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -50898,10 +50898,10 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 53801,
-          "lines": 1178,
+          "bytes": 54876,
+          "lines": 1203,
           "imports": 0,
-          "exports": 27,
+          "exports": 30,
           "routes": 1,
           "env_refs": 28,
           "fs_writes": 0,
@@ -50919,7 +50919,7 @@
         ],
         "priority_score": 9,
         "priority_band": "high",
-        "sha256": "dc4b1eb11af6ef4ec0d470aeafe85ae7df4c99499199ee80f60c130426a22eb6"
+        "sha256": "b315eb08a281080e2253970701899e59d6bee6888364b66529d6085dcb19a19f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -50931,7 +50931,8 @@
           "tests/wave602-backend-atomic-deep-dive.test.js",
           "tests/wave921-trainer-unification.test.js",
           "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
-          "tests/finalized-c4-distill-method-truthfulness.test.js"
+          "tests/finalized-c4-distill-method-truthfulness.test.js",
+          "tests/wave945-distill-pipeline-matrix.test.js"
         ],
         "category_links": [
           {
@@ -50983,7 +50984,7 @@
             "relation": "sampled"
           }
         ],
-        "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
+        "improvement_track": "split_or_add_generated_contract_map_before_growth",
         "innovation_opportunity": "Keep quantization/distillation workers behind generated method, receipt, calibration, MoE, and bakeoff contracts that record measured deltas per artifact.",
         "suggested_verification": [
           "npm run verify:quantize-worker-matrix",
@@ -50993,7 +50994,7 @@
         ]
       },
       "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
+      "next_best_action": "Maintain current contract and keep split_or_add_generated_contract_map_before_growth current."
     },
     {
       "path": "workers/distill/scripts/train_preference.py",

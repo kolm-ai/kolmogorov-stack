@@ -47,6 +47,16 @@ def _require(mod_name, install_hint, code=3):
         sys.exit(code)
 
 
+def _json_float(value):
+    try:
+        n = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(n):
+        return None
+    return n
+
+
 def _holdout_expected(row):
     if not isinstance(row, dict):
         return None
@@ -211,7 +221,7 @@ def main():
     _require("peft", "pip install peft")
     _require("datasets", "pip install datasets")
 
-    from transformers import TrainingArguments, Trainer, DataCollatorForLanguageModeling
+    from transformers import TrainingArguments, Trainer, TrainerCallback, DataCollatorForLanguageModeling
     from datasets import Dataset
 
     if not os.path.exists(args.pairs):
@@ -338,11 +348,25 @@ def main():
 
     training = TrainingArguments(**ta_kwargs)
 
+    class _KolmProgressCallback(TrainerCallback):
+        def on_log(self, args, state, control, logs=None, **kwargs):
+            payload = {
+                "event": "kolm.train.progress",
+                "step": int(getattr(state, "global_step", 0) or 0),
+                "epoch": _json_float(getattr(state, "epoch", None)),
+                "loss": _json_float((logs or {}).get("loss")),
+                "eval_loss": _json_float((logs or {}).get("eval_loss")),
+                "learning_rate": _json_float((logs or {}).get("learning_rate")),
+                "telemetry_source": "measured",
+            }
+            print(json.dumps({k: v for k, v in payload.items() if v is not None}), flush=True)
+
     trainer_kwargs = dict(
         model=model,
         args=training,
         train_dataset=ds,
         data_collator=DataCollatorForLanguageModeling(tok, mlm=False),
+        callbacks=[_KolmProgressCallback()],
     )
     if eval_ds is not None:
         trainer_kwargs["eval_dataset"] = eval_ds

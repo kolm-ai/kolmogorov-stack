@@ -40,7 +40,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | model-signing-standards | trust | sota_review_complete_external_or_release_gate_open | at=9 open=0/0/2 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | confidential-compute | enterprise | sota_review_complete_external_or_release_gate_open | at=10 open=0/0/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | agent-security-eval | enterprise | sota_review_complete_external_or_release_gate_open | at=8 open=0/0/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
-| compile-api-to-model-competitors | compiler-platform | sota_review_complete_external_or_release_gate_open | at=11 open=0/0/4 | 4 | npm run verify:stack-sota<br>npm run verify:inventions |
+| compile-api-to-model-competitors | compiler-platform | sota_review_complete_external_or_release_gate_open | at=12 open=0/0/3 | 4 | npm run verify:stack-sota<br>npm run verify:inventions |
 
 ## Top Component Gaps
 

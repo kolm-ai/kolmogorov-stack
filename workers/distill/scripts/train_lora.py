@@ -38,6 +38,16 @@ def _require(mod_name, install_hint):
         sys.exit(3)
 
 
+def _json_float(value):
+    try:
+        n = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(n):
+        return None
+    return n
+
+
 UNSLOTH_FAMILIES = (
     "qwen",
     "qwen2",
@@ -756,7 +766,7 @@ def main():
     _require("accelerate", "pip install accelerate")
 
     from transformers import (AutoModelForCausalLM, AutoTokenizer,
-                              TrainingArguments, Trainer,
+                              TrainingArguments, Trainer, TrainerCallback,
                               DataCollatorForLanguageModeling)
     from peft import LoraConfig, get_peft_model, TaskType
     from datasets import Dataset
@@ -976,7 +986,22 @@ def main():
             except Exception as e:
                 sys.stderr.write(f"[train_lora] custom optimizer build failed: {e}\n")
 
-    callbacks = []
+    class _KolmProgressCallback(TrainerCallback):
+        def on_log(self, args, state, control, logs=None, **kwargs):
+            payload = {
+                "event": "kolm.train.progress",
+                "step": int(getattr(state, "global_step", 0) or 0),
+                "epoch": _json_float(getattr(state, "epoch", None)),
+                "loss": _json_float((logs or {}).get("loss")),
+                "eval_loss": _json_float((logs or {}).get("eval_loss")),
+                "learning_rate": _json_float((logs or {}).get("learning_rate")),
+                "telemetry_source": "measured",
+            }
+            # Drop null scalars so the Node parser can distinguish missing
+            # metrics from measured zero values without carrying raw log text.
+            print(json.dumps({k: v for k, v in payload.items() if v is not None}), flush=True)
+
+    callbacks = [_KolmProgressCallback()]
     if early_stop_enabled:
         # W787-1 — EarlyStoppingCallback. patience = KOLM_EARLY_STOP_PATIENCE
         # (default 3) maps to the transformers `early_stopping_patience`

@@ -997,6 +997,7 @@ export async function* distill({
   let step = resumePriorSteps;
   let kAccum = 0.5;
   let lastProgressEvent = null;
+  let progressTelemetrySource = 'synthetic';
   // W459 - try each teacher in attemptList until one succeeds. A "success"
   // means: worker exit code === 0 AND a manifest.json was written without a
   // `teacher_error` field. On failure (rate-limit, transient API error,
@@ -1053,6 +1054,10 @@ export async function* distill({
       args.push(`--importance-weights=${importanceWeightsPath}`);
     }
     // Spawn detached so the parent can move on while the worker runs.
+    let attemptLogOffset = 0;
+    try {
+      attemptLogOffset = fs.existsSync(logPath) ? fs.statSync(logPath).size : 0;
+    } catch (_) {} // deliberate: cleanup
     const logFd = fs.openSync(logPath, 'a');
     const child = spawn(process.execPath, args, {
       detached: true,
@@ -1095,14 +1100,42 @@ export async function* distill({
       }
       yield evt;
     }
-    // Drain.
-    const attemptExit = await new Promise((resolve) => {
+    // Drain while tailing structured worker progress. Only JSON lines with the
+    // explicit kolm.train.progress/kolm.distill.progress event contract become
+    // measured progress rows; ordinary trainer stdout remains log text.
+    let attemptExit = null;
+    const consumeMeasuredProgress = ({ flushIncomplete = false } = {}) => {
+      const parsed = _readWorkerProgressSince(logPath, {
+        offset: attemptLogOffset,
+        attempt: attemptIdx + 1,
+        stepBase: step,
+        flushIncomplete,
+      });
+      attemptLogOffset = parsed.offset;
+      const events = [];
+      for (const evt of parsed.events) {
+        if (Number.isFinite(Number(evt.step)) && Number(evt.step) <= step) {
+          evt.worker_step = Math.max(0, Math.floor(Number(evt.step)));
+          evt.step = step + 1;
+        }
+        step = Math.max(step, Math.floor(Number(evt.step) || (step + 1)));
+        lastProgressEvent = evt;
+        progressTelemetrySource = 'measured';
+        if (progressFd !== null) {
+          try { fs.writeSync(progressFd, JSON.stringify(evt) + '\n'); } catch (_) {} // deliberate: cleanup
+        }
+        events.push(evt);
+      }
+      return events;
+    };
+    const exitPromise = new Promise((resolve) => {
       let resolved = false;
       const finish = (code, signal) => {
         if (resolved) return;
         resolved = true;
         try { fs.closeSync(logFd); } catch {} // deliberate: cleanup
-        resolve({ code, signal: signal || null });
+        attemptExit = { code, signal: signal || null };
+        resolve(attemptExit);
       };
       if (typeof child.on === 'function') {
         child.on('exit', (code, signal) => finish(code, signal));
@@ -1113,6 +1146,20 @@ export async function* distill({
       const deadlineMs = workerMode === 'full' ? 600_000 : 90_000;
       setTimeout(() => finish(null, 'timeout'), deadlineMs).unref?.();
     });
+    const pollMs = workerMode === 'full' ? 1000 : 250;
+    while (attemptExit === null) {
+      await Promise.race([
+        exitPromise,
+        new Promise((resolve) => setTimeout(resolve, pollMs)),
+      ]);
+      for (const evt of consumeMeasuredProgress({ flushIncomplete: attemptExit !== null })) {
+        yield evt;
+      }
+    }
+    await exitPromise;
+    for (const evt of consumeMeasuredProgress({ flushIncomplete: true })) {
+      yield evt;
+    }
     // Load + classify this attempt's manifest.
     let attemptManifest = null;
     if (fs.existsSync(manifestPath)) {
@@ -1233,7 +1280,7 @@ export async function* distill({
     workerMode,
     manifest: workerManifest,
     lastStep: lastProgressEvent,
-    progressTelemetrySource: 'synthetic',
+    progressTelemetrySource,
   });
   try {
     const metaPath = path.join(runDir, 'run-meta.json');
@@ -1322,6 +1369,88 @@ export function resolveDistillFinalLoss(manifest, lastStep) {
 
 function _finiteMetric(v) {
   return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
+function _numberOrNull(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function parseDistillWorkerProgressLine(line, { attempt = 1, fallbackStep = null } = {}) {
+  const raw = String(line || '').trim();
+  if (!raw || raw.length > 16_384 || raw[0] !== '{') return null;
+  let obj = null;
+  try { obj = JSON.parse(raw); } catch (_) { return null; }
+  if (!obj || typeof obj !== 'object') return null;
+  const event = String(obj.event || obj.type || '').trim();
+  const isProgress = obj.kolm_progress === true
+    || event === 'kolm.train.progress'
+    || event === 'kolm.distill.progress'
+    || event === 'train_progress';
+  if (!isProgress) return null;
+  const loss = _numberOrNull(obj.loss ?? obj.train_loss ?? obj.training_loss ?? obj.eval_loss);
+  const kScore = _numberOrNull(obj.k_score ?? obj.kscore ?? obj.k_final);
+  const progressPct = _numberOrNull(obj.progress_pct ?? obj.percent ?? obj.progress);
+  const epoch = _numberOrNull(obj.epoch);
+  const explicitStep = _numberOrNull(obj.step ?? obj.global_step);
+  if (loss == null && kScore == null && progressPct == null && epoch == null && explicitStep == null) {
+    return null;
+  }
+  const step = explicitStep != null
+    ? Math.max(0, Math.floor(explicitStep))
+    : (fallbackStep != null ? Math.max(0, Math.floor(Number(fallbackStep))) : null);
+  return _normalizeProgressEvent({
+    step,
+    ...(loss != null ? { loss } : {}),
+    ...(kScore != null ? { k_score: kScore } : {}),
+    ...(progressPct != null ? { progress_pct: Math.max(0, Math.min(100, progressPct)) } : {}),
+    ...(epoch != null ? { epoch } : {}),
+    ...(obj.stage ? { stage: String(obj.stage) } : {}),
+    ts: typeof obj.ts === 'string' ? obj.ts : new Date().toISOString(),
+    attempt: Math.max(1, Math.floor(Number(obj.attempt ?? attempt) || 1)),
+    loss_source: loss != null ? 'measured' : 'unavailable',
+    k_source: kScore != null ? 'measured' : 'unavailable',
+    telemetry_source: 'measured',
+    progress_event: 'worker',
+  });
+}
+
+function _readWorkerProgressSince(logPath, { offset = 0, attempt = 1, stepBase = 0, flushIncomplete = false } = {}) {
+  let stat = null;
+  try { stat = fs.statSync(logPath); } catch (_) { return { offset, events: [] }; }
+  if (!stat || stat.size <= offset) return { offset: stat ? stat.size : offset, events: [] };
+  const maxBytes = 1024 * 1024;
+  const start = Math.max(offset, stat.size - maxBytes);
+  let chunk = '';
+  try {
+    const fd = fs.openSync(logPath, 'r');
+    try {
+      const buf = Buffer.alloc(stat.size - start);
+      fs.readSync(fd, buf, 0, buf.length, start);
+      chunk = buf.toString('utf8');
+    } finally {
+      fs.closeSync(fd);
+    }
+  } catch (_) {
+    return { offset, events: [] };
+  }
+  const events = [];
+  let nextOffset = stat.size;
+  const endsWithNewline = /\r?\n$/.test(chunk);
+  const lines = chunk.split(/\r?\n/);
+  if (!flushIncomplete && !endsWithNewline) {
+    const partial = lines.pop() || '';
+    nextOffset = stat.size - Buffer.byteLength(partial, 'utf8');
+  }
+  let nextStep = Number.isFinite(Number(stepBase)) ? Math.floor(Number(stepBase)) : 0;
+  for (const line of lines) {
+    const evt = parseDistillWorkerProgressLine(line, { attempt, fallbackStep: nextStep + 1 });
+    if (!evt) continue;
+    if (evt.step == null) evt.step = nextStep + 1;
+    nextStep = Math.max(nextStep, Math.floor(Number(evt.step) || 0));
+    events.push(evt);
+  }
+  return { offset: nextOffset, events };
 }
 
 export function resolveDistillFinalK(manifest, lastStep) {

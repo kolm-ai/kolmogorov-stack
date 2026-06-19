@@ -15,6 +15,8 @@ import {
   _resolveOrderingPolicy,
   _w808RegressionGate,
   classifyTeacher,
+  distill,
+  parseDistillWorkerProgressLine,
   resolveDistillFinalK,
   resolveDistillFinalLoss,
   summarizeDistillTelemetry,
@@ -87,7 +89,7 @@ test('W945 generated matrix is current and all hard distill gates are green', ()
   assert.equal(m.gates.ok, true, JSON.stringify(m.gates.failures, null, 2));
   assert.deepEqual(m.gates.failures, []);
   assert.deepEqual(m.gates.warnings, []);
-  assert.equal(m.summary.export_count, 19);
+  assert.equal(m.summary.export_count, 20);
   assert.ok(m.summary.function_count >= 26);
   assert.equal(m.summary.mode_count, 3);
   assert.equal(m.summary.teacher_classification_count, 10);
@@ -183,6 +185,67 @@ test('W945 runtime teacher policy, tenant, ordering, and telemetry contracts sta
     k_source: 'measured',
     worker_mode: 'full',
   });
+
+  const parsed = parseDistillWorkerProgressLine(JSON.stringify({
+    event: 'kolm.train.progress',
+    step: 7,
+    loss: 0.234,
+    k_score: 0.88,
+    stage: 'train',
+  }), { attempt: 2 });
+  assert.equal(parsed.telemetry_source, 'measured');
+  assert.equal(parsed.loss_source, 'measured');
+  assert.equal(parsed.k_source, 'measured');
+  assert.equal(parsed.step, 7);
+  assert.equal(parsed.attempt, 2);
+  assert.equal(parsed.stage, 'train');
+  assert.equal(parseDistillWorkerProgressLine('[train_lora] loss=0.2'), null);
+});
+
+test('W945 distill parses structured worker progress into measured telemetry', async () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w945-progress-'));
+  const worker = path.join(tmp, 'fake-worker.mjs');
+  fs.writeFileSync(worker, `
+import fs from 'node:fs';
+import path from 'node:path';
+const outArg = process.argv.find((arg) => arg.startsWith('--out='));
+const out = outArg ? outArg.slice('--out='.length) : path.join(process.cwd(), 'out');
+fs.mkdirSync(out, { recursive: true });
+process.stdout.write(JSON.stringify({ event: 'kolm.train.progress', step: 1, loss: 0.321, k_score: 0.82, stage: 'train' }));
+fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify({ worker: 'fake', mode: 'full', loss_final: 0.3, k_score_final: 0.84 }));
+`, 'utf8');
+  try {
+    await withEnv({
+      KOLM_DATA_DIR: tmp,
+      HOME: tmp,
+      USERPROFILE: tmp,
+    }, async () => {
+      const events = [];
+      for await (const evt of distill({
+        student_base: 'Qwen/Qwen2.5-0.5B-Instruct',
+        pairs_override: [{ input: 'a', output: 'A' }],
+        train_from_pairs: true,
+        worker_cmd: worker,
+        max_steps: 1,
+        emit_progress_every: 1,
+        tenant_id: 'tenant-progress',
+      })) {
+        events.push(evt);
+      }
+      const measured = events.find((evt) => evt && evt.progress_event === 'worker');
+      assert.ok(measured, 'expected measured worker progress event');
+      assert.equal(measured.telemetry_source, 'measured');
+      assert.equal(measured.loss_source, 'measured');
+      const done = events.find((evt) => evt && evt.done);
+      assert.equal(done.progress_telemetry_source, 'measured');
+      assert.equal(done.telemetry_source, 'measured');
+      assert.equal(done.loss_source, 'measured');
+      const progressText = fs.readFileSync(path.join(path.dirname(done.artifact_path), 'progress.jsonl'), 'utf8');
+      assert.match(progressText, /"progress_event":"worker"/);
+    });
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
 });
 
 test('W945 W808 regression gate remains versioned, tenant-local, and fail-closed', async () => {
