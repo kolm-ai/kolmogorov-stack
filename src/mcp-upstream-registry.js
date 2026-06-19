@@ -18,8 +18,9 @@ import {
   hashMcpProvenanceValue,
   normalizeMcpToolContract,
 } from './mcp-gateway.js';
+import { buildMcpSessionTranscript } from './mcp-session-transcript.js';
 
-export const MCP_UPSTREAM_REGISTRY_VERSION = 'w641-mcp-upstream-registry-v1';
+export const MCP_UPSTREAM_REGISTRY_VERSION = 'w983-mcp-upstream-registry-v2';
 export const MCP_LATEST_PROTOCOL_VERSION = '2025-11-25';
 
 const TOOL_NAME_RE = /^[A-Za-z0-9_.-]{1,128}$/;
@@ -118,6 +119,7 @@ function _normalizeServer(raw, env, index) {
   const tenants = _array(server.tenants || server.tenant_ids).map(String);
   const timeout_ms = Number(server.timeout_ms || server.timeoutMs || 10000);
   const protocol_version = _asString(server.protocol_version || server.protocolVersion || MCP_LATEST_PROTOCOL_VERSION);
+  const session_transcript = server.session_transcript !== false && server.sessionTranscript !== false;
 
   if (!id || !url || tools.length === 0 || !SUPPORTED_TRANSPORTS.has(transport)) return null;
   let parsed;
@@ -134,6 +136,7 @@ function _normalizeServer(raw, env, index) {
     tenants: [...new Set(tenants)].sort(),
     timeout_ms: Number.isFinite(timeout_ms) && timeout_ms > 0 ? Math.min(timeout_ms, 120000) : 10000,
     protocol_version,
+    session_transcript,
     headers: _headersFromConfig(server, env),
   };
 }
@@ -222,37 +225,71 @@ function _upstreamProvenance(payload, responseBody) {
   };
 }
 
-async function _postJsonRpc(server, payload, fetchImpl) {
+function _responseHeader(res, name) {
+  const headers = res && res.headers;
+  if (!headers) return null;
+  try {
+    if (typeof headers.get === 'function') {
+      const v = headers.get(name) || headers.get(String(name).toLowerCase()) || headers.get(String(name).toUpperCase());
+      return typeof v === 'string' && v ? v : null;
+    }
+    if (typeof headers === 'object') {
+      const want = String(name || '').toLowerCase();
+      for (const [k, v] of Object.entries(headers)) {
+        if (String(k).toLowerCase() !== want) continue;
+        return Array.isArray(v) ? String(v[0] || '') : String(v || '');
+      }
+    }
+  } catch { return null; }
+  return null;
+}
+
+function _parseJsonOrSse(text) {
+  const raw = String(text || '').trim();
+  if (!raw) return null;
+  if (raw[0] === '{' || raw[0] === '[') return JSON.parse(raw);
+  const data = [];
+  for (const line of raw.split(/\r?\n/)) {
+    const m = /^data:\s?(.*)$/.exec(line);
+    if (m && m[1] && m[1] !== '[DONE]') data.push(m[1]);
+  }
+  for (let i = data.length - 1; i >= 0; i--) {
+    try { return JSON.parse(data[i]); } catch { /* try prior SSE data row */ }
+  }
+  throw new Error('not_json_or_sse');
+}
+
+async function _postJsonRpcEnvelope(server, payload, fetchImpl, opts = {}) {
   const controller = typeof AbortController === 'function' ? new AbortController() : null;
   const timer = controller ? setTimeout(() => controller.abort(), server.timeout_ms) : null;
   try {
+    const protocolVersion = opts.protocol_version || server.protocol_version || MCP_LATEST_PROTOCOL_VERSION;
+    const headers = {
+      'content-type': 'application/json',
+      accept: 'application/json, text/event-stream',
+      'mcp-protocol-version': protocolVersion,
+      ...server.headers,
+    };
+    if (opts.session_id) headers['mcp-session-id'] = opts.session_id;
     const res = await fetchImpl(server.url, {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        accept: 'application/json',
-        'mcp-protocol-version': server.protocol_version || MCP_LATEST_PROTOCOL_VERSION,
-        ...server.headers,
-      },
+      headers,
       body: JSON.stringify(payload),
       ...(controller ? { signal: controller.signal } : {}),
     });
     const text = await res.text();
     let body = null;
     if (text) {
-      try { body = JSON.parse(text); } catch {
+      try { body = _parseJsonOrSse(text); } catch {
         if (!res.ok) throw _err('mcp_upstream_http_error', `MCP upstream ${server.id} returned HTTP ${res.status}`, { status: res.status, server_id: server.id });
         throw _err('mcp_upstream_bad_json', `MCP upstream ${server.id} returned non-JSON response`, { server_id: server.id });
       }
     }
-    if (body && body.error) {
-      return attachMcpUpstreamProvenance(_toolErrorResult(body.error), _upstreamProvenance(payload, body));
+    if (opts.notification && res.ok && !body) {
+      return { body: null, status: res.status, session_id: _responseHeader(res, 'mcp-session-id') || null };
     }
-    if (!res.ok) throw _err('mcp_upstream_http_error', `MCP upstream ${server.id} returned HTTP ${res.status}`, { status: res.status, server_id: server.id });
-    if (!body || body.jsonrpc !== '2.0' || !('result' in body)) {
-      throw _err('mcp_upstream_bad_response', `MCP upstream ${server.id} response is not a JSON-RPC result`, { server_id: server.id });
-    }
-    return attachMcpUpstreamProvenance(_normalizeToolResult(body.result), _upstreamProvenance(payload, body));
+    if (!res.ok) throw _err('mcp_upstream_http_error', `MCP upstream ${server.id} returned HTTP ${res.status}`, { status: res.status, server_id: server.id, body });
+    return { body, status: res.status, session_id: _responseHeader(res, 'mcp-session-id') || null };
   } catch (e) {
     if (e && e.name === 'AbortError') {
       throw _err('mcp_upstream_timeout', `MCP upstream ${server.id} timed out after ${server.timeout_ms}ms`, { server_id: server.id });
@@ -262,6 +299,124 @@ async function _postJsonRpc(server, payload, fetchImpl) {
   } finally {
     if (timer) clearTimeout(timer);
   }
+}
+
+async function _postJsonRpc(server, payload, fetchImpl, opts = {}) {
+  const env = await _postJsonRpcEnvelope(server, payload, fetchImpl, opts);
+  const body = env.body;
+  if (body && body.error) {
+    return attachMcpUpstreamProvenance(_toolErrorResult(body.error), _upstreamProvenance(payload, body));
+  }
+  if (!body || body.jsonrpc !== '2.0' || !('result' in body)) {
+    throw _err('mcp_upstream_bad_response', `MCP upstream ${server.id} response is not a JSON-RPC result`, { server_id: server.id });
+  }
+  return attachMcpUpstreamProvenance(_normalizeToolResult(body.result), _upstreamProvenance(payload, body));
+}
+
+function _initializeRequest(server) {
+  return {
+    jsonrpc: '2.0',
+    id: 'kolm-init-1',
+    method: 'initialize',
+    params: {
+      protocolVersion: server.protocol_version || MCP_LATEST_PROTOCOL_VERSION,
+      capabilities: {},
+      clientInfo: {
+        name: 'kolm-mcp-gateway',
+        version: MCP_UPSTREAM_REGISTRY_VERSION,
+      },
+    },
+  };
+}
+
+function _initializedNotification() {
+  return { jsonrpc: '2.0', method: 'notifications/initialized' };
+}
+
+function _toolsListRequest() {
+  return { jsonrpc: '2.0', id: 'kolm-tools-1', method: 'tools/list', params: {} };
+}
+
+function _toolsFromListResponse(body) {
+  const result = body && typeof body === 'object' && body.result && typeof body.result === 'object' ? body.result : {};
+  return Array.isArray(result.tools) ? result.tools : null;
+}
+
+function _assertToolListed(server, tool, tools) {
+  if (!Array.isArray(tools)) return;
+  if (tools.some((row) => row && typeof row === 'object' && row.name === tool)) return;
+  throw _err('mcp_upstream_tool_not_listed', `MCP upstream ${server.id} tools/list did not advertise "${tool}"`, {
+    server_id: server.id,
+    tool,
+  });
+}
+
+async function _executeWithSessionTranscript(server, { tool, args }, fetchImpl) {
+  const initialize_request = _initializeRequest(server);
+  const init = await _postJsonRpcEnvelope(server, initialize_request, fetchImpl);
+  if (!init.body || init.body.error || init.body.jsonrpc !== '2.0' || !init.body.result) {
+    throw _err('mcp_upstream_initialize_error', `MCP upstream ${server.id} did not return a valid initialize result`, { server_id: server.id });
+  }
+  const protocol_version = _asString(init.body.result.protocolVersion) || server.protocol_version || MCP_LATEST_PROTOCOL_VERSION;
+  const upstream_session_id = init.session_id;
+
+  const initialized_notification = _initializedNotification();
+  const initialized = await _postJsonRpcEnvelope(server, initialized_notification, fetchImpl, {
+    notification: true,
+    session_id: upstream_session_id,
+    protocol_version,
+  });
+
+  const tools_list_request = _toolsListRequest();
+  const list = await _postJsonRpcEnvelope(server, tools_list_request, fetchImpl, {
+    session_id: upstream_session_id,
+    protocol_version,
+  });
+  if (!list.body || list.body.error || list.body.jsonrpc !== '2.0' || !list.body.result) {
+    throw _err('mcp_upstream_tools_list_error', `MCP upstream ${server.id} did not return a valid tools/list result`, { server_id: server.id });
+  }
+  _assertToolListed(server, tool, _toolsFromListResponse(list.body));
+
+  const tool_call_request = {
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'tools/call',
+    params: { name: tool, arguments: args == null ? {} : args },
+  };
+  const call = await _postJsonRpcEnvelope(server, tool_call_request, fetchImpl, {
+    session_id: upstream_session_id,
+    protocol_version,
+  });
+
+  const transcript = buildMcpSessionTranscript({
+    protocol_version,
+    server_id: server.id,
+    transport: server.transport,
+    upstream_session_id,
+    initialize_request,
+    initialize_response: init.body,
+    initialized_notification,
+    initialized_ack: initialized.body,
+    initialized_ack_status: initialized.status,
+    tools_list_request,
+    tools_list_response: list.body,
+    tool_call_request,
+    tool_call_response: call.body,
+  });
+
+  const provenance = {
+    ..._upstreamProvenance(tool_call_request, call.body),
+    mcp_protocol_version: protocol_version,
+    mcp_upstream_session_id: upstream_session_id,
+    mcp_session_transcript: transcript,
+  };
+  if (call.body && call.body.error) {
+    return attachMcpUpstreamProvenance(_toolErrorResult(call.body.error), provenance);
+  }
+  if (!call.body || call.body.jsonrpc !== '2.0' || !('result' in call.body)) {
+    throw _err('mcp_upstream_bad_response', `MCP upstream ${server.id} response is not a JSON-RPC result`, { server_id: server.id });
+  }
+  return attachMcpUpstreamProvenance(_normalizeToolResult(call.body.result), provenance);
 }
 
 export function makeMcpUpstreamRegistry(opts = {}) {
@@ -282,6 +437,7 @@ export function makeMcpUpstreamRegistry(opts = {}) {
         tenants: server.tenants.slice(),
         protocol_version: server.protocol_version,
         timeout_ms: server.timeout_ms,
+        session_transcript: server.session_transcript,
       }));
     },
     resolve({ tool, tenant, server_id } = {}) {
@@ -297,6 +453,9 @@ export function makeMcpUpstreamRegistry(opts = {}) {
         throw _err('mcp_upstream_fetch_unavailable', 'global fetch is not available for MCP upstream execution');
       }
       const server = _resolveServer(servers, { tool, tenant, server_id });
+      if (server.session_transcript) {
+        return _executeWithSessionTranscript(server, { tool, args }, fetchImpl);
+      }
       const request = {
         jsonrpc: '2.0',
         id: 1,

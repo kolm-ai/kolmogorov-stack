@@ -44,7 +44,7 @@ import {
 } from './mcp-gateway.js';
 import { anchorLeafHash } from './transparency-anchor.js';
 
-export const MCP_GATEWAY_ROUTES_VERSION = 'w982-mcp-gateway-routes-v3';
+export const MCP_GATEWAY_ROUTES_VERSION = 'w983-mcp-gateway-routes-v4';
 const MCP_RECEIPT_TABLE = 'mcp_tool_receipts';
 
 function _tenantIdOf(req) {
@@ -334,6 +334,20 @@ export function register(r, deps = {}) {
         upstream_request_id: body.upstream_request_id || body.upstreamRequestId || null,
         upstream_request_hash: body.upstream_request_hash || body.upstreamRequestHash || null,
         upstream_response_hash: body.upstream_response_hash || body.upstreamResponseHash || null,
+        mcp_session_transcript: body.mcp_session_transcript || body.session_transcript || body.mcpSessionTranscript || null,
+        mcp_protocol_version: body.mcp_protocol_version || body.mcpProtocolVersion || null,
+        mcp_upstream_session_id: body.mcp_upstream_session_id || body.mcpUpstreamSessionId || null,
+        mcp_upstream_session_hash: body.mcp_upstream_session_hash || body.mcpUpstreamSessionHash || null,
+        mcp_session_transcript_hash: body.mcp_session_transcript_hash || body.mcpSessionTranscriptHash || null,
+        mcp_session_transcript_step_count: body.mcp_session_transcript_step_count || body.mcpSessionTranscriptStepCount || null,
+        mcp_initialize_request_hash: body.mcp_initialize_request_hash || body.mcpInitializeRequestHash || null,
+        mcp_initialize_response_hash: body.mcp_initialize_response_hash || body.mcpInitializeResponseHash || null,
+        mcp_initialized_notification_hash: body.mcp_initialized_notification_hash || body.mcpInitializedNotificationHash || null,
+        mcp_tools_list_request_hash: body.mcp_tools_list_request_hash || body.mcpToolsListRequestHash || null,
+        mcp_tools_list_response_hash: body.mcp_tools_list_response_hash || body.mcpToolsListResponseHash || null,
+        mcp_tools_snapshot_hash: body.mcp_tools_snapshot_hash || body.mcpToolsSnapshotHash || null,
+        mcp_tool_call_request_hash: body.mcp_tool_call_request_hash || body.mcpToolCallRequestHash || null,
+        mcp_tool_call_response_hash: body.mcp_tool_call_response_hash || body.mcpToolCallResponseHash || null,
       });
 
       if (policyDecision) out.receipt.policy = policyDecision;

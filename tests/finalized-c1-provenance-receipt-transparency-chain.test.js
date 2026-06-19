@@ -217,7 +217,7 @@ test('AC2: kolm-audit-1 registry export is byte-identical to legacy receiptSubje
 // ---------------------------------------------------------------------------
 // AC3 - MCP tool-call fidelity.
 // ---------------------------------------------------------------------------
-test('AC3: mcp-tool-call-2 exports faithful in-toto Statement with args/result subjects and full predicate', () => {
+test('AC3: current MCP tool-call receipt exports faithful in-toto Statement with args/result subjects and full predicate', () => {
   const signer = freshSigner();
   const built = buildMcpReceipt({
     tool: 'search_web',
@@ -269,8 +269,10 @@ test('AC3: mcp-tool-call-2 exports faithful in-toto Statement with args/result s
   // Both legacy and current MCP receipt classes are registered.
   assert.ok(listReceiptClasses().includes('mcp-tool-call-1'));
   assert.ok(listReceiptClasses().includes('mcp-tool-call-2'));
+  assert.ok(listReceiptClasses().includes('mcp-tool-call-3'));
   assert.equal(getReceiptDescriptor('mcp-tool-call-1').idField, 'call_id');
   assert.equal(getReceiptDescriptor('mcp-tool-call-2').idField, 'call_id');
+  assert.equal(getReceiptDescriptor('mcp-tool-call-3').idField, 'call_id');
 });
 
 // ---------------------------------------------------------------------------

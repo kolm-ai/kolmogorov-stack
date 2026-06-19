@@ -39,8 +39,8 @@
     "frontier_improvement_or_invention"
   ],
   "summary": {
-    "component_count": 972,
-    "test_referenced_components": 972,
+    "component_count": 973,
+    "test_referenced_components": 973,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 66,
     "domains": {
@@ -49,7 +49,7 @@
       "capture_data_eval": 85,
       "compile_artifact_runtime": 148,
       "developer_distribution": 70,
-      "identity_access": 31,
+      "identity_access": 32,
       "infra_cloud_device": 71,
       "platform_support": 221,
       "runtime_serving_routing": 26,
@@ -60,21 +60,21 @@
     "surfaces": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 632,
+      "core-backend": 633,
       "package-distribution": 92,
       "service": 3,
       "worker": 211
     },
     "risk_signals": {
-      "auth_or_tenant_boundary": 23,
-      "cryptographic_or_proof_boundary": 475,
+      "auth_or_tenant_boundary": 24,
+      "cryptographic_or_proof_boundary": 476,
       "distribution_or_worker_surface": 306,
       "environment_configuration_boundary": 371,
-      "execution_or_subprocess_boundary": 313,
+      "execution_or_subprocess_boundary": 314,
       "http_route_surface": 41,
       "large_component_contract_risk": 45,
       "money_or_entitlement_path": 17,
-      "network_or_provider_boundary": 172,
+      "network_or_provider_boundary": 173,
       "stateful_storage_boundary": 125
     },
     "top_review_targets": [
@@ -25473,10 +25473,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "68dcf16edbe08356ca1527f5cee114e03643d8e7e11ec33d262b8bc61379b8f3",
+      "sha256": "f6a1eca15ac21d6ffe94e88e4d2a37ae2a94cec8331f915c44c13f2eec59118a",
       "metrics": {
-        "bytes": 12326,
-        "lines": 279,
+        "bytes": 12429,
+        "lines": 280,
         "imports": 7,
         "exports": 6,
         "routes": 0,
@@ -25661,9 +25661,9 @@
       "surface": "core-backend",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "93cda0a3ec3ce2634740d7075de91da33190b773e9c24fa974235dc55cb80342",
+      "sha256": "484d0080cca648fdb8880dd2374672a07137c83eb18865e2377c2450ede960f5",
       "metrics": {
-        "bytes": 14589,
+        "bytes": 14594,
         "lines": 339,
         "imports": 2,
         "exports": 2,
@@ -36312,7 +36312,8 @@
         "tests/model-signing-sidecars.test.js",
         "tests/receipt-export-registry.test.js",
         "tests/wave921-intoto-attestation.test.js",
-        "tests/wave982-mcp-provenance-binding.test.js"
+        "tests/wave982-mcp-provenance-binding.test.js",
+        "tests/wave983-mcp-session-transcript.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -39767,10 +39768,10 @@
       "surface": "api-http",
       "domain": "api_surface",
       "language": "javascript",
-      "sha256": "ee5a70502e052ee5382198d21b1fe491ce3b9698eeaec381feff291087b33569",
+      "sha256": "1b8c0e9ecc09875e1333649cec001d9fb46e9eeb0057df20aa60ebe5730a5a42",
       "metrics": {
-        "bytes": 18129,
-        "lines": 448,
+        "bytes": 19694,
+        "lines": 462,
         "imports": 2,
         "exports": 3,
         "routes": 2,
@@ -39788,7 +39789,8 @@
         "tests/wave921-mcp-signed-receipts.test.js",
         "tests/wave966-mcp-tool-contract-pinning.test.js",
         "tests/wave981-mcp-tool-policy.test.js",
-        "tests/wave982-mcp-provenance-binding.test.js"
+        "tests/wave982-mcp-provenance-binding.test.js",
+        "tests/wave983-mcp-session-transcript.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -39834,12 +39836,12 @@
       "surface": "core-backend",
       "domain": "runtime_serving_routing",
       "language": "javascript",
-      "sha256": "01c87921e5b22a14b5e634849a1ef011fcc2d413ecdd5b7d83cc574283c4ee1e",
+      "sha256": "63cae6dd1361300c8abf7ea68e51b6b888a80e3fbb9bf6d2d4c4497344938704",
       "metrics": {
-        "bytes": 30519,
-        "lines": 732,
-        "imports": 4,
-        "exports": 21,
+        "bytes": 35272,
+        "lines": 821,
+        "imports": 5,
+        "exports": 23,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -39955,6 +39957,66 @@
       ]
     },
     {
+      "path": "src/mcp-session-transcript.js",
+      "id": "src-mcp-session-transcript-js",
+      "surface": "core-backend",
+      "domain": "identity_access",
+      "language": "javascript",
+      "sha256": "931ba0b72d4946ee8a08c56193810a221713d339e9d05211c17038faaedb585a",
+      "metrics": {
+        "bytes": 6610,
+        "lines": 165,
+        "imports": 2,
+        "exports": 6,
+        "routes": 0,
+        "env_refs": 0,
+        "fs_writes": 0,
+        "subprocess_refs": 0,
+        "network_refs": 0,
+        "crypto_refs": 7,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/wave983-mcp-session-transcript.test.js"
+      ],
+      "risk_signals": [
+        "auth_or_tenant_boundary",
+        "cryptographic_or_proof_boundary",
+        "network_or_provider_boundary"
+      ],
+      "priority_score": 5,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+      "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
+      "suggested_verification": [
+        "npm run verify:auth-boundary-matrix",
+        "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
+      ]
+    },
+    {
       "path": "src/mcp-tool-policy.js",
       "id": "src-mcp-tool-policy-js",
       "surface": "core-backend",
@@ -40020,16 +40082,16 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "a3095ef0aa6ced8e3c9f5a93b13f27353a8797ee7a1eded88a050154273075f7",
+      "sha256": "1d4c1977d9639419c791d1871d738d28039a7c9935a70dd43d385c0f38847229",
       "metrics": {
-        "bytes": 13334,
-        "lines": 339,
-        "imports": 1,
+        "bytes": 19471,
+        "lines": 498,
+        "imports": 2,
         "exports": 8,
         "routes": 0,
         "env_refs": 4,
         "fs_writes": 0,
-        "subprocess_refs": 0,
+        "subprocess_refs": 1,
         "network_refs": 2,
         "crypto_refs": 0,
         "markers": 0
@@ -40037,13 +40099,15 @@
       "test_refs": [
         "tests/wave641-mcp-upstream-registry.test.js",
         "tests/wave966-mcp-tool-contract-pinning.test.js",
-        "tests/wave982-mcp-provenance-binding.test.js"
+        "tests/wave982-mcp-provenance-binding.test.js",
+        "tests/wave983-mcp-session-transcript.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary",
+        "execution_or_subprocess_boundary",
         "network_or_provider_boundary"
       ],
-      "priority_score": 2,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -42405,7 +42469,8 @@
         "tests/agent-audit-report-ready-notify.test.js",
         "tests/wave910-notifications.test.js",
         "tests/wave258-audit-fixes.test.js",
-        "tests/wave699-drift-alert-w813-contract.test.js"
+        "tests/wave699-drift-alert-w813-contract.test.js",
+        "tests/wave983-mcp-session-transcript.test.js"
       ],
       "risk_signals": [
         "environment_configuration_boundary",
@@ -46953,10 +47018,10 @@
       "surface": "core-backend",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "124cbf833644d27c8ec467fc02fdb4a76aad7d8564df1ea1bbc9c9a4ca67e92d",
+      "sha256": "2cd63f4a08d06d3ae69730761b999e5c36b378f4b3f1b19cf91d4d6b8af7f068",
       "metrics": {
-        "bytes": 24456,
-        "lines": 540,
+        "bytes": 25127,
+        "lines": 553,
         "imports": 2,
         "exports": 19,
         "routes": 0,
@@ -46972,7 +47037,8 @@
         "tests/model-signing-build-sidecars.test.js",
         "tests/receipt-export-registry.test.js",
         "tests/wave921-intoto-attestation.test.js",
-        "tests/wave982-mcp-provenance-binding.test.js"
+        "tests/wave982-mcp-provenance-binding.test.js",
+        "tests/wave983-mcp-session-transcript.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",

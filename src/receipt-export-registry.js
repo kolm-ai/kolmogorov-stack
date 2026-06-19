@@ -156,8 +156,9 @@ registerReceiptClass('kolm-audit-1', {
 
 // ---------------------------------------------------------------------------
 // MCP tool-call descriptors. v1 is the original signed receipt; v2 adds signed
-// actor/session/upstream JSON-RPC provenance fields while preserving the same
-// subject and predicate type shape.
+// actor/session/upstream JSON-RPC provenance fields; v3 adds signed MCP
+// initialize/tools-list/tools-call session transcript continuity fields while
+// preserving the same subject and predicate type shape.
 // ---------------------------------------------------------------------------
 const MCP_TOOLCALL_CONTENT_DIGESTS = Object.freeze([
   { nameTag: 'args', hashField: 'args_hash', kind: 'tool_input' },
@@ -176,9 +177,21 @@ const MCP_TOOLCALL_V2_PREDICATE_FIELDS = Object.freeze([
   'upstream_request_id', 'upstream_request_hash', 'upstream_response_hash',
 ]);
 
+const MCP_TOOLCALL_V3_PREDICATE_FIELDS = Object.freeze([
+  ...MCP_TOOLCALL_V2_PREDICATE_FIELDS,
+  'mcp_protocol_version', 'mcp_upstream_session_hash',
+  'mcp_session_transcript_version', 'mcp_session_transcript_hash',
+  'mcp_session_transcript_step_count', 'mcp_initialize_request_hash',
+  'mcp_initialize_response_hash', 'mcp_initialized_notification_hash',
+  'mcp_tools_list_request_hash', 'mcp_tools_list_response_hash',
+  'mcp_tools_snapshot_hash', 'mcp_tool_call_request_hash',
+  'mcp_tool_call_response_hash',
+]);
+
 for (const [schema, predicateFields] of [
   ['mcp-tool-call-1', MCP_TOOLCALL_PREDICATE_FIELDS],
   ['mcp-tool-call-2', MCP_TOOLCALL_V2_PREDICATE_FIELDS],
+  ['mcp-tool-call-3', MCP_TOOLCALL_V3_PREDICATE_FIELDS],
 ]) {
   registerReceiptClass(schema, {
     idField: 'call_id',

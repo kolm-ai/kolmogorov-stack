@@ -256,6 +256,7 @@ test('detection matrix: mcp + openai-agents samples are not claimed by otel/lang
   assert.equal(detectConnector(mcpLog), 'mcp');
   assert.equal(detectConnector([{ schema: 'mcp-tool-call-1', tool: 'send_email', call_id: 'mtc_1' }]), 'mcp');
   assert.equal(detectConnector([{ schema: 'mcp-tool-call-2', tool: 'send_email', call_id: 'mtc_2' }]), 'mcp');
+  assert.equal(detectConnector([{ schema: 'mcp-tool-call-3', tool: 'send_email', call_id: 'mtc_3' }]), 'mcp');
 
   // OpenAI Agents SDK rows have no run_type / dotted_order; they must be
   // claimed by openai-agents BEFORE langsmith's looser sniff gets a look.

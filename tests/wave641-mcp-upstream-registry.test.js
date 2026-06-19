@@ -104,7 +104,7 @@ test('W641 #2 env shorthand builds a configured upstream registry', () => {
 test('W641 #3 registry executes MCP tools/call JSON-RPC with protocol header', async () => {
   let seen = null;
   const registry = makeMcpUpstreamRegistry({
-    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [TOOL], tenants: [TENANT] }],
+    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [TOOL], tenants: [TENANT], session_transcript: false }],
     fetchImpl: async (url, init) => {
       seen = { url, init, body: JSON.parse(init.body) };
       return jsonResponse({ jsonrpc: '2.0', id: 1, result: RESULT });
@@ -124,7 +124,7 @@ test('W641 #3 registry executes MCP tools/call JSON-RPC with protocol header', a
 test('W641 #4 dispatch signs the actual upstream result when no precomputed result is supplied', async () => {
   const signer = makeSigner();
   const registry = makeMcpUpstreamRegistry({
-    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [TOOL], tenants: [TENANT] }],
+    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [TOOL], tenants: [TENANT], session_transcript: false }],
     fetchImpl: async () => jsonResponse({ jsonrpc: '2.0', id: 1, result: RESULT }),
   });
   const router = makeRouterStub();
@@ -146,7 +146,7 @@ test('W641 #4 dispatch signs the actual upstream result when no precomputed resu
 test('W641 #5 upstream JSON-RPC errors become signed tool execution errors', async () => {
   const signer = makeSigner();
   const registry = makeMcpUpstreamRegistry({
-    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [TOOL] }],
+    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [TOOL], session_transcript: false }],
     fetchImpl: async () => jsonResponse({ jsonrpc: '2.0', id: 1, error: { code: -32602, message: 'bad customer id' } }),
   });
   const router = makeRouterStub();
@@ -167,7 +167,7 @@ test('W641 #5 upstream JSON-RPC errors become signed tool execution errors', asy
 test('W641 #6 missing upstream tool returns an explicit route error', async () => {
   const signer = makeSigner();
   const registry = makeMcpUpstreamRegistry({
-    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: ['crm.other'] }],
+    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: ['crm.other'], session_transcript: false }],
     fetchImpl: async () => jsonResponse({ jsonrpc: '2.0', id: 1, result: RESULT }),
   });
   const router = makeRouterStub();

@@ -1,7 +1,7 @@
 // W982 - MCP caller/session/upstream provenance binding.
 //
 // W981 closed policy authorization. This wave moves the remaining MCP trail gap
-// into signed evidence: new receipts default to mcp-tool-call-2 and bind
+// into signed evidence: W982 receipts introduced mcp-tool-call-2 and bind
 // privacy-safe actor/session hashes plus upstream JSON-RPC envelope digests.
 
 import { test } from 'node:test';
@@ -190,7 +190,7 @@ test('W982 #4 live upstream JSON-RPC request and response envelopes are signed b
   let seenRequest = null;
   const responseEnvelope = { jsonrpc: '2.0', id: 1, result: RESULT };
   const registry = makeMcpUpstreamRegistry({
-    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [TOOL], tenants: [TENANT] }],
+    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [TOOL], tenants: [TENANT], session_transcript: false }],
     fetchImpl: async (_url, init) => {
       seenRequest = JSON.parse(init.body);
       return jsonResponse(responseEnvelope);

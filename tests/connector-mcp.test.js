@@ -2,7 +2,7 @@
 //
 // Pins src/connectors/mcp.js: JSON-RPC tools/call traffic (request/result
 // paired by id), tools/list declared tool surfaces, initialize serverInfo,
-// kolm mcp-gateway receipts (mcp-tool-call-1/2), and the {server, entries[]}
+// kolm mcp-gateway receipts (mcp-tool-call-1/2/3), and the {server, entries[]}
 // wrapper - all normalized to canonical AuditEvents with action.server set
 // (the field the red-team mcp-discovery probe and model-provenance mcp_servers
 // surface read). Plus: detection via the registry, end-to-end runAudit, and
@@ -32,10 +32,10 @@ const MCP_JSONRPC = [
   { jsonrpc: '2.0', id: 3, result: { content: [{ type: 'text', text: 'delivered' }], isError: false } },
 ];
 
-// kolm's own mcp-gateway receipt shape (src/mcp-gateway.js, mcp-tool-call-2;
-// legacy mcp-tool-call-1 remains accepted).
+// kolm's own mcp-gateway receipt shape (src/mcp-gateway.js, mcp-tool-call-3;
+// legacy mcp-tool-call-1/2 remains accepted).
 const MCP_RECEIPT = {
-  schema: 'mcp-tool-call-2',
+  schema: 'mcp-tool-call-3',
   call_id: 'mtc_01JTESTRECEIPT0000000000',
   timestamp: '2026-06-11T10:00:00.000Z',
   tenant_id: 'tn_acme',
@@ -100,7 +100,7 @@ test('mcp: tools/list -> granted scopes on calls + a discovery event', () => {
   assert.equal(probe.status, 'exposed', 'tool-surface enumeration (list_tools) is the discovery signal');
 });
 
-test('mcp: gateway receipt shape (mcp-tool-call-2) is absorbed', () => {
+test('mcp: gateway receipt shape (mcp-tool-call-3) is absorbed', () => {
   const events = mcp.normalize([MCP_RECEIPT]);
   assert.equal(events.length, 1);
   const ev = events[0];
@@ -121,6 +121,11 @@ test('mcp: gateway receipt shape (mcp-tool-call-2) is absorbed', () => {
   const evAlt = mcp.normalize([alt]);
   assert.equal(evAlt.length, 1);
   assert.equal(evAlt[0].action.tool, 'send_email');
+
+  const v2 = { ...MCP_RECEIPT, schema: 'mcp-tool-call-2' };
+  const evV2 = mcp.normalize([v2]);
+  assert.equal(evV2.length, 1);
+  assert.equal(evV2[0].action.tool, 'send_email');
 });
 
 test('mcp: generic {server, entries[]} wrapper and JSONL strings normalize', () => {

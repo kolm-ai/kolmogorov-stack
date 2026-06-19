@@ -155,7 +155,7 @@ test('W966 #3 expected tool contract mismatches fail before tool execution', asy
 test('W966 #4 upstream registry descriptors are signed by the dispatch route', async () => {
   const signer = makeSigner();
   const registry = makeMcpUpstreamRegistry({
-    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [CONTRACT], tenants: [TENANT] }],
+    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [CONTRACT], tenants: [TENANT], session_transcript: false }],
     fetchImpl: async () => jsonResponse({ jsonrpc: '2.0', id: 1, result: RESULT }),
   });
   assert.deepEqual(registry.toolContractFor({ tool: TOOL, tenant: TENANT, server_id: 'crm' }), normalizeMcpToolContract(CONTRACT));
@@ -183,7 +183,7 @@ test('W966 #5 dispatch rejects stale expected contract hashes before upstream ex
   const signer = makeSigner();
   let called = false;
   const registry = makeMcpUpstreamRegistry({
-    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [CONTRACT], tenants: [TENANT] }],
+    servers: [{ id: 'crm', url: 'https://mcp.example.test/rpc', tools: [CONTRACT], tenants: [TENANT], session_transcript: false }],
     fetchImpl: async () => {
       called = true;
       return jsonResponse({ jsonrpc: '2.0', id: 1, result: RESULT });
