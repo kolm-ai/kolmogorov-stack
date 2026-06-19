@@ -36,10 +36,10 @@
     }
   },
   "summary": {
-    "component_count": 974,
-    "atomic_deep_dive_complete": 974,
+    "component_count": 975,
+    "atomic_deep_dive_complete": 975,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 974,
+    "direct_test_referenced_components": 975,
     "direct_test_reference_pct": 100,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 66,
@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2039,
+          "js_family": 2041,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -108,7 +108,7 @@
       "developer_distribution": 70,
       "identity_access": 32,
       "infra_cloud_device": 71,
-      "platform_support": 221,
+      "platform_support": 222,
       "runtime_serving_routing": 26,
       "storage_state": 28,
       "training_model_optimization": 174,
@@ -117,7 +117,7 @@
     "components_by_surface": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 634,
+      "core-backend": 635,
       "package-distribution": 92,
       "service": 3,
       "worker": 211
@@ -166,7 +166,7 @@
       "critical_gaps": 0,
       "major_gaps": 3,
       "minor_gaps": 1,
-      "required_components": 3,
+      "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
         "npm run verify:quant-oracle",
@@ -182,7 +182,7 @@
       "critical_gaps": 0,
       "major_gaps": 2,
       "minor_gaps": 2,
-      "required_components": 3,
+      "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
         "npm run verify:surfaces",
@@ -198,7 +198,7 @@
       "critical_gaps": 0,
       "major_gaps": 1,
       "minor_gaps": 1,
-      "required_components": 4,
+      "required_components": 5,
       "suggested_verification": [
         "npm run verify:stack-sota",
         "npm run verify:surfaces",
@@ -358,7 +358,7 @@
       "critical_gaps": 0,
       "major_gaps": 2,
       "minor_gaps": 1,
-      "required_components": 3,
+      "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
         "npm run verify:compliance-packet",
@@ -5493,7 +5493,8 @@
           "tests/sota-distill.test.js",
           "tests/wave921-serve-config.test.js",
           "tests/wave957-eagle3-train.test.js",
-          "tests/wave975-python-runtime-boundary.test.js"
+          "tests/wave975-python-runtime-boundary.test.js",
+          "tests/wave993-probe-harness-paired-metrics.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -16175,9 +16176,9 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 21445,
-          "lines": 489,
-          "imports": 3,
+          "bytes": 23264,
+          "lines": 520,
+          "imports": 4,
           "exports": 6,
           "routes": 0,
           "env_refs": 0,
@@ -16193,7 +16194,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "d69e75abce0aa540f2afae2553bae936483093c28d30796d69187fa81991e657"
+        "sha256": "78db3263d0b35f915e562fca3f033768fdeeb62516aed6ffed640ca5cc445b02"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -16202,7 +16203,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave955-agent-benchmark-adapter.test.js"
+          "tests/wave955-agent-benchmark-adapter.test.js",
+          "tests/wave993-probe-harness-paired-metrics.test.js"
         ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
@@ -17616,8 +17618,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 108405,
-          "lines": 1852,
+          "bytes": 108965,
+          "lines": 1857,
           "imports": 13,
           "exports": 26,
           "routes": 0,
@@ -17636,7 +17638,7 @@
         ],
         "priority_score": 8,
         "priority_band": "high",
-        "sha256": "3ce1d5fe5b36fac8fe7925af6ed268da814bbd99c905daa35c1434f4a7cf5e9f"
+        "sha256": "9582413a9239131c4541b0554ef3c14727b194dd03eca50f193b002b73ce7510"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -40087,6 +40089,83 @@
       "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
     },
     {
+      "path": "src/probe-harness.js",
+      "id": "src-probe-harness-js",
+      "surface": "core-backend",
+      "domain": "platform_support",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 10364,
+          "lines": 301,
+          "imports": 1,
+          "exports": 11,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 5,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary"
+        ],
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "930e63eeb4b821e63c4b659b46862b99e627473a8af8a17dbbe4b2a46c878401"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave993-probe-harness-paired-metrics.test.js"
+        ],
+        "category_links": [
+          {
+            "id": "quantization",
+            "stack_area": "compiler-runtime",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "required"
+          },
+          {
+            "id": "kv-cache",
+            "stack_area": "runtime",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "required"
+          },
+          {
+            "id": "speculative-decoding",
+            "stack_area": "runtime",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "required"
+          },
+          {
+            "id": "agent-security-eval",
+            "stack_area": "enterprise",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "required"
+          }
+        ],
+        "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
+        "innovation_opportunity": "Keep support modules behind generated lifecycle, verifier, provider, privacy, storage, and claim-scope contracts before adding more daemon, binder, or orchestration behavior.",
+        "suggested_verification": [
+          "npm run verify:daemon-connector-matrix",
+          "npm run verify:binder-contract-matrix",
+          "npm run verify:intent-contract-matrix",
+          "npm run verify:otel-matrix",
+          "npm run verify:codegraph"
+        ]
+      },
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping."
+    },
+    {
       "path": "src/product-experience.js",
       "id": "src-product-experience-js",
       "surface": "core-backend",
@@ -42375,8 +42454,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 56848,
-          "lines": 1048,
+          "bytes": 57390,
+          "lines": 1054,
           "imports": 1,
           "exports": 9,
           "routes": 0,
@@ -42395,7 +42474,7 @@
         ],
         "priority_score": 8,
         "priority_band": "high",
-        "sha256": "e644d4219bc5b11d2ae2c14e36909d83806c421b94054d608fd4966379e65346"
+        "sha256": "c91c2cb99076cc7c1d9207a20d49e31f7347925b15d976016f4c2bbe02e668d5"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -46620,7 +46699,8 @@
           "tests/research-docs.test.js",
           "tests/sota-distill.test.js",
           "tests/wave603-whole-stack-sota-deep-dive.test.js",
-          "tests/wave957-eagle3-train.test.js"
+          "tests/wave957-eagle3-train.test.js",
+          "tests/wave993-probe-harness-paired-metrics.test.js"
         ],
         "category_links": [
           {

@@ -1008,6 +1008,11 @@ export function mergeBenchmarkResults(redTeamResult, benchmarkRun) {
     valid_tasks: bs.valid_tasks || 0,
     attack_success_rate: bs.attack_success_rate == null ? null : bs.attack_success_rate,
     benign_utility_rate: bs.benign_utility_rate == null ? null : bs.benign_utility_rate,
+    utility_under_attack_rate: bs.utility_under_attack_rate == null ? null : bs.utility_under_attack_rate,
+    utility_under_attack_tasks: bs.utility_under_attack_tasks || 0,
+    utility_under_attack_success: bs.utility_under_attack_success || 0,
+    paired_utility_tasks: bs.paired_utility_tasks || 0,
+    paired_utility_coverage: bs.paired_utility_coverage == null ? null : bs.paired_utility_coverage,
     suites: Array.isArray(bs.suites) ? bs.suites.slice(0, 12) : [],
     public_suites: Array.isArray(bs.public_suites) ? bs.public_suites.slice(0, 12) : [],
     fixture_only: bs.fixture_only === true,
@@ -1017,7 +1022,8 @@ export function mergeBenchmarkResults(redTeamResult, benchmarkRun) {
   };
   const note = `Includes public-benchmark adapter evidence (${benchmarkRun.spec_version || 'agent benchmark adapter'}): `
     + `${benchmarkSummary.tasks_run} task(s), ASR ${benchmarkSummary.attack_success_rate == null ? 'n/a' : benchmarkSummary.attack_success_rate}, `
-    + `benign utility ${benchmarkSummary.benign_utility_rate == null ? 'n/a' : benchmarkSummary.benign_utility_rate}; `
+    + `benign utility ${benchmarkSummary.benign_utility_rate == null ? 'n/a' : benchmarkSummary.benign_utility_rate}, `
+    + `utility-under-attack ${benchmarkSummary.utility_under_attack_rate == null ? 'n/a' : benchmarkSummary.utility_under_attack_rate}; `
     + `${probesMerged} probe outcome(s) are determined by benchmark execution. `
     + (benchmarkSummary.fixture_only ? 'Rows were fixture/local unless marked public_data=true. ' : 'Rows include public_data=true public-suite evidence. ')
     + (den === 0 ? 'No probe channel was exercised by any source.' : '');

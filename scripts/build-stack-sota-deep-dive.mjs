@@ -39,7 +39,7 @@ const STACK_CATEGORIES = Object.freeze([
     domains: ['training_model_optimization', 'compile_artifact_runtime', 'runtime_serving_routing'],
     readiness_surfaces: ['compile-train-distill', 'runtime-compute'],
     keywords: ['quant', 'fp4', 'nvfp4', 'gptq', 'awq', 'gguf', 'export'],
-    required_paths: ['src/quantization-oracle.js', 'workers/quantize/scripts/quantize.py', 'src/export-nvfp4.js'],
+    required_paths: ['src/quantization-oracle.js', 'workers/quantize/scripts/quantize.py', 'src/export-nvfp4.js', 'src/probe-harness.js'],
   },
   {
     id: 'kv-cache',
@@ -47,7 +47,7 @@ const STACK_CATEGORIES = Object.freeze([
     domains: ['runtime_serving_routing', 'compile_artifact_runtime'],
     readiness_surfaces: ['runtime-compute', 'ai-ml-optimizer'],
     keywords: ['kv', 'cache', 'itkv', 'preload', 'runtime'],
-    required_paths: ['src/kv-cache-policy.js', 'src/kv-cache-shard.js', 'src/itkv-profile.js'],
+    required_paths: ['src/kv-cache-policy.js', 'src/kv-cache-shard.js', 'src/itkv-profile.js', 'src/probe-harness.js'],
   },
   {
     id: 'speculative-decoding',
@@ -55,7 +55,7 @@ const STACK_CATEGORIES = Object.freeze([
     domains: ['runtime_serving_routing', 'training_model_optimization'],
     readiness_surfaces: ['runtime-compute', 'ai-ml-optimizer'],
     keywords: ['speculative', 'spec-decode', 'accelerate', 'draft', 'eagle'],
-    required_paths: ['src/accelerate.js', 'src/speculative-decoding.js', 'src/spec-decode.js', 'apps/trainer/eagle3_train.py'],
+    required_paths: ['src/accelerate.js', 'src/speculative-decoding.js', 'src/spec-decode.js', 'apps/trainer/eagle3_train.py', 'src/probe-harness.js'],
   },
   {
     id: 'finetune-frameworks',
@@ -135,7 +135,7 @@ const STACK_CATEGORIES = Object.freeze([
     domains: ['trust_security_compliance', 'capture_data_eval', 'api_surface'],
     readiness_surfaces: ['infrastructure-enterprise', 'capture-gateway-lake'],
     keywords: ['audit', 'agent', 'red-team', 'risk', 'control', 'eval'],
-    required_paths: ['src/audit-orchestrator.js', 'src/red-team.js', 'src/attestation-report-builder.js'],
+    required_paths: ['src/audit-orchestrator.js', 'src/red-team.js', 'src/attestation-report-builder.js', 'src/probe-harness.js'],
   },
   {
     id: 'compile-api-to-model-competitors',
