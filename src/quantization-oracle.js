@@ -213,7 +213,7 @@ const METHOD_CATALOG = Object.freeze({
   },
   spinquant: {
     label: 'SpinQuant learned rotations W4A4KV4',
-    worker_method: null,
+    worker_method: 'spinquant',
     execution_status: 'worker_external_repo',
     experimental: true,
     bits: 4,
@@ -229,7 +229,7 @@ const METHOD_CATALOG = Object.freeze({
   },
   respinquant: {
     label: 'ReSpinQuant layer-wise fused rotations W4A4/W3A3',
-    worker_method: null,
+    worker_method: 'respinquant',
     execution_status: 'worker_external_repo',
     experimental: true,
     bits: 4,
@@ -245,7 +245,7 @@ const METHOD_CATALOG = Object.freeze({
   },
   infoquant: {
     label: 'InfoQuant PSOT W4A4KV4 distribution shaping',
-    worker_method: null,
+    worker_method: 'infoquant',
     execution_status: 'worker_external_repo',
     experimental: true,
     bits: 4,

@@ -152,7 +152,7 @@ test('5c. CLI quantization oracle accepts MoE topology flags', () => {
   assert.equal(plan.recommendation.moe_quantization.policy.router, 'fp16');
 });
 
-test('5d. external-only quant methods never masquerade as worker-ready', () => {
+test('5d. external-only quant methods stay gated, while rotation adapters become worker-addressable when enabled', () => {
   const gated = methodAvailability('mc_moe', {});
   assert.equal(gated.available, false);
   assert.equal(gated.reason, 'experimental_gated');
@@ -164,9 +164,8 @@ test('5d. external-only quant methods never masquerade as worker-ready', () => {
 
   const rotation = methodAvailability('infoquant', { KOLM_ENABLE_EXPERIMENTAL_QUANTS: '1' });
   assert.equal(rotation.known, true);
-  assert.equal(rotation.available, false);
-  assert.equal(rotation.reason, 'external_repo_only');
-  assert.match(rotation.hint, /external research plan/);
+  assert.equal(rotation.available, true);
+  assert.equal(rotation.reason, 'experimental_enabled');
 });
 
 async function makeRouterApp() {

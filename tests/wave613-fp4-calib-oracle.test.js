@@ -85,14 +85,17 @@ test('4. NVFP4 export path records calibration result when the option is enabled
 
   assert.match(src, /buildFp4CalibPlan/);
   assert.match(src, /run_fp4_calibration/);
+  assert.match(src, /apply_fp4_calibration_to_model/);
   assert.match(src, /fp4_calibration_plan/);
   assert.match(src, /fp4_calibration/);
+  assert.match(src, /fp4_calibration_fusion/);
 });
 
-test('5. backend spec records W613 closure and keeps transform fusion as follow-up', () => {
+test('5. backend spec records W613 closure and W1011 pre-round fusion closure', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
 
   assert.match(spec, /CLOSED W613/);
   assert.match(spec, /FP4 calibration plan into the oracle recommendation/);
-  assert.match(spec, /Fuse the BATQuant calibration plan into the NVFP4 export/);
+  assert.match(spec, /W1011/);
+  assert.match(spec, /pre-round FP4 fusion/);
 });

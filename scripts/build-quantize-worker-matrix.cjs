@@ -74,9 +74,13 @@ function extractRunFunctions(src) {
 }
 
 function methodDispatchCoverage(src, choices) {
+  const rotationDispatchPresent = src.includes('def run_rotation_external(')
+    && src.includes('elif args.method in ("spinquant", "respinquant", "infoquant"):')
+    && src.includes('tool_info = run_rotation_external(');
   return choices.map((method) => {
     let dispatch = null;
     if (method === 'int4' || method === 'int8') dispatch = 'run_int_bnb';
+    else if (['spinquant', 'respinquant', 'infoquant'].includes(method) && rotationDispatchPresent) dispatch = 'run_rotation_external';
     else {
       const re = new RegExp(`elif args\\.method == ["']${method}["']:\\s*\\n\\s*tool_info = (run_[a-z0-9_]+)\\(`);
       const m = src.match(re);
@@ -118,7 +122,7 @@ function extractSubprocessBoundaries(src) {
       line: lineNumber(src, m.index),
       repo_envs: envs.sort(),
       module_names: [...modules, ...directModules].sort(),
-      check_false: block.includes('subprocess.run(cmd, check=False)'),
+      check_false: block.includes('subprocess.run(cmd, check=False'),
       returncode_checked: block.includes('res.returncode != 0'),
     });
   }
@@ -156,7 +160,7 @@ function safetyGuards(src) {
   const mainIdx = src.indexOf('def main():');
   const mainBlock = mainIdx >= 0 ? src.slice(mainIdx) : '';
   return {
-    method_choices_argparse: src.includes('choices=["int4", "int8", "gptq", "awq"') && src.includes('"qat"'),
+    method_choices_argparse: src.includes('choices=["int4", "int8", "gptq", "awq"') && src.includes('"qat"') && src.includes('"spinquant"'),
     experimental_methods_env_gated: src.includes('KOLM_ENABLE_EXPERIMENTAL_QUANTS') && src.includes('guard_experimental_method(args.method)'),
     stable_methods_fail_hint: src.includes('"stable_methods": ["int4", "int8", "gptq", "awq"]'),
     lazy_imports_per_method: src.includes('def run_int_bnb') && src.includes('except ImportError as e') && src.includes('missing python deps'),
@@ -168,7 +172,7 @@ function safetyGuards(src) {
     moe_detection_gated_on_config: src.includes('moe_detection = detect_moe_config(str(src))') && src.includes('if moe_detection.get("is_moe")'),
     router_precision_sacred_fp16: src.includes('router_after_tag = "fp16"') && src.includes('SACRED'),
     self_test_moe_no_model_short_circuit: src.includes('--self-test-moe') && src.includes('before any --in/--out validation'),
-    subprocess_returncodes_fail_loud: src.includes('subprocess.run(cmd, check=False)') && src.includes('res.returncode != 0') && src.includes('fail(4,'),
+    subprocess_returncodes_fail_loud: src.includes('subprocess.run(cmd, check=False') && src.includes('res.returncode != 0') && src.includes('fail(4,'),
   };
 }
 
@@ -246,9 +250,9 @@ function buildMatrix() {
   };
 
   const failures = [];
-  if (summary.method_count !== 10) failures.push({ gate: 'method_count', expected: 10, actual: summary.method_count });
+  if (summary.method_count !== 13) failures.push({ gate: 'method_count', expected: 13, actual: summary.method_count });
   if (summary.stable_method_count !== 4) failures.push({ gate: 'stable_methods', expected: 4, actual: summary.stable_method_count });
-  if (summary.experimental_method_count !== 6) failures.push({ gate: 'experimental_methods', expected: 6, actual: summary.experimental_method_count });
+  if (summary.experimental_method_count !== 9) failures.push({ gate: 'experimental_methods', expected: 9, actual: summary.experimental_method_count });
   if (missingDispatch.length) failures.push({ gate: 'method_dispatch', missing: missingDispatch });
   if (summary.cli_flag_count < 13) failures.push({ gate: 'cli_flags', count: summary.cli_flag_count });
   if (missingReceiptFields.length) failures.push({ gate: 'receipt_fields', missing: missingReceiptFields });

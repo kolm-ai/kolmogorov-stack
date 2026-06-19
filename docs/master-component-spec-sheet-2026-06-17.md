@@ -7,7 +7,7 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 ## How Close To Perfect
 
 - Local engineering perfection: **100/100**
-- Frontier/product perfection: **95.3/100**
+- Frontier/product perfection: **96.3/100**
 - Atomic components inventoried: **978**
 - Atomic deep dives complete: **100%**
 - Direct test referenced: **978/978 (100%)**
@@ -17,7 +17,7 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 - Readiness proof surplus hill-climb: **104.3/110**
 - Language fit: **js_control_plane_with_python_rust_native_escape_hatches**
 - SOTA categories still carrying critical work: **0/16**
-- SOTA categories still carrying major work: **2/16**
+- SOTA categories still carrying major work: **1/16**
 
 Interpretation: local code/spec discipline and readiness proof coverage are now complete, but claimable frontier/product perfection remains lower because partner adoption, package release, public benchmark data, certification, and SOTA category gaps are still external or frontier-open. Above-100 scoring is limited to local proof surplus and never upgrades an external gate into a shipped claim.
 
@@ -27,7 +27,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | --- | --- | --- | --- | --- | --- |
 | distillation | training | sota_review_complete_local_frontier_aligned | at=14 open=0/0/0 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | moe-distill-quant | training | sota_review_complete_major_frontier_work_open | at=8 open=0/4/2 | 6 | npm run verify:stack-sota<br>npm run verify:inventions |
-| quantization | compiler-runtime | sota_review_complete_major_frontier_work_open | at=12 open=0/3/1 | 4 | npm run verify:stack-sota<br>npm run verify:quant-oracle |
+| quantization | compiler-runtime | sota_review_complete_external_or_release_gate_open | at=14 open=0/0/1 | 4 | npm run verify:stack-sota<br>npm run verify:quant-oracle |
 | kv-cache | runtime | sota_review_complete_external_or_release_gate_open | at=9 open=0/0/2 | 4 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | speculative-decoding | runtime | sota_review_complete_external_or_release_gate_open | at=8 open=0/0/1 | 5 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | finetune-frameworks | training | sota_review_complete_external_or_release_gate_open | at=12 open=0/0/3 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
@@ -51,7 +51,6 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | `src/airgap-distill.js` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `workers/distill/distill.mjs` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `workers/quantize/scripts/quantize.py` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_quantize_worker_matrix_and_frontier_method_contract. |
-| `apps/export/probe.py` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping. |
 | `apps/trainer/multinode_launch.py` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `src/distill-pipeline.js` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_distill_pipeline_matrix_and_training_orchestrator_contract. |
 | `src/spec-compile.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract. |
@@ -65,7 +64,8 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | `src/cloud-distill.js` | training_model_optimization | 8 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/compile-pipeline.js` | compile_artifact_runtime | 8 | linked_frontier_work_open | Execute the linked frontier track: split_or_add_generated_contract_map_before_growth. |
 | `src/forge-experts.js` | identity_access | 5 | linked_frontier_work_open | Execute the linked frontier track: extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests. |
-| `src/quantization-oracle.js` | training_model_optimization | 4 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
+| `apps/trainer/moe_to_dense.py` | training_model_optimization | 3 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
+| `src/moe-to-dense.js` | training_model_optimization | 2 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 
 ## Machine Sheet
 

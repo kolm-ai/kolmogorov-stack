@@ -36,6 +36,7 @@ import { fileURLToPath } from 'node:url';
 
 import { hashDaqProfile, validateProfile } from './daq-profile.js';
 import { gateQuantKScore } from './quant-accuracy-recovery.js';
+import { buildProbeMeasurementReceipt, derivePairedRuntimeDeltas } from './probe-harness.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WORKER_PATH = path.resolve(__dirname, '..', 'workers', 'quantize', 'scripts', 'quantize.py');
@@ -125,6 +126,7 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
   }
 
   const py = process.env.PYTHON || 'python3';
+  const spawn = opts.spawnSync || spawnSync;
   const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w719-bakeoff-'));
   const results = [];
 
@@ -137,7 +139,7 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
     fs.mkdirSync(outDir, { recursive: true });
 
     const t0 = Date.now();
-    const res = spawnSync(py, [WORKER_PATH,
+    const res = spawn(py, [WORKER_PATH,
       '--method=int4',
       `--in=${model_path}`,
       `--out=${outDir}`,
@@ -190,6 +192,7 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
     let kscore_gate = null;
     let scorer = 'bits_coverage_surrogate';
     let score_details = null;
+    let probe_measurement_receipt = null;
     const measured = (opts.measured && (opts.measured[profile_id] || opts.measured[i]))
       || readMeasuredFromReceipt(outDir);
     if (measured && measured.fp16 && measured.quant) {
@@ -203,6 +206,20 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
         kscore = gate.quant_kscore;
         kscore_gate = gate;
         scorer = gate.scorer;
+        probe_measurement_receipt = buildQuantizationProbeReceipt({
+          profile_id,
+          model_path,
+          profile,
+          measured,
+          gate,
+          eval_set,
+          out_dir: outDir,
+          latency_ms,
+          vram_gb,
+          avg_weight_bits: averageWeightBits(profile),
+          started_at: new Date(t0).toISOString(),
+          completed_at: new Date(t0 + latency_ms).toISOString(),
+        });
       } catch {
         const profileScore = scoreProfile(profile, eval_set, { profile_id });
         kscore = profileScore.kscore;
@@ -225,6 +242,7 @@ export async function runMixedPrecisionBakeoff(model_path, candidate_profiles, e
       avg_weight_bits,
       ...(score_details ? { score_details } : {}),
       ...(kscore_gate ? { kscore_gate } : {}),
+      ...(probe_measurement_receipt ? { probe_measurement_receipt } : {}),
       accepted: true, // pareto pass happens after the loop
     });
   }
@@ -301,6 +319,120 @@ export function enforceAccuracyFloor(results, opts = {}) {
     }
   }
   return results;
+}
+
+export function buildQuantizationProbeReceipt({
+  profile_id,
+  model_path = null,
+  profile = null,
+  measured = null,
+  gate = null,
+  eval_set = null,
+  out_dir = null,
+  latency_ms = null,
+  vram_gb = null,
+  avg_weight_bits = null,
+  started_at = null,
+  completed_at = null,
+} = {}) {
+  const fp16 = measured?.fp16 || null;
+  const quant = measured?.quant || null;
+  if (!profile_id || !fp16 || !quant || !gate) return null;
+
+  const workloadId = String(
+    measured.workload_id
+      || measured.holdout_id
+      || measured.eval_set_id
+      || `quant-holdout:${hashDaqProfile(Array.isArray(profile) ? profile : [{ layer_id: profile_id }]).slice(0, 12)}`,
+  );
+  const runtime = String(measured.runtime || fp16.runtime || quant.runtime || 'quantize-worker');
+  const model = String(measured.model || fp16.model || quant.model || model_path || 'unknown-model');
+  const latencyMs = finiteNumberOrNull(latency_ms);
+  const vramGb = finiteNumberOrNull(vram_gb);
+  const avgBits = finiteNumberOrNull(avg_weight_bits);
+
+  const baseline = {
+    id: `${profile_id}:fp16`,
+    runtime,
+    model,
+    workload_id: workloadId,
+    method: 'fp16',
+    kscore: gate.fp16_kscore,
+    quality_score: gate.fp16_kscore,
+    perplexity: fp16.perplexity ?? null,
+    accuracy: fp16.accuracy ?? fp16.holdout_accuracy ?? null,
+    holdout_accuracy: fp16.holdout_accuracy ?? null,
+    size_bytes: fp16.size_bytes ?? null,
+    p50_latency_us: fp16.p50_latency_us ?? null,
+  };
+  const candidate = {
+    id: `${profile_id}:quant`,
+    runtime,
+    model,
+    workload_id: workloadId,
+    method: 'mixed_precision_quant',
+    profile_id,
+    kscore: gate.quant_kscore,
+    quality_score: gate.quant_kscore,
+    perplexity: quant.perplexity ?? null,
+    kl_mean: quant.kl_mean ?? null,
+    size_bytes: quant.size_bytes ?? null,
+    p50_latency_us: quant.p50_latency_us ?? null,
+    latency_ms: latencyMs,
+    vram_gb: vramGb,
+    avg_weight_bits: avgBits,
+  };
+  const paired = derivePairedRuntimeDeltas({
+    baseline,
+    candidate,
+    require_same: ['runtime', 'model', 'workload_id'],
+  });
+  const metrics = {
+    scorer: gate.scorer,
+    verdict: gate.verdict,
+    ships: gate.ships,
+    fp16_kscore: gate.fp16_kscore,
+    quant_kscore: gate.quant_kscore,
+    k_score_delta: gate.k_score_delta,
+    k_score_drop: gate.k_score_drop,
+    quant_kl_mean: gate.quant_kl_mean,
+    max_kl: gate.max_kl,
+    max_delta_drop: gate.max_delta_drop,
+    latency_ms: latencyMs,
+    vram_gb: vramGb,
+    avg_weight_bits: avgBits,
+    paired_runtime: paired,
+  };
+
+  return buildProbeMeasurementReceipt({
+    domain: 'quantization',
+    artifact: {
+      id: profile_id,
+      method: 'mixed_precision_quant',
+      model,
+      output_dir: out_dir,
+    },
+    config: {
+      profile_id,
+      profile_digest: Array.isArray(profile) ? hashDaqProfile(profile) : null,
+      method: 'mixed_precision_bakeoff',
+    },
+    workload: {
+      id: workloadId,
+      eval_rows: Array.isArray(eval_set) ? eval_set.length : null,
+      source: measured.workload_source || null,
+    },
+    baseline,
+    candidate,
+    metrics,
+    samples: Array.isArray(eval_set) ? eval_set : [],
+    evidence: {
+      measured_source: measured.source || measured.evidence_source || 'worker_or_external_scorer',
+      gate,
+    },
+    started_at,
+    completed_at,
+  });
 }
 
 // finalized-c5: read measured fp16/quant accuracy metrics from the worker's
@@ -444,6 +576,12 @@ function averageWeightBits(profile) {
 function finiteNumber(value, fallback) {
   const n = Number(value);
   return Number.isFinite(n) ? n : fallback;
+}
+
+function finiteNumberOrNull(value) {
+  if (value == null || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
 }
 
 function roundGate(value) {

@@ -2,67 +2,67 @@
   "cli_flags": [
     {
       "flag": "--bits",
-      "line": 70,
-      "opt_in": false
-    },
-    {
-      "flag": "--calib",
-      "line": 65,
-      "opt_in": false
-    },
-    {
-      "flag": "--calib-fp4",
-      "line": 93,
-      "opt_in": true
-    },
-    {
-      "flag": "--calib-fp4-block",
-      "line": 103,
-      "opt_in": true
-    },
-    {
-      "flag": "--calib-fp4-max-layers",
-      "line": 107,
-      "opt_in": true
-    },
-    {
-      "flag": "--device",
       "line": 72,
       "opt_in": false
     },
     {
+      "flag": "--calib",
+      "line": 67,
+      "opt_in": false
+    },
+    {
+      "flag": "--calib-fp4",
+      "line": 95,
+      "opt_in": true
+    },
+    {
+      "flag": "--calib-fp4-block",
+      "line": 105,
+      "opt_in": true
+    },
+    {
+      "flag": "--calib-fp4-max-layers",
+      "line": 109,
+      "opt_in": true
+    },
+    {
+      "flag": "--device",
+      "line": 74,
+      "opt_in": false
+    },
+    {
       "flag": "--group-size",
-      "line": 68,
+      "line": 70,
       "opt_in": false
     },
     {
       "flag": "--in",
-      "line": 63,
+      "line": 65,
       "opt_in": false
     },
     {
       "flag": "--method",
-      "line": 60,
+      "line": 61,
       "opt_in": false
     },
     {
       "flag": "--mixed-precision",
-      "line": 75,
+      "line": 77,
       "opt_in": false
     },
     {
       "flag": "--out",
-      "line": 64,
+      "line": 66,
       "opt_in": false
     },
     {
       "flag": "--self-test-moe",
-      "line": 112,
+      "line": 114,
       "opt_in": true
     },
     {
       "flag": "--trust-remote-code",
-      "line": 84,
+      "line": 86,
       "opt_in": true
     }
   ],
@@ -89,8 +89,11 @@
     "exl2",
     "exl3",
     "hqq",
+    "infoquant",
     "qat",
-    "quip"
+    "quip",
+    "respinquant",
+    "spinquant"
   ],
   "failed_safety_guards": [],
   "gates": {
@@ -130,6 +133,11 @@
       "method": "hqq"
     },
     {
+      "dispatch_function": "run_rotation_external",
+      "dispatch_present": true,
+      "method": "infoquant"
+    },
+    {
       "dispatch_function": "run_int_bnb",
       "dispatch_present": true,
       "method": "int4"
@@ -148,6 +156,16 @@
       "dispatch_function": "run_quip",
       "dispatch_present": true,
       "method": "quip"
+    },
+    {
+      "dispatch_function": "run_rotation_external",
+      "dispatch_present": true,
+      "method": "respinquant"
+    },
+    {
+      "dispatch_function": "run_rotation_external",
+      "dispatch_present": true,
+      "method": "spinquant"
     }
   ],
   "methods": [
@@ -157,10 +175,13 @@
     "exl3",
     "gptq",
     "hqq",
+    "infoquant",
     "int4",
     "int8",
     "qat",
-    "quip"
+    "quip",
+    "respinquant",
+    "spinquant"
   ],
   "missing_receipt_fields": [],
   "purpose": "Generated contract matrix for the quantize worker boundary: method menu, CLI flags, reproducibility receipt, optimizer subprocesses, frontier quantization controls, worker isolation, and direct tests.",
@@ -206,48 +227,52 @@
   ],
   "run_functions": [
     {
-      "line": 441,
+      "line": 446,
       "name": "_run_exllamav2"
     },
     {
-      "line": 336,
+      "line": 341,
       "name": "run_aqlm"
     },
     {
-      "line": 306,
+      "line": 311,
       "name": "run_awq"
     },
     {
-      "line": 475,
+      "line": 480,
       "name": "run_exl2"
     },
     {
-      "line": 481,
+      "line": 486,
       "name": "run_exl3"
     },
     {
-      "line": 637,
+      "line": 730,
       "name": "run_fp4_calibration"
     },
     {
-      "line": 272,
+      "line": 277,
       "name": "run_gptq"
     },
     {
-      "line": 487,
+      "line": 492,
       "name": "run_hqq"
     },
     {
-      "line": 233,
+      "line": 238,
       "name": "run_int_bnb"
     },
     {
-      "line": 528,
+      "line": 533,
       "name": "run_qat"
     },
     {
-      "line": 391,
+      "line": 396,
       "name": "run_quip"
+    },
+    {
+      "line": 625,
+      "name": "run_rotation_external"
     }
   ],
   "safety_guards": {
@@ -293,7 +318,7 @@
     {
       "check_false": true,
       "function": "_run_exllamav2",
-      "line": 441,
+      "line": 446,
       "module_names": [
         "exllamav2.conversion.convert"
       ],
@@ -303,7 +328,7 @@
     {
       "check_false": true,
       "function": "run_aqlm",
-      "line": 336,
+      "line": 341,
       "module_names": [
         "aqlm.main"
       ],
@@ -315,7 +340,7 @@
     {
       "check_false": true,
       "function": "run_qat",
-      "line": 528,
+      "line": 533,
       "module_names": [
         "efficient_qat.main_block_ap"
       ],
@@ -327,7 +352,7 @@
     {
       "check_false": true,
       "function": "run_quip",
-      "line": 391,
+      "line": 396,
       "module_names": [
         "quip_sharp.quantize_llama"
       ],
@@ -335,23 +360,31 @@
         "QUIP_SHARP_REPO_PATH"
       ],
       "returncode_checked": true
+    },
+    {
+      "check_false": true,
+      "function": "run_rotation_external",
+      "line": 625,
+      "module_names": [],
+      "repo_envs": [],
+      "returncode_checked": true
     }
   ],
   "summary": {
     "cli_flag_count": 13,
-    "dispatch_covered_methods": 10,
+    "dispatch_covered_methods": 13,
     "exit_code_count": 4,
-    "experimental_method_count": 6,
+    "experimental_method_count": 9,
     "failed_safety_guards": 0,
-    "method_count": 10,
+    "method_count": 13,
     "missing_test_evidence": 0,
-    "quantize_bytes": 72983,
-    "quantize_lines": 1583,
+    "quantize_bytes": 80474,
+    "quantize_lines": 1785,
     "receipt_field_count": 19,
     "required_receipt_field_gaps": 0,
-    "run_function_count": 11,
+    "run_function_count": 12,
     "stable_method_count": 4,
-    "subprocess_boundary_count": 4,
+    "subprocess_boundary_count": 5,
     "worker_package_isolated": true
   },
   "test_evidence": [

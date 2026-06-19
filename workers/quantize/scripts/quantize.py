@@ -44,6 +44,7 @@ import argparse
 import hashlib
 import json
 import os
+import shlex
 import sys
 import time
 import traceback
@@ -59,7 +60,8 @@ def parse_args():
     req = not self_test_only
     p.add_argument("--method", required=req,
                    choices=["int4", "int8", "gptq", "awq",
-                            "aqlm", "quip", "exl2", "exl3", "hqq", "qat"])
+                            "aqlm", "quip", "exl2", "exl3", "hqq", "qat",
+                            "spinquant", "respinquant", "infoquant"])
     p.add_argument("--in", dest="src", required=req, help="HF model directory")
     p.add_argument("--out", dest="dst", required=req, help="output directory")
     p.add_argument("--calib", default=None,
@@ -172,7 +174,10 @@ def fail(code, msg, extra=None):
 # hint instead of failing deep inside the (possibly missing) toolchain. The
 # four stable worker methods (int4/int8/gptq/awq) are always allowed. Mirrors
 # the experimental flag in src/quantization-oracle.js METHOD_CATALOG.
-_EXPERIMENTAL_METHODS = frozenset(("hqq", "exl2", "exl3", "aqlm", "quip", "qat"))
+_EXPERIMENTAL_METHODS = frozenset((
+    "hqq", "exl2", "exl3", "aqlm", "quip", "qat",
+    "spinquant", "respinquant", "infoquant",
+))
 
 
 def _experimental_quants_enabled():
@@ -591,6 +596,94 @@ def run_qat(src, dst, calib, bits, group_size, device, trust_remote_code=False):
 # round. Additive: omitting --calib-fp4 leaves the pre-W921 path untouched.
 # -----------------------------------------------------------------------------
 
+_ROTATION_EXTERNAL_RUNNERS = {
+    "spinquant": {
+        "env": "KOLM_SPINQUANT_CMD",
+        "scheme": "spinquant-w4a4kv4",
+        "hint": "set KOLM_SPINQUANT_CMD to a command that writes a HF artifact to {dst}",
+    },
+    "respinquant": {
+        "env": "KOLM_RESPINQUANT_CMD",
+        "scheme": "respinquant-w4a4",
+        "hint": "set KOLM_RESPINQUANT_CMD to a command that writes a HF artifact to {dst}",
+    },
+    "infoquant": {
+        "env": "KOLM_INFOQUANT_CMD",
+        "scheme": "infoquant-psot-w4a4kv4",
+        "hint": "set KOLM_INFOQUANT_CMD to a command that writes a HF artifact to {dst}",
+    },
+}
+
+
+def _expand_external_command(template, values):
+    try:
+        return [part.format(**values) for part in shlex.split(template)]
+    except KeyError as e:
+        fail(2, f"external quant command contains unknown placeholder: {e}")
+
+
+def run_rotation_external(method, src, dst, calib, bits, group_size, device, trust_remote_code=False):
+    """Run SpinQuant/ReSpinQuant/InfoQuant through an operator command.
+
+    These repos do not expose a stable shared Python API, so the worker lane is
+    an honest adapter. The command must write files under dst or the run fails
+    closed before a success receipt can be emitted.
+    """
+    meta = _ROTATION_EXTERNAL_RUNNERS.get(method)
+    if not meta:
+        fail(2, f"unknown external rotation quant method: {method}")
+    template = os.environ.get(meta["env"])
+    if not template:
+        fail(2,
+             f"{method} requires an operator-supplied external runner command",
+             {"method": method,
+              "env": meta["env"],
+              "hint": meta["hint"],
+              "placeholders": ["{src}", "{dst}", "{calib}", "{bits}",
+                               "{group_size}", "{device}"]})
+
+    import subprocess
+    values = {
+        "src": src,
+        "dst": dst,
+        "calib": calib or "",
+        "bits": str(bits),
+        "group_size": str(group_size),
+        "device": device,
+    }
+    cmd = _expand_external_command(template, values)
+    env = os.environ.copy()
+    env.update({
+        "KOLM_QUANT_METHOD": method,
+        "KOLM_QUANT_SRC": src,
+        "KOLM_QUANT_DST": dst,
+        "KOLM_QUANT_CALIB": calib or "",
+        "KOLM_QUANT_BITS": str(bits),
+        "KOLM_QUANT_GROUP_SIZE": str(group_size),
+        "KOLM_QUANT_DEVICE": device,
+        "KOLM_QUANT_TRUST_REMOTE_CODE": "1" if trust_remote_code else "0",
+    })
+    os.makedirs(dst, exist_ok=True)
+    res = subprocess.run(cmd, check=False, env=env)
+    if res.returncode != 0:
+        fail(4, f"{method} external runner exited {res.returncode}",
+             {"env": meta["env"],
+              "command": cmd[:4] + (["..."] if len(cmd) > 4 else [])})
+    if not hash_output_tree(dst):
+        fail(4, f"{method} external runner produced no artifact files in --out",
+             {"env": meta["env"], "out": dst})
+    return {
+        "lib": method,
+        "scheme": meta["scheme"],
+        "adapter": "external-command",
+        "runner_env": meta["env"],
+        "bits": bits,
+        "group_size": group_size,
+        "device": device,
+        "trust_remote_code": bool(trust_remote_code),
+    }
+
+
 def _iter_safetensor_weights(src, max_layers, min_numel=4096):
     """Yield (name, numpy_2d_array) for the largest 2-D float weight tensors in
     a HF model dir, loading lazily from safetensors on CPU. Falls back to a
@@ -661,6 +754,110 @@ def run_fp4_calibration(src, block=32, max_layers=64, grid_steps=24):
         return {"ok": False, "reason": f"fp4 calibration raised: {e.__class__.__name__}: {e}"}
 
 
+def _fp4_grid_torch(torch, device):
+    return torch.tensor(
+        [-6.0, -4.0, -3.0, -2.0, -1.5, -1.0, -0.5, -0.0,
+         0.0, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0],
+        dtype=torch.float32,
+        device=device,
+    )
+
+
+def _quantize_fp4_block_torch(torch, block, grid):
+    if block.numel() == 0:
+        return block
+    amax = block.abs().max()
+    if float(amax.detach().cpu()) <= 0.0:
+        return torch.zeros_like(block)
+    scale = amax / 6.0
+    scaled = torch.clamp(block / scale, -6.0, 6.0)
+    flat = scaled.reshape(-1, 1)
+    idx = torch.argmin(torch.abs(flat - grid.reshape(1, -1)), dim=1)
+    return grid[idx].reshape_as(block) * scale
+
+
+def _fit_clip_fp4_block_torch(torch, block, grid):
+    best = _quantize_fp4_block_torch(torch, block, grid)
+    best_mse = torch.mean((best - block) ** 2)
+    amax = block.abs().max()
+    if float(amax.detach().cpu()) <= 0.0:
+        return best, 0.0
+    for frac in (0.95, 0.9, 0.85, 0.8, 0.75, 0.7):
+        clipped = torch.clamp(block, -amax * frac, amax * frac)
+        q = _quantize_fp4_block_torch(torch, clipped, grid)
+        mse = torch.mean((q - block) ** 2)
+        if float(mse.detach().cpu()) < float(best_mse.detach().cpu()):
+            best = q
+            best_mse = mse
+    return best, float(best_mse.detach().cpu())
+
+
+def apply_fp4_calibration_to_model(model, calibration, block=None, max_layers=None):
+    """Fuse an FP4-aware pre-round clipping pass into calibrated model weights.
+
+    Only 2-D floating parameters listed in the calibration plan are touched.
+    The post-export K-score gate remains the promotion authority.
+    """
+    try:
+        import torch
+    except ImportError as e:
+        return {"ok": False, "applied": False, "reason": f"torch missing: {e}"}
+    if not calibration or not calibration.get("ok"):
+        return {"ok": False, "applied": False, "reason": "calibration_not_ok"}
+    layers = calibration.get("layers") or {}
+    if not isinstance(layers, dict) or not layers:
+        return {"ok": False, "applied": False, "reason": "no_calibrated_layers"}
+
+    selected = set(layers.keys())
+    limit = max_layers if isinstance(max_layers, int) and max_layers > 0 else len(selected)
+    fused = 0
+    seen = 0
+    total_mse = 0.0
+    total_blocks = 0
+    used_block = int(block or calibration.get("block") or 32)
+    with torch.no_grad():
+        for name, param in model.named_parameters():
+            if name not in selected:
+                continue
+            seen += 1
+            if fused >= limit:
+                break
+            if not getattr(param, "is_floating_point", lambda: False)() or param.ndim != 2:
+                continue
+            data = param.detach().to(dtype=torch.float32)
+            grid = _fp4_grid_torch(torch, data.device)
+            out = torch.empty_like(data)
+            rows, cols = data.shape
+            for r in range(rows):
+                for start in range(0, cols, used_block):
+                    end = min(cols, start + used_block)
+                    q, mse = _fit_clip_fp4_block_torch(torch, data[r, start:end], grid)
+                    out[r, start:end] = q
+                    total_mse += mse
+                    total_blocks += 1
+            param.copy_(out.to(dtype=param.dtype, device=param.device))
+            fused += 1
+
+    if fused == 0:
+        return {
+            "ok": False,
+            "applied": False,
+            "reason": "no_matching_2d_float_parameters",
+            "calibrated_layers": len(selected),
+            "matched_parameters": seen,
+        }
+    return {
+        "ok": True,
+        "applied": True,
+        "algorithm": "batquant-pre-round-fp4-grid+block-clip",
+        "source": "arXiv:2603.16590",
+        "fused_layers": fused,
+        "calibrated_layers": len(selected),
+        "block": used_block,
+        "mean_block_mse": (total_mse / total_blocks) if total_blocks else 0.0,
+    }
+
+
 def _load_calib(path, tokenizer, as_str=False, max_rows=128, max_len=512):
     """Load calibration text. If path missing, fall back to a tiny built-in set."""
     rows = []
@@ -726,6 +923,9 @@ _BACKEND_SUPPORTED_BITS = {
     "exl3":  [2, 3, 4, 5, 6, 8],
     "hqq":   [2, 3, 4, 8],
     "qat":   [2, 3, 4, 8],
+    "spinquant": [4],
+    "respinquant": [3, 4],
+    "infoquant": [4],
 }
 
 
@@ -1524,6 +1724,8 @@ def main():
             tool_info = run_hqq(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         elif args.method == "qat":
             tool_info = run_qat(str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
+        elif args.method in ("spinquant", "respinquant", "infoquant"):
+            tool_info = run_rotation_external(args.method, str(src), str(dst), args.calib, args.bits, args.group_size, args.device, trust_remote_code=trc)
         else:
             fail(2, f"unknown method: {args.method}")
     except SystemExit:

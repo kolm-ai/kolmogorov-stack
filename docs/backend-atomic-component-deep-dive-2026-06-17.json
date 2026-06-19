@@ -2347,10 +2347,10 @@
         "tests/model-signing-sidecars.test.js",
         "tests/r3-kolm-serve.test.js",
         "tests/wave1001-neural-compile-provisioning.test.js",
+        "tests/wave1009-quantization-paired-measurement-receipt.test.js",
         "tests/wave163-export-binder.test.js",
         "tests/wave266-compile-targets-surfaced.test.js",
-        "tests/wave723-streaming-load.test.js",
-        "tests/wave921-fp4-calib-trust-remote.test.js"
+        "tests/wave723-streaming-load.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -26865,6 +26865,7 @@
       },
       "test_refs": [
         "tests/finalized-c5-real-layer-importance-mixed-precision.test.js",
+        "tests/wave1009-quantization-paired-measurement-receipt.test.js",
         "tests/wave719-daq.test.js"
       ],
       "risk_signals": [
@@ -33266,10 +33267,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "e0558339e1f92ea8fefffa97cad2c676cb0c6ec5986e10cd418c26e6da33d3e9",
+      "sha256": "7e9aa54e2c3f25be47661a87a0f28b716b22cc7ca52e5c6383373c81c9b1cdd4",
       "metrics": {
-        "bytes": 13936,
-        "lines": 340,
+        "bytes": 14507,
+        "lines": 348,
         "imports": 5,
         "exports": 9,
         "routes": 0,
@@ -46794,9 +46795,9 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "dfb65d1faa9e30774d4d2e917f2725637a88487a6e3d2dbbc6a6ad3b632a599c",
+      "sha256": "78cb38e66a965b4b223faba2174d459250026a17e84de151c1eae0dde13e447e",
       "metrics": {
-        "bytes": 33031,
+        "bytes": 33054,
         "lines": 905,
         "imports": 3,
         "exports": 5,
@@ -46860,22 +46861,23 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "7acf6e631f36683d29377eed264f7de6090ba8338216a3b3163eeda373abcdb9",
+      "sha256": "a47fcb36980661c6b13a7c03fc9b3d1ef61cedb0a6fc4239ea8696b7caa090b6",
       "metrics": {
-        "bytes": 18385,
-        "lines": 472,
-        "imports": 8,
-        "exports": 4,
+        "bytes": 22557,
+        "lines": 610,
+        "imports": 9,
+        "exports": 5,
         "routes": 0,
         "env_refs": 3,
         "fs_writes": 0,
-        "subprocess_refs": 4,
+        "subprocess_refs": 7,
         "network_refs": 0,
         "crypto_refs": 3,
         "markers": 0
       },
       "test_refs": [
         "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js",
+        "tests/wave1009-quantization-paired-measurement-receipt.test.js",
         "tests/wave606-quant-accuracy-floor.test.js"
       ],
       "risk_signals": [
@@ -61059,16 +61061,16 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "python",
-      "sha256": "7c5b3fce58c6ccce730cc94a94eb402f13335e98bd7251cbe74170d9e2ca73ff",
+      "sha256": "7940fa60886f9a1737af33a781f9985156123f863fa70316a924ba6e287ffb4b",
       "metrics": {
-        "bytes": 72983,
-        "lines": 1583,
+        "bytes": 80474,
+        "lines": 1785,
         "imports": 0,
-        "exports": 40,
+        "exports": 46,
         "routes": 0,
-        "env_refs": 2,
+        "env_refs": 4,
         "fs_writes": 1,
-        "subprocess_refs": 5,
+        "subprocess_refs": 6,
         "network_refs": 0,
         "crypto_refs": 4,
         "markers": 0

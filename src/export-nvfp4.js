@@ -254,10 +254,11 @@ export async function runExport({ artifact, quant, target_dir, force = false, fp
     'import modelopt.torch.quantization as mtq',
     'from transformers import AutoModelForCausalLM, AutoTokenizer',
     'fp4_calibration = None',
+    'fp4_calibration_fusion = None',
     ...(fp4Plan ? [
       `sys.path.insert(0, ${JSON.stringify(FP4_CALIB_SCRIPT_DIR)})`,
       'try:',
-      '    from quantize import run_fp4_calibration',
+      '    from quantize import run_fp4_calibration, apply_fp4_calibration_to_model',
       `    fp4_calibration = run_fp4_calibration(${JSON.stringify(artifact.merged_dir)}, block=${JSON.stringify(fp4Plan.block)}, max_layers=${JSON.stringify(fp4Plan.max_layers)})`,
       'except Exception as e:',
       '    fp4_calibration = {"ok": False, "error": str(e), "stage": "fp4_calibration"}',
@@ -265,6 +266,12 @@ export async function runExport({ artifact, quant, target_dir, force = false, fp
     `model = AutoModelForCausalLM.from_pretrained(${JSON.stringify(artifact.merged_dir)}, torch_dtype=torch.float16)`,
     `tok = AutoTokenizer.from_pretrained(${JSON.stringify(artifact.merged_dir)}, trust_remote_code=True)`,
     `cfg = getattr(mtq, ${JSON.stringify(formatCfg)})`,
+    ...(fp4Plan ? [
+      'try:',
+      `    fp4_calibration_fusion = apply_fp4_calibration_to_model(model, fp4_calibration, block=${JSON.stringify(fp4Plan.block)}, max_layers=${JSON.stringify(fp4Plan.max_layers)})`,
+      'except Exception as e:',
+      '    fp4_calibration_fusion = {"ok": False, "applied": False, "error": str(e), "stage": "fp4_calibration_fusion"}',
+    ] : []),
     'def calibrate(m):',
     '    inputs = tok("The quick brown fox jumps over the lazy dog.", return_tensors="pt").to(m.device)',
     '    with torch.no_grad(): m(**inputs)',
@@ -272,7 +279,7 @@ export async function runExport({ artifact, quant, target_dir, force = false, fp
     '    mtq.quantize(model, cfg, forward_loop=calibrate)',
     `    model.save_pretrained(${JSON.stringify(target_dir)})`,
     `    tok.save_pretrained(${JSON.stringify(target_dir)})`,
-    `    print(json.dumps({"ok": True, "cfg": ${JSON.stringify(formatCfg)}, "weight_dtype": ${JSON.stringify(parsed.weight_dtype)}, "activation_dtype": ${JSON.stringify(parsed.activation_dtype)}, "fp4_calibration": fp4_calibration}))`,
+    `    print(json.dumps({"ok": True, "cfg": ${JSON.stringify(formatCfg)}, "weight_dtype": ${JSON.stringify(parsed.weight_dtype)}, "activation_dtype": ${JSON.stringify(parsed.activation_dtype)}, "fp4_calibration": fp4_calibration, "fp4_calibration_fusion": fp4_calibration_fusion}))`,
     'except Exception as e:',
     '    print(json.dumps({"ok": False, "error": str(e), "trace": traceback.format_exc()[-2048:]}))',
     '    sys.exit(1)',
@@ -324,6 +331,7 @@ export async function runExport({ artifact, quant, target_dir, force = false, fp
     forced: force === true && !blackwell.blackwell_native,
     fp4_calibration_plan: fp4Plan,
     fp4_calibration: detail?.fp4_calibration || null,
+    fp4_calibration_fusion: detail?.fp4_calibration_fusion || null,
     forge_version: NVFP4_EXPORT_VERSION,
   };
 }

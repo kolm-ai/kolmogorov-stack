@@ -54,15 +54,15 @@ test('W941 generated matrix is current and all hard quantize worker gates are gr
   assert.equal(m.gates.ok, true, JSON.stringify(m.gates.failures, null, 2));
   assert.deepEqual(m.gates.failures, []);
   assert.deepEqual(m.gates.warnings, []);
-  assert.equal(m.summary.method_count, 10);
+  assert.equal(m.summary.method_count, 13);
   assert.equal(m.summary.stable_method_count, 4);
-  assert.equal(m.summary.experimental_method_count, 6);
-  assert.equal(m.summary.dispatch_covered_methods, 10);
-  assert.equal(m.summary.run_function_count, 11);
+  assert.equal(m.summary.experimental_method_count, 9);
+  assert.equal(m.summary.dispatch_covered_methods, 13);
+  assert.equal(m.summary.run_function_count, 12);
   assert.equal(m.summary.cli_flag_count, 13);
   assert.equal(m.summary.receipt_field_count, 19);
   assert.equal(m.summary.required_receipt_field_gaps, 0);
-  assert.equal(m.summary.subprocess_boundary_count, 4);
+  assert.equal(m.summary.subprocess_boundary_count, 5);
   assert.equal(m.summary.exit_code_count, 4);
   assert.equal(m.summary.failed_safety_guards, 0);
   assert.equal(m.summary.missing_test_evidence, 0);
@@ -72,8 +72,8 @@ test('W941 generated matrix is current and all hard quantize worker gates are gr
 test('W941 matrix captures methods, flags, dispatch coverage, and receipt fields', () => {
   const m = matrix();
   assert.deepEqual(m.stable_methods, ['awq', 'gptq', 'int4', 'int8']);
-  assert.deepEqual(m.experimental_methods, ['aqlm', 'exl2', 'exl3', 'hqq', 'qat', 'quip']);
-  for (const method of ['int4', 'int8', 'gptq', 'awq', 'aqlm', 'quip', 'exl2', 'exl3', 'hqq', 'qat']) {
+  assert.deepEqual(m.experimental_methods, ['aqlm', 'exl2', 'exl3', 'hqq', 'infoquant', 'qat', 'quip', 'respinquant', 'spinquant']);
+  for (const method of ['int4', 'int8', 'gptq', 'awq', 'aqlm', 'quip', 'exl2', 'exl3', 'hqq', 'qat', 'spinquant', 'respinquant', 'infoquant']) {
     assert.ok(m.methods.includes(method), `missing method ${method}`);
     const row = m.method_dispatch.find((x) => x.method === method);
     assert.equal(row.dispatch_present, true, `${method} must have dispatch coverage`);
@@ -98,7 +98,7 @@ test('W941 matrix captures optimizer subprocesses, safety guards, worker isolati
   assert.equal(m.worker_package.root_excludes_heavy_deps, true);
 
   const subprocesses = new Map(m.subprocess_boundaries.map((row) => [row.function, row]));
-  for (const fn of ['run_aqlm', 'run_quip', '_run_exllamav2', 'run_qat']) {
+  for (const fn of ['run_aqlm', 'run_quip', '_run_exllamav2', 'run_qat', 'run_rotation_external']) {
     assert.ok(subprocesses.has(fn), `missing subprocess boundary ${fn}`);
     assert.equal(subprocesses.get(fn).check_false, true, `${fn} must use check=False`);
     assert.equal(subprocesses.get(fn).returncode_checked, true, `${fn} must check returncode`);

@@ -10,7 +10,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 100,
-    "frontier_product_score": 95.3,
+    "frontier_product_score": 96.3,
     "readiness_proof_surplus_score": 104.3,
     "readiness_proof_surplus_ceiling": 110,
     "score_notes": [
@@ -47,9 +47,9 @@
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 0,
-    "categories_with_major_frontier_work_open": 2,
+    "categories_with_major_frontier_work_open": 1,
     "critical_sota_category_closed_pct": 100,
-    "major_sota_category_closed_pct": 87.5,
+    "major_sota_category_closed_pct": 93.8,
     "readiness": {
       "total": 57,
       "closed": 49,
@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2063,
+          "js_family": 2064,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -122,7 +122,7 @@
       "service": 3,
       "worker": 211
     },
-    "top_gap_count": 26
+    "top_gap_count": 22
   },
   "category_targets": [
     {
@@ -160,11 +160,11 @@
     {
       "id": "quantization",
       "stack_area": "compiler-runtime",
-      "status": "sota_review_complete_major_frontier_work_open",
-      "already_at_frontier_count": 12,
-      "improvement_count": 2,
+      "status": "sota_review_complete_external_or_release_gate_open",
+      "already_at_frontier_count": 14,
+      "improvement_count": 1,
       "critical_gaps": 0,
-      "major_gaps": 3,
+      "major_gaps": 0,
       "minor_gaps": 1,
       "required_components": 4,
       "suggested_verification": [
@@ -415,7 +415,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -489,7 +489,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -563,7 +563,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -637,7 +637,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -711,7 +711,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "required"
         },
         {
@@ -754,44 +754,6 @@
       ]
     },
     {
-      "path": "apps/export/probe.py",
-      "domain": "platform_support",
-      "surface": "worker",
-      "priority_score": 9,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "distribution_or_worker_surface",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "large_component_contract_risk"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "llm-routing",
-          "stack_area": "gateway",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping.",
-      "suggested_verification": [
-        "npm run verify:daemon-connector-matrix",
-        "npm run verify:binder-contract-matrix",
-        "npm run verify:intent-contract-matrix",
-        "npm run verify:otel-matrix",
-        "npm run verify:codegraph"
-      ]
-    },
-    {
       "path": "apps/trainer/multinode_launch.py",
       "domain": "training_model_optimization",
       "surface": "worker",
@@ -822,7 +784,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -895,7 +857,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -968,7 +930,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1042,7 +1004,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1122,7 +1084,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1195,7 +1157,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1268,7 +1230,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1336,7 +1298,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1417,7 +1379,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1483,7 +1445,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1562,7 +1524,7 @@
         {
           "id": "quantization",
           "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1699,34 +1661,6 @@
       ]
     },
     {
-      "path": "src/quantization-oracle.js",
-      "domain": "training_model_optimization",
-      "surface": "core-backend",
-      "priority_score": 4,
-      "risk_signals": [
-        "environment_configuration_boundary",
-        "large_component_contract_risk"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff.",
-      "suggested_verification": [
-        "npm run verify:quantize-worker-matrix",
-        "npm run verify:distill-pipeline-matrix",
-        "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
-        "npm run verify:quant-oracle"
-      ]
-    },
-    {
       "path": "apps/trainer/moe_to_dense.py",
       "domain": "training_model_optimization",
       "surface": "worker",
@@ -1753,81 +1687,6 @@
         "npm run verify:distill-pipeline-matrix",
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/probe-harness.js",
-      "domain": "platform_support",
-      "surface": "core-backend",
-      "priority_score": 3,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        },
-        {
-          "id": "kv-cache",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        },
-        {
-          "id": "speculative-decoding",
-          "stack_area": "runtime",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        },
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping.",
-      "suggested_verification": [
-        "npm run verify:daemon-connector-matrix",
-        "npm run verify:binder-contract-matrix",
-        "npm run verify:intent-contract-matrix",
-        "npm run verify:otel-matrix",
-        "npm run verify:codegraph"
-      ]
-    },
-    {
-      "path": "src/export-nvfp4.js",
-      "domain": "platform_support",
-      "surface": "core-backend",
-      "priority_score": 2,
-      "risk_signals": [
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping.",
-      "suggested_verification": [
-        "npm run verify:daemon-connector-matrix",
-        "npm run verify:binder-contract-matrix",
-        "npm run verify:intent-contract-matrix",
-        "npm run verify:otel-matrix",
-        "npm run verify:codegraph"
       ]
     },
     {
@@ -3038,7 +2897,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -3058,10 +2917,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "apps/export/registry.py",
@@ -3474,10 +3331,10 @@
           "tests/model-signing-sidecars.test.js",
           "tests/r3-kolm-serve.test.js",
           "tests/wave1001-neural-compile-provisioning.test.js",
+          "tests/wave1009-quantization-paired-measurement-receipt.test.js",
           "tests/wave163-export-binder.test.js",
           "tests/wave266-compile-targets-surfaced.test.js",
-          "tests/wave723-streaming-load.test.js",
-          "tests/wave921-fp4-calib-trust-remote.test.js"
+          "tests/wave723-streaming-load.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -5596,7 +5453,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -6835,7 +6692,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -7545,7 +7402,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -8256,7 +8113,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -8649,7 +8506,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -16305,7 +16162,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -16924,7 +16781,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -20643,7 +20500,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -24643,6 +24500,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/finalized-c5-real-layer-importance-mixed-precision.test.js",
+          "tests/wave1009-quantization-paired-measurement-receipt.test.js",
           "tests/wave719-daq.test.js"
         ],
         "category_links": [],
@@ -27547,7 +27405,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -30114,8 +29972,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 13936,
-          "lines": 340,
+          "bytes": 14507,
+          "lines": 348,
           "imports": 5,
           "exports": 9,
           "routes": 0,
@@ -30132,7 +29990,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "e0558339e1f92ea8fefffa97cad2c676cb0c6ec5986e10cd418c26e6da33d3e9"
+        "sha256": "7e9aa54e2c3f25be47661a87a0f28b716b22cc7ca52e5c6383373c81c9b1cdd4"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -30149,7 +30007,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -30163,10 +30021,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/export-ollama.js",
@@ -39919,7 +39775,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           },
           {
@@ -39951,10 +39807,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/product-experience.js",
@@ -41522,7 +41376,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 33031,
+          "bytes": 33054,
           "lines": 905,
           "imports": 3,
           "exports": 5,
@@ -41540,7 +41394,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "dfb65d1faa9e30774d4d2e917f2725637a88487a6e3d2dbbc6a6ad3b632a599c"
+        "sha256": "78cb38e66a965b4b223faba2174d459250026a17e84de151c1eae0dde13e447e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -41560,7 +41414,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -41573,10 +41427,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "src/quantize-bakeoff.js",
@@ -41586,14 +41438,14 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 18385,
-          "lines": 472,
-          "imports": 8,
-          "exports": 4,
+          "bytes": 22557,
+          "lines": 610,
+          "imports": 9,
+          "exports": 5,
           "routes": 0,
           "env_refs": 3,
           "fs_writes": 0,
-          "subprocess_refs": 4,
+          "subprocess_refs": 7,
           "network_refs": 0,
           "crypto_refs": 3,
           "markers": 0
@@ -41605,7 +41457,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "7acf6e631f36683d29377eed264f7de6090ba8338216a3b3163eeda373abcdb9"
+        "sha256": "a47fcb36980661c6b13a7c03fc9b3d1ef61cedb0a6fc4239ea8696b7caa090b6"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -41615,6 +41467,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js",
+          "tests/wave1009-quantization-paired-measurement-receipt.test.js",
           "tests/wave606-quant-accuracy-floor.test.js"
         ],
         "category_links": [],
@@ -46276,7 +46129,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -50116,7 +49969,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -51509,7 +51362,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -51821,7 +51674,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -52515,7 +52368,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -52621,7 +52474,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -53854,14 +53707,14 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 72983,
-          "lines": 1583,
+          "bytes": 80474,
+          "lines": 1785,
           "imports": 0,
-          "exports": 40,
+          "exports": 46,
           "routes": 0,
-          "env_refs": 2,
+          "env_refs": 4,
           "fs_writes": 1,
-          "subprocess_refs": 5,
+          "subprocess_refs": 6,
           "network_refs": 0,
           "crypto_refs": 4,
           "markers": 0
@@ -53876,7 +53729,7 @@
         ],
         "priority_score": 10,
         "priority_band": "high",
-        "sha256": "7c5b3fce58c6ccce730cc94a94eb402f13335e98bd7251cbe74170d9e2ca73ff"
+        "sha256": "7940fa60886f9a1737af33a781f9985156123f863fa70316a924ba6e287ffb4b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -53910,7 +53763,7 @@
           {
             "id": "quantization",
             "stack_area": "compiler-runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           },
           {
