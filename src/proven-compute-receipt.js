@@ -20,7 +20,7 @@ import {
   verifySignatureBlock,
 } from './ed25519.js';
 import { nonceBinding } from './nras-verifier.js';
-import { PROOF_SCOPE, proofScopeLabel } from './receipt-export-registry.js';
+import { PROOF_SCOPE, proofScopeAssessment, proofScopeLabel } from './receipt-export-registry.js';
 import { isValidCidFormat } from './cid.js';
 import {
   TransparencyLog,
@@ -113,6 +113,16 @@ function compactAttestationState(state) {
     'eat_nonce',
     'expected_nonce',
     'nonce_binding_alg',
+    'proof_mode',
+    'proofMode',
+    'evidence_type',
+    'evidenceType',
+    'proof_system',
+    'proofSystem',
+    'challenge_window',
+    'challengeWindow',
+    'public_inputs_hash',
+    'publicInputsHash',
   ]) {
     const value = s[key];
     if (typeof value === 'string' && value) out[key] = value.slice(0, key.includes('nonce') ? 160 : 300);
@@ -160,6 +170,7 @@ export function assessProvenComputeProof(input = {}) {
   if (!outputDigest) reasons.push('invalid_output_digest');
 
   const stateScope = proofScopeLabel(attestationState);
+  const modeAssessment = proofScopeAssessment(attestationState);
   if (stateScope !== PROOF_SCOPE.PROVEN_COMPUTE) {
     reasons.push('attestation_not_cryptographically_verified');
   }
@@ -176,6 +187,9 @@ export function assessProvenComputeProof(input = {}) {
   return {
     ok,
     proof_scope: ok ? PROOF_SCOPE.PROVEN_COMPUTE : PROOF_SCOPE.KEY_CUSTODY,
+    proof_mode: modeAssessment.proof_mode,
+    evidence_family: modeAssessment.evidence_family,
+    frontier_readiness: modeAssessment.frontier_readiness,
     reason: ok ? 'proven_compute' : reasons[0],
     reasons,
     expected_nonce: expectedNonce,
@@ -241,8 +255,12 @@ export function buildProvenComputeReceipt(input = {}, opts = {}) {
       nonce: assessment.nonce,
       verifier: assessment.verifier,
       attestation_report_hash: assessment.attestation_report_hash,
+      proof_mode: assessment.proof_mode,
+      evidence_family: assessment.evidence_family,
+      frontier_readiness: assessment.frontier_readiness,
     },
     proof_scope: assessment.proof_scope,
+    proof_mode: assessment.proof_mode,
     caveat: assessment.ok
       ? 'attestation_nonce_binds_input_output_digests'
       : 'integrity_only_no_proven_compute',
@@ -392,6 +410,15 @@ export function verifyProvenComputeReceipt(receiptInput, opts = {}) {
     return {
       ok: false,
       reason: `proof_scope_mismatch:${receipt.proof_scope}->${assessment.proof_scope}`,
+      checks,
+      receipt_digest: receiptDigest,
+      assessment,
+    };
+  }
+  if (receipt.proof_mode && receipt.proof_mode !== assessment.proof_mode) {
+    return {
+      ok: false,
+      reason: `proof_mode_mismatch:${receipt.proof_mode}->${assessment.proof_mode}`,
       checks,
       receipt_digest: receiptDigest,
       assessment,

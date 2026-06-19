@@ -38,7 +38,7 @@ import { buildSubprocessorInventory } from './subprocessor-inventory.js';
 import { timestampDigest, selfIssueTimestamp } from './rfc3161-timestamp.js';
 import { TransparencyLog, TRANSPARENCY_LOG_VERSION } from './transparency-log.js';
 import { getPublicTransparencyLog } from './transparency-log-routes.js';
-import { PROOF_SCOPE, proofScopeLabel } from './receipt-export-registry.js';
+import { PROOF_SCOPE, proofScopeAssessment, proofScopeLabel, proofModeDescriptor } from './receipt-export-registry.js';
 // GAP-3: the one-line caveat rendered next to a bound coverage declaration.
 // (coverage-declaration.js imports this module's canonicalize; both sides only
 // reference each other inside function bodies, so the cycle is benign.)
@@ -353,6 +353,8 @@ function compactProofState(state) {
   if (typeof s.kind === 'string' && s.kind.trim() !== '') out.kind = s.kind.slice(0, 80);
   if (typeof s.state === 'string' && s.state.trim() !== '') out.state = s.state.slice(0, 120);
   if (typeof s.reason === 'string' && s.reason.trim() !== '') out.reason = s.reason.slice(0, 240);
+  const mode = s.proof_mode || s.proofMode || s.mode || s.evidence_type || s.evidenceType;
+  if (typeof mode === 'string' && mode.trim() !== '') out.proof_mode = mode.slice(0, 80);
   return out;
 }
 
@@ -360,12 +362,18 @@ export function buildReportProofScope(auditResult) {
   const candidates = proofStateCandidates(auditResult);
   const proven = candidates.find((c) => proofScopeLabel(c.state) === PROOF_SCOPE.PROVEN_COMPUTE);
   const selected = proven || candidates[0] || null;
-  const scope = selected ? proofScopeLabel(selected.state) : PROOF_SCOPE.KEY_CUSTODY;
+  const assessment = selected
+    ? proofScopeAssessment(selected.state)
+    : proofScopeAssessment(null);
   return {
-    scope,
+    scope: assessment.scope,
+    proof_mode: assessment.proof_mode,
+    evidence_family: assessment.evidence_family,
+    frontier_readiness: assessment.frontier_readiness,
+    default_claimable: assessment.default_claimable,
     source: selected ? selected.source : null,
     state: selected ? compactProofState(selected.state) : { verified: false, verifier: 'none' },
-    caveat: scope === PROOF_SCOPE.PROVEN_COMPUTE
+    caveat: assessment.scope === PROOF_SCOPE.PROVEN_COMPUTE
       ? 'cryptographically_verified_compute_evidence_present'
       : 'report_integrity_only_no_proof_of_compute',
   };
@@ -375,10 +383,12 @@ function proofScopeCaveat(proofScope) {
   const ps = proofScope && typeof proofScope === 'object' ? proofScope : {};
   const state = ps.state && typeof ps.state === 'object' ? ps.state : {};
   const verifier = typeof state.verifier === 'string' && state.verifier ? state.verifier : 'registered verifier';
+  const modeDescriptor = proofModeDescriptor(ps.proof_mode || state.proof_mode);
+  const modeLabel = modeDescriptor.label;
   if (ps.scope === PROOF_SCOPE.PROVEN_COMPUTE) {
-    return `Proof scope: this signed report includes cryptographically verified compute evidence from ${verifier}; only that verified TEE/opML/zkML attestation, with input/output binding, can support a claim that a specific inference output was computed by the claimed model. The report signature, timestamp, transparency-log inclusion, and input-evidence digest by themselves prove report integrity and evidence binding, not proof-of-compute.`;
+    return `Proof scope: this signed report includes cryptographically verified compute evidence from ${verifier} (${modeLabel}); only that verified TEE/opML/zkML attestation, with input/output binding, can support a claim that a specific inference output was computed by the claimed model. The report signature, timestamp, transparency-log inclusion, and input-evidence digest by themselves prove report integrity and evidence binding, not proof-of-compute.`;
   }
-  return 'Proof scope: this signed report proves report integrity, issuer key custody, input-evidence digest binding, timestamp evidence, and any transparency-log inclusion; it does not prove that any specific inference output was computed by the claimed model. Treat proof-of-compute as absent unless a cryptographically verified TEE, opML, or zkML attestation with input/output binding is present.';
+  return 'Proof scope: this signed report proves report integrity, issuer key custody, input-evidence digest binding, timestamp evidence, and any transparency-log inclusion; it does not prove that any specific inference output was computed by the claimed model. Treat proof-of-compute as absent unless a cryptographically verified TEE, opML, or zkML attestation with input/output binding is present; opML and zkML are explicit proof-tier interfaces, not default product claims without registered verifier evidence.';
 }
 
 function buildCaveats(summary, auditResult, proofScope = null) {

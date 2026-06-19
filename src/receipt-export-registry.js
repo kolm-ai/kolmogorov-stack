@@ -353,6 +353,98 @@ export const PROOF_SCOPE = Object.freeze({
   PROVEN_COMPUTE: 'proven_compute',
 });
 
+export const PROOF_MODE = Object.freeze({
+  KEY_CUSTODY: 'key_custody',
+  TEE_NRAS: 'tee_nras',
+  TEE_VENDOR_CHAIN: 'tee_vendor_chain',
+  OPML: 'opml',
+  ZKML: 'zkml',
+  CRYPTOGRAPHIC_ATTESTATION: 'cryptographic_attestation',
+});
+
+export const PROOF_MODE_DESCRIPTORS = Object.freeze({
+  [PROOF_MODE.KEY_CUSTODY]: Object.freeze({
+    label: 'key custody / evidence integrity',
+    evidence_family: 'integrity',
+    default_claimable: true,
+    frontier_readiness: 'default_integrity_scope',
+    caveat: 'Signs and timestamps evidence but does not prove model execution.',
+  }),
+  [PROOF_MODE.TEE_NRAS]: Object.freeze({
+    label: 'GPU TEE / NVIDIA NRAS',
+    evidence_family: 'tee',
+    default_claimable: true,
+    frontier_readiness: 'deployable_frontier_when_root_and_hardware_are_present',
+    caveat: 'Requires a registered verifier, pinned trust root, and nonce binding over input/output digests.',
+  }),
+  [PROOF_MODE.TEE_VENDOR_CHAIN]: Object.freeze({
+    label: 'CPU or cloud TEE vendor chain',
+    evidence_family: 'tee',
+    default_claimable: false,
+    frontier_readiness: 'plugin_or_deployment_required',
+    caveat: 'Requires vendor-chain verification such as TDX PCS, AMD VCEK/ARK-ASK, or AWS Nitro roots.',
+  }),
+  [PROOF_MODE.OPML]: Object.freeze({
+    label: 'opML / optimistic ML',
+    evidence_family: 'optimistic_dispute',
+    default_claimable: false,
+    frontier_readiness: 'roadmap_interface_only_until_bond_and_challenge_window_are_integrated',
+    caveat: 'Requires a finalized dispute window or equivalent registered verifier evidence before it can support a compute claim.',
+  }),
+  [PROOF_MODE.ZKML]: Object.freeze({
+    label: 'zkML / cryptographic execution proof',
+    evidence_family: 'cryptographic_proof',
+    default_claimable: false,
+    frontier_readiness: 'roadmap_interface_only_until_proof_system_adapter_is_integrated',
+    caveat: 'Requires a registered zk proof verifier whose public inputs bind artifact, input digest, and output digest.',
+  }),
+  [PROOF_MODE.CRYPTOGRAPHIC_ATTESTATION]: Object.freeze({
+    label: 'registered cryptographic verifier',
+    evidence_family: 'cryptographic_attestation',
+    default_claimable: false,
+    frontier_readiness: 'custom_registered_verifier',
+    caveat: 'Requires a registered verifier and explicit nonce or public-input binding before claim wording is allowed.',
+  }),
+});
+
+function normalizeProofMode(value) {
+  if (typeof value !== 'string') return null;
+  const s = value.trim().toLowerCase().replace(/[\s-]+/g, '_');
+  if (!s) return null;
+  if (['key_custody', 'integrity', 'signed_integrity'].includes(s)) return PROOF_MODE.KEY_CUSTODY;
+  if (['tee_nras', 'nras', 'gpu_tee', 'nvidia_nras', 'nvidia_gpu_tee', 'hopper_cc', 'blackwell_cc'].includes(s)) return PROOF_MODE.TEE_NRAS;
+  if (['tee_vendor_chain', 'vendor_chain_tee', 'tdx', 'sev_snp', 'sev-snp', 'nitro', 'cvm', 'pccs', 'vcek'].includes(s)) return PROOF_MODE.TEE_VENDOR_CHAIN;
+  if (['opml', 'optimistic_ml', 'optimistic_proof', 'fraud_proof', 'dispute_game'].includes(s)) return PROOF_MODE.OPML;
+  if (['zkml', 'zk_ml', 'zk', 'ezkl', 'zkllm', 'zkgpt', 'cryptographic_execution_proof'].includes(s)) return PROOF_MODE.ZKML;
+  if (['cryptographic_attestation', 'registered_verifier', 'custom_verifier'].includes(s)) return PROOF_MODE.CRYPTOGRAPHIC_ATTESTATION;
+  return null;
+}
+
+export function proofModeDescriptor(mode) {
+  const key = normalizeProofMode(mode) || PROOF_MODE.CRYPTOGRAPHIC_ATTESTATION;
+  return PROOF_MODE_DESCRIPTORS[key] || PROOF_MODE_DESCRIPTORS[PROOF_MODE.CRYPTOGRAPHIC_ATTESTATION];
+}
+
+export function proofModeForState(state) {
+  if (!state || typeof state !== 'object') return PROOF_MODE.KEY_CUSTODY;
+  const explicit = normalizeProofMode(state.proof_mode || state.proofMode || state.mode || state.evidence_type || state.evidenceType);
+  if (explicit) return explicit;
+  const haystack = [
+    state.verifier,
+    state.kind,
+    state.state,
+    state.attestation_type,
+    state.attestationType,
+    state.proof_system,
+    state.proofSystem,
+  ].map((v) => String(v || '').toLowerCase()).join(' ');
+  if (/\bnras\b|nvidia|gpu[-_ ]?tee|hopper|blackwell/.test(haystack)) return PROOF_MODE.TEE_NRAS;
+  if (/tdx|sev[-_ ]?snp|nitro|cvm|pccs|vcek|ark[-_ ]?ask|vendor[-_ ]?chain/.test(haystack)) return PROOF_MODE.TEE_VENDOR_CHAIN;
+  if (/opml|optimistic|fraud[-_ ]?proof|dispute/.test(haystack)) return PROOF_MODE.OPML;
+  if (/zkml|zk[-_ ]?ml|zkllm|zkgpt|ezkl|zero[-_ ]?knowledge/.test(haystack)) return PROOF_MODE.ZKML;
+  return PROOF_MODE.CRYPTOGRAPHIC_ATTESTATION;
+}
+
 // Verifier labels that are NOT a real proof-of-compute (shape-only / absent).
 const _NON_PROOF_VERIFIERS = new Set(['shape_v1', 'shape', 'none', '', null, undefined]);
 
@@ -364,6 +456,22 @@ export function proofScopeLabel(state) {
     return PROOF_SCOPE.PROVEN_COMPUTE;
   }
   return PROOF_SCOPE.KEY_CUSTODY;
+}
+
+export function proofScopeAssessment(state) {
+  const scope = proofScopeLabel(state);
+  const proof_mode = scope === PROOF_SCOPE.PROVEN_COMPUTE
+    ? proofModeForState(state)
+    : proofModeForState(state || {});
+  const descriptor = proofModeDescriptor(proof_mode);
+  return {
+    scope,
+    proof_mode,
+    evidence_family: descriptor.evidence_family,
+    default_claimable: descriptor.default_claimable === true,
+    frontier_readiness: descriptor.frontier_readiness,
+    caveat: descriptor.caveat,
+  };
 }
 
 // ===========================================================================
