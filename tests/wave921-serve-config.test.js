@@ -315,6 +315,65 @@ test('selectKvCachePolicy: shard remains selectable', () => {
   assert.equal(r.runtime_can_enforce, true);
 });
 
+test('selectKvCachePolicy: low-rank Palu/Eigen specs are registered but external-executor gated', () => {
+  const palu = selectKvCachePolicy({
+    format: 'transformers',
+    requested: 'palu',
+    rank: 128,
+    compression_ratio: 0.33,
+  });
+  assert.equal(palu.policy, 'palu');
+  assert.equal(palu.kind, 'lowrank');
+  assert.equal(palu.runtime_can_enforce, false);
+  assert.equal(palu.executor_status, 'external_required');
+  assert.equal(palu.external_executor, 'palu');
+  assert.equal(palu.params.rank, 128);
+  assert.equal(palu.params.compression_ratio, 0.33);
+  assert.match(palu.reason, /external\/upstream palu support/);
+
+  const eigen = selectKvCachePolicy({ format: 'vllm', requested: 'eigen_attention' });
+  assert.equal(eigen.policy, 'eigen-attn');
+  assert.equal(eigen.kind, 'lowrank');
+  assert.equal(eigen.runtime_can_enforce, false);
+  assert.equal(eigen.executor_status, 'external_required');
+  assert.equal(eigen.fallback, 'kivi2');
+});
+
+test('selectKvCachePolicy: low-rank validation rejects impossible rank and compression', () => {
+  const badRank = selectKvCachePolicy({ requested: 'palu', rank: 0 });
+  assert.equal(badRank.runtime_can_enforce, false);
+  assert.match(badRank.reason, /invalid rank/);
+
+  const badCompression = selectKvCachePolicy({ requested: 'eigen-attn', compression_ratio: 1.5 });
+  assert.equal(badCompression.runtime_can_enforce, false);
+  assert.match(badCompression.reason, /invalid compression_ratio/);
+});
+
+test('selectKvCachePolicy: KVQuant, KV-Compress, and HiCache are runtime-frontier advisory specs', () => {
+  const kvq3 = selectKvCachePolicy({ format: 'vllm', requested: 'kvquant', group_size: 64 });
+  assert.equal(kvq3.policy, 'kvquant3');
+  assert.equal(kvq3.kind, 'quant');
+  assert.equal(kvq3.params.nbits, 3);
+  assert.equal(kvq3.params.outlier_policy, 'dense_and_sparse');
+  assert.equal(kvq3.runtime_can_enforce, false);
+  assert.equal(kvq3.external_executor, 'kvquant');
+  assert.match(kvq3.reason, /advanced KV quantization spec/);
+
+  const kvcompress = selectKvCachePolicy({ format: 'vllm', requested: 'vllm_kvcompress' });
+  assert.equal(kvcompress.policy, 'vllm-kvcompress');
+  assert.equal(kvcompress.kind, 'paged_eviction');
+  assert.equal(kvcompress.params.paged_attention, true);
+  assert.equal(kvcompress.runtime_can_enforce, false);
+  assert.match(kvcompress.reason, /paged-eviction KV spec/);
+
+  const hicache = selectKvCachePolicy({ format: 'sglang', requested: 'sglang_hicache' });
+  assert.equal(hicache.policy, 'sglang-hicache');
+  assert.equal(hicache.kind, 'tiering');
+  assert.equal(hicache.params.cpu_cache_enabled, true);
+  assert.equal(hicache.runtime_can_enforce, false);
+  assert.match(hicache.reason, /tiered-cache KV spec/);
+});
+
 test('selectKvCachePolicy: ITKV profile fuses into policy params', () => {
   const built = buildItkvProfile({
     artifact_id: 'art_w621_itkv',
@@ -360,9 +419,14 @@ test('selectKvCachePolicy: default ITKV profile binds active policies', () => {
 });
 
 test('KV_POLICIES registry has all named policies', () => {
-  for (const p of ['off', 'streaming', 'h2o', 'snapkv', 'pyramidkv', 'kivi2', 'kivi4', 'shard']) {
+  for (const p of ['off', 'streaming', 'h2o', 'snapkv', 'pyramidkv', 'kivi2', 'kivi4', 'kvquant3', 'kvquant4', 'shard', 'palu', 'eigen-attn', 'vllm-kvcompress', 'sglang-hicache']) {
     assert.ok(KV_POLICIES[p], `missing policy ${p}`);
   }
+  assert.equal(KV_POLICIES.palu.kind, 'lowrank');
+  assert.equal(KV_POLICIES['eigen-attn'].external_executor, true);
+  assert.equal(KV_POLICIES.kvquant3.nbits, 3);
+  assert.equal(KV_POLICIES['vllm-kvcompress'].kind, 'paged_eviction');
+  assert.equal(KV_POLICIES['sglang-hicache'].kind, 'tiering');
 });
 
 test('kvPolicyPassportEntry: estimated vs tested + freeze', () => {
@@ -373,6 +437,17 @@ test('kvPolicyPassportEntry: estimated vs tested + freeze', () => {
   assert.equal(tested.status, 'tested');
   assert.equal(tested.compression_ratio, 0.5);
   assert.ok(Object.isFrozen(tested));
+
+  const lowrank = kvPolicyPassportEntry({ policy: 'palu', params: { rank: 64, compression_ratio: 0.35 } });
+  assert.equal(lowrank.kind, 'lowrank');
+  assert.equal(lowrank.external_executor, 'palu');
+  assert.equal(lowrank.executor_status, 'external_required');
+  assert.equal(lowrank.estimated_memory_fraction, 0.35);
+
+  const advanced = kvPolicyPassportEntry({ policy: 'vllm-kvcompress', params: { budget: 0.5 } });
+  assert.equal(advanced.kind, 'paged_eviction');
+  assert.equal(advanced.external_executor, 'vllm-kvcompress');
+  assert.equal(advanced.executor_status, 'external_required');
 });
 
 test('emitKvPolicyVllmConfig honors only what vLLM enforces', () => {
@@ -381,6 +456,16 @@ test('emitKvPolicyVllmConfig honors only what vLLM enforces', () => {
   const quant = emitKvPolicyVllmConfig('kivi2', 'auto');
   assert.equal(quant.kv_cache_dtype, 'fp8');
   assert.match(quant.note, /quant axis/);
+  const lowrank = emitKvPolicyVllmConfig('palu', 'auto');
+  assert.equal(lowrank.kv_cache_dtype, 'auto');
+  assert.match(lowrank.note, /external cache executor/);
+  const kvquant = emitKvPolicyVllmConfig('kvquant3', 'auto');
+  assert.equal(kvquant.kv_cache_dtype, 'auto');
+  assert.match(kvquant.note, /advanced KV quantization/);
+  const kvcompress = emitKvPolicyVllmConfig('vllm-kvcompress', 'auto');
+  assert.match(kvcompress.note, /KV-Compress-capable/);
+  const hicache = emitKvPolicyVllmConfig('sglang-hicache', 'auto');
+  assert.match(hicache.note, /SGLang HiCache/);
 });
 
 // ===========================================================================

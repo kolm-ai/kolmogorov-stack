@@ -53,4 +53,11 @@ test('W1006 serve.py exposes KV policy telemetry from live token counters', () =
   assert.match(source, /self\._kv_meter\.record\(prompt_tokens=prompt_tokens, output_tokens=new_tokens\)/);
   assert.match(source, /"kv_policy_active": kv_policy_active/);
   assert.match(source, /"kv_cache": kv_summary/);
+  assert.match(source, /advisory_names = \("palu", "eigen-attn"/);
+  assert.match(source, /"kvquant3", "kvquant4", "vllm-kvcompress", "sglang-hicache"/);
+  assert.match(source, /advisory KV policy spec/);
+  assert.match(source, /a Palu\/Eigen low-rank cache executor/);
+  assert.match(source, /a KVQuant-capable cache executor/);
+  assert.match(source, /KV-Compress-capable paged-cache extension/);
+  assert.match(source, /SGLang HiCache tiering/);
 });

@@ -34,8 +34,8 @@ function findPython() {
 test('1. serve usage exposes the full KV policy set and tuning flags', () => {
   const src = fs.readFileSync(CLI, 'utf8');
 
-  assert.match(src, /--kv-cache auto\|off\|streaming\|h2o\|snapkv\|pyramidkv\|kivi2\|kivi4\|shard/);
-  for (const flag of ['--kv-budget F', '--kv-sink N', '--kv-window N', '--kv-group N', '--kv-residual N']) {
+  assert.match(src, /--kv-cache auto\|off\|streaming\|h2o\|snapkv\|pyramidkv\|kivi2\|kivi4\|kvquant3\|kvquant4\|shard\|palu\|eigen-attn\|vllm-kvcompress\|sglang-hicache/);
+  for (const flag of ['--kv-budget F', '--kv-sink N', '--kv-window N', '--kv-group N', '--kv-residual N', '--kv-rank N', '--kv-compression F']) {
     assert.ok(src.includes(flag), `usage missing ${flag}`);
   }
 });
@@ -47,6 +47,7 @@ test('2. CLI serve path emits structured KOLM_KV_POLICY and keeps Shard back-com
   assert.match(src, /emitKvPolicyVllmConfig/);
   assert.match(src, /serveEnv\.KOLM_KV_POLICY\s*=\s*JSON\.stringify\(\{ policy: applied\.policy, kind: applied\.kind, params: applied\.params \}\)/);
   assert.match(src, /serveEnv\.KOLM_KV_CACHE_BACKEND\s*=\s*applied\.policy === 'shard' \? 'shard' : 'default'/);
+  assert.match(src, /!policy\.executor_status/);
   assert.match(src, /kv_profile:\s*m\.kv_profile \|\| null/);
   assert.match(src, /artifact_id:\s*m\.artifact_id \|\| m\.artifact_hash \|\| m\.id \|\| ap/);
 });
@@ -62,6 +63,37 @@ test('3. vLLM eviction requests fall back to enforceable KIVI quant policy', () 
   assert.equal(applied.runtime_can_enforce, true);
 });
 
+test('3b. low-rank KV policies stay advisory until an external executor exists', () => {
+  const requested = selectKvCachePolicy({ format: 'vllm', requested: 'eigenattn', rank: 96 });
+  assert.equal(requested.policy, 'eigen-attn');
+  assert.equal(requested.kind, 'lowrank');
+  assert.equal(requested.runtime_can_enforce, false);
+  assert.equal(requested.executor_status, 'external_required');
+  assert.equal(requested.params.rank, 96);
+  assert.equal(requested.fallback, 'kivi2');
+});
+
+test('3c. runtime-frontier KV policies are selectable but advisory without upstream executors', () => {
+  const kvquant = selectKvCachePolicy({ format: 'vllm', requested: 'kvquant-3' });
+  assert.equal(kvquant.policy, 'kvquant3');
+  assert.equal(kvquant.kind, 'quant');
+  assert.equal(kvquant.params.nbits, 3);
+  assert.equal(kvquant.runtime_can_enforce, false);
+  assert.equal(kvquant.executor_status, 'external_required');
+
+  const kvcompress = selectKvCachePolicy({ format: 'vllm', requested: 'kv-compress' });
+  assert.equal(kvcompress.policy, 'vllm-kvcompress');
+  assert.equal(kvcompress.kind, 'paged_eviction');
+  assert.equal(kvcompress.runtime_can_enforce, false);
+  assert.equal(kvcompress.executor_status, 'external_required');
+
+  const hicache = selectKvCachePolicy({ format: 'sglang', requested: 'hicache' });
+  assert.equal(hicache.policy, 'sglang-hicache');
+  assert.equal(hicache.kind, 'tiering');
+  assert.equal(hicache.runtime_can_enforce, false);
+  assert.equal(hicache.executor_status, 'external_required');
+});
+
 test('4. backend spec records W607 closure and W1006 KV measurement closure', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
 
@@ -70,6 +102,8 @@ test('4. backend spec records W607 closure and W1006 KV measurement closure', ()
   assert.match(spec, /W1006/);
   assert.match(spec, /paired no-KV baseline/);
   assert.match(spec, /probe\.py no longer records only the kv_policy name/);
+  assert.match(spec, /W1015/);
+  assert.match(spec, /low-rank KV policy registry/);
 });
 
 test('5. ITKV kvpolicy sidecar mirrors serve.py policy builders and pins worker deps', () => {

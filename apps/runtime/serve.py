@@ -360,13 +360,28 @@ def _kv_policy_memory_fraction(policy: Dict[str, Any], active_policy: str,
         if name in ("snapkv", "pyramidkv"):
             retained = min(total, max(retained, _int_or_none(params.get("window_tokens")) or 64))
         fraction = retained / total
-    elif name in ("kivi2", "kivi4"):
-        nbits = _int_or_none(params.get("nbits")) or (2 if name == "kivi2" else 4)
+    elif name in ("kivi2", "kivi4", "kvquant3", "kvquant4"):
+        nbits = _int_or_none(params.get("nbits")) or (3 if name == "kvquant3" else (2 if name == "kivi2" else 4))
         fraction = max(1.0 / max(1, base_bits), min(1.0, nbits / max(1, base_bits)))
+        retained = total
+    elif name == "vllm-kvcompress":
+        budget = _number_or_none(params.get("budget"))
+        budget = budget if budget is not None and 0.0 < budget <= 1.0 else 0.5
+        retained = max(1, min(total, int(math.ceil(total * budget))))
+        retained = min(total, max(retained, _int_or_none(params.get("window_tokens")) or 64))
+        fraction = retained / total
+    elif name == "sglang-hicache":
+        gpu_fraction = _number_or_none(params.get("gpu_cache_fraction"))
+        fraction = gpu_fraction if gpu_fraction is not None and 0.0 < gpu_fraction <= 1.0 else 0.8
         retained = total
     elif name == "shard":
         ratio = _number_or_none(params.get("compression_ratio"))
         ratio = ratio if ratio is not None and 0.0 < ratio <= 1.0 else 0.1
+        retained = total
+        fraction = ratio
+    elif name in ("palu", "eigen-attn"):
+        ratio = _number_or_none(params.get("compression_ratio"))
+        ratio = ratio if ratio is not None and 0.0 < ratio <= 1.0 else (0.35 if name == "palu" else 0.6)
         retained = total
         fraction = ratio
     evicted = max(0, total - retained)
@@ -484,7 +499,10 @@ def _engine_runtime_version(engine_name: str) -> Optional[str]:
 #
 # Eviction presses (StreamingLLM / SnapKV / H2O / PyramidKV) come from NVIDIA's
 # kvpress (Apache-2.0, pip install kvpress) as forward hooks; the KIVI quant
-# axis uses transformers' native QuantizedCache. vLLM/PagedAttention cannot host
+# axis uses transformers' native QuantizedCache. Palu/Eigen-Attn low-rank KV,
+# KVQuant, vLLM KV-Compress, and SGLang HiCache are represented as advisory
+# policy specs until concrete runtime cache executors are
+# installed. vLLM/PagedAttention cannot host
 # these — the JS picker reports runtime_can_enforce:false for those. Every
 # import is soft: a missing optional dep degrades to the default cache + a note.
 # --------------------------------------------------------------------------
@@ -562,11 +580,28 @@ def quantized_cache_for(policy: Dict[str, Any]):
 def _build_kv_cache_for_policy(model, policy: Dict[str, Any]):
     """Resolve a policy dict into (press_or_None, quant_cache_fn_or_None,
     active_policy_str). Returns the default cache (None, None, 'default') for
-    'off'/'default'/'shard' or when the optional dep is missing."""
+    'off'/'default'/'shard'/low-rank advisory specs or when the optional dep is
+    missing."""
     if not policy or not isinstance(policy, dict):
         return None, None, "default"
     name = str(policy.get("policy") or "default").lower()
     if name in ("off", "default", "shard"):
+        return None, None, "default"
+    advisory_names = ("palu", "eigen-attn", "kvquant3", "kvquant4", "vllm-kvcompress", "sglang-hicache")
+    advisory_kinds = ("lowrank", "paged_eviction", "tiering")
+    if name in advisory_names or policy.get("kind") in advisory_kinds:
+        executor = {
+            "palu": "Palu",
+            "eigen-attn": "Eigen-Attn",
+            "kvquant3": "KVQuant",
+            "kvquant4": "KVQuant",
+            "vllm-kvcompress": "vLLM KV-Compress",
+            "sglang-hicache": "SGLang HiCache",
+        }.get(name, str(policy.get("kind") or "advanced KV"))
+        sys.stderr.write(
+            f"[serve] --kv-cache {name} requested as advisory KV policy spec, "
+            f"but no {executor} cache executor is installed; using default cache.\n"
+        )
         return None, None, "default"
     if name in ("kivi2", "kivi4"):
         fn = quantized_cache_for(policy)
@@ -612,15 +647,42 @@ def _try_vllm(target_model: str, draft_model: Optional[str], lora_dir: Optional[
         kv_cache_dtype = kv_dtype_override
 
     # KV-policy: vLLM can only honor the QUANT axis (kv_cache_dtype) + sliding
-    # window, never the pluggable eviction presses (those are transformers-only).
-    if kv_policy.get("kind") == "quant" and kv_cache_dtype == "auto":
+    # window, never the pluggable eviction/structural/low-rank policies.
+    kv_policy_name = str(kv_policy.get("policy") or "").lower()
+    if kv_policy.get("kind") == "quant" and kv_policy_name in ("kivi2", "kivi4") and kv_cache_dtype == "auto":
         kv_cache_dtype = "fp8"
-    elif kv_policy.get("kind") in ("eviction", "compress") and kv_policy.get("policy") not in ("default", "off"):
-        sys.stderr.write(
-            f"[serve] vLLM cannot enforce KV policy '{kv_policy.get('policy')}' "
-            "(PagedAttention owns its cache); honoring the quant axis only. "
-            "Use the transformers engine (KOLM_FORCE_TRANSFORMERS=1) for eviction.\n"
-        )
+    elif (
+        kv_policy.get("kind") in ("eviction", "compress", "lowrank", "paged_eviction", "tiering")
+        or kv_policy_name in ("kvquant3", "kvquant4")
+    ) and kv_policy_name not in ("default", "off"):
+        if kv_policy.get("kind") == "lowrank":
+            sys.stderr.write(
+                f"[serve] vLLM cannot enforce KV policy '{kv_policy_name}' "
+                "(PagedAttention owns its cache); a Palu/Eigen low-rank cache executor "
+                "is required before this policy can become active.\n"
+            )
+        elif kv_policy_name in ("kvquant3", "kvquant4"):
+            sys.stderr.write(
+                f"[serve] vLLM cannot enforce KV policy '{kv_policy_name}' "
+                "with base kv_cache_dtype; a KVQuant-capable cache executor is required "
+                "before this policy can become active.\n"
+            )
+        elif kv_policy.get("kind") == "paged_eviction":
+            sys.stderr.write(
+                f"[serve] vLLM cannot enforce KV policy '{kv_policy_name}' without a "
+                "KV-Compress-capable paged-cache extension; using native vLLM cache.\n"
+            )
+        elif kv_policy.get("kind") == "tiering":
+            sys.stderr.write(
+                f"[serve] KV policy '{kv_policy_name}' targets SGLang HiCache tiering, "
+                "not the vLLM engine; using native vLLM cache.\n"
+            )
+        else:
+            sys.stderr.write(
+                f"[serve] vLLM cannot enforce KV policy '{kv_policy_name}' "
+                "(PagedAttention owns its cache); honoring the quant axis only. "
+                "Use the transformers engine (KOLM_FORCE_TRANSFORMERS=1) for eviction/compression.\n"
+            )
     if kv_cache_backend == "shard":
         # vLLM owns its own PagedAttention KV cache and does not accept a
         # HuggingFace Cache subclass. We record the operator's intent so

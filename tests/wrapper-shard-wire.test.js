@@ -85,7 +85,7 @@ test('shard-wire #4 — cmdServe --http usage line documents --kv-cache', () => 
   // The HTTP-serve usage line must list the --kv-cache flag so `--help` users
   // can discover it. We pin the exact substring.
   assert.match(src,
-    /usage: kolm serve --http <artifact\.kolm>[^']*--kv-cache auto\|off\|streaming\|h2o\|snapkv\|pyramidkv\|kivi2\|kivi4\|shard/,
+    /usage: kolm serve --http <artifact\.kolm>[^']*--kv-cache auto\|off\|streaming\|h2o\|snapkv\|pyramidkv\|kivi2\|kivi4\|kvquant3\|kvquant4\|shard\|palu\|eigen-attn\|vllm-kvcompress\|sglang-hicache/,
     'cmdServe --http usage line must list the full KV policy set');
   assert.match(src, /--kv-budget F/, 'cmdServe --http usage line must expose KV budget tuning');
 });

@@ -14301,7 +14301,7 @@ spec:
     // First positional arg that's not a flag is the artifact path.
     const artifact = args.find(a => !a.startsWith('--') && a !== 'serve');
     if (!artifact) {
-      console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1] [--optimize] [--kv-cache auto|off|streaming|h2o|snapkv|pyramidkv|kivi2|kivi4|shard] [--kv-budget F] [--kv-sink N] [--kv-window N] [--kv-group N] [--kv-residual N] [--speculative auto|off|<draft-model>] [--num-speculative-tokens N] [--prompt-cache auto|on|off] [--max-batch N]');
+      console.error('usage: kolm serve --http <artifact.kolm> [--port 8765] [--host 127.0.0.1] [--optimize] [--kv-cache auto|off|streaming|h2o|snapkv|pyramidkv|kivi2|kivi4|kvquant3|kvquant4|shard|palu|eigen-attn|vllm-kvcompress|sglang-hicache] [--kv-budget F] [--kv-sink N] [--kv-window N] [--kv-group N] [--kv-residual N] [--kv-rank N] [--kv-compression F] [--speculative auto|off|<draft-model>] [--num-speculative-tokens N] [--prompt-cache auto|on|off] [--max-batch N]');
       nextStep({ run: 'kolm artifacts list', see: 'docs/run/serve.md' });
       process.exit(EXIT.BAD_ARGS);
     }
@@ -14408,10 +14408,25 @@ spec:
     // KOLM_KV_CACHE_BACKEND is retained only for Shard back-compat.
     try {
       const requestedRaw = pickFlag(args, '--kv-cache') ?? 'auto';
-      const requested = String(requestedRaw).toLowerCase() === 'default'
-        ? 'off'
-        : String(requestedRaw).toLowerCase();
-      const allowedKv = ['auto', 'off', 'streaming', 'h2o', 'snapkv', 'pyramidkv', 'kivi2', 'kivi4', 'shard'];
+      const requestedLower = String(requestedRaw).toLowerCase();
+      const kvAliases = {
+        default: 'off',
+        eigenattn: 'eigen-attn',
+        eigen_attention: 'eigen-attn',
+        'eigen-attention': 'eigen-attn',
+        kvquant: 'kvquant3',
+        'kvquant-3': 'kvquant3',
+        kvquant_3: 'kvquant3',
+        'kvquant-4': 'kvquant4',
+        kvquant_4: 'kvquant4',
+        kvcompress: 'vllm-kvcompress',
+        'kv-compress': 'vllm-kvcompress',
+        vllm_kvcompress: 'vllm-kvcompress',
+        hicache: 'sglang-hicache',
+        sglang_hicache: 'sglang-hicache',
+      };
+      const requested = kvAliases[requestedLower] || requestedLower;
+      const allowedKv = ['auto', 'off', 'streaming', 'h2o', 'snapkv', 'pyramidkv', 'kivi2', 'kivi4', 'kvquant3', 'kvquant4', 'shard', 'palu', 'eigen-attn', 'vllm-kvcompress', 'sglang-hicache'];
       if (!allowedKv.includes(requested)) {
         console.error(`error: --kv-cache must be one of: ${allowedKv.join(', ')} (got '${requestedRaw}')`);
         process.exit(EXIT.BAD_ARGS);
@@ -14467,9 +14482,11 @@ spec:
         window_tokens: numFlag('--kv-window'),
         group_size: numFlag('--kv-group'),
         residual_length: numFlag('--kv-residual'),
+        rank: numFlag('--kv-rank'),
+        compression_ratio: numFlag('--kv-compression'),
       };
       const policy = selectKvCachePolicy(policyInput);
-      const applied = (!policy.runtime_can_enforce && policy.fallback && policy.fallback !== policy.policy)
+      const applied = (!policy.runtime_can_enforce && !policy.executor_status && policy.fallback && policy.fallback !== policy.policy)
         ? selectKvCachePolicy({ ...policyInput, requested: policy.fallback })
         : policy;
       serveEnv.KOLM_KV_POLICY = JSON.stringify({ policy: applied.policy, kind: applied.kind, params: applied.params });

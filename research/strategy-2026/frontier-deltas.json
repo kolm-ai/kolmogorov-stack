@@ -209,11 +209,11 @@
         "severity": "minor"
       },
       {
-        "gap": "Low-rank axis (Palu/Eigen Attention) entirely absent from KV_POLICIES; the registry covers quant+eviction+structural(Shard) but not the ~2-4x orthogonal low-rank projection axis that the research lists.",
+        "gap": "[closed W1015] Low-rank axis (Palu/Eigen Attention) is no longer absent from KV_POLICIES; palu/eigen-attn are registered as kind:'lowrank' specs with rank/compression defaults, CLI aliases, passport executor metadata, and serve.py advisory handling. Runtime enforcement remains external-executor-required.",
         "severity": "minor"
       },
       {
-        "gap": "vLLM path gets only fp8 KV; no KVQuant/3-4bit, no KV-Compress paged eviction, no SGLang HiCache tiering - the prod-favored runtime is left at the basic quant axis while the rich policies only land on the transformers/edge path.",
+        "gap": "[closed W1016] Runtime-frontier path is no longer absent from KV_POLICIES; kvquant3/kvquant4/vllm-kvcompress/sglang-hicache are registered with advisory defaults, CLI aliases, passport executor metadata, vLLM config notes, and serve.py inactive-until-executor handling. Base vLLM still only enforces fp8/KIVI-compatible quant today; active KVQuant/KV-Compress/HiCache requires upstream/custom executor evidence.",
         "severity": "minor"
       }
     ],
@@ -255,10 +255,19 @@
         "value": 8
       },
       {
-        "title": "Add a low-rank policy (Palu/Eigen-Attn) entry to the registry as a spec",
+        "title": "Install and measure a real Palu/Eigen low-rank KV executor",
         "type": "spec-followup",
-        "where": "src/serve-config.js KV_POLICIES (:489) + a new executor path in serve.py/workers",
-        "what": "Add palu/eigen entries (kind:'lowrank', runtimes:['transformers']) with params for rank and on-the-fly reconstruction, composable after eviction/quant for the extra orthogonal ~2-4x the research cites. Needs an executor (Palu repo) so it is a follow-up, not surgical.",
+        "where": "apps/runtime/serve.py lowrank executor branch + workers/itkv/scripts/kvpolicy.py parity sidecar",
+        "what": "W1015 closes the local registry/passport/CLI contract. Active low-rank KV still needs a real executor path, integration tests on GPU, and paired W1006 quality/memory receipts before claiming the ~2-4x low-rank compression axis as shipped.",
+        "effort": "L",
+        "risk": "med",
+        "value": 5
+      },
+      {
+        "title": "Install and measure real KVQuant/KV-Compress/HiCache executors",
+        "type": "spec-followup",
+        "where": "apps/runtime/serve.py advisory executor branch + workers/itkv/scripts/kvpolicy.py parity sidecar",
+        "what": "W1016 closes the local registry/passport/CLI contract. Active 3-4bit KVQuant, vLLM paged KV-Compress eviction, and SGLang HiCache tiering still need vetted upstream/custom runtime adapters, GPU integration tests, and paired W1006 quality/memory receipts before claiming these runtime-frontier modes as shipped.",
         "effort": "L",
         "risk": "med",
         "value": 5

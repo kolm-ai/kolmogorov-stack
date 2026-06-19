@@ -18,7 +18,9 @@
 //                        vllmQuantizationString()    safe fallback chain.
 //
 //   2. KV-CACHE POLICY   selectKvCachePolicy()       StreamingLLM / H2O / SnapKV /
-//                        resolveWorkloadPolicy()     PyramidKV / KIVI-2/4 / Shard,
+//                        resolveWorkloadPolicy()     PyramidKV / KIVI-2/4 / KVQuant /
+//                                                    Shard / Palu / Eigen-Attn /
+//                                                    KV-Compress / HiCache,
 //                        KV_POLICIES registry        with a per-runtime capability
 //                        kvPolicyPassportEntry()     gate (eviction = transformers
 //                                                    only; quant axis = vLLM too).
@@ -63,7 +65,7 @@ import { buildItkvProfile, hashItkvProfile } from './itkv-profile.js';
 
 export const SERVE_CONFIG_VERSION = 'serve-config-v1';
 export const QUANT_KERNEL_ORACLE_VERSION = 'qko-v1';
-export const KV_POLICY_VERSION = 'kv-policy-v2-itkv';
+export const KV_POLICY_VERSION = 'kv-policy-v4-runtime-frontier';
 export const EAGLE_RESOLVER_VERSION = 'eagle-resolver-v1';
 
 // ===========================================================================
@@ -475,18 +477,25 @@ export function servingKernelPassportEntry({ resolved, compute_capability, measu
 
 // ===========================================================================
 // 2. KV-CACHE POLICY DISPATCH
-//    (StreamingLLM / H2O / SnapKV / PyramidKV / KIVI / Shard)
+//    (StreamingLLM / H2O / SnapKV / PyramidKV / KIVI / KVQuant / Shard /
+//     Palu / Eigen-Attn / KV-Compress / HiCache)
 // ===========================================================================
 //
 // All five techniques attack the O(layers * kv_heads * head_dim * seq_len) KV
 // blow-up. Eviction presses (StreamingLLM/SnapKV/H2O/PyramidKV) run on the
 // transformers engine via NVIDIA kvpress; KIVI is the quant axis (transformers
-// QuantizedCache and vLLM kv_cache_dtype). vLLM/PagedAttention can ONLY honor
-// the quant axis + sliding window, never pluggable eviction - the dispatcher is
-// explicit about runtime_can_enforce. Refs:
+// QuantizedCache and vLLM kv_cache_dtype); Shard is the structural PCA+VQ axis.
+// Palu/Eigen-Attn, KVQuant, vLLM KV-Compress, and SGLang HiCache are registered
+// as policy specs, but require external/upstream cache executors before
+// runtime_can_enforce can become true.
+// vLLM/PagedAttention can ONLY honor the quant axis + sliding window, never
+// pluggable eviction or low-rank projection - the dispatcher is explicit about
+// runtime_can_enforce. Refs:
 //   StreamingLLM arXiv:2309.17453   H2O arXiv:2306.14048
 //   SnapKV arXiv:2404.14469         PyramidKV arXiv:2406.02069
 //   KIVI arXiv:2402.02750           kvpress https://github.com/NVIDIA/kvpress
+//   Palu arXiv:2407.21118           Eigen Attention arXiv:2408.05646
+//   KVQuant arXiv:2401.18079        KV-Compress arXiv:2410.00161
 
 export const KV_POLICIES = Object.freeze({
   off:        { kind: 'off',      press: null,                runtimes: ['transformers', 'vllm', 'sglang', 'llama.cpp'] },
@@ -496,7 +505,13 @@ export const KV_POLICIES = Object.freeze({
   pyramidkv:  { kind: 'eviction', press: 'pyramidkv', wraps: true, runtimes: ['transformers'] },
   kivi2:      { kind: 'quant',    nbits: 2,                   runtimes: ['transformers', 'vllm'] },
   kivi4:      { kind: 'quant',    nbits: 4,                   runtimes: ['transformers', 'vllm'] },
+  kvquant3:   { kind: 'quant',    nbits: 3, executor: 'kvquant', runtimes: ['transformers', 'vllm'], external_executor: true },
+  kvquant4:   { kind: 'quant',    nbits: 4, executor: 'kvquant', runtimes: ['transformers', 'vllm'], external_executor: true },
   shard:      { kind: 'compress', press: null,                runtimes: ['transformers'] },
+  palu:       { kind: 'lowrank',  executor: 'palu',           runtimes: ['transformers'], external_executor: true },
+  'eigen-attn': { kind: 'lowrank', executor: 'eigen-attn',    runtimes: ['transformers'], external_executor: true },
+  'vllm-kvcompress': { kind: 'paged_eviction', executor: 'vllm-kvcompress', runtimes: ['vllm'], external_executor: true },
+  'sglang-hicache': { kind: 'tiering', executor: 'sglang-hicache', runtimes: ['sglang'], external_executor: true },
 });
 
 // Default tuning per policy. Numbers are the published defaults for each method.
@@ -507,7 +522,13 @@ const KV_POLICY_DEFAULTS = Object.freeze({
   pyramidkv: { budget: 0.5, window_tokens: 64, kernel_size: 5 },
   kivi2:     { nbits: 2, group_size: 32, residual_length: 128 }, // KIVI 2-bit per-channel K
   kivi4:     { nbits: 4, group_size: 32, residual_length: 128 },
+  kvquant3:  { nbits: 3, group_size: 64, residual_length: 128, outlier_policy: 'dense_and_sparse' },
+  kvquant4:  { nbits: 4, group_size: 64, residual_length: 128, outlier_policy: 'dense_and_sparse' },
   shard:     { sink_tokens: 4, window_tokens: 64, compression_ratio: 0.1 },
+  palu:      { rank: 64, basis: 'svd', reconstruction: 'on_the_fly', compression_ratio: 0.35 },
+  'eigen-attn': { rank: 64, basis: 'eigen', reconstruction: 'on_the_fly', compression_ratio: 0.6 },
+  'vllm-kvcompress': { budget: 0.5, sink_tokens: 4, window_tokens: 64, paged_attention: true },
+  'sglang-hicache': { gpu_cache_fraction: 0.8, cpu_cache_enabled: true, disk_cache_enabled: false, prefix_cache_enabled: true },
 });
 
 function _normalizeRuntimeForKv(format) {
@@ -518,6 +539,23 @@ function _normalizeRuntimeForKv(format) {
   if (['llama.cpp', 'llamacpp', 'gguf'].includes(f)) return 'llama.cpp';
   if (f === 'mlx') return 'mlx';
   return f || 'transformers';
+}
+
+function _normalizeKvPolicyName(policy) {
+  const p = _lower(policy);
+  if (p === 'default') return 'off';
+  if (['eigenattn', 'eigen_attention', 'eigen-attention', 'eigen attention'].includes(p)) {
+    return 'eigen-attn';
+  }
+  if (['kvquant', 'kvquant-3', 'kvquant_3', 'kvquant 3'].includes(p)) return 'kvquant3';
+  if (['kvquant-4', 'kvquant_4', 'kvquant 4'].includes(p)) return 'kvquant4';
+  if (['kv-compress', 'kvcompress', 'vllm_kvcompress', 'vllm-kv-compress'].includes(p)) {
+    return 'vllm-kvcompress';
+  }
+  if (['hicache', 'sglang_hicache', 'sglang-hi-cache', 'sglang hi-cache'].includes(p)) {
+    return 'sglang-hicache';
+  }
+  return p;
 }
 
 function _validItkvProfile(profile) {
@@ -613,10 +651,12 @@ export function selectKvCachePolicy({
   kernel_size,
   group_size,
   residual_length,
+  rank,
+  compression_ratio,
   kv_profile,
 } = {}) {
   const runtime = _normalizeRuntimeForKv(format);
-  let policy = _lower(requested);
+  let policy = _normalizeKvPolicyName(requested);
 
   if (!policy || policy === 'auto') {
     policy = resolveWorkloadPolicy(workload);
@@ -656,6 +696,8 @@ export function selectKvCachePolicy({
   if (_isFiniteNumber(kernel_size)) params.kernel_size = kernel_size;
   if (_isFiniteNumber(group_size)) params.group_size = group_size;
   if (_isFiniteNumber(residual_length)) params.residual_length = residual_length;
+  if (_isFiniteNumber(rank)) params.rank = rank;
+  if (_isFiniteNumber(compression_ratio)) params.compression_ratio = compression_ratio;
   if (spec.nbits != null && params.nbits == null) params.nbits = spec.nbits;
 
   // Param validation - reject impossible values rather than ship a broken config.
@@ -667,12 +709,61 @@ export function selectKvCachePolicy({
       fallback: 'off', version: KV_POLICY_VERSION,
     });
   }
-  if (params.nbits != null && ![2, 4, 8].includes(params.nbits)) {
+  if (params.nbits != null && ![2, 3, 4, 8].includes(params.nbits)) {
     return Object.freeze({
       policy, kind: spec.kind, params,
       runtime_can_enforce: false, runtime,
-      reason: `invalid nbits ${params.nbits} (must be 2, 4, or 8)`,
+      reason: `invalid nbits ${params.nbits} (must be 2, 3, 4, or 8)`,
       fallback: 'off', version: KV_POLICY_VERSION,
+    });
+  }
+  if (params.group_size != null && (!Number.isInteger(params.group_size) || params.group_size <= 0)) {
+    return Object.freeze({
+      policy, kind: spec.kind, params,
+      runtime_can_enforce: false, runtime,
+      reason: `invalid group_size ${params.group_size} (must be a positive integer)`,
+      fallback: 'off', version: KV_POLICY_VERSION,
+    });
+  }
+  if (params.residual_length != null && (!Number.isInteger(params.residual_length) || params.residual_length < 0)) {
+    return Object.freeze({
+      policy, kind: spec.kind, params,
+      runtime_can_enforce: false, runtime,
+      reason: `invalid residual_length ${params.residual_length} (must be a non-negative integer)`,
+      fallback: 'off', version: KV_POLICY_VERSION,
+    });
+  }
+  if (params.rank != null && (!Number.isInteger(params.rank) || params.rank <= 0 || params.rank > 8192)) {
+    return Object.freeze({
+      policy, kind: spec.kind, params,
+      runtime_can_enforce: false, runtime,
+      reason: `invalid rank ${params.rank} (must be an integer in [1,8192])`,
+      fallback: 'off', version: KV_POLICY_VERSION,
+    });
+  }
+  if (params.compression_ratio != null && (params.compression_ratio <= 0 || params.compression_ratio > 1)) {
+    return Object.freeze({
+      policy, kind: spec.kind, params,
+      runtime_can_enforce: false, runtime,
+      reason: `invalid compression_ratio ${params.compression_ratio} (must be in (0,1])`,
+      fallback: 'off', version: KV_POLICY_VERSION,
+    });
+  }
+
+  if (spec.external_executor) {
+    const fallback = (runtime === 'vllm' && KV_POLICIES.kivi2.runtimes.includes(runtime)) ? 'kivi2' : 'off';
+    const specLabel = spec.kind === 'lowrank' ? 'low-rank KV spec'
+      : spec.kind === 'paged_eviction' ? 'paged-eviction KV spec'
+      : spec.kind === 'tiering' ? 'tiered-cache KV spec'
+      : spec.kind === 'quant' ? 'advanced KV quantization spec'
+      : 'KV policy spec';
+    return Object.freeze({
+      policy, kind: spec.kind, params,
+      runtime_can_enforce: false, runtime,
+      reason: `${policy} (${spec.kind}) is registered as a ${specLabel} but requires external/upstream ${spec.executor} support before Kolm can enforce it. Exporting advisory policy only.`,
+      fallback, version: KV_POLICY_VERSION,
+      external_executor: spec.executor,
+      executor_status: 'external_required',
     });
   }
 
@@ -716,17 +807,21 @@ export function kvPolicyPassportEntry({ policy, params = {}, measured } = {}) {
   }
   const m = measured && typeof measured === 'object' ? measured : {};
   const num = (v) => (_isFiniteNumber(v) ? v : null);
+  const spec = KV_POLICIES[policy] || {};
   return Object.freeze({
     policy,
-    kind: (KV_POLICIES[policy] && KV_POLICIES[policy].kind) || 'unknown',
+    kind: spec.kind || 'unknown',
     params: Object.freeze({ ...params }),
     compression_ratio: num(m.compression_ratio),
+    estimated_memory_fraction: num(params.compression_ratio),
     retained_tokens: num(m.retained_tokens),
     evicted_tokens: num(m.evicted_tokens),
     budget: num(m.budget != null ? m.budget : params.budget),
     peak_kv_mb: num(m.peak_kv_mb),
     quality_delta: num(m.quality_delta),
     max_context_at_vram: num(m.max_context_at_vram),
+    external_executor: spec.external_executor ? spec.executor : null,
+    executor_status: spec.external_executor ? 'external_required' : null,
     version: KV_POLICY_VERSION,
     status: (_isFiniteNumber(m.compression_ratio) && _isFiniteNumber(m.peak_kv_mb)) ? 'tested' : 'estimated',
   });
@@ -740,11 +835,19 @@ export function emitKvPolicyVllmConfig(policy, kvCacheDtype = 'auto') {
   const p = typeof policy === 'object' && policy ? policy.policy : policy;
   const kind = (KV_POLICIES[p] && KV_POLICIES[p].kind) || 'off';
   const out = { kv_cache_dtype: kvCacheDtype };
-  if (kind === 'quant') {
+  if (kind === 'quant' && (p === 'kivi2' || p === 'kivi4')) {
     // KIVI maps onto vLLM's fp8/int8 KV quant axis. 2-bit is not a vLLM KV
     // dtype yet, so the closest honest vLLM enforcement is fp8.
     out.kv_cache_dtype = kvCacheDtype === 'auto' ? 'fp8' : kvCacheDtype;
     out.note = `${p} requested; vLLM enforces the quant axis via kv_cache_dtype=${out.kv_cache_dtype} (2-bit eviction not a vLLM KV dtype)`;
+  } else if (kind === 'quant') {
+    out.note = `${p} is an advanced KV quantization policy spec requiring external/upstream executor support; vLLM cannot enforce it via kv_cache_dtype`;
+  } else if (kind === 'lowrank') {
+    out.note = `${p} is a low-rank KV policy spec requiring an external cache executor; vLLM (PagedAttention) cannot enforce it`;
+  } else if (kind === 'paged_eviction') {
+    out.note = `${p} is a paged KV eviction policy spec requiring a KV-Compress-capable vLLM extension; base vLLM config cannot enforce it`;
+  } else if (kind === 'tiering') {
+    out.note = `${p} is an SGLang HiCache tiering policy spec; vLLM config cannot enforce it`;
   } else if (kind === 'eviction' || kind === 'compress') {
     out.note = `${p} is a transformers-engine eviction policy; vLLM (PagedAttention) cannot enforce it - emit on the transformers serve path`;
   }
@@ -1312,6 +1415,8 @@ export function buildServeConfig({
     window_tokens: requested.kv_window,
     group_size: requested.kv_group,
     residual_length: requested.kv_residual,
+    rank: requested.kv_rank,
+    compression_ratio: requested.kv_compression_ratio,
   });
 
   // 3. Speculative.

@@ -3699,7 +3699,10 @@
       },
       "test_refs": [
         "tests/wave957-apps-atomic-scope.test.js",
-        "tests/wave921-serve-config.test.js"
+        "tests/wave1006-runtime-probe-kv-baseline.test.js",
+        "tests/wave607-kv-cache-cli-dispatch.test.js",
+        "tests/wave921-serve-config.test.js",
+        "tests/wrapper-shard-wire.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface",
@@ -4829,10 +4832,10 @@
       "surface": "worker",
       "domain": "compile_artifact_runtime",
       "language": "python",
-      "sha256": "a6e4ff748a97f1fc7c6b7736da83a0110c2c0e6082b7c201d9595cc107a1c61e",
+      "sha256": "c1a1caab57b149faf7f48e7b0d12a0d1caff3515c9c124390220ba3e5aa73125",
       "metrics": {
-        "bytes": 65954,
-        "lines": 1499,
+        "bytes": 69282,
+        "lines": 1561,
         "imports": 0,
         "exports": 61,
         "routes": 0,
@@ -9672,10 +9675,10 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "07c06bcb21376a86516532e68863e778592b25d765ead52e322b43e4a565bae6",
+      "sha256": "f7501233ed04812b983adfe57b2fab1838b517f27107d2814da42fb477300aea",
       "metrics": {
-        "bytes": 2659010,
-        "lines": 57803,
+        "bytes": 2659842,
+        "lines": 57820,
         "imports": 548,
         "exports": 1,
         "routes": 0,
@@ -14895,12 +14898,12 @@
       "test_refs": [
         "tests/research-docs.test.js",
         "tests/wave-dapo-frontier.test.js",
+        "tests/wave1006-runtime-probe-kv-baseline.test.js",
         "tests/wave144-extract.test.js",
         "tests/wave144-native-compile.test.js",
         "tests/wave144-phi-redactor.test.js",
         "tests/wave287-runtime-dispatch.test.js",
-        "tests/wave346-local-rewrites.test.js",
-        "tests/wave347-nl-seeds.test.js"
+        "tests/wave346-local-rewrites.test.js"
       ],
       "risk_signals": [
         "distribution_or_worker_surface"
@@ -24589,8 +24592,11 @@
         "markers": 0
       },
       "test_refs": [
+        "tests/wave1006-runtime-probe-kv-baseline.test.js",
+        "tests/wave607-kv-cache-cli-dispatch.test.js",
         "tests/wave921-serve-config.test.js",
-        "tests/wave957-apps-atomic-scope.test.js"
+        "tests/wave957-apps-atomic-scope.test.js",
+        "tests/wrapper-shard-wire.test.js"
       ],
       "risk_signals": [],
       "priority_score": 0,
@@ -51255,10 +51261,10 @@
       "surface": "core-backend",
       "domain": "runtime_serving_routing",
       "language": "javascript",
-      "sha256": "7c0bf0492bdb7a07139784523263ea4d719543c522d91dc676da814f15f396ff",
+      "sha256": "5b587b9c14d65be98fc83f7c0115aee9ec614f27cb7ce395a71b0fee4106d054",
       "metrics": {
-        "bytes": 68696,
-        "lines": 1444,
+        "bytes": 74852,
+        "lines": 1549,
         "imports": 1,
         "exports": 33,
         "routes": 0,
