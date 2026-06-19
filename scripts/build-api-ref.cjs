@@ -800,7 +800,7 @@ body[data-api-filter="live"] .api-group:not(:has(.route-live)){display:none}
     </div>
   </aside>
 </section>
-<div class="surface-media-panel" aria-label="API reference surface map">
+<div class="surface-media-panel kolm-surface-media" aria-label="API reference surface map">
   <div><b>capture and route</b><span>Provider-compatible chat, messages, responses, gateway dispatch and capture ingestion endpoints.</span></div>
   <div><b>compile and verify</b><span>Build jobs, artifacts, receipts, signatures, OpenAPI references and verifier routes.</span></div>
   <div><b>train and evaluate</b><span>Datasets, labels, bakeoffs, quality prediction, K-score and distillation workflows.</span></div>

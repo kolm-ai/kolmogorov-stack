@@ -29,7 +29,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 /* page-scoped hooks for the script-rendered Trust Center app (v2 tokens only) */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:0 0 22px}
 .stat{background:var(--paper-2);border:1px solid var(--line);border-top-color:var(--line-top);border-radius:var(--r-lg);padding:16px 18px}
-.stat .big{font-family:var(--display);font-weight:620;font-size:var(--fs-metric);letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink);line-height:1.1}
+.stat .big{font-family:var(--display);font-weight:620;font-size:var(--fs-metric);letter-spacing:0;font-variant-numeric:tabular-nums;color:var(--ink);line-height:1.1}
 .stat .lbl{font-family:var(--mono);color:var(--ink-3);font-size:11px;text-transform:uppercase;letter-spacing:.1em;margin-top:6px}
 #content .card{overflow-x:auto !important}
 #content table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
@@ -46,7 +46,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
 .tc .btn.primary:hover{background:var(--accent-deep);border-color:var(--accent-deep)}
 .tc .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line-2);font-weight:500}
 .tc .btn.ghost:hover{border-color:var(--accent-edge)}
-.tc .btn.sm{padding:7px 13px;min-height:34px;font-size:13px}
+.tc .btn.sm{padding:7px 13px;min-height:44px;font-size:13px}
 .tc .mono{font-family:var(--mono)}
 .tc .muted{color:var(--ink-3)}
 .tc .num{font-variant-numeric:tabular-nums}

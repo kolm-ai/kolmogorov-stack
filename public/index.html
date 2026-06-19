@@ -63,6 +63,13 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
   background:var(--well,#0c0e0f);line-height:0;aspect-ratio:16/9}
 .kolm-pipeline-film__video,.kolm-pipeline-film__poster{display:block;width:100%;height:100%;object-fit:cover}
 .kolm-pipeline-film__poster{position:absolute;inset:0;display:none}
+.kolm-pipeline-film__readout{position:absolute;left:14px;right:14px;bottom:14px;z-index:2;display:grid;gap:7px;
+  padding:12px 14px;border:1px solid rgba(255,255,255,.12);border-radius:8px;
+  background:rgba(8,9,10,.74);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  color:var(--ink,#eef0ea);font:600 12px/1.35 var(--font-mono,ui-monospace,monospace);letter-spacing:0}
+.kolm-pipeline-film__readout span{display:flex;align-items:center;gap:8px;min-height:18px;color:var(--ink-2,#b9bcb4)}
+.kolm-pipeline-film__readout b{color:var(--accent,#3FE5A0);font-weight:600}
+@media(max-width:560px){.kolm-pipeline-film__readout{position:relative;left:auto;right:auto;bottom:auto;border-left:0;border-right:0;border-bottom:0;border-radius:0}}
 @media (prefers-reduced-motion:reduce){
   .kolm-pipeline-film__video{display:none}
   .kolm-pipeline-film__poster{display:block}
@@ -140,7 +147,7 @@ setTimeout(function(){if(!h.hasAttribute('data-reveal-armed'))h.classList.remove
       </div>
 
       <!-- hero showpiece: self-hosted Remotion cinematic pipeline film; poster only under reduced-motion -->
-      <figure class="kolm-pipeline-film" aria-label="kolm pipeline: live OpenAI and Anthropic API calls are captured through a drop-in proxy with secrets stripped, compiled into one signed .kolm model of about 142 megabytes, run on laptop, edge, server or phone, and verified by its Ed25519 signature."><video class="kolm-pipeline-film__video" autoplay muted loop playsinline preload="metadata" poster="/media/pipeline-poster.png" width="1600" height="900"><source src="/media/pipeline.webm" type="video/webm" /></video><img class="kolm-pipeline-film__poster" src="/media/pipeline-poster.png" alt="kolm pipeline diagram: LIVE API to CAPTURE to COMPILE to RUN to VERIFY, signature valid." width="1600" height="900" /></figure>
+      <figure class="kolm-pipeline-film kolm-hero-system" aria-label="kolm pipeline: live OpenAI and Anthropic API calls are captured through a drop-in proxy with secrets stripped, compiled into one signed .kolm model of about 142 megabytes, run on laptop, edge, server or phone, and verified by its Ed25519 signature."><video class="kolm-pipeline-film__video" autoplay muted loop playsinline preload="metadata" poster="/media/pipeline-poster.png" width="1600" height="900"><source src="/media/pipeline.webm" type="video/webm" /></video><img class="kolm-pipeline-film__poster" src="/media/pipeline-poster.png" alt="kolm pipeline diagram: LIVE API to CAPTURE to COMPILE to RUN to VERIFY, signature valid." width="1600" height="900" /><figcaption class="kolm-pipeline-film__readout"><span><b>LIVE API</b> to capture, compile, run, and verify.</span><span>Secrets stripped before disk; one signed .kolm artifact, 5 runtime targets, offline Ed25519 verification.</span></figcaption></figure>
     </div>
   </section>
 
