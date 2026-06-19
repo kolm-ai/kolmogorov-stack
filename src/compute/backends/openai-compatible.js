@@ -3,6 +3,10 @@
 // targets only; training still routes through local/cloud training adapters.
 
 import crypto from 'node:crypto';
+import {
+  buildRuntimeProvenComputeReceipt,
+  runtimeProvenComputeRequired,
+} from '../../proven-compute-runtime.js';
 
 export const OPENAI_COMPATIBLE_LIMITS = Object.freeze({
   max_url_chars: 2048,
@@ -178,6 +182,8 @@ export function createOpenAICompatibleAdapter({
     body = null,
     env = {},
     timeoutMs = 60_000,
+    provenCompute = null,
+    proven_compute = null,
   } = {}) {
     const t0 = Date.now();
     const det = await detect();
@@ -249,6 +255,34 @@ export function createOpenAICompatibleAdapter({
     let parsed = null;
     try { parsed = JSON.parse(text); } catch { /* raw text is returned below */ }
     const safeText = String(text || '').slice(0, OPENAI_COMPATIBLE_LIMITS.max_error_chars);
+    const proofInput = provenCompute || proven_compute
+      || (requestBody && typeof requestBody === 'object' ? requestBody.kolm_proven_compute || requestBody.proven_compute : null)
+      || (parsed && typeof parsed === 'object' ? parsed.kolm_proven_compute || parsed.proven_compute : null);
+    let runtimeProvenCompute = null;
+    if (proofInput && typeof proofInput === 'object') {
+      runtimeProvenCompute = await buildRuntimeProvenComputeReceipt({
+        request_body: requestBody,
+        response_body: parsed || text,
+        proven_compute: proofInput,
+        runtime_target: name,
+      }, {
+        signer: proofInput.signer,
+        transparencyLog: proofInput.transparencyLog,
+        transparency: proofInput.transparency,
+        now_ms: proofInput.now_ms,
+      });
+      if (!runtimeProvenCompute.ok && runtimeProvenComputeRequired({ proven_compute: proofInput })) {
+        return {
+          ok: false,
+          exit_code: 1,
+          reason: 'proven_compute_required_failed',
+          detail: runtimeProvenCompute.reason,
+          latency_ms: Date.now() - t0,
+          backend: name,
+          endpoint: det.endpoint,
+        };
+      }
+    }
     return {
       ok: res.ok,
       exit_code: res.ok ? 0 : 1,
@@ -260,6 +294,18 @@ export function createOpenAICompatibleAdapter({
       response_text_sha256: _hash(text),
       response: parsed,
       choices: parsed?.choices || null,
+      proven_compute: runtimeProvenCompute ? {
+        ok: runtimeProvenCompute.ok,
+        reason: runtimeProvenCompute.reason || null,
+        proof_scope: runtimeProvenCompute.proof_scope || null,
+        receipt_digest: runtimeProvenCompute.receipt_digest || null,
+        input_digest: runtimeProvenCompute.input_digest || null,
+        output_digest: runtimeProvenCompute.output_digest || null,
+        version: runtimeProvenCompute.version,
+      } : null,
+      proven_compute_receipt: runtimeProvenCompute && runtimeProvenCompute.ok
+        ? runtimeProvenCompute.receipt
+        : null,
     };
   }
 

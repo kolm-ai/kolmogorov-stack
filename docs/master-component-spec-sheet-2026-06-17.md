@@ -8,9 +8,9 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 
 - Local engineering perfection: **100/100**
 - Frontier/product perfection: **86.3/100**
-- Atomic components inventoried: **973**
+- Atomic components inventoried: **974**
 - Atomic deep dives complete: **100%**
-- Direct test referenced: **973/973 (100%)**
+- Direct test referenced: **974/974 (100%)**
 - High-priority direct test referenced: **66/66 (100%)**
 - Local readiness proof coverage: **57/57 (100%)**
 - Claimable readiness closed locally: **49/57 (86%)**
@@ -36,7 +36,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | ondevice-inference | cross-device | sota_review_complete_major_frontier_work_open | at=7 open=0/1/2 | 3 | npm run verify:stack-sota<br>npm run verify:platform |
 | llm-routing | gateway | sota_review_complete_external_or_release_gate_open | at=12 open=0/0/0 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_external_or_release_gate_open | at=15 open=0/0/0 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |
-| verifiable-inference | trust | sota_review_complete_critical_frontier_work_open | at=12 open=1/0/2 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
+| verifiable-inference | trust | sota_review_complete_critical_frontier_work_open | at=13 open=1/0/2 | 5 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | model-signing-standards | trust | sota_review_complete_external_or_release_gate_open | at=8 open=0/0/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | confidential-compute | enterprise | sota_review_complete_major_frontier_work_open | at=9 open=0/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | agent-security-eval | enterprise | sota_review_complete_major_frontier_work_open | at=8 open=0/2/1 | 3 | npm run verify:stack-sota<br>npm run verify:compliance-packet |

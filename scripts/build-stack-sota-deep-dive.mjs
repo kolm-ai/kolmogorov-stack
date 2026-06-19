@@ -111,7 +111,7 @@ const STACK_CATEGORIES = Object.freeze([
     domains: ['trust_security_compliance', 'compile_artifact_runtime', 'runtime_serving_routing'],
     readiness_surfaces: ['format-standard', 'infrastructure-enterprise', 'runtime-compute'],
     keywords: ['verified', 'verify', 'receipt', 'inference', 'attestation', 'sigstore'],
-    required_paths: ['src/verified.js', 'src/gateway-receipt.js', 'src/sigstore.js', 'packages/attestation/src/index.js'],
+    required_paths: ['src/verified.js', 'src/gateway-receipt.js', 'src/sigstore.js', 'packages/attestation/src/index.js', 'src/proven-compute-runtime.js'],
   },
   {
     id: 'model-signing-standards',

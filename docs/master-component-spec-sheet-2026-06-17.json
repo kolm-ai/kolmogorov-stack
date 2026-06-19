@@ -36,10 +36,10 @@
     }
   },
   "summary": {
-    "component_count": 973,
-    "atomic_deep_dive_complete": 973,
+    "component_count": 974,
+    "atomic_deep_dive_complete": 974,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 973,
+    "direct_test_referenced_components": 974,
     "direct_test_reference_pct": 100,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 66,
@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2038,
+          "js_family": 2039,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -104,7 +104,7 @@
       "api_surface": 32,
       "billing_marketplace": 22,
       "capture_data_eval": 85,
-      "compile_artifact_runtime": 148,
+      "compile_artifact_runtime": 149,
       "developer_distribution": 70,
       "identity_access": 32,
       "infra_cloud_device": 71,
@@ -117,7 +117,7 @@
     "components_by_surface": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 633,
+      "core-backend": 634,
       "package-distribution": 92,
       "service": 3,
       "worker": 211
@@ -305,12 +305,12 @@
       "id": "verifiable-inference",
       "stack_area": "trust",
       "status": "sota_review_complete_critical_frontier_work_open",
-      "already_at_frontier_count": 12,
+      "already_at_frontier_count": 13,
       "improvement_count": 2,
       "critical_gaps": 1,
       "major_gaps": 0,
       "minor_gaps": 2,
-      "required_components": 4,
+      "required_components": 5,
       "suggested_verification": [
         "npm run verify:stack-sota",
         "npm run verify:compliance-packet",
@@ -22802,9 +22802,9 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 8160,
-          "lines": 270,
-          "imports": 1,
+          "bytes": 10103,
+          "lines": 316,
+          "imports": 2,
           "exports": 4,
           "routes": 0,
           "env_refs": 3,
@@ -22821,7 +22821,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "957a0d8100f9e4ad9ffda65e5c7ade16c1efa77a6f37915cd4616ae6c893190a"
+        "sha256": "c9b3e5e7e9bb9b20b27561e9b5a0dbb664fa922c335f4e29e13f0dfc076e4382"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -22831,6 +22831,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave932-compute-backends-contract.test.js",
+          "tests/wave992-runtime-proven-compute.test.js",
           "tests/wave551-compute-training-contract.test.js",
           "tests/wave954-learned-embedding-provider.test.js"
         ],
@@ -38330,7 +38331,8 @@
           "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
           "tests/nras-verifier.test.js",
           "tests/wave968-proven-compute-receipt.test.js",
-          "tests/wave975-python-runtime-boundary.test.js"
+          "tests/wave975-python-runtime-boundary.test.js",
+          "tests/wave992-runtime-proven-compute.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -40476,7 +40478,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/byoc-gpu-attestation.test.js",
-          "tests/wave968-proven-compute-receipt.test.js"
+          "tests/wave968-proven-compute-receipt.test.js",
+          "tests/wave992-runtime-proven-compute.test.js"
         ],
         "category_links": [],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
@@ -40488,6 +40491,65 @@
       },
       "perfection_gaps": [],
       "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
+    },
+    {
+      "path": "src/proven-compute-runtime.js",
+      "id": "src-proven-compute-runtime-js",
+      "surface": "core-backend",
+      "domain": "compile_artifact_runtime",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 9093,
+          "lines": 278,
+          "imports": 3,
+          "exports": 6,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 8,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary"
+        ],
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "0a78c2ef2eaa00f31b00ba102e1a8d487209ea15d8637642e16966f3a9a93413"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave992-runtime-proven-compute.test.js"
+        ],
+        "category_links": [
+          {
+            "id": "verifiable-inference",
+            "stack_area": "trust",
+            "status": "sota_review_complete_critical_frontier_work_open",
+            "relation": "required"
+          }
+        ],
+        "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
+        "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
+        "suggested_verification": [
+          "npm run verify:inventions",
+          "npm run verify:benchmark-evidence",
+          "npm run verify:wrapper-cli-matrix",
+          "npm run verify:spec-compile-matrix",
+          "npm run verify:artifact-matrix"
+        ]
+      },
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
     },
     {
       "path": "src/provenance.js",
