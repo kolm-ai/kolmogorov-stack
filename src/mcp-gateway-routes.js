@@ -31,6 +31,10 @@
 //                    dispatch body carries no precomputed `result`, this invokes
 //                    the registered MCP server. Without it (and without a body
 //                    result) the dispatch records an empty result.
+//   policy - optional ({tenant,tool,server_id,args,caller}) -> {allow,reason}.
+//                    Evaluated before guardrails, upstream execution, signing,
+//                    anchoring, or persistence. Deny returns 403 and mints no
+//                    receipt.
 
 import {
   wrapToolCall,
@@ -40,7 +44,7 @@ import {
 } from './mcp-gateway.js';
 import { anchorLeafHash } from './transparency-anchor.js';
 
-export const MCP_GATEWAY_ROUTES_VERSION = 'w921-mcp-gateway-routes-v1';
+export const MCP_GATEWAY_ROUTES_VERSION = 'w981-mcp-gateway-routes-v2';
 const MCP_RECEIPT_TABLE = 'mcp_tool_receipts';
 
 function _tenantIdOf(req) {
@@ -71,6 +75,64 @@ function _upstreamErrorStatus(code) {
   if (code === 'mcp_upstream_timeout') return 504;
   if (typeof code === 'string' && code.startsWith('mcp_upstream_')) return 502;
   return null;
+}
+
+function _callerPolicyContext(req) {
+  const tr = req && req.tenant_record && typeof req.tenant_record === 'object' ? req.tenant_record : {};
+  const auth = req && req.auth && typeof req.auth === 'object' ? req.auth : {};
+  const scopes = Array.isArray(auth.scopes) ? auth.scopes
+    : (Array.isArray(tr.scopes) ? tr.scopes : []);
+  return {
+    subject_id: tr.user_id || tr.owner_id || auth.subject_id || auth.user_id || null,
+    api_key_id: tr.api_key_id || auth.api_key_id || null,
+    trust_level: tr.mcp_trust_level || tr.trust_level || auth.mcp_trust_level || auth.trust_level || req?.mcp_trust_level || null,
+    scopes: scopes.map((s) => String(s)).slice(0, 64),
+  };
+}
+
+function _safePolicyDecision(v) {
+  if (v == null) {
+    return {
+      ok: true,
+      allow: true,
+      action: 'allow',
+      reason: 'no policy decision',
+      policy_id: null,
+      rule_id: null,
+      caller_trust_level: null,
+      required_trust_level: null,
+      version: MCP_GATEWAY_ROUTES_VERSION,
+    };
+  }
+  if (typeof v === 'boolean') {
+    return {
+      ok: true,
+      allow: v,
+      action: v ? 'allow' : 'deny',
+      reason: v ? 'policy allowed' : 'policy denied',
+      policy_id: null,
+      rule_id: null,
+      caller_trust_level: null,
+      required_trust_level: null,
+      version: MCP_GATEWAY_ROUTES_VERSION,
+    };
+  }
+  const o = v && typeof v === 'object' && !Array.isArray(v) ? v : {};
+  const allow = o.ok === false ? false : (o.allow !== false && o.action !== 'deny' && o.effect !== 'deny');
+  const s = (x, max = 256) => (typeof x === 'string' && x ? x.slice(0, max) : null);
+  return {
+    ok: o.ok !== false,
+    allow,
+    action: allow ? 'allow' : 'deny',
+    reason: s(o.reason, 512) || (allow ? 'policy allowed' : 'policy denied'),
+    policy_id: s(o.policy_id || o.policyId, 128),
+    rule_id: s(o.rule_id || o.ruleId, 128),
+    tool: s(o.tool, 128),
+    server_id: s(o.server_id || o.serverId, 128),
+    caller_trust_level: s(o.caller_trust_level || o.callerTrustLevel, 64),
+    required_trust_level: s(o.required_trust_level || o.requiredTrustLevel, 64),
+    version: s(o.version, 128) || MCP_GATEWAY_ROUTES_VERSION,
+  };
 }
 
 // Build the persistence seam. Prefers an injected store; otherwise a process-
@@ -148,6 +210,10 @@ export function register(r, deps = {}) {
   // guardrail config ({mode, threshold, ...}) or null. Absent it, no screening.
   const guardrailFor = typeof deps.guardrailFor === 'function' ? deps.guardrailFor : null;
 
+  // OPTIONAL per-tool policy gate. policy(input) -> {allow, reason, ...}.
+  // Deny is fail-closed before upstream execution and before a receipt exists.
+  const policy = typeof deps.policy === 'function' ? deps.policy : null;
+
   const persist = _makePersistence(deps);
 
   // ── POST /v1/mcp/dispatch ──────────────────────────────────────────────────
@@ -177,6 +243,39 @@ export function register(r, deps = {}) {
     const args = (body.arguments != null) ? body.arguments
       : (body.args != null ? body.args : {});
     const server_id = body.server_id != null ? String(body.server_id) : null;
+    const transport = body.transport != null ? String(body.transport) : null;
+
+    let policyDecision = null;
+    if (policy) {
+      const caller = _callerPolicyContext(req);
+      try {
+        policyDecision = _safePolicyDecision(await policy({
+          tenant,
+          tool,
+          server_id,
+          transport,
+          args,
+          caller,
+          caller_trust_level: caller.trust_level,
+          req,
+        }));
+      } catch (e) {
+        return res.status(503).json({
+          ok: false,
+          error: 'mcp_tool_policy_unavailable',
+          detail: String((e && e.message) || e).slice(0, 512),
+          version: MCP_GATEWAY_ROUTES_VERSION,
+        });
+      }
+      if (!policyDecision.allow) {
+        return res.status(403).json({
+          ok: false,
+          error: 'mcp_tool_policy_denied',
+          policy: policyDecision,
+          version: MCP_GATEWAY_ROUTES_VERSION,
+        });
+      }
+    }
 
     // Resolve the per-tenant guardrail config (opt-in). A thrown resolver must
     // never take down dispatch - degrade to no screening.
@@ -215,10 +314,12 @@ export function register(r, deps = {}) {
         signer: getSigner() || undefined,
         now: (typeof body.now === 'number' || typeof body.now === 'string') ? body.now : undefined,
         call_id: body.call_id ? String(body.call_id) : undefined,
-        transport: body.transport != null ? String(body.transport) : null,
+        transport,
         server_id,
         guardrail,
       });
+
+      if (policyDecision) out.receipt.policy = policyDecision;
 
       // Persist the signed receipt so GET /v1/mcp/verify/:id can return it.
       const persisted = persist.save(tenant, out.receipt);
@@ -241,6 +342,7 @@ export function register(r, deps = {}) {
         receipt: out.receipt,
         result_passthrough_contract: out.result_passthrough_contract,
         guardrail: out.guardrail,
+        policy: policyDecision,
         anchor_enqueued,
         verify_url: `/v1/mcp/verify/${out.receipt.call_id}`,
         persisted,

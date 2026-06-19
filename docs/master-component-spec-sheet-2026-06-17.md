@@ -8,9 +8,9 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 
 - Local engineering perfection: **100/100**
 - Frontier/product perfection: **83.2/100**
-- Atomic components inventoried: **971**
+- Atomic components inventoried: **972**
 - Atomic deep dives complete: **100%**
-- Direct test referenced: **971/971 (100%)**
+- Direct test referenced: **972/972 (100%)**
 - High-priority direct test referenced: **66/66 (100%)**
 - Local readiness proof coverage: **57/57 (100%)**
 - Claimable readiness closed locally: **49/57 (86%)**
@@ -35,7 +35,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | small-llm-students | model-registry | sota_review_complete_critical_frontier_work_open | at=11 open=1/0/0 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | ondevice-inference | cross-device | sota_review_complete_major_frontier_work_open | at=7 open=0/1/2 | 3 | npm run verify:stack-sota<br>npm run verify:platform |
 | llm-routing | gateway | sota_review_complete_major_frontier_work_open | at=7 open=0/2/2 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
-| mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_external_or_release_gate_open | at=12 open=0/0/2 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |
+| mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_external_or_release_gate_open | at=13 open=0/0/1 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |
 | verifiable-inference | trust | sota_review_complete_critical_frontier_work_open | at=11 open=1/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | model-signing-standards | trust | sota_review_complete_external_or_release_gate_open | at=8 open=0/0/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | confidential-compute | enterprise | sota_review_complete_major_frontier_work_open | at=9 open=0/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |

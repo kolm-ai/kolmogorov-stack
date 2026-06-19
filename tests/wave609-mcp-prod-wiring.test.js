@@ -65,15 +65,18 @@ test('1. router mounts MCP and in-toto receipt routes with prod store/signer/anc
   assert.match(src, /__startReceiptAnchorBatcher_w609\(\{/);
   assert.match(src, /update\('mcp_tool_receipts'/);
   assert.match(src, /makeMcpUpstreamExecutorFromEnv as __makeMcpUpstreamExecutor_w641/);
+  assert.match(src, /mcpToolPolicyFromEnv as __mcpToolPolicyFromEnv_w981/);
   assert.match(src, /const __w641McpUpstream = \(\(\) =>/);
+  assert.match(src, /const __w981McpToolPolicy = \(\(\) =>/);
   assert.match(src, /__registerIntotoReceiptRoutes_w921\(r, \{ authMiddleware, store: __w609ReceiptStore, getSigner: __w609GetReceiptSigner \}\)/);
   assert.match(src, /__registerMcpGatewayRoutes_w921\(r, \{/);
   assert.match(src, /anchorBatcher: __w609McpAnchorBatcher/);
   assert.match(src, /execute: __w641McpUpstream\.execute/);
   assert.match(src, /toolContractFor: __w641McpUpstream\.toolContractFor/);
+  assert.match(src, /policy: __w981McpToolPolicy\.evaluate/);
 });
 
-test('1b. backend spec records W609/W640/W641 closures and leaves remaining policy gaps open', () => {
+test('1b. backend spec records MCP closures and leaves session provenance open', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
   assert.match(spec, /CLOSED W609: wire MCP gateway to durable store \+ signer in prod/);
   assert.match(spec, /CLOSED W609: anchor MCP receipts into the existing Merkle transparency log/);

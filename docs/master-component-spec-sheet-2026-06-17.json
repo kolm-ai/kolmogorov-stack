@@ -36,10 +36,10 @@
     }
   },
   "summary": {
-    "component_count": 971,
-    "atomic_deep_dive_complete": 971,
+    "component_count": 972,
+    "atomic_deep_dive_complete": 972,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 971,
+    "direct_test_referenced_components": 972,
     "direct_test_reference_pct": 100,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 66,
@@ -105,7 +105,7 @@
       "billing_marketplace": 22,
       "capture_data_eval": 85,
       "compile_artifact_runtime": 148,
-      "developer_distribution": 69,
+      "developer_distribution": 70,
       "identity_access": 31,
       "infra_cloud_device": 71,
       "platform_support": 221,
@@ -117,7 +117,7 @@
     "components_by_surface": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 631,
+      "core-backend": 632,
       "package-distribution": 92,
       "service": 3,
       "worker": 211
@@ -289,11 +289,11 @@
       "id": "mcp-tool-gateway-receipts",
       "stack_area": "agent-integrations",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 12,
+      "already_at_frontier_count": 13,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 2,
+      "minor_gaps": 1,
       "required_components": 3,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -35939,8 +35939,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 13398,
-          "lines": 329,
+          "bytes": 17030,
+          "lines": 431,
           "imports": 2,
           "exports": 3,
           "routes": 2,
@@ -35958,7 +35958,7 @@
         ],
         "priority_score": 7,
         "priority_band": "high",
-        "sha256": "99933b6591444e9e4a6ee8a23869c86463348e62343b6600d379276961fda2eb"
+        "sha256": "29243be0846fe2ab44f6486be848a6cdaf1f9a14e1dabb9debd0e817c1f85ac3"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -35971,7 +35971,8 @@
           "tests/wave609-mcp-prod-wiring.test.js",
           "tests/wave641-mcp-upstream-registry.test.js",
           "tests/wave921-mcp-signed-receipts.test.js",
-          "tests/wave966-mcp-tool-contract-pinning.test.js"
+          "tests/wave966-mcp-tool-contract-pinning.test.js",
+          "tests/wave981-mcp-tool-policy.test.js"
         ],
         "category_links": [
           {
@@ -36116,6 +36117,55 @@
       },
       "perfection_gaps": [],
       "next_best_action": "Maintain current contract and keep closed_loop_routing_outcome_learning_and_verified_cache current."
+    },
+    {
+      "path": "src/mcp-tool-policy.js",
+      "id": "src-mcp-tool-policy-js",
+      "surface": "core-backend",
+      "domain": "developer_distribution",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 9359,
+          "lines": 260,
+          "imports": 0,
+          "exports": 6,
+          "routes": 0,
+          "env_refs": 1,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 0,
+          "markers": 0
+        },
+        "risk_signals": [
+          "environment_configuration_boundary",
+          "network_or_provider_boundary"
+        ],
+        "priority_score": 2,
+        "priority_band": "normal",
+        "sha256": "457941ebdedf61878e0749cbe0b20d2a2a6a3c2eb6690c315d870521f1c0ca2a"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave981-mcp-tool-policy.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
+        "innovation_opportunity": "Keep CLI command, SDK/package, and release conformance proofs generated from one distribution matrix before publish.",
+        "suggested_verification": [
+          "npm run verify:cli-command-matrix",
+          "npm run verify:tui-workbench-matrix",
+          "npm run verify:package-release"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep generated_cli_package_sdk_conformance_and_release_evidence current."
     },
     {
       "path": "src/mcp-upstream-registry.js",
@@ -43065,12 +43115,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1473145,
-          "lines": 30887,
-          "imports": 535,
+          "bytes": 1473510,
+          "lines": 30892,
+          "imports": 536,
           "exports": 8,
           "routes": 810,
-          "env_refs": 196,
+          "env_refs": 197,
           "fs_writes": 1,
           "subprocess_refs": 44,
           "network_refs": 34,
@@ -43088,7 +43138,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "a0c15ff1549b5a887bf12826b1abbb963417ad5d19596686fb3984b83a2dfe4c"
+        "sha256": "57668937a9184d3a49b84a3562b58750a3962810eaf3170179ec610df5869620"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
