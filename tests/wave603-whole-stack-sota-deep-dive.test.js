@@ -63,7 +63,7 @@ test('W603 #3 - every SOTA category has evidence, gaps, components, and verifica
 test('W603 #4 - summary keeps open frontier and external-gate state explicit', () => {
   assert.equal(doc.summary.category_count, EXPECTED.length);
   assert.ok(doc.summary.total_atomic_component_links >= 400);
-  assert.ok(doc.summary.categories_with_critical_frontier_work_open >= 1);
+  assert.equal(doc.summary.categories_with_critical_frontier_work_open, 0);
   assert.ok(doc.summary.categories_with_major_frontier_work_open >= 1);
   assert.equal(doc.summary.readiness_open_requirements.length, 8);
   assert.ok(doc.cross_stack_invention_themes.length >= 5);

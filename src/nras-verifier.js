@@ -36,6 +36,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { registerAttestationVerifier, KINDS } from './confidential-compute.js';
+import { NRAS_ROOT_CERT_SHA256_ENV, validateNrasRootCertPin } from './nras-live-readiness.js';
 import { pythonBin } from './python-runtime.js';
 
 export const NRAS_VERIFIER_VERSION = 'c1-nras-verifier-v1';
@@ -173,6 +174,14 @@ export function registerNrasVerifier(opts = {}) {
       `Looked for cert at: ${rootCert || '(unset)'}`
     );
   }
+  const rootCertSha256 = opts.rootCertSha256 || process.env[NRAS_ROOT_CERT_SHA256_ENV] || null;
+  const rootPin = validateNrasRootCertPin({ rootCert, expectedSha256: rootCertSha256 });
+  if (rootCertSha256 && !rootPin.ok) {
+    throw new Error(
+      `${NRAS_ROOT_CERT_SHA256_ENV} mismatch for NVIDIA NRAS root cert. ` +
+      `expected=${rootPin.expected_sha256 || rootCertSha256} actual=${rootPin.actual_sha256 || '(unreadable)'}`
+    );
+  }
   if (!fs.existsSync(WORKER_PATH)) {
     throw new Error(
       `KOLM_NRAS_VERIFIER=1 but the worker is missing at ${WORKER_PATH}. ` +
@@ -181,7 +190,13 @@ export function registerNrasVerifier(opts = {}) {
   }
   const fn = makeNrasVerifier({ rootCert, ...opts });
   registerAttestationVerifier(KINDS.NRAS, fn);
-  return { registered: true, root_cert: rootCert, version: NRAS_VERIFIER_VERSION };
+  return {
+    registered: true,
+    root_cert: rootCert,
+    root_cert_sha256: rootPin.actual_sha256 || null,
+    root_cert_sha256_pinned: rootPin.pinned === true,
+    version: NRAS_VERIFIER_VERSION,
+  };
 }
 
 export const NRAS_VERIFIER_SPEC = {
@@ -189,7 +204,7 @@ export const NRAS_VERIFIER_SPEC = {
   kind: KINDS.NRAS,
   replay_ttl_ms: NRAS_REPLAY_TTL_MS,
   binding: 'sha256(input_digest||output_digest)',
-  env_gate: 'KOLM_NRAS_VERIFIER=1 + KOLM_NRAS_ROOT_CERT',
+  env_gate: `KOLM_NRAS_VERIFIER=1 + KOLM_NRAS_ROOT_CERT + optional ${NRAS_ROOT_CERT_SHA256_ENV}`,
   privacy: 'only digests + NRAS token cross the worker boundary; no plaintext',
 };
 

@@ -39,8 +39,8 @@
     "frontier_improvement_or_invention"
   ],
   "summary": {
-    "component_count": 976,
-    "test_referenced_components": 976,
+    "component_count": 977,
+    "test_referenced_components": 977,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 67,
     "domains": {
@@ -51,7 +51,7 @@
       "developer_distribution": 70,
       "identity_access": 32,
       "infra_cloud_device": 71,
-      "platform_support": 222,
+      "platform_support": 223,
       "runtime_serving_routing": 26,
       "storage_state": 28,
       "training_model_optimization": 174,
@@ -60,16 +60,16 @@
     "surfaces": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 636,
+      "core-backend": 637,
       "package-distribution": 92,
       "service": 3,
       "worker": 211
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 24,
-      "cryptographic_or_proof_boundary": 479,
+      "cryptographic_or_proof_boundary": 480,
       "distribution_or_worker_surface": 306,
-      "environment_configuration_boundary": 372,
+      "environment_configuration_boundary": 373,
       "execution_or_subprocess_boundary": 315,
       "http_route_surface": 41,
       "large_component_contract_risk": 46,
@@ -25183,11 +25183,11 @@
         "tests/byoc-gpu-attestation.test.js",
         "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
         "tests/nras-verifier.test.js",
+        "tests/wave1002-nras-live-readiness.test.js",
         "tests/wave144-verifier-states.test.js",
         "tests/wave409v-confidential-compute.test.js",
         "tests/wave445-verify-hardening.test.js",
-        "tests/wave460-attestation-embed.test.js",
-        "tests/wave968-proven-compute-receipt.test.js"
+        "tests/wave460-attestation-embed.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -42587,19 +42587,81 @@
       ]
     },
     {
+      "path": "src/nras-live-readiness.js",
+      "id": "src-nras-live-readiness-js",
+      "surface": "core-backend",
+      "domain": "platform_support",
+      "language": "javascript",
+      "sha256": "0ff837d58aff9f34508f69f84c7901f95125e18c0e4c10d91e9171b643a51454",
+      "metrics": {
+        "bytes": 11480,
+        "lines": 339,
+        "imports": 4,
+        "exports": 7,
+        "routes": 0,
+        "env_refs": 1,
+        "fs_writes": 0,
+        "subprocess_refs": 0,
+        "network_refs": 0,
+        "crypto_refs": 5,
+        "markers": 0
+      },
+      "test_refs": [
+        "tests/wave1002-nras-live-readiness.test.js"
+      ],
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary"
+      ],
+      "priority_score": 4,
+      "deep_dive": {
+        "status": "atomic_deep_dive_complete",
+        "reviewed_at": "2026-06-17",
+        "lenses": [
+          "source_to_route_import_wiring",
+          "security_privacy_failure_abuse",
+          "state_storage_idempotency",
+          "claim_scope_evidence_and_tests",
+          "frontier_improvement_or_invention"
+        ],
+        "evidence_basis": [
+          "live_file_tree",
+          "static_import_export_route_scan",
+          "test_reference_scan",
+          "risk_signal_scan",
+          "existing_backend_frontier_and_readiness_docs"
+        ],
+        "exit_criteria": [
+          "component_is_named_in_atomic_ledger",
+          "risk_signals_are_explicit",
+          "improvement_track_is_assigned",
+          "claim_scope_stays_local_until_external_evidence_exists"
+        ]
+      },
+      "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
+      "innovation_opportunity": "Keep support modules behind generated lifecycle, verifier, provider, privacy, storage, and claim-scope contracts before adding more daemon, binder, or orchestration behavior.",
+      "suggested_verification": [
+        "npm run verify:daemon-connector-matrix",
+        "npm run verify:binder-contract-matrix",
+        "npm run verify:intent-contract-matrix",
+        "npm run verify:otel-matrix",
+        "npm run verify:codegraph"
+      ]
+    },
+    {
       "path": "src/nras-verifier.js",
       "id": "src-nras-verifier-js",
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "3f22874cac6a35ef9520d8e0d7583cf949ef8d891b42549c017b5bf0b13667ed",
+      "sha256": "9632a151a7f4fa41c2500e073187da92f325d7a95142bcb4318174e7f3eb51d6",
       "metrics": {
-        "bytes": 9487,
-        "lines": 204,
-        "imports": 7,
+        "bytes": 10188,
+        "lines": 219,
+        "imports": 8,
         "exports": 7,
         "routes": 0,
-        "env_refs": 4,
+        "env_refs": 5,
         "fs_writes": 0,
         "subprocess_refs": 4,
         "network_refs": 0,
@@ -42610,6 +42672,7 @@
         "tests/byoc-gpu-attestation.test.js",
         "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
         "tests/nras-verifier.test.js",
+        "tests/wave1002-nras-live-readiness.test.js",
         "tests/wave968-proven-compute-receipt.test.js",
         "tests/wave975-python-runtime-boundary.test.js",
         "tests/wave992-runtime-proven-compute.test.js",
@@ -45234,7 +45297,8 @@
         "tests/byoc-gpu-attestation.test.js",
         "tests/wave968-proven-compute-receipt.test.js",
         "tests/wave992-runtime-proven-compute.test.js",
-        "tests/wave998-proof-mode-tiers.test.js"
+        "tests/wave998-proof-mode-tiers.test.js",
+        "tests/wave1002-nras-live-readiness.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary"
@@ -60422,7 +60486,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/nras-verifier.test.js"
+        "tests/nras-verifier.test.js",
+        "tests/wave1002-nras-live-readiness.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
