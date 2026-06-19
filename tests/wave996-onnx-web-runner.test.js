@@ -213,5 +213,6 @@ test('W996 platform evidence and stack spec record ONNX-Web closure honestly', (
   assert.doesNotMatch(source, /unpkg\.com|jsdelivr|cdn\.jsdelivr|cdn\.skypack/i);
   const spec = fs.readFileSync(SPEC_PATH, 'utf8');
   assert.match(spec, /CLOSED W996: wire signed ONNX-Web browser runner/);
-  assert.match(spec, /Production WebLLM MLC and LlamaWeb execution is still not wired|remaining gap is production WebLLM\/LlamaWeb engine execution/i);
+  assert.match(spec, /CLOSED W999: wire signed WebLLM browser runner/);
+  assert.match(spec, /LlamaWeb GGUF execution remains unwired/i);
 });

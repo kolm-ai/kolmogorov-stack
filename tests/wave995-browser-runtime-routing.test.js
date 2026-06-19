@@ -90,9 +90,10 @@ test('W995 compile/deploy catalog carries signed-manifest browser requirements',
   assert.equal(describeBrowserDeployTarget('safetensors'), null);
 });
 
-test('W995 stack spec closes routing without claiming production browser LLM execution', () => {
+test('W995 stack spec closes routing without claiming LlamaWeb browser GGUF execution', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
   assert.match(spec, /CLOSED W995: Browser runtime deploy rows for LlamaWeb\/WebLLM\/ONNX-Web/);
   assert.match(spec, /browser-only signed-weight deploy specs/);
-  assert.match(spec, /Production WebLLM MLC and LlamaWeb execution is still not wired/);
+  assert.match(spec, /CLOSED W999: wire signed WebLLM browser runner/);
+  assert.match(spec, /LlamaWeb GGUF execution remains unwired/);
 });

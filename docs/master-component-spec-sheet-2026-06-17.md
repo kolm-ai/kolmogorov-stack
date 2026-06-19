@@ -33,7 +33,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | finetune-frameworks | training | sota_review_complete_external_or_release_gate_open | at=12 open=0/0/3 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
 | synthetic-data-curation | data | sota_review_complete_major_frontier_work_open | at=8 open=0/3/1 | 3 | npm run verify:stack-sota<br>npm run verify:redaction-benchmark |
 | small-llm-students | model-registry | sota_review_complete_critical_frontier_work_open | at=11 open=1/0/0 | 3 | npm run verify:stack-sota<br>npm run verify:inventions |
-| ondevice-inference | cross-device | sota_review_complete_major_frontier_work_open | at=8 open=0/1/1 | 3 | npm run verify:stack-sota<br>npm run verify:platform |
+| ondevice-inference | cross-device | sota_review_complete_major_frontier_work_open | at=9 open=0/1/1 | 3 | npm run verify:stack-sota<br>npm run verify:platform |
 | llm-routing | gateway | sota_review_complete_external_or_release_gate_open | at=12 open=0/0/0 | 3 | npm run verify:stack-sota<br>npm run verify:surfaces |
 | mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_external_or_release_gate_open | at=15 open=0/0/0 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |
 | verifiable-inference | trust | sota_review_complete_critical_frontier_work_open | at=14 open=1/0/1 | 5 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
