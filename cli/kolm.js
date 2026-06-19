@@ -14653,6 +14653,10 @@ async function _cmdServeAutodetect(args) {
       console.error(`error: cannot build docker-compose — ${decision.reason}`);
       process.exit(EXIT.BAD_ARGS);
     }
+    if (decision.browser_only) {
+      console.error(`error: ${decision.runtime} is a browser deploy target, not a server container runtime. Use --dry-run --json to emit the signed-weight browser deploy spec.`);
+      process.exit(EXIT.BAD_ARGS);
+    }
     const yaml = buildDockerCompose({
       runtime: decision.runtime, artifactPath: ap, port, contextLength,
     });
@@ -14664,6 +14668,10 @@ async function _cmdServeAutodetect(args) {
   if (wantK8s) {
     if (decision.runtime === 'unsupported') {
       console.error(`error: cannot build k8s manifests — ${decision.reason}`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    if (decision.browser_only) {
+      console.error(`error: ${decision.runtime} is a browser deploy target, not a server k8s runtime. Use --dry-run --json to emit the signed-weight browser deploy spec.`);
       process.exit(EXIT.BAD_ARGS);
     }
     const yaml = buildK8sManifests({
@@ -14682,6 +14690,8 @@ async function _cmdServeAutodetect(args) {
         runtime: decision.runtime,
         reason: decision.reason,
         command: decision.command || null,
+        browser_only: decision.browser_only === true,
+        requires_signed_weights: decision.requires_signed_weights === true,
         hw: hwProbe.primary,
         format: decision.format,
         gpu_class: decision.gpu_class,
@@ -14694,6 +14704,10 @@ async function _cmdServeAutodetect(args) {
       console.log(`gpu_class:       ${decision.gpu_class} (${hwProbe.primary?.name || 'unknown'})`);
       console.log(`runtime:         ${decision.runtime}`);
       console.log(`reason:          ${decision.reason}`);
+      if (decision.browser_only) {
+        console.log(`browser-only:    true`);
+        console.log(`signed-weights:  required`);
+      }
       if (decision.command) {
         const cmdStr = [decision.command.bin, ...decision.command.args].join(' ');
         console.log(`would-spawn:     ${cmdStr}`);
@@ -14710,6 +14724,11 @@ async function _cmdServeAutodetect(args) {
   if (decision.runtime === 'unsupported') {
     console.error(`error: ${decision.reason}`);
     console.error(`  try: kolm serve ${path.basename(ap)} --dry-run    (to see detection details)`);
+    process.exit(EXIT.BAD_ARGS);
+  }
+
+  if (decision.browser_only) {
+    console.error(`error: ${decision.runtime} is a browser-only runtime target. Use --dry-run --json to emit the signed-weight browser deploy spec, then load it from the browser runner.`);
     process.exit(EXIT.BAD_ARGS);
   }
 

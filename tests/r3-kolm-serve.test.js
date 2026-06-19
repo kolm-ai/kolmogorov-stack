@@ -146,7 +146,15 @@ test('detectRuntime: manifest.format wins over file suffix', () => {
 });
 
 test('detectRuntime: contract — KNOWN_RUNTIMES and version exported', () => {
-  assert.deepEqual([...KNOWN_RUNTIMES].sort(), ['llama.cpp', 'mlx', 'ollama', 'vllm']);
+  assert.deepEqual([...KNOWN_RUNTIMES].sort(), [
+    'llama.cpp',
+    'llama.cpp-webgpu',
+    'mlx',
+    'ollama',
+    'onnxruntime-web',
+    'vllm',
+    'webllm',
+  ]);
   assert.equal(SERVE_AUTODETECT_VERSION, 'serve-autodetect-v1');
 });
 

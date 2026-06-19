@@ -10,12 +10,15 @@
 //   1. --runtime override            -> caller-pinned runtime, no auto-pick
 //   2. .gguf + ollama override       -> ollama (Modelfile + ollama serve)
 //   3. .gguf + CUDA GPU              -> llama.cpp + -ngl <layers>
-//   4. .gguf + Apple Silicon         -> llama.cpp + --metal
-//   5. .gguf + CPU only              -> llama.cpp CPU mode
-//   6. .safetensors + CUDA GPU       -> vllm OpenAI-compat server
-//   7. .safetensors + Apple Silicon  -> mlx-lm.server
-//   8. .mlx + anything               -> mlx-lm.server
-//   9. everything else               -> {runtime: 'unsupported', reason}
+//   4. .gguf + browser/WebGPU        -> llama.cpp-webgpu / LlamaWeb deploy spec
+//   5. .mlc + browser/WebGPU         -> WebLLM MLCEngine deploy spec
+//   6. .onnx + browser/WebGPU        -> onnxruntime-web WebGPU deploy spec
+//   7. .gguf + Apple Silicon         -> llama.cpp + --metal
+//   8. .gguf + CPU only              -> llama.cpp CPU mode
+//   9. .safetensors + CUDA GPU       -> vllm OpenAI-compat server
+//   10. .safetensors + Apple Silicon -> mlx-lm.server
+//   11. .mlx + anything              -> mlx-lm.server
+//   12. everything else              -> {runtime: 'unsupported', reason}
 //
 // We do NOT invent capabilities. If the host has no CUDA and the artifact is
 // safetensors-CUDA-only, we report 'unsupported' with a reason field the
@@ -41,6 +44,12 @@ export const RUNTIME_SELECTION = Object.freeze({
     cuda:  Object.freeze({ runtime: 'llama.cpp',     flags: '--n-gpu-layers 999' }),
     metal: Object.freeze({ runtime: 'llama.cpp',     flags: '--metal' }),
     cpu:   Object.freeze({ runtime: 'llama.cpp',     flags: '' }),
+    browser: Object.freeze({
+      runtime: 'llama.cpp-webgpu',
+      flags: 'LlamaWeb signed GGUF via browser WebGPU',
+      browser_only: true,
+      requires_signed_weights: true,
+    }),
   }),
   safetensors: Object.freeze({
     cuda:  Object.freeze({ runtime: 'vllm',          flags: '--gpu-memory-utilization 0.9' }),
@@ -53,6 +62,22 @@ export const RUNTIME_SELECTION = Object.freeze({
   exl2: Object.freeze({
     cuda:  Object.freeze({ runtime: 'exllamav2',     flags: '' }),
   }),
+  mlc: Object.freeze({
+    browser: Object.freeze({
+      runtime: 'webllm',
+      flags: 'WebLLM MLCEngine q4f16 WebGPU',
+      browser_only: true,
+      requires_signed_weights: true,
+    }),
+  }),
+  onnx: Object.freeze({
+    browser: Object.freeze({
+      runtime: 'onnxruntime-web',
+      flags: 'onnxruntime-web WebGPU execution provider',
+      browser_only: true,
+      requires_signed_weights: true,
+    }),
+  }),
 });
 
 // /health response schema - exported as a constant so the OpenAPI builder
@@ -62,7 +87,7 @@ export const HEALTH_SCHEMA = Object.freeze({
   required: ['ok', 'runtime', 'uptime_s'],
   properties: {
     ok:        { type: 'boolean' },
-    runtime:   { type: 'string', enum: ['llama.cpp', 'vllm', 'mlx', 'ollama', 'transformers', 'exllamav2', 'unknown'] },
+    runtime:   { type: 'string', enum: ['llama.cpp', 'vllm', 'mlx', 'ollama', 'transformers', 'exllamav2', 'llama.cpp-webgpu', 'webllm', 'onnxruntime-web', 'unknown'] },
     uptime_s:  { type: 'integer', minimum: 0 },
     version:   { type: 'string' },
     artifact:  { type: ['string', 'null'] },
@@ -89,7 +114,7 @@ export const METRICS_SCHEMA = Object.freeze({
  * selectRuntime(artifactPath, hardware) -> Promise<envelope>
  *
  * Async wrapper around RUNTIME_SELECTION. Hardware is one of:
- *   - string ('cuda', 'metal', 'cpu')
+ *   - string ('cuda', 'metal', 'cpu', 'browser')
  *   - object { class: 'cuda', gpu_name?, vram_gb? }
  *
  * Returns `{ok:true, runtime, flags, format, hardware, gpu_name, vram_gb}`
@@ -103,11 +128,13 @@ export async function selectRuntime(artifactPath, hardware) {
   else if (lower.endsWith('.safetensors')) format = 'safetensors';
   else if (lower.endsWith('.mlx')) format = 'mlx';
   else if (lower.endsWith('.exl2')) format = 'exl2';
+  else if (lower.endsWith('.mlc') || lower.endsWith('mlc-chat-config.json')) format = 'mlc';
+  else if (lower.endsWith('.onnx')) format = 'onnx';
   if (!format) {
     return {
       ok: false,
       error: 'unknown_artifact_format',
-      hint: `selectRuntime supports .gguf, .safetensors, .mlx, .exl2; got ${artifactPath}`,
+      hint: `selectRuntime supports .gguf, .safetensors, .mlx, .exl2, .mlc, .onnx; got ${artifactPath}`,
     };
   }
   let hwClass = null;
@@ -142,6 +169,8 @@ export async function selectRuntime(artifactPath, hardware) {
     ok: true,
     runtime: row.runtime,
     flags: row.flags,
+    browser_only: row.browser_only === true,
+    requires_signed_weights: row.requires_signed_weights === true,
     format,
     hardware: hwClass,
     gpu_name,
@@ -157,6 +186,15 @@ export const KNOWN_RUNTIMES = Object.freeze([
   'vllm',
   'mlx',
   'ollama',
+  'llama.cpp-webgpu',
+  'webllm',
+  'onnxruntime-web',
+]);
+
+export const BROWSER_ONLY_RUNTIMES = Object.freeze([
+  'llama.cpp-webgpu',
+  'webllm',
+  'onnxruntime-web',
 ]);
 
 // Inspect a hardware probe and figure out the GPU class. We only care about
@@ -165,8 +203,15 @@ export const KNOWN_RUNTIMES = Object.freeze([
 //   - metal : Apple Silicon (unified memory >= 8 GB rec, but we accept any)
 //   - cpu   : everything else (no GPU, or unknown vendor)
 function gpuClass(hwProbe) {
+  if (typeof hwProbe === 'string' && hwProbe.toLowerCase() === 'browser') return 'browser';
+  if (hwProbe && typeof hwProbe === 'object') {
+    const explicit = String(hwProbe.class || hwProbe.gpu_class || hwProbe.target || '').toLowerCase();
+    if (explicit === 'browser' || explicit === 'webgpu') return 'browser';
+    if (hwProbe.browser === true || hwProbe.webgpu === true) return 'browser';
+  }
   if (!hwProbe || !hwProbe.primary) return 'cpu';
   const p = hwProbe.primary;
+  if (p.vendor === 'browser' || p.vendor === 'webgpu') return 'browser';
   if (p.vendor === 'nvidia' && p.vram_gb >= 4) return 'cuda';
   if (p.vendor === 'apple') return 'metal';
   // AMD ROCm is reachable via llama.cpp HIP but vLLM coverage is shakier;
@@ -181,12 +226,15 @@ function gpuClass(hwProbe) {
 function artifactFormat({ artifactPath, manifest }) {
   if (manifest && manifest.format) {
     const f = String(manifest.format).toLowerCase();
-    if (f === 'gguf' || f === 'safetensors' || f === 'mlx') return f;
+    if (f === 'gguf' || f === 'safetensors' || f === 'mlx' || f === 'mlc' || f === 'onnx' || f === 'exl2') return f;
   }
   const lower = String(artifactPath || '').toLowerCase();
   if (lower.endsWith('.gguf')) return 'gguf';
   if (lower.endsWith('.safetensors')) return 'safetensors';
   if (lower.endsWith('.mlx')) return 'mlx';
+  if (lower.endsWith('.exl2')) return 'exl2';
+  if (lower.endsWith('.mlc') || lower.endsWith('mlc-chat-config.json')) return 'mlc';
+  if (lower.endsWith('.onnx')) return 'onnx';
   return 'unknown';
 }
 
@@ -266,6 +314,33 @@ export function detectRuntime(opts) {
 
   // --- 2. GGUF + ollama override (--runtime ollama already handled above) --
   //     left intentionally for the override path; no auto-route to ollama.
+
+  // --- Browser/WebGPU deploy specs. These are not local daemon spawn paths. --
+  if (klass === 'browser') {
+    const row = RUNTIME_SELECTION[format] && RUNTIME_SELECTION[format].browser;
+    if (!row) {
+      return {
+        runtime: 'unsupported',
+        reason: `${format} is not supported by the browser/WebGPU runtime table`,
+        format,
+        gpu_class: klass,
+      };
+    }
+    return {
+      runtime: row.runtime,
+      browser_only: true,
+      requires_signed_weights: row.requires_signed_weights === true,
+      reason: `${format} + browser/WebGPU -> ${row.runtime} signed-weight deploy spec`,
+      command: buildCommand(row.runtime, { artifactPath, contextLength, port, host, klass }),
+      env: {
+        ...env,
+        KOLM_BROWSER_REQUIRE_SIGNED_WEIGHTS: '1',
+        KOLM_BROWSER_NO_UNSIGNED_AUTO_FETCH: '1',
+      },
+      format,
+      gpu_class: klass,
+    };
+  }
 
   // --- 3-5. GGUF routes to llama.cpp regardless of hardware. ----------------
   if (format === 'gguf') {
@@ -353,7 +428,7 @@ export function detectRuntime(opts) {
   // --- 9. Unknown format / unsupported pairing. ----------------------------
   return {
     runtime: 'unsupported',
-    reason: `unknown artifact format (suffix "${path.extname(artifactPath || '')}"); supported: .gguf, .safetensors, .mlx`,
+    reason: `unknown artifact format (suffix "${path.extname(artifactPath || '')}"); supported: .gguf, .safetensors, .mlx, .exl2, .mlc, .onnx`,
     format,
     gpu_class: klass,
   };
@@ -366,6 +441,13 @@ export function detectRuntime(opts) {
 // ---------------------------------------------------------------------------
 function buildCommand(runtime, p) {
   const { artifactPath, contextLength, port, host, gpuLayers, klass } = p;
+  if (BROWSER_ONLY_RUNTIMES.includes(runtime)) {
+    return {
+      bin: 'browser-deploy-spec',
+      args: ['--runtime', runtime, '--artifact', artifactPath, '--require-signed-weights'],
+      browser_only: true,
+    };
+  }
   if (runtime === 'llama.cpp') {
     // llama-server is the OpenAI-compat HTTP daemon in llama.cpp.
     // The legacy binary name is `server`; we prefer `llama-server` because

@@ -95,6 +95,33 @@ export const COMPILE_TARGET_INFO = Object.freeze({
   }),
 });
 
+export const BROWSER_DEPLOY_TARGET_INFO = Object.freeze({
+  gguf: Object.freeze({
+    id: 'gguf',
+    runtime: 'llama.cpp-webgpu',
+    engine: 'LlamaWeb',
+    required_artifact_fields: ['runtime_target_config.gguf_path', 'model_weight_artifact_manifest'],
+    signed_weight_manifest_required: true,
+    no_unsigned_auto_fetch: true,
+  }),
+  mlc: Object.freeze({
+    id: 'mlc',
+    runtime: 'webllm',
+    engine: 'WebLLM MLCEngine',
+    required_artifact_fields: ['model_weight_artifact_manifest'],
+    signed_weight_manifest_required: true,
+    no_unsigned_auto_fetch: true,
+  }),
+  onnx: Object.freeze({
+    id: 'onnx',
+    runtime: 'onnxruntime-web',
+    engine: 'ONNX Runtime Web WebGPU EP',
+    required_artifact_fields: ['runtime_target_config.onnx_path', 'model_weight_artifact_manifest'],
+    signed_weight_manifest_required: true,
+    no_unsigned_auto_fetch: true,
+  }),
+});
+
 // Resolve a dotted path against an object. Returns undefined on miss.
 function _get(obj, dotted) {
   if (!obj || !dotted) return undefined;
@@ -159,10 +186,17 @@ export function describeCompileTarget(target) {
   return COMPILE_TARGET_INFO[target];
 }
 
+export function describeBrowserDeployTarget(target) {
+  if (!target || !BROWSER_DEPLOY_TARGET_INFO[target]) return null;
+  return BROWSER_DEPLOY_TARGET_INFO[target];
+}
+
 export default {
   COMPILE_TARGETS,
   COMPILE_TARGET_INFO,
+  BROWSER_DEPLOY_TARGET_INFO,
   validateCompileTarget,
   inferCompileTarget,
   describeCompileTarget,
+  describeBrowserDeployTarget,
 };

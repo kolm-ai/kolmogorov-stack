@@ -9670,10 +9670,10 @@
       "surface": "cli",
       "domain": "developer_distribution",
       "language": "javascript",
-      "sha256": "54366b423872277b3efa12ddae2eb7383a0dd10f433cab623a0ef5f0e278bfa9",
+      "sha256": "95415ef2b4f2d9700105c1ae493608d101ac92ab6aee507e1b6d22cb28dfe813",
       "metrics": {
-        "bytes": 2654718,
-        "lines": 57716,
+        "bytes": 2655745,
+        "lines": 57735,
         "imports": 547,
         "exports": 1,
         "routes": 0,
@@ -22966,12 +22966,12 @@
       "surface": "core-backend",
       "domain": "compile_artifact_runtime",
       "language": "javascript",
-      "sha256": "807ae9e1c8bd068606a112db2919ddea7948a0c37dcab626e94543ac8bc42295",
+      "sha256": "41e5ef9ed7a6fa35948427646e0d89de9805831ed7290eb0b7db69fbc1f9cc68",
       "metrics": {
-        "bytes": 6855,
-        "lines": 169,
+        "bytes": 7969,
+        "lines": 203,
         "imports": 0,
-        "exports": 6,
+        "exports": 8,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -22981,7 +22981,8 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/wave266-compile-targets-surfaced.test.js"
+        "tests/wave266-compile-targets-surfaced.test.js",
+        "tests/wave995-browser-runtime-routing.test.js"
       ],
       "risk_signals": [
         "execution_or_subprocess_boundary"
@@ -50984,22 +50985,23 @@
       "surface": "core-backend",
       "domain": "runtime_serving_routing",
       "language": "javascript",
-      "sha256": "f6e3fa7c2a28df21d9c8817ae008409437f1f224d307e3b5477ab92b198e480a",
+      "sha256": "1de5e2276964d044bfe04ef885dd993c3a9eaaf9f5593662f187483277cec0da",
       "metrics": {
-        "bytes": 22001,
-        "lines": 628,
+        "bytes": 25182,
+        "lines": 710,
         "imports": 1,
-        "exports": 9,
+        "exports": 10,
         "routes": 0,
         "env_refs": 1,
         "fs_writes": 2,
-        "subprocess_refs": 4,
+        "subprocess_refs": 5,
         "network_refs": 1,
         "crypto_refs": 0,
         "markers": 0
       },
       "test_refs": [
         "tests/r3-kolm-serve.test.js",
+        "tests/wave995-browser-runtime-routing.test.js",
         "tests/wrapper-r-enrich.test.js",
         "tests/wrapper-r1-r8.test.js"
       ],
