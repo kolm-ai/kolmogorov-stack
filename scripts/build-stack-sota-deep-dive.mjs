@@ -193,6 +193,13 @@ const EXTERNAL_FRESHNESS_PROBE = Object.freeze([
     confirms: 'vLLM documents model-based speculation methods including EAGLE, draft models, MTP, PARD, and MLP, keeping draft-model wiring and acceptance metrics relevant.',
   },
   {
+    id: 'category-aware-semantic-caching',
+    category: 'llm-routing',
+    source_type: 'paper',
+    url: 'https://arxiv.org/abs/2510.26835',
+    confirms: 'Category-aware semantic caching varies thresholds, TTLs, and quotas by workload category, supporting the W987 route-path cache hardening.',
+  },
+  {
     id: 'nvidia-attestation-suite',
     category: 'confidential-compute',
     source_type: 'official-docs',

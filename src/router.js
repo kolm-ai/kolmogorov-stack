@@ -6949,17 +6949,40 @@ export function buildRouter() {
       const _cacheModel = body.model || 'default';
       let _cacheCanon = null;
       let _cacheUserText = inputText;
+      let _cachePolicy = null;
       if (_cacheCfg.mode !== 'off') {
         try {
           const _c = semcache.canonicalizeCacheInput(body);
           _cacheCanon = _c.canonicalInput;
           _cacheUserText = _c.userText || inputText;
-          const _hit = await semcache.semanticCacheLookup({ tenant: _cacheTenant, namespace: nsSlug, model: _cacheModel, canonicalInput: _cacheCanon, userText: _cacheUserText, config: _cacheCfg });
-          if (_hit && typeof _hit.status === 'string' && _hit.status.endsWith('_hit') && _hit.value) {
-            return res.status(200).json({
-              ...(_hit.value),
-              kolm_cache_hit: { mode: _cacheCfg.mode, similarity: _hit.similarity, source_receipt_id: _hit.source_receipt_id },
+          _cachePolicy = semcache.deriveCachePolicy({
+            userText: _cacheUserText,
+            canonicalInput: _cacheCanon,
+            body,
+            config: _cacheCfg,
+          });
+          if (_cachePolicy && _cachePolicy.cache_allowed) {
+            const _hit = await semcache.semanticCacheLookup({
+              tenant: _cacheTenant,
+              namespace: nsSlug,
+              model: _cacheModel,
+              category: _cachePolicy.category,
+              canonicalInput: _cacheCanon,
+              userText: _cacheUserText,
+              config: _cachePolicy.config || _cacheCfg,
             });
+            if (_hit && typeof _hit.status === 'string' && _hit.status.endsWith('_hit') && _hit.value) {
+              return res.status(200).json({
+                ...(_hit.value),
+                kolm_cache_hit: {
+                  mode: (_cachePolicy.config && _cachePolicy.config.mode) || _cacheCfg.mode,
+                  similarity: _hit.similarity,
+                  source_receipt_id: _hit.source_receipt_id,
+                  category: _cachePolicy.category,
+                  category_aware: _cachePolicy.category_aware,
+                },
+              });
+            }
           }
         } catch (_) { _cacheCanon = _cacheCanon || null; /* cache miss-path: fall through to a live call */ }
       }
@@ -7179,9 +7202,19 @@ export function buildRouter() {
       // W921 - populate the semantic cache on a successful live call (best-effort,
       // only when enabled). Stores the redacted client response so a future hit
       // returns exactly what this caller received.
-      if (_cacheCfg.mode !== 'off' && _cacheCanon && result.ok) {
+      if (_cacheCfg.mode !== 'off' && _cacheCanon && result.ok && _cachePolicy && _cachePolicy.cache_allowed) {
         try {
-          await semcache.semanticCacheWrite({ tenant: _cacheTenant, namespace: nsSlug, model: _cacheModel, canonicalInput: _cacheCanon, userText: _cacheUserText, value: clientJson, source_receipt_id: receipt.receipt_id, config: _cacheCfg });
+          await semcache.semanticCacheWrite({
+            tenant: _cacheTenant,
+            namespace: nsSlug,
+            model: _cacheModel,
+            category: _cachePolicy.category,
+            canonicalInput: _cacheCanon,
+            userText: _cacheUserText,
+            value: clientJson,
+            source_receipt_id: receipt.receipt_id,
+            config: _cachePolicy.config || _cacheCfg,
+          });
         } catch (_) { /* cache write is best-effort */ }
       }
       // W608 - close the semantic-routing flywheel. After the final provider
