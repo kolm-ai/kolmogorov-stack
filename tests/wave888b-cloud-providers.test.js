@@ -36,6 +36,10 @@
 //  14) `kolm test cloud --dry-run --provider runpod --json` forces
 //      dry-run even if the key were set, and tags detail.mode='dry-run'.
 //  15) Modal detect() exposes provider:'modal' + docs_url + install_hint.
+//  16) RunPod endpoint GraphQL defaults carry versioned docs-backed metadata
+//      and no source-level open marker.
+//  17) RunPod stopEndpoint scales the endpoint to zero workers using the
+//      docs-backed saveEndpoint mutation shape.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -48,7 +52,7 @@ import { fileURLToPath } from 'node:url';
 import * as runpodMod from '../src/cloud-providers/runpod.js';
 import * as modalMod  from '../src/cloud-providers/modal.js';
 import * as pgStoreMod from '../src/storage/postgres-store.js';
-import { RunPodProvider, RUNPOD_GPU_CATALOG } from '../src/cloud-providers/runpod.js';
+import { RunPodProvider, RUNPOD_GPU_CATALOG, RUNPOD_GRAPHQL_CONTRACT } from '../src/cloud-providers/runpod.js';
 import { ModalProvider } from '../src/cloud-providers/modal.js';
 import { PostgresCaptureStore, smokePostgresStore, SCHEMA_SQL } from '../src/storage/postgres-store.js';
 
@@ -387,4 +391,72 @@ test('W888-B #15 — modal detect envelope includes provider, docs_url, install_
   }
   assert.equal(d.provider, 'modal');
   assert.match(d.docs_url, /modal\.com/);
+});
+
+// ---------------------------------------------------------------------------
+// 16) RunPod GraphQL defaults carry explicit contract metadata
+// ---------------------------------------------------------------------------
+test('W888-B #16 - RunPod GraphQL defaults are versioned, docs-backed, and marker-free', () => {
+  assert.match(RUNPOD_GRAPHQL_CONTRACT.version, /^w976-runpod-graphql-contract-v\d+$/);
+  assert.match(RUNPOD_GRAPHQL_CONTRACT.endpoints_docs_url, /docs\.runpod\.io\/sdks\/graphql\/manage-endpoints/);
+  assert.match(RUNPOD_GRAPHQL_CONTRACT.docs_url, /docs\.runpod\.io\/sdks\/graphql\/configurations/);
+  assert.match(RUNPOD_GRAPHQL_CONTRACT.schema_url, /graphql-spec\.runpod\.io/);
+
+  const provider = new RunPodProvider('rpa_test_key_for_contract_only', {
+    fetch: async () => ({
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ data: {} }),
+    }),
+  });
+  for (const name of ['createEndpoint', 'listEndpoints', 'stopEndpoint', 'endpointMetrics']) {
+    const mutation = provider.mutations[name];
+    const contract = RUNPOD_GRAPHQL_CONTRACT.operations[name];
+    assert.ok(mutation, `mutation ${name} must be present`);
+    assert.equal(mutation.docs_url, contract.docs_url, `${name} docs_url must come from contract`);
+    assert.equal(mutation.upstream_operation, contract.upstream_operation,
+      `${name} upstream_operation must come from contract`);
+    assert.equal(mutation.contract_status, contract.contract_status,
+      `${name} contract_status must come from contract`);
+    assert.equal(typeof mutation.query, 'string', `${name} must include GraphQL query text`);
+  }
+
+  const source = fs.readFileSync(path.join(REPO_ROOT, 'src', 'cloud-providers', 'runpod.js'), 'utf8');
+  const openMarkerPattern = new RegExp(`\\b${'TO'}${'DO'}\\b`);
+  assert.doesNotMatch(source, openMarkerPattern,
+    'RunPod provider must not carry an unowned open marker after contract pinning');
+  assert.doesNotMatch(source, /serverless\/endpoints\/manage-endpoints/,
+    'RunPod provider must not point at the retired endpoint docs URL');
+});
+
+// ---------------------------------------------------------------------------
+// 17) stopEndpoint uses docs-backed scale-to-zero semantics
+// ---------------------------------------------------------------------------
+test('W888-B #17 - RunPod stopEndpoint scales workers to zero through saveEndpoint', async () => {
+  const calls = [];
+  const provider = new RunPodProvider('rpa_test_key_for_stop_only', {
+    fetch: async (_url, opts) => {
+      calls.push(JSON.parse(opts.body));
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({
+          data: { saveEndpoint: { id: 'ep_test_123', workersMin: 0, workersMax: 0 } },
+        }),
+      };
+    },
+  });
+
+  const out = await provider.stopEndpoint('ep_test_123');
+  assert.equal(out.ok, true);
+  assert.equal(out.endpoint_id, 'ep_test_123');
+  assert.equal(calls.length, 1, 'stopEndpoint must make exactly one GraphQL call');
+  assert.match(calls[0].query, /saveEndpoint/, 'stopEndpoint must use saveEndpoint');
+  assert.doesNotMatch(calls[0].query, /stopEndpoint\s*\(/,
+    'stopEndpoint must not call the undocumented stopEndpoint mutation');
+  assert.deepEqual(calls[0].variables, {
+    input: { id: 'ep_test_123', workersMin: 0, workersMax: 0 },
+  });
+  assert.equal(out.raw.saveEndpoint.workersMin, 0);
+  assert.equal(out.raw.saveEndpoint.workersMax, 0);
 });

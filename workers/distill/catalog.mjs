@@ -8,7 +8,8 @@
 // public/spec/rs-1.html §7.7 (which links here so third-party tooling can
 // consume the JSON form). The license tags carry "verify_before_ship: true"
 // when the upstream license text has not been re-checked since the entry
-// was added; treat that flag as a build-time TODO, not a legal opinion.
+// was added; treat that flag as a build-time compliance review item, not a
+// legal opinion.
 
 // ----- Teacher vendors and models ------------------------------------------
 

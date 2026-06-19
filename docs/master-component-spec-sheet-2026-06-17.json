@@ -21122,27 +21122,26 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 21884,
-          "lines": 543,
+          "bytes": 22745,
+          "lines": 576,
           "imports": 3,
-          "exports": 4,
+          "exports": 5,
           "routes": 0,
           "env_refs": 9,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 5,
           "crypto_refs": 7,
-          "markers": 5
+          "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
           "environment_configuration_boundary",
-          "network_or_provider_boundary",
-          "open_marker_requires_owner_review"
+          "network_or_provider_boundary"
         ],
-        "priority_score": 6,
+        "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "26d5b015ff4f21f27da6c19978448df1dcbe14c77b455bb4c7447f286307dc4d"
+        "sha256": "54613bc3841fff739482f53c4fea48e33872e8a78965b6218f13e984dc3d8ba5"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -21168,10 +21167,8 @@
           "npm run verify:package-release"
         ]
       },
-      "perfection_gaps": [
-        "open_marker_requires_owner_review"
-      ],
-      "next_best_action": "Resolve or explicitly owner-review the open TODO/FIXME marker."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep capability_probe_attested_byoc_worker_and_deploy_readiness current."
     },
     {
       "path": "src/cloud-sync.js",
@@ -51391,8 +51388,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 9772,
-          "lines": 309,
+          "bytes": 9793,
+          "lines": 310,
           "imports": 0,
           "exports": 12,
           "routes": 0,
@@ -51401,17 +51398,16 @@
           "subprocess_refs": 0,
           "network_refs": 0,
           "crypto_refs": 0,
-          "markers": 1
+          "markers": 0
         },
         "risk_signals": [
           "distribution_or_worker_surface",
           "environment_configuration_boundary",
-          "execution_or_subprocess_boundary",
-          "open_marker_requires_owner_review"
+          "execution_or_subprocess_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "a313f744286df9fbb055b0450bbab598139a85d5fca80528b0ab164f347a1e77"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "a288f095870e97ba6f0910fcd670d60fc686a9da4056a3935963e067a30803ac"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -51439,10 +51435,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "open_marker_requires_owner_review"
-      ],
-      "next_best_action": "Resolve or explicitly owner-review the open TODO/FIXME marker."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "workers/distill/distill.mjs",

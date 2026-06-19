@@ -19,18 +19,17 @@
 //
 // API target: https://api.runpod.io/graphql (pod + endpoint mutations) and
 //   https://api.runpod.ai/v2/{endpointId}/run (job execution).
-// Docs:        https://docs.runpod.io/serverless/endpoints/manage-endpoints
-//              https://docs.runpod.io/api-reference/graphql
+// Docs:        https://docs.runpod.io/sdks/graphql/manage-endpoints
+//              https://docs.runpod.io/sdks/graphql/configurations
 //
 // Caveats / Constraints / Limitations:
 //   1. RunPod's GraphQL schema changes without notice. Every mutation is
 //      executed via `_callRunPodAPI(query, variables)` and wrapped in try/
 //      catch so a schema drift returns a structured error envelope with
 //      the mutation name + docs URL - never a stack trace at the call site.
-//   2. The exact mutation strings for `podCreate`, `podStop`, `endpointCreate`
-//      are marked TODO with their docs URL where the shape isn't pinned by
-//      a public spec. Callers can override mutations via the `mutations`
-//      option to the constructor for forward-compat.
+//   2. Endpoint GraphQL defaults are stamped with docs_url, upstream operation,
+//      and contract_status metadata. Callers can override mutations via the
+//      `mutations` option to the constructor for forward-compat.
 //   3. We do NOT upload model weights to RunPod object storage here - the
 //      caller is expected to either (a) bake the weights into the endpoint
 //      template image or (b) point `config.modelUrl` at an HTTPS-reachable
@@ -45,7 +44,39 @@ import crypto from 'node:crypto';
 const GRAPHQL_URL = 'https://api.runpod.io/graphql';
 const SERVERLESS_HOST = 'api.runpod.ai';
 const POLL_INTERVAL_MS = 2000;
-const DEFAULT_DOCS_URL = 'https://docs.runpod.io/api-reference/graphql';
+const GRAPHQL_DOCS_URL = 'https://docs.runpod.io/sdks/graphql/configurations';
+const ENDPOINTS_DOCS_URL = 'https://docs.runpod.io/sdks/graphql/manage-endpoints';
+const GRAPHQL_SCHEMA_URL = 'https://graphql-spec.runpod.io/';
+const DEFAULT_DOCS_URL = GRAPHQL_DOCS_URL;
+
+export const RUNPOD_GRAPHQL_CONTRACT = Object.freeze({
+  version: 'w976-runpod-graphql-contract-v1',
+  docs_url: GRAPHQL_DOCS_URL,
+  endpoints_docs_url: ENDPOINTS_DOCS_URL,
+  schema_url: GRAPHQL_SCHEMA_URL,
+  operations: Object.freeze({
+    createEndpoint: Object.freeze({
+      upstream_operation: 'saveEndpoint',
+      docs_url: ENDPOINTS_DOCS_URL,
+      contract_status: 'docs_backed_with_override',
+    }),
+    listEndpoints: Object.freeze({
+      upstream_operation: 'myself.endpoints',
+      docs_url: ENDPOINTS_DOCS_URL,
+      contract_status: 'docs_backed_query',
+    }),
+    stopEndpoint: Object.freeze({
+      upstream_operation: 'saveEndpoint_scale_to_zero',
+      docs_url: ENDPOINTS_DOCS_URL,
+      contract_status: 'docs_backed_stop_semantics',
+    }),
+    endpointMetrics: Object.freeze({
+      upstream_operation: 'myself.endpoint',
+      docs_url: GRAPHQL_SCHEMA_URL,
+      contract_status: 'schema_backed_query',
+    }),
+  }),
+});
 
 // Known GPU SKU labels. We do NOT enforce membership at the API call site - 
 // RunPod's GPU catalog grows. The list is exported so the Studio UI can show
@@ -398,7 +429,7 @@ export class RunPodProvider {
       endpoint_id: endpointId,
       endpoint_url: endpointId ? `https://${this.serverlessHost}/v2/${endpointId}` : null,
       raw: ep,
-      docs_url: 'https://docs.runpod.io/serverless/endpoints/manage-endpoints',
+      docs_url: ENDPOINTS_DOCS_URL,
     };
   }
 
@@ -428,7 +459,10 @@ export class RunPodProvider {
       const err = new Error('stopEndpoint requires endpoint id'); err.code = 'bad_args'; throw err;
     }
     const m = this.mutations.stopEndpoint;
-    const data = await this._callRunPodAPI(m.query, { input: { id } }, 'stopEndpoint');
+    const variables = typeof m.buildVariables === 'function'
+      ? m.buildVariables({ id })
+      : { input: { id, workersMin: 0, workersMax: 0 } };
+    const data = await this._callRunPodAPI(m.query, variables, 'stopEndpoint');
     return { ok: true, provider: 'runpod', endpoint_id: id, raw: data };
   }
 
@@ -454,18 +488,15 @@ export class RunPodProvider {
   }
 }
 
-// Default GraphQL mutations. Each entry's `query` is a best-effort match
-// against the RunPod schema as of 2026-05. If RunPod ships a breaking
-// schema change, override via:
+// Default GraphQL operations. Each entry carries a docs URL and an upstream
+// operation label so schema drift has a machine-readable contract. If RunPod
+// ships a breaking schema change, override via:
 //   new RunPodProvider(key, { mutations: { createEndpoint: { query: '...' } } })
 function _defaultMutations() {
+  const ops = RUNPOD_GRAPHQL_CONTRACT.operations;
   return {
-    // TODO https://docs.runpod.io/serverless/endpoints/manage-endpoints
-    // Verify exact mutation name + input shape against the GraphQL playground
-    // before relying on this in prod. The fallback `data.saveEndpoint` and
-    // `data.endpointCreate` reads in createServingEndpoint() cover both
-    // historical names.
     createEndpoint: {
+      ...ops.createEndpoint,
       query: `mutation CreateEndpoint($input: EndpointInput!) {
         saveEndpoint(input: $input) {
           id
@@ -477,8 +508,8 @@ function _defaultMutations() {
         }
       }`,
     },
-    // TODO https://docs.runpod.io/api-reference/graphql/queries/endpoints
     listEndpoints: {
+      ...ops.listEndpoints,
       query: `query ListEndpoints {
         myself {
           endpoints {
@@ -492,16 +523,18 @@ function _defaultMutations() {
         }
       }`,
     },
-    // TODO https://docs.runpod.io/serverless/endpoints/manage-endpoints
     stopEndpoint: {
-      query: `mutation StopEndpoint($input: StopEndpointInput!) {
-        stopEndpoint(input: $input) {
+      ...ops.stopEndpoint,
+      query: `mutation StopEndpoint($input: EndpointInput!) {
+        saveEndpoint(input: $input) {
           id
+          workersMin
+          workersMax
         }
       }`,
     },
-    // TODO https://docs.runpod.io/api-reference/graphql/queries/endpoints
     endpointMetrics: {
+      ...ops.endpointMetrics,
       query: `query EndpointMetrics($id: String!) {
         endpoint(id: $id) {
           id
