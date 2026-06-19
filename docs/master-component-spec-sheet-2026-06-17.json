@@ -36,10 +36,10 @@
     }
   },
   "summary": {
-    "component_count": 970,
-    "atomic_deep_dive_complete": 970,
+    "component_count": 971,
+    "atomic_deep_dive_complete": 971,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 970,
+    "direct_test_referenced_components": 971,
     "direct_test_reference_pct": 100,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 66,
@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2028,
+          "js_family": 2030,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -104,7 +104,7 @@
       "api_surface": 32,
       "billing_marketplace": 22,
       "capture_data_eval": 85,
-      "compile_artifact_runtime": 147,
+      "compile_artifact_runtime": 148,
       "developer_distribution": 69,
       "identity_access": 31,
       "infra_cloud_device": 71,
@@ -117,7 +117,7 @@
     "components_by_surface": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 630,
+      "core-backend": 631,
       "package-distribution": 92,
       "service": 3,
       "worker": 211
@@ -5482,7 +5482,8 @@
           "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
           "tests/sota-distill.test.js",
           "tests/wave921-serve-config.test.js",
-          "tests/wave957-eagle3-train.test.js"
+          "tests/wave957-eagle3-train.test.js",
+          "tests/wave975-python-runtime-boundary.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -7967,7 +7968,8 @@
         "direct_test_refs": [
           "tests/sota-distill.test.js",
           "tests/wave957-apps-atomic-scope.test.js",
-          "tests/wave957-eagle3-train.test.js"
+          "tests/wave957-eagle3-train.test.js",
+          "tests/wave975-python-runtime-boundary.test.js"
         ],
         "category_links": [
           {
@@ -27561,12 +27563,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 16848,
-          "lines": 387,
-          "imports": 5,
+          "bytes": 16806,
+          "lines": 388,
+          "imports": 6,
           "exports": 12,
           "routes": 0,
-          "env_refs": 3,
+          "env_refs": 1,
           "fs_writes": 0,
           "subprocess_refs": 12,
           "network_refs": 1,
@@ -27580,7 +27582,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "7b35a2381befc7cdbcd87da2733eb134d321df80cc3aef43e0d3b9e17793317b"
+        "sha256": "68cea2a7f4806b7385637fa71fa18395987a3893a7d511cd2116e4a49c73c34e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -27589,7 +27591,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave-dapo-frontier.test.js"
+          "tests/wave-dapo-frontier.test.js",
+          "tests/wave975-python-runtime-boundary.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -27663,12 +27666,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 11085,
-          "lines": 283,
-          "imports": 7,
+          "bytes": 11043,
+          "lines": 284,
+          "imports": 8,
           "exports": 7,
           "routes": 0,
-          "env_refs": 4,
+          "env_refs": 2,
           "fs_writes": 0,
           "subprocess_refs": 7,
           "network_refs": 0,
@@ -27681,7 +27684,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "28c39feb34b0dbe66241014473994052d25625e0dd3cf01da39a9e28c29901be"
+        "sha256": "6cc24a731cfac7824222264df5c0302d7bd021db7e0af29fb7e25f60d3a04cd7"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -27694,7 +27697,8 @@
           "tests/finalized-c4-rlvr-grpo-frontier-knobs-dapo-gspo-vllm.test.js",
           "tests/wave-dapo-frontier.test.js",
           "tests/wave921-grpo-rlvr.test.js",
-          "tests/wave921-studio-cli.test.js"
+          "tests/wave921-studio-cli.test.js",
+          "tests/wave975-python-runtime-boundary.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -27889,12 +27893,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 22978,
-          "lines": 564,
-          "imports": 5,
+          "bytes": 22845,
+          "lines": 565,
+          "imports": 6,
           "exports": 14,
           "routes": 0,
-          "env_refs": 9,
+          "env_refs": 5,
           "fs_writes": 0,
           "subprocess_refs": 4,
           "network_refs": 0,
@@ -27907,7 +27911,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "787edb5abbc0adb187988567ad17e1c6389b3b72bf89ceb5c912356768f43503"
+        "sha256": "b73f5146f325e2eff05eb83c60a4d62eb6f1babdeafc58c2db03270825240937"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -27920,7 +27924,8 @@
           "tests/sota-distill.test.js",
           "tests/wave921-preference-miner.test.js",
           "tests/wave921-studio-cli.test.js",
-          "tests/wave973-bond-jeffreys-trainer.test.js"
+          "tests/wave973-bond-jeffreys-trainer.test.js",
+          "tests/wave975-python-runtime-boundary.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -28051,12 +28056,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 20597,
-          "lines": 498,
-          "imports": 6,
+          "bytes": 20555,
+          "lines": 499,
+          "imports": 7,
           "exports": 13,
           "routes": 0,
-          "env_refs": 4,
+          "env_refs": 2,
           "fs_writes": 0,
           "subprocess_refs": 8,
           "network_refs": 0,
@@ -28070,7 +28075,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "133ea477bac53f9bd41abe7e03c1752728fcfa8095b2471996f93db8428945d6"
+        "sha256": "c08bca7c8895528222624e5dcc7148d187594e4c8631d5d04a75f718378d492d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -28080,7 +28085,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/finalized-c4-rejection-sampling-best-of-n-trainer.test.js",
-          "tests/finalized-c4-rejection-sampling-wiring.test.js"
+          "tests/finalized-c4-rejection-sampling-wiring.test.js",
+          "tests/wave975-python-runtime-boundary.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -37005,12 +37011,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 17887,
-          "lines": 451,
-          "imports": 7,
+          "bytes": 17845,
+          "lines": 452,
+          "imports": 8,
           "exports": 6,
           "routes": 0,
-          "env_refs": 4,
+          "env_refs": 2,
           "fs_writes": 0,
           "subprocess_refs": 6,
           "network_refs": 0,
@@ -37024,7 +37030,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "4bf9606f1e244bf644836d52e3f43b9261e4a7acf0b8f75d6479cfc6aedb0df9"
+        "sha256": "bcd55dd9400dab74255b3ad84db84d28d3190134622bfa72f3fc70b5ef959510"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -37035,6 +37041,7 @@
         "direct_test_refs": [
           "tests/wave921-model-merge.test.js",
           "tests/wave921-studio-cli.test.js",
+          "tests/wave975-python-runtime-boundary.test.js",
           "tests/wave921-merge-lineage.test.js"
         ],
         "category_links": [],
@@ -37560,12 +37567,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 7507,
-          "lines": 219,
-          "imports": 5,
+          "bytes": 7465,
+          "lines": 220,
+          "imports": 6,
           "exports": 5,
           "routes": 0,
-          "env_refs": 6,
+          "env_refs": 4,
           "fs_writes": 0,
           "subprocess_refs": 4,
           "network_refs": 0,
@@ -37578,7 +37585,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "1022f6a815dc0c2b4aecb31a07d30b2f15d65586e4dc09aae12a3607ac89a599"
+        "sha256": "cf865a58fe9d9776c906ef6416183bbfcede1a0d27bf2ff0c0fc7205e0681508"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -37588,6 +37595,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave958-moe-to-dense.test.js",
+          "tests/wave975-python-runtime-boundary.test.js",
           "tests/wave584-distill-strategy.test.js"
         ],
         "category_links": [
@@ -37651,6 +37659,7 @@
           "tests/wave191-moe-cli.test.js",
           "tests/wave921-moe-quantize.test.js",
           "tests/wave958-moe-to-dense.test.js",
+          "tests/wave975-python-runtime-boundary.test.js",
           "tests/wrapper-s7.test.js"
         ],
         "category_links": [],
@@ -38190,12 +38199,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 9485,
-          "lines": 203,
-          "imports": 6,
+          "bytes": 9487,
+          "lines": 204,
+          "imports": 7,
           "exports": 7,
           "routes": 0,
-          "env_refs": 6,
+          "env_refs": 4,
           "fs_writes": 0,
           "subprocess_refs": 4,
           "network_refs": 0,
@@ -38209,7 +38218,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "2e7d2bb2a146be654b6d4ac7c744b04732efaee3234dbe7c588e58fa3310ca3c"
+        "sha256": "3f22874cac6a35ef9520d8e0d7583cf949ef8d891b42549c017b5bf0b13667ed"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -38221,7 +38230,8 @@
           "tests/byoc-gpu-attestation.test.js",
           "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
           "tests/nras-verifier.test.js",
-          "tests/wave968-proven-compute-receipt.test.js"
+          "tests/wave968-proven-compute-receipt.test.js",
+          "tests/wave975-python-runtime-boundary.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -41225,6 +41235,56 @@
       },
       "perfection_gaps": [],
       "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
+    },
+    {
+      "path": "src/python-runtime.js",
+      "id": "src-python-runtime-js",
+      "surface": "core-backend",
+      "domain": "compile_artifact_runtime",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 1516,
+          "lines": 55,
+          "imports": 0,
+          "exports": 6,
+          "routes": 0,
+          "env_refs": 1,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 0,
+          "markers": 0
+        },
+        "risk_signals": [
+          "environment_configuration_boundary"
+        ],
+        "priority_score": 1,
+        "priority_band": "normal",
+        "sha256": "7cdceb68f3bb75c14fc412789ae294e3fac46597a7d7d66c0457664f0baa9006"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave975-python-runtime-boundary.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
+        "innovation_opportunity": "Make compile a replayable artifact DAG where each stage emits signed receipts, hashes, and DSSE/SLSA sidecars.",
+        "suggested_verification": [
+          "npm run verify:inventions",
+          "npm run verify:benchmark-evidence",
+          "npm run verify:wrapper-cli-matrix",
+          "npm run verify:spec-compile-matrix",
+          "npm run verify:artifact-matrix"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/quality-calibration.js",
@@ -46313,12 +46373,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 8151,
-          "lines": 216,
-          "imports": 5,
+          "bytes": 8109,
+          "lines": 217,
+          "imports": 6,
           "exports": 4,
           "routes": 0,
-          "env_refs": 6,
+          "env_refs": 4,
           "fs_writes": 0,
           "subprocess_refs": 3,
           "network_refs": 0,
@@ -46331,7 +46391,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "d956266c6e141d08b13ee9e0e0e367d44f8e91469be21a6ccc972e44967cdc05"
+        "sha256": "d345adc8e9f736ea0f4da3943e6e64fd03de93e66f3d31e5101dcb3c0afc4873"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -46343,6 +46403,7 @@
           "tests/finalized-c4-speculative-decoding-acceptance-eval-harness.test.js",
           "tests/sota-distill.test.js",
           "tests/wave957-eagle3-train.test.js",
+          "tests/wave975-python-runtime-boundary.test.js",
           "tests/sota-cli.test.js",
           "tests/sota-computequant.test.js",
           "tests/wave888m-corpus-coverage.test.js"
@@ -52692,7 +52753,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/sota-distill.test.js"
+          "tests/sota-distill.test.js",
+          "tests/wave975-python-runtime-boundary.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",

@@ -36,6 +36,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { registerAttestationVerifier, KINDS } from './confidential-compute.js';
+import { pythonBin } from './python-runtime.js';
 
 export const NRAS_VERIFIER_VERSION = 'c1-nras-verifier-v1';
 export const NRAS_REPLAY_TTL_MS = 24 * 60 * 60 * 1000; // 24h replay window
@@ -56,7 +57,7 @@ export function nonceBinding(input_digest, output_digest) {
 }
 
 function _pythonBin() {
-  return process.env.KOLM_PYTHON || process.env.PYTHON || 'python3';
+  return pythonBin();
 }
 
 // ---------------------------------------------------------------------------

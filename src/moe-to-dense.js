@@ -8,6 +8,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { pythonBin } from './python-runtime.js';
 
 const _here = path.dirname(fileURLToPath(import.meta.url));
 const _repoRoot = path.resolve(_here, '..');
@@ -28,7 +29,7 @@ const INSTALL_HINT = [
 ].join('\n');
 
 function _pythonBin() {
-  return process.env.KOLM_PYTHON || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+  return pythonBin();
 }
 
 function whichSync(name) {

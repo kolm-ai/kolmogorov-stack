@@ -15,12 +15,13 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { pythonBin } from './python-runtime.js';
 
 const _here = path.dirname(fileURLToPath(import.meta.url));
 const _repoRoot = path.resolve(_here, '..');
 
 function _pythonBin() {
-  return process.env.KOLM_PYTHON || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+  return pythonBin();
 }
 
 export const OBJECTIVES = ['dpo', 'simpo', 'orpo', 'kto'];
@@ -537,7 +538,7 @@ export function doctorExtended() {
   }
   let trl_importable = false;
   try {
-    const py = process.env.KOLM_PYTHON || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+    const py = pythonBin();
     const r = spawnSync(py, ['-c', 'import trl'], { stdio: 'pipe', timeout: 20000 });
     trl_importable = r.status === 0;
   } catch (_) { trl_importable = false; }

@@ -21,7 +21,7 @@ self-hosted SKU, no feature gating. Open-source MIT licensed.
 | RAM | 4 GiB | 8 GiB |
 | Disk | 20 GiB SSD | 100 GiB NVMe |
 | Node.js | 20.x LTS | 22.x LTS |
-| Python | 3.10+ (only for distill/quantize workers) | 3.12 |
+| Python | 3.10+ (for ML/proof workers: distill, quantize, import/export, runtime adapters) | 3.12 |
 | GPU | optional | NVIDIA L4 / A10G / RTX 4090 for local compile |
 | Network | egress to HF Hub for base-model downloads (or use air-gap mode) | + ingress 443 for users |
 

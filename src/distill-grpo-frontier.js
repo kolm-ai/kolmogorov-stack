@@ -29,6 +29,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { loadRecipe } from './distill-recipe-loader.js';
+import { pythonBin } from './python-runtime.js';
 
 const _here = path.dirname(fileURLToPath(import.meta.url));
 const _repoRoot = path.resolve(_here, '..');
@@ -104,7 +105,7 @@ function _fail(message) {
 }
 
 function _pythonBin() {
-  return process.env.KOLM_PYTHON || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+  return pythonBin();
 }
 
 // probeVllm() - ENV-GATED capability probe. Returns {available, reason, hint}.

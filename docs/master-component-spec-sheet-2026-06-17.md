@@ -8,9 +8,9 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 
 - Local engineering perfection: **100/100**
 - Frontier/product perfection: **83.2/100**
-- Atomic components inventoried: **970**
+- Atomic components inventoried: **971**
 - Atomic deep dives complete: **100%**
-- Direct test referenced: **970/970 (100%)**
+- Direct test referenced: **971/971 (100%)**
 - High-priority direct test referenced: **66/66 (100%)**
 - Local readiness proof coverage: **57/57 (100%)**
 - Claimable readiness closed locally: **49/57 (86%)**

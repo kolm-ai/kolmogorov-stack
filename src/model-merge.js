@@ -34,6 +34,7 @@ import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { buildLineage, VALID_MERGE_METHODS } from './artifact-lineage.js';
+import { pythonBin } from './python-runtime.js';
 
 const _here = path.dirname(fileURLToPath(import.meta.url));
 const _repoRoot = path.resolve(_here, '..');
@@ -177,7 +178,7 @@ function resolveTrainer() {
 }
 
 function _pythonBin() {
-  return process.env.KOLM_PYTHON || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+  return pythonBin();
 }
 
 // W921 - dry-run plan envelope. Pure (no spawn, no GPU). Validates inputs,
