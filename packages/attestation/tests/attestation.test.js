@@ -8,7 +8,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Buffer } from 'node:buffer';
 import {
+  clearAttestationVerifier,
+  evaluateParsedAttestation,
   parseAttestation,
+  registerAttestationVerifier,
+  VERIFICATION_TIERS,
   verifyAttestation,
   extractMeasurement,
   SUPPORTED_TARGETS,
@@ -171,6 +175,79 @@ test('verifyAttestation: measurement mismatch → invalid', () => {
   });
   assert.equal(v.valid, false);
   assert.match(v.reasons[0], /measurement mismatch/);
+});
+
+test('verifyAttestation: hardware TEE evidence requires crypto verifier by default', () => {
+  const payload = {
+    module_id: 'i-1234567890abcdef0-enc1234',
+    timestamp: 1700000000000,
+    digest: 'SHA384',
+    pcrs: { 0: 'e'.repeat(96) },
+    cabundle: ['MIIDxz...PEMENC'],
+  };
+  const measurement = `pcr0:sha384:${'e'.repeat(96)}`;
+
+  const strict = verifyAttestation('aws-nitro', payload, { measurement, vendor: 'aws' });
+  assert.equal(strict.valid, false);
+  assert.equal(strict.tier, VERIFICATION_TIERS.PARSED_UNVERIFIED);
+  assert.equal(strict.cryptographic, false);
+  assert.match(strict.reasons.join('\n'), /cryptographic attestation verifier required/);
+
+  const tofu = verifyAttestation('aws-nitro', payload, { measurement, vendor: 'aws', allow_tofu: true });
+  assert.equal(tofu.valid, true);
+  assert.equal(tofu.tier, VERIFICATION_TIERS.TOFU_MEASUREMENT);
+  assert.equal(tofu.trust_policy, 'explicit_tofu');
+  assert.equal(tofu.cryptographic, false);
+});
+
+test('verifyAttestation: registered hardware verifier is the only crypto-valid path', () => {
+  const payload = {
+    module_id: 'i-1234567890abcdef0-enc1234',
+    timestamp: 1700000000000,
+    digest: 'SHA384',
+    pcrs: { 0: 'f'.repeat(96) },
+    cabundle: ['MIIDxz...PEMENC'],
+  };
+  const measurement = `pcr0:sha384:${'f'.repeat(96)}`;
+  try {
+    registerAttestationVerifier('aws-nitro', (parsed, ctx) => {
+      assert.equal(ctx.target, 'aws-nitro');
+      assert.equal(parsed.measurement, measurement);
+      return { ok: true, verifier: 'unit-nitro-chain', trust_root: 'aws-nitro-root-fixture' };
+    });
+
+    const verified = verifyAttestation('aws-nitro', payload, { measurement, vendor: 'aws' });
+    assert.equal(verified.valid, true);
+    assert.equal(verified.tier, VERIFICATION_TIERS.CRYPTOGRAPHIC_VENDOR_CHAIN);
+    assert.equal(verified.cryptographic, true);
+    assert.equal(verified.verifier, 'unit-nitro-chain');
+    assert.equal(verified.trust_root, 'aws-nitro-root-fixture');
+  } finally {
+    clearAttestationVerifier('aws-nitro');
+  }
+});
+
+test('evaluateParsedAttestation: rejected verifier fails even with matching measurement', () => {
+  const payload = {
+    module_id: 'i-1234567890abcdef0-enc1234',
+    timestamp: 1700000000000,
+    digest: 'SHA384',
+    pcrs: { 0: '9'.repeat(96) },
+    cabundle: ['MIIDxz...PEMENC'],
+  };
+  const parsed = parseAttestation('aws-nitro', payload);
+  assert.equal(parsed.ok, true);
+  try {
+    registerAttestationVerifier('aws-nitro', () => ({ ok: false, reason: 'bad_signature' }));
+    const result = evaluateParsedAttestation('aws-nitro', parsed, {
+      measurement: parsed.measurement,
+      vendor: parsed.vendor,
+    });
+    assert.equal(result.valid, false);
+    assert.match(result.reasons.join('\n'), /bad_signature/);
+  } finally {
+    clearAttestationVerifier('aws-nitro');
+  }
 });
 
 test('extractMeasurement: returns the measurement on success', () => {

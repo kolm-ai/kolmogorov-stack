@@ -10,7 +10,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 100,
-    "frontier_product_score": 84.4,
+    "frontier_product_score": 85.3,
     "readiness_proof_surplus_score": 104.3,
     "readiness_proof_surplus_ceiling": 110,
     "score_notes": [
@@ -47,9 +47,9 @@
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 2,
-    "categories_with_major_frontier_work_open": 11,
+    "categories_with_major_frontier_work_open": 10,
     "critical_sota_category_closed_pct": 87.5,
-    "major_sota_category_closed_pct": 31.3,
+    "major_sota_category_closed_pct": 37.5,
     "readiness": {
       "total": 57,
       "closed": 49,
@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2037,
+          "js_family": 2038,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -305,11 +305,11 @@
       "id": "verifiable-inference",
       "stack_area": "trust",
       "status": "sota_review_complete_critical_frontier_work_open",
-      "already_at_frontier_count": 11,
+      "already_at_frontier_count": 12,
       "improvement_count": 2,
       "critical_gaps": 1,
-      "major_gaps": 1,
-      "minor_gaps": 1,
+      "major_gaps": 0,
+      "minor_gaps": 2,
       "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -10489,8 +10489,8 @@
       "language": "markdown",
       "composition": {
         "metrics": {
-          "bytes": 2960,
-          "lines": 81,
+          "bytes": 3975,
+          "lines": 105,
           "imports": 1,
           "exports": 0,
           "routes": 0,
@@ -10498,7 +10498,7 @@
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 3,
+          "crypto_refs": 5,
           "markers": 0
         },
         "risk_signals": [
@@ -10507,7 +10507,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "1b5913b7db2757ee682ab66f773c4ecf93d6b36699064439c979f11f3b4ca0b0"
+        "sha256": "cd0f5a34fc025c46d36837046d5d4247e2b5cc2dadbe345d4854878aeac8804d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -10642,10 +10642,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 5684,
-          "lines": 149,
+          "bytes": 9394,
+          "lines": 258,
           "imports": 5,
-          "exports": 4,
+          "exports": 10,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -10660,7 +10660,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "135f5757538a5c45a5b07a61a7f8caefa6318668226ebfd8866d0d7e78ab90c3"
+        "sha256": "1d6b26c82f565757955f2d35d30b8de652e66bbfe008ed74a8f8ffea1fd1af30"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -10670,7 +10670,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave602-backend-atomic-deep-dive.test.js",
-          "tests/wave670-tdx-attestation-contract.test.js"
+          "tests/wave670-tdx-attestation-contract.test.js",
+          "tests/wave990-attestation-policy-contract.test.js"
         ],
         "category_links": [
           {
@@ -10729,7 +10730,8 @@
         "direct_test_refs": [
           "tests/wave409v-confidential-compute.test.js",
           "tests/wave460-attestation-embed.test.js",
-          "tests/wave555-user-completion-cloud-optimizer.test.js"
+          "tests/wave555-user-completion-cloud-optimizer.test.js",
+          "tests/wave990-attestation-policy-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
@@ -10854,8 +10856,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 6203,
-          "lines": 184,
+          "bytes": 9143,
+          "lines": 261,
           "imports": 4,
           "exports": 0,
           "routes": 0,
@@ -10863,7 +10865,7 @@
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 11,
+          "crypto_refs": 13,
           "markers": 0
         },
         "risk_signals": [
@@ -10872,7 +10874,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "badd1513bfb61c98067b5683b4dba855ea1f728f52d50fc64a4269a427f8c4d2"
+        "sha256": "5387908283778001cd8d889e6a2bb4cf09a4b06e2c2b2b25d4f7f600e5ad20e1"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -19759,8 +19761,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 31616,
-          "lines": 807,
+          "bytes": 32430,
+          "lines": 830,
           "imports": 9,
           "exports": 9,
           "routes": 0,
@@ -19780,7 +19782,7 @@
         ],
         "priority_score": 7,
         "priority_band": "high",
-        "sha256": "3b3fc1bdeaece2ef76d16b24c9c363a462e84bd372e65a46377d7c970dacd382"
+        "sha256": "eefafb032f1c6051818c34316dec887bf711ba38550628e00b87e4d61a9a5165"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -19790,7 +19792,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/byoc-gpu-attestation.test.js",
-          "tests/wave974-byoc-core-contract.test.js"
+          "tests/wave974-byoc-core-contract.test.js",
+          "tests/wave990-attestation-policy-contract.test.js"
         ],
         "category_links": [
           {

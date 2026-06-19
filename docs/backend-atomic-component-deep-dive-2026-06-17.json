@@ -9863,10 +9863,10 @@
       "surface": "package-distribution",
       "domain": "trust_security_compliance",
       "language": "markdown",
-      "sha256": "1b5913b7db2757ee682ab66f773c4ecf93d6b36699064439c979f11f3b4ca0b0",
+      "sha256": "cd0f5a34fc025c46d36837046d5d4247e2b5cc2dadbe345d4854878aeac8804d",
       "metrics": {
-        "bytes": 2960,
-        "lines": 81,
+        "bytes": 3975,
+        "lines": 105,
         "imports": 1,
         "exports": 0,
         "routes": 0,
@@ -9874,7 +9874,7 @@
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 3,
+        "crypto_refs": 5,
         "markers": 0
       },
       "test_refs": [
@@ -10049,12 +10049,12 @@
       "surface": "package-distribution",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "135f5757538a5c45a5b07a61a7f8caefa6318668226ebfd8866d0d7e78ab90c3",
+      "sha256": "1d6b26c82f565757955f2d35d30b8de652e66bbfe008ed74a8f8ffea1fd1af30",
       "metrics": {
-        "bytes": 5684,
-        "lines": 149,
+        "bytes": 9394,
+        "lines": 258,
         "imports": 5,
-        "exports": 4,
+        "exports": 10,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -10065,7 +10065,8 @@
       },
       "test_refs": [
         "tests/wave602-backend-atomic-deep-dive.test.js",
-        "tests/wave670-tdx-attestation-contract.test.js"
+        "tests/wave670-tdx-attestation-contract.test.js",
+        "tests/wave990-attestation-policy-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -10126,7 +10127,8 @@
       "test_refs": [
         "tests/wave409v-confidential-compute.test.js",
         "tests/wave460-attestation-embed.test.js",
-        "tests/wave555-user-completion-cloud-optimizer.test.js"
+        "tests/wave555-user-completion-cloud-optimizer.test.js",
+        "tests/wave990-attestation-policy-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
@@ -10289,10 +10291,10 @@
       "surface": "package-distribution",
       "domain": "trust_security_compliance",
       "language": "javascript",
-      "sha256": "badd1513bfb61c98067b5683b4dba855ea1f728f52d50fc64a4269a427f8c4d2",
+      "sha256": "5387908283778001cd8d889e6a2bb4cf09a4b06e2c2b2b25d4f7f600e5ad20e1",
       "metrics": {
-        "bytes": 6203,
-        "lines": 184,
+        "bytes": 9143,
+        "lines": 261,
         "imports": 4,
         "exports": 0,
         "routes": 0,
@@ -10300,7 +10302,7 @@
         "fs_writes": 0,
         "subprocess_refs": 0,
         "network_refs": 0,
-        "crypto_refs": 11,
+        "crypto_refs": 13,
         "markers": 0
       },
       "test_refs": [
@@ -20756,10 +20758,10 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "3b3fc1bdeaece2ef76d16b24c9c363a462e84bd372e65a46377d7c970dacd382",
+      "sha256": "eefafb032f1c6051818c34316dec887bf711ba38550628e00b87e4d61a9a5165",
       "metrics": {
-        "bytes": 31616,
-        "lines": 807,
+        "bytes": 32430,
+        "lines": 830,
         "imports": 9,
         "exports": 9,
         "routes": 0,
@@ -20772,7 +20774,8 @@
       },
       "test_refs": [
         "tests/byoc-gpu-attestation.test.js",
-        "tests/wave974-byoc-core-contract.test.js"
+        "tests/wave974-byoc-core-contract.test.js",
+        "tests/wave990-attestation-policy-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",

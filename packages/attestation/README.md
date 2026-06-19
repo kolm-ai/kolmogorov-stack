@@ -9,7 +9,7 @@ is running, on what silicon*. This package parses those reports into a
 normalized envelope so the kolm.ai BYOC store can pin the measurement on
 the deployment.
 
-## What it does today (v0.1)
+## What it does today (v0.2.6)
 
 - **Parse** each vendor's attestation format:
   - AWS Nitro Enclaves — COSE_Sign1 over CBOR (PCR0 = SHA-384 of EIF)
@@ -22,8 +22,12 @@ the deployment.
   chain (where present).
 - **Compare** an incoming attestation against an `expected` envelope
   (measurement match, vendor match, freshness).
+- **Enforce a trust policy**: hardware TEE targets are not `valid` by default
+  unless a registered verifier confirms the vendor chain/signature. Operators
+  can explicitly opt into `allow_tofu: true`; that returns the
+  `tofu_measurement` tier rather than a cryptographic claim.
 
-## What it does NOT do yet
+## What it does NOT bundle yet
 
 - **Cryptographic verification of the vendor signing chain.**
   - AWS Nitro: needs the AWS Nitro root certificate.
@@ -32,15 +36,20 @@ the deployment.
   - Intel TDX: needs the Intel PCS cert chain.
   - Azure MAA: needs the JWKS fetched from the MAA endpoint.
 
-Today the parsers expose the cert chain claims so the cryptographic
-verification can plug in without an API change. The BYOC flow operates in
-TOFU (trust on first use) mode: the operator's first attestation pins the
-measurement, and any later attestation that doesn't match raises the alarm.
+The parsers expose the cert chain claims so cryptographic verification can plug
+in without an API change. Pure TOFU is no longer implicit: callers must pass
+`allow_tofu: true` to accept parsed-only hardware measurements, and the result
+is labeled as `tofu_measurement`.
 
 ## Public API
 
 ```js
-import { parseAttestation, verifyAttestation, extractMeasurement } from 'kolm-attestation';
+import {
+  parseAttestation,
+  verifyAttestation,
+  registerAttestationVerifier,
+  extractMeasurement,
+} from 'kolm-attestation';
 
 // Parse a raw vendor payload into a normalized envelope.
 const parsed = parseAttestation('aws-nitro', payload);
@@ -51,7 +60,22 @@ const result = verifyAttestation('aws-nitro', payload, {
   measurement: 'pcr0:sha384:abc...',
   vendor: 'aws',
 });
-// { valid, reasons, parsed }
+// { valid:false, reasons:['cryptographic attestation verifier required...'], tier:'parsed_unverified', ... }
+
+// Explicit TOFU comparison remains possible but is labeled.
+const tofu = verifyAttestation('aws-nitro', payload, {
+  measurement: 'pcr0:sha384:abc...',
+  vendor: 'aws',
+  allow_tofu: true,
+});
+// { valid:true, tier:'tofu_measurement', cryptographic:false, ... }
+
+// Production hardware proof requires a registered vendor-chain verifier.
+registerAttestationVerifier('aws-nitro', (parsed) => {
+  // Verify COSE signature, cert chain, PCR binding, freshness, and revocation
+  // against pinned AWS Nitro roots in your deployment environment.
+  return { ok: true, verifier: 'aws-nitro-chain-v1', trust_root: 'aws-nitro-root-g1' };
+});
 
 // Just grab the measurement.
 const m = extractMeasurement('sev-snp', reportBuffer);

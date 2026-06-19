@@ -32,6 +32,13 @@ import { parseGcpCvmAttestation } from './gcp-cvm.js';
 import { parseAzureCvmAttestation } from './azure-cvm.js';
 
 export const SUPPORTED_TARGETS = ['aws-nitro', 'sev-snp', 'tdx', 'gcp-cvm', 'azure-cvm', 'docker'];
+export const HARDWARE_ATTESTATION_TARGETS = Object.freeze(['aws-nitro', 'sev-snp', 'tdx', 'gcp-cvm', 'azure-cvm']);
+export const VERIFICATION_TIERS = Object.freeze({
+  SOFTWARE_MEASUREMENT: 'software_measurement',
+  PARSED_UNVERIFIED: 'parsed_unverified',
+  TOFU_MEASUREMENT: 'tofu_measurement',
+  CRYPTOGRAPHIC_VENDOR_CHAIN: 'cryptographic_vendor_chain',
+});
 
 const PARSERS = {
   'aws-nitro': parseNitroAttestation,
@@ -41,6 +48,26 @@ const PARSERS = {
   'azure-cvm': parseAzureCvmAttestation,
   'docker':    parseDockerAttestation,
 };
+
+const VERIFIERS = new Map();
+
+export function registerAttestationVerifier(target, fn) {
+  if (!SUPPORTED_TARGETS.includes(target)) {
+    throw new Error(`unsupported target: ${target}`);
+  }
+  if (typeof fn !== 'function') {
+    throw new Error('attestation verifier must be a function');
+  }
+  VERIFIERS.set(target, fn);
+}
+
+export function clearAttestationVerifier(target) {
+  VERIFIERS.delete(target);
+}
+
+export function listRegisteredAttestationVerifiers() {
+  return Array.from(VERIFIERS.keys()).sort();
+}
 
 // Parse a raw attestation payload. Returns a normalized object:
 //
@@ -76,6 +103,107 @@ export function parseAttestation(target, payload) {
   }
 }
 
+function isHardwareTarget(target) {
+  return HARDWARE_ATTESTATION_TARGETS.includes(target);
+}
+
+function normalizeExpected(expected) {
+  return expected && typeof expected === 'object' ? expected : {};
+}
+
+function wantsTofu(expected) {
+  return expected.allow_tofu === true || expected.trust_policy === 'tofu';
+}
+
+function wantsCryptographic(target, expected) {
+  if (expected.require_cryptographic === true || expected.require_crypto === true) return true;
+  if (expected.require_cryptographic === false || expected.require_crypto === false) return false;
+  return isHardwareTarget(target) && !wantsTofu(expected);
+}
+
+function runRegisteredVerifier(target, parsed, expected) {
+  const verifier = VERIFIERS.get(target);
+  if (!verifier) return null;
+  try {
+    const out = verifier(parsed, { target, expected });
+    if (out && typeof out.then === 'function') {
+      return { ok: false, reason: 'async_verifier_not_supported_by_sync_api' };
+    }
+    return out && typeof out === 'object' ? out : { ok: false, reason: 'verifier_returned_falsy' };
+  } catch (err) {
+    return { ok: false, reason: `verifier_threw:${err && err.message ? err.message : 'unknown'}` };
+  }
+}
+
+export function evaluateParsedAttestation(target, parsed, expected = {}) {
+  const policy = normalizeExpected(expected);
+  const reasons = [];
+  if (!parsed || parsed.ok !== true) {
+    return {
+      valid: false,
+      reasons: parsed?.errors || ['attestation parse failed'],
+      parsed,
+      tier: VERIFICATION_TIERS.PARSED_UNVERIFIED,
+      cryptographic: false,
+      trust_policy: isHardwareTarget(target) ? 'require_cryptographic' : 'parse_only',
+      verifier: null,
+      trust_root: null,
+    };
+  }
+
+  if (policy.measurement && parsed.measurement !== policy.measurement) {
+    reasons.push(`measurement mismatch: stored=${policy.measurement} attested=${parsed.measurement}`);
+  }
+  if (policy.vendor && parsed.vendor !== policy.vendor) {
+    reasons.push(`vendor mismatch: stored=${policy.vendor} attested=${parsed.vendor}`);
+  }
+  if (policy.min_signed_at && parsed.claims?.signed_at) {
+    if (parsed.claims.signed_at < policy.min_signed_at) {
+      reasons.push(`attestation too old: ${parsed.claims.signed_at} < ${policy.min_signed_at}`);
+    }
+  }
+
+  let verifierResult = null;
+  let cryptographic = false;
+  let tier = target === 'docker'
+    ? VERIFICATION_TIERS.SOFTWARE_MEASUREMENT
+    : VERIFICATION_TIERS.PARSED_UNVERIFIED;
+
+  if (isHardwareTarget(target)) {
+    verifierResult = runRegisteredVerifier(target, parsed, policy);
+    if (verifierResult) {
+      if (verifierResult.ok === true) {
+        cryptographic = true;
+        tier = VERIFICATION_TIERS.CRYPTOGRAPHIC_VENDOR_CHAIN;
+      } else {
+        reasons.push(`attestation verifier rejected: ${verifierResult.reason || 'unknown'}`);
+      }
+    }
+
+    if (!cryptographic) {
+      if (wantsCryptographic(target, policy)) {
+        reasons.push(`cryptographic attestation verifier required for ${target}`);
+      } else if (wantsTofu(policy)) {
+        tier = VERIFICATION_TIERS.TOFU_MEASUREMENT;
+      }
+    }
+  }
+
+  return {
+    valid: reasons.length === 0,
+    reasons,
+    parsed,
+    tier,
+    cryptographic,
+    trust_policy: isHardwareTarget(target)
+      ? (cryptographic ? 'cryptographic_vendor_chain' : (wantsTofu(policy) ? 'explicit_tofu' : 'require_cryptographic'))
+      : 'software_measurement',
+    verifier: verifierResult?.verifier || null,
+    trust_root: verifierResult?.trust_root || null,
+    verifier_result: verifierResult || null,
+  };
+}
+
 // Verify a parsed attestation against an `expected` envelope:
 //
 //   expected = {
@@ -87,26 +215,7 @@ export function parseAttestation(target, payload) {
 // Returns { valid: boolean, reasons: string[], parsed }.
 export function verifyAttestation(target, payload, expected = {}) {
   const parsed = parseAttestation(target, payload);
-  if (!parsed.ok) return { valid: false, reasons: parsed.errors, parsed };
-
-  const reasons = [];
-  if (expected.measurement && parsed.measurement !== expected.measurement) {
-    reasons.push(`measurement mismatch: stored=${expected.measurement} attested=${parsed.measurement}`);
-  }
-  if (expected.vendor && parsed.vendor !== expected.vendor) {
-    reasons.push(`vendor mismatch: stored=${expected.vendor} attested=${parsed.vendor}`);
-  }
-  if (expected.min_signed_at && parsed.claims?.signed_at) {
-    if (parsed.claims.signed_at < expected.min_signed_at) {
-      reasons.push(`attestation too old: ${parsed.claims.signed_at} < ${expected.min_signed_at}`);
-    }
-  }
-
-  return {
-    valid: reasons.length === 0,
-    reasons,
-    parsed,
-  };
+  return evaluateParsedAttestation(target, parsed, expected);
 }
 
 // Dispatch helper for kolm BYOC `recordAttestation`. Given the target and

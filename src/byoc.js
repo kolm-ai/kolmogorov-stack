@@ -15,7 +15,11 @@
 import crypto from 'node:crypto';
 import { id, insert, find, findOne, update, all } from './store.js';
 import { effectiveReceiptSecret } from './env.js';
-import { parseAttestation } from '../packages/attestation/src/index.js';
+import {
+  parseAttestation,
+  evaluateParsedAttestation,
+  HARDWARE_ATTESTATION_TARGETS,
+} from '../packages/attestation/src/index.js';
 import { verifyAttestation as verifyCcAttestation, KINDS as CC_KINDS, STATES as CC_STATES } from './confidential-compute.js';
 import { isValidCidFormat } from './cid.js';
 import {
@@ -33,6 +37,10 @@ function attestationTargetFor(deployTarget) {
   if (deployTarget === 'gcp-cvm-gpu') return 'gcp-cvm';
   if (deployTarget === 'azure-cvm-gpu') return 'azure-cvm';
   return deployTarget;
+}
+
+function isHardwareParserTarget(target) {
+  return HARDWARE_ATTESTATION_TARGETS.includes(target);
 }
 
 function signManifest(manifest) {
@@ -247,14 +255,29 @@ export function recordAttestation(enrollToken, { public_url, attestation, measur
       const parserTarget = attestationTargetFor(d.target);
       const parsedResult = parseAttestation(parserTarget, attestation);
       if (parsedResult.ok) {
+        const verification = evaluateParsedAttestation(parserTarget, parsedResult, {
+          measurement: parsedResult.measurement,
+          vendor: parsedResult.vendor,
+        });
         parsed = {
           vendor: parsedResult.vendor,
           measurement: parsedResult.measurement,
           claims: parsedResult.claims,
           parsed_at: parsedResult.parsed_at,
           has_signing_chain: !!(parsedResult.signing_cert_chain && parsedResult.signing_cert_chain.length),
+          verification: {
+            valid: verification.valid,
+            tier: verification.tier,
+            cryptographic: verification.cryptographic,
+            trust_policy: verification.trust_policy,
+            verifier: verification.verifier,
+            trust_root: verification.trust_root,
+            reasons: verification.reasons,
+          },
         };
-        if (parsedResult.measurement) extractedMeasurement = parsedResult.measurement;
+        if (parsedResult.measurement && (!isHardwareParserTarget(parserTarget) || verification.cryptographic === true)) {
+          extractedMeasurement = parsedResult.measurement;
+        }
         vendor = parsedResult.vendor;
       }
     }
