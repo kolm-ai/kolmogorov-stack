@@ -67,10 +67,12 @@ test('docker-compose: llama.cpp runtime swaps image', () => {
   assert.equal(svc.image, 'ghcr.io/ggml-org/llama.cpp:server');
 });
 
-test('docker-compose: includes commented NGINX TLS proxy with cert TODO', () => {
+test('docker-compose: includes commented NGINX TLS proxy with explicit cert env vars', () => {
   const out = generateDockerCompose({ artifact: 'foo' });
   assert.match(out, /Optional NGINX TLS terminator/);
-  assert.match(out, /TODO: fill in cert path/);
+  assert.match(out, /\$\{KOLM_TLS_CERT_PATH:-\/etc\/ssl\/kolm\.pem\}/);
+  assert.match(out, /\$\{KOLM_TLS_KEY_PATH:-\/etc\/ssl\/kolm\.key\}/);
+  assert.doesNotMatch(out, /\bTODO\b/);
   // The proxy is commented out (every nginx line starts with '#'), so
   // js-yaml shouldn't see a nginx-tls service.
   const parsed = yaml.load(out);

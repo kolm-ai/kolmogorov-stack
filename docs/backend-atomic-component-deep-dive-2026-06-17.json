@@ -75,7 +75,7 @@
       "large_component_contract_risk": 45,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 171,
-      "open_marker_requires_owner_review": 9,
+      "open_marker_requires_owner_review": 8,
       "stateful_storage_boundary": 125
     },
     "top_review_targets": [
@@ -363,19 +363,6 @@
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
       },
       {
-        "path": "src/deploy-generators.js",
-        "domain": "infra_cloud_device",
-        "priority_score": 9,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "environment_configuration_boundary",
-          "large_component_contract_risk",
-          "open_marker_requires_owner_review",
-          "stateful_storage_boundary"
-        ],
-        "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness"
-      },
-      {
         "path": "workers/distill/scripts/dedup_pairs.py",
         "domain": "training_model_optimization",
         "priority_score": 9,
@@ -475,6 +462,18 @@
           "network_or_provider_boundary"
         ],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
+      },
+      {
+        "path": "src/red-team.js",
+        "domain": "identity_access",
+        "priority_score": 8,
+        "risk_signals": [
+          "auth_or_tenant_boundary",
+          "cryptographic_or_proof_boundary",
+          "large_component_contract_risk",
+          "network_or_provider_boundary"
+        ],
+        "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests"
       }
     ]
   },
@@ -28286,10 +28285,10 @@
       "surface": "core-backend",
       "domain": "infra_cloud_device",
       "language": "javascript",
-      "sha256": "3d21c0b87d6d2fbdf865661fefb9a90af8220ce17e4fa84ee7f6ec2ebe84b1d6",
+      "sha256": "d1a8ffafb514d633cbcd498cbb8ef6a419ab012bdc8ce8ff89d289c84fed24c5",
       "metrics": {
-        "bytes": 37477,
-        "lines": 994,
+        "bytes": 37496,
+        "lines": 995,
         "imports": 11,
         "exports": 7,
         "routes": 0,
@@ -28298,7 +28297,7 @@
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 48,
-        "markers": 2
+        "markers": 0
       },
       "test_refs": [
         "tests/r4-deploy-generators.test.js",
@@ -28308,10 +28307,9 @@
         "cryptographic_or_proof_boundary",
         "environment_configuration_boundary",
         "large_component_contract_risk",
-        "open_marker_requires_owner_review",
         "stateful_storage_boundary"
       ],
-      "priority_score": 9,
+      "priority_score": 8,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

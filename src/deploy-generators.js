@@ -141,7 +141,8 @@ export function generateDockerCompose({
 
   const proxyBlock = [
     '  # ---- Optional NGINX TLS terminator ----------------------------------------',
-    '  # Uncomment and fill in cert paths + server_name. Place a real nginx.conf in',
+    '  # Uncomment and set KOLM_TLS_CERT_PATH, KOLM_TLS_KEY_PATH, and server_name.',
+    '  # Place a real nginx.conf in',
     '  # ./nginx/nginx.conf that proxies to http://kolm-runtime:' + exposedPort + '.',
     '  # See docs/self-hosted-deploy-complete.md section 7 for a working example.',
     '  #',
@@ -157,8 +158,8 @@ export function generateDockerCompose({
     '  #     - "80:80"',
     '  #   volumes:',
     '  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro',
-    '  #     - /etc/ssl/kolm.pem:/etc/ssl/kolm.pem:ro       # TODO: fill in cert path',
-    '  #     - /etc/ssl/kolm.key:/etc/ssl/kolm.key:ro       # TODO: fill in key path',
+    '  #     - ${KOLM_TLS_CERT_PATH:-/etc/ssl/kolm.pem}:/etc/ssl/kolm.pem:ro',
+    '  #     - ${KOLM_TLS_KEY_PATH:-/etc/ssl/kolm.key}:/etc/ssl/kolm.key:ro',
     '  #   healthcheck:',
     '  #     test: ["CMD-SHELL", "wget -qO- http://localhost/health >/dev/null || exit 1"]',
     '  #     interval: 30s',

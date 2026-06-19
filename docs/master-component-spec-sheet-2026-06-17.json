@@ -910,54 +910,6 @@
       ]
     },
     {
-      "path": "src/deploy-generators.js",
-      "domain": "infra_cloud_device",
-      "surface": "core-backend",
-      "priority_score": 9,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "large_component_contract_risk",
-        "open_marker_requires_owner_review",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "open_marker_requires_owner_review",
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "finetune-frameworks",
-          "stack_area": "training",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "ondevice-inference",
-          "stack_area": "cross-device",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "compile-api-to-model-competitors",
-          "stack_area": "compiler-platform",
-          "status": "sota_review_complete_critical_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Resolve or explicitly owner-review the open TODO/FIXME marker.",
-      "suggested_verification": [
-        "npm run verify:platform",
-        "npm run verify:package-release"
-      ]
-    },
-    {
       "path": "apps/trainer/multinode_launch.py",
       "domain": "training_model_optimization",
       "surface": "worker",
@@ -2176,6 +2128,60 @@
         "npm run verify:wrapper-cli-matrix",
         "npm run verify:spec-compile-matrix",
         "npm run verify:artifact-matrix"
+      ]
+    },
+    {
+      "path": "src/data-ingest.js",
+      "domain": "capture_data_eval",
+      "surface": "core-backend",
+      "priority_score": 8,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
+        "large_component_contract_risk",
+        "network_or_provider_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "distillation",
+          "stack_area": "training",
+          "status": "sota_review_complete_local_frontier_aligned",
+          "relation": "sampled"
+        },
+        {
+          "id": "synthetic-data-curation",
+          "stack_area": "data",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "llm-routing",
+          "stack_area": "gateway",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "agent-security-eval",
+          "stack_area": "enterprise",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "compile-api-to-model-competitors",
+          "stack_area": "compiler-platform",
+          "status": "sota_review_complete_critical_frontier_work_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: measurement_harness_data_value_and_holdout_leakage_guards.",
+      "suggested_verification": [
+        "npm run verify:redaction-benchmark",
+        "npm run verify:quality-calibration",
+        "npm run verify:data-curate-matrix",
+        "npm run verify:bench-harness-matrix"
       ]
     }
   ],
@@ -26192,8 +26198,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 37477,
-          "lines": 994,
+          "bytes": 37496,
+          "lines": 995,
           "imports": 11,
           "exports": 7,
           "routes": 0,
@@ -26202,18 +26208,17 @@
           "subprocess_refs": 0,
           "network_refs": 0,
           "crypto_refs": 48,
-          "markers": 2
+          "markers": 0
         },
         "risk_signals": [
           "cryptographic_or_proof_boundary",
           "environment_configuration_boundary",
           "large_component_contract_risk",
-          "open_marker_requires_owner_review",
           "stateful_storage_boundary"
         ],
-        "priority_score": 9,
+        "priority_score": 8,
         "priority_band": "high",
-        "sha256": "3d21c0b87d6d2fbdf865661fefb9a90af8220ce17e4fa84ee7f6ec2ebe84b1d6"
+        "sha256": "d1a8ffafb514d633cbcd498cbb8ef6a419ab012bdc8ce8ff89d289c84fed24c5"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -26259,10 +26264,9 @@
         ]
       },
       "perfection_gaps": [
-        "open_marker_requires_owner_review",
         "linked_frontier_work_open"
       ],
-      "next_best_action": "Resolve or explicitly owner-review the open TODO/FIXME marker."
+      "next_best_action": "Execute the linked frontier track: capability_probe_attested_byoc_worker_and_deploy_readiness."
     },
     {
       "path": "src/deploy-pipeline.js",

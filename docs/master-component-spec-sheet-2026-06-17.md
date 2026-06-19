@@ -55,7 +55,6 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | `src/airgap-distill.js` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `workers/distill/distill.mjs` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `workers/quantize/scripts/quantize.py` | training_model_optimization | 10 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_quantize_worker_matrix_and_frontier_method_contract. |
-| `src/deploy-generators.js` | infra_cloud_device | 9 | open_marker_requires_owner_review<br>linked_frontier_work_open | Resolve or explicitly owner-review the open TODO/FIXME marker. |
 | `apps/trainer/multinode_launch.py` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 | `cli/kolm-tui.mjs` | developer_distribution | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_tui_workbench_matrix_and_cli_distribution_contract. |
 | `src/bench-harness.js` | capture_data_eval | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_bench_harness_matrix_and_privacy_safe_measurement_contract. |
@@ -66,6 +65,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | `src/otel.js` | platform_support | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_otel_matrix_and_privacy_safe_semconv_contract. |
 | `src/spec-compile.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_spec_compile_matrix_and_signed_artifact_compiler_contract. |
 | `src/wrapper-cli.js` | compile_artifact_runtime | 9 | linked_frontier_work_open | Execute the linked frontier track: maintain_generated_wrapper_cli_matrix_and_gateway_capture_receipt_namespace_contract. |
+| `workers/distill/scripts/dedup_pairs.py` | training_model_optimization | 9 | linked_frontier_work_open | Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff. |
 
 ## Machine Sheet
 
