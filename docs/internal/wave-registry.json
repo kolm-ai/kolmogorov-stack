@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 415,
+    "orphan_tests": 416,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 8,
-    "state_local_green": 418,
+    "state_local_green": 419,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 595,
-    "test_only_waves": 415,
-    "waves": 431
+    "test_files": 596,
+    "test_only_waves": 416,
+    "waves": 432
   },
-  "generated_at": "2026-06-19T00:21:07.380Z",
+  "generated_at": "2026-06-19T00:45:47.292Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -495,7 +495,8 @@
       "W967",
       "W968",
       "W971",
-      "W972"
+      "W972",
+      "W973"
     ],
     "plan_only_waves": [
       "W850",
@@ -919,7 +920,8 @@
       "W967",
       "W968",
       "W971",
-      "W972"
+      "W972",
+      "W973"
     ]
   },
   "schema": "kolm.wave_registry.v1",
@@ -3923,7 +3925,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -4300,7 +4302,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -7981,11 +7983,11 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         },
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8029,7 +8031,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8124,7 +8126,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8143,7 +8145,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8151,6 +8153,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave972-distill-method-bakeoff.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W973",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "research",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js",
+          "script": "npm:verify:distill-strategy"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave973-bond-jeffreys-trainer.test.js"
       ],
       "test_letter_suffixes": []
     }

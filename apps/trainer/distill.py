@@ -167,6 +167,19 @@ DP_TRAINING_VERSION = "finalized-c2-v1"
 DP_ACCOUNTANT = "rdp_moments_v1"
 DP_MECHANISM = "dp_sgd_sampled_gaussian"
 
+# W973 - BOND-style Best-of-N distribution matching.
+#
+# BOND (arXiv:2407.14622) distills the Best-of-N target distribution rather
+# than only the single sampled response. Locally, W619 already creates BoN
+# target rows and W972 can compare method deltas. The missing trainer primitive
+# is the Jeffreys objective: a symmetric forward+backward KL that balances
+# mode-covering and mode-seeking behavior. The actual torch loss is registered
+# as KDObjective.BOND_JEFFREYS; the pure helper below exists so CI can prove the
+# math without installing torch.
+
+BOND_TRAINING_VERSION = "w973-bond-jeffreys-v1"
+BOND_OBJECTIVE = "bond_jeffreys"
+
 # W828-3/-4 — TRACE-AWARE LOSS.
 #
 # W713 captured reasoning traces (Anthropic thinking blocks, OpenAI o1
@@ -1008,6 +1021,7 @@ class KDObjective(str, enum.Enum):
     FORWARD_KL = "forward_kl"
     REVERSE_KL = "reverse_kl"
     JSD = "jsd"
+    BOND_JEFFREYS = BOND_OBJECTIVE
     # W921 — DistiLLM-2 contrastive asymmetric SKL+SRKL objective (Ko et al.,
     # ICML 2025 Oral, arXiv:2503.07067). See skewed_kl/skewed_reverse_kl/
     # distillm2_loss below. Local-teacher only (needs logits).
@@ -1043,7 +1057,8 @@ class DistillConfig:
     objective: KDObjective = KDObjective.FORWARD_KL
     """forward_kl is Hinton's original. reverse_kl is the MiniLLM formulation,
     which keeps the student from spreading mass across modes the teacher
-    rejects. jsd is the symmetric variant."""
+    rejects. jsd is the symmetric variant. bond_jeffreys is the BOND-style
+    Best-of-N distribution-matching objective."""
 
     top_k: int = 0
     """If > 0, only the top-k teacher logits enter the KL term; the rest are
@@ -1123,10 +1138,55 @@ def _jensen_shannon(student_logits, teacher_logits, T: float):
     return 0.5 * (kl_sm + kl_tm) * (T * T)
 
 
+def bond_jeffreys_from_probs(student_probs, target_probs, eps: float = 1e-12) -> float:
+    """Pure Python Jeffreys divergence over two discrete distributions.
+
+    This is the torch-free BOND math contract used by --self-test-bond. The
+    train-time objective below applies the same symmetric KL over token logits.
+    """
+    s = [max(float(x), 0.0) for x in student_probs]
+    t = [max(float(x), 0.0) for x in target_probs]
+    if len(s) != len(t) or not s:
+        raise ValueError("student_probs and target_probs must be non-empty and same length")
+    ss = sum(s)
+    tt = sum(t)
+    if ss <= 0.0 or tt <= 0.0:
+        raise ValueError("student_probs and target_probs must have positive mass")
+    s = [max(x / ss, eps) for x in s]
+    t = [max(x / tt, eps) for x in t]
+    # Renormalize after epsilon flooring so the result is stable and symmetric.
+    ss = sum(s)
+    tt = sum(t)
+    s = [x / ss for x in s]
+    t = [x / tt for x in t]
+    kl_st = sum(si * math.log(si / ti) for si, ti in zip(s, t))
+    kl_ts = sum(ti * math.log(ti / si) for si, ti in zip(s, t))
+    return 0.5 * (kl_st + kl_ts)
+
+
+def _bond_jeffreys(student_logits, teacher_logits, T: float):
+    """BOND-style Jeffreys distribution matching.
+
+    W619 supplies Best-of-N target rows and W972 supplies the same-holdout
+    report. This loss gives the local trainer the missing BOND primitive:
+    symmetric KL between the student token distribution and the BoN/teacher
+    target distribution. It is signature-compatible with the existing KD loop.
+    """
+    log_p_s = F.log_softmax(student_logits / T, dim=-1)
+    log_p_t = F.log_softmax(teacher_logits / T, dim=-1)
+    p_s = log_p_s.exp()
+    p_t = log_p_t.exp()
+    # torch.nn.functional.kl_div(log_q, p) computes KL(p || q).
+    kl_ts = F.kl_div(log_p_s, p_t, reduction="batchmean", log_target=False)
+    kl_st = F.kl_div(log_p_t, p_s, reduction="batchmean", log_target=False)
+    return 0.5 * (kl_st + kl_ts) * (T * T)
+
+
 _KD_FNS = {
     KDObjective.FORWARD_KL: _forward_kl,
     KDObjective.REVERSE_KL: _reverse_kl,
     KDObjective.JSD: _jensen_shannon,
+    KDObjective.BOND_JEFFREYS: _bond_jeffreys,
 }
 
 
@@ -2181,6 +2241,14 @@ def receipt_block(session: DistillSession, train_summary: dict) -> dict:
             "arXiv:2306.13649",  # On-policy distillation
         ],
     }
+    if session.config.objective == KDObjective.BOND_JEFFREYS:
+        block["papers"].append("arXiv:2407.14622")  # BOND Best-of-N distillation
+        block["bond_distribution_matching"] = {
+            "version": BOND_TRAINING_VERSION,
+            "objective": BOND_OBJECTIVE,
+            "divergence": "jeffreys",
+            "target_distribution": "best_of_n_or_teacher_target_rows",
+        }
     # W921-NEXT4 — surface the MoE block + its references in the receipt ONLY
     # when the student was a sparse-MoE model (dense receipts are unchanged).
     moe_summary = train_summary.get("moe")
@@ -2204,6 +2272,9 @@ __all__ = [
     "receipt_block",
     "compute_dp_sgd_budget",
     "DP_TRAINING_VERSION",
+    "bond_jeffreys_from_probs",
+    "BOND_TRAINING_VERSION",
+    "BOND_OBJECTIVE",
     # W828-3 — trace-aware loss exposed so a worker harness can call the
     # primitive directly without invoking the full trainer (the bench scaffold
     # bench_trace_aware.py uses this path).
@@ -2272,6 +2343,38 @@ def _self_test_dp() -> dict[str, Any]:
         "dp_training_version": DP_TRAINING_VERSION,
         "accountant": DP_ACCOUNTANT,
         "reference_epsilon": ref["epsilon"],
+        "checks": checks,
+        "n_checks": len(checks),
+    }
+
+
+def _self_test_bond() -> dict[str, Any]:
+    """Pure BOND/Jeffreys self-test; no torch, model download, or network."""
+    checks: list[dict[str, Any]] = []
+
+    def _check(name: str, cond: bool, detail: str = "") -> None:
+        checks.append({"name": name, "pass": bool(cond), "detail": detail})
+        assert cond, f"bond self-test FAILED: {name} ({detail})"
+
+    identical = bond_jeffreys_from_probs([0.2, 0.3, 0.5], [0.2, 0.3, 0.5])
+    shifted = bond_jeffreys_from_probs([0.7, 0.2, 0.1], [0.1, 0.2, 0.7])
+    shifted_rev = bond_jeffreys_from_probs([0.1, 0.2, 0.7], [0.7, 0.2, 0.1])
+    mild = bond_jeffreys_from_probs([0.55, 0.3, 0.15], [0.45, 0.35, 0.2])
+
+    _check("objective_enum_registered", KDObjective.from_str(BOND_OBJECTIVE) == KDObjective.BOND_JEFFREYS)
+    _check("jeffreys_identical_zero", abs(identical) < 1e-12, f"identical={identical}")
+    _check("jeffreys_positive_on_shift", shifted > 0.0, f"shifted={shifted}")
+    _check("jeffreys_symmetric", abs(shifted - shifted_rev) < 1e-12,
+           f"forward={shifted} reverse={shifted_rev}")
+    _check("larger_shift_larger_loss", shifted > mild, f"shifted={shifted} mild={mild}")
+    _check("kd_registry_has_bond", KDObjective.BOND_JEFFREYS in _KD_FNS)
+
+    return {
+        "ok": True,
+        "bond_training_version": BOND_TRAINING_VERSION,
+        "objective": BOND_OBJECTIVE,
+        "divergence": "jeffreys",
+        "reference_loss": shifted,
         "checks": checks,
         "n_checks": len(checks),
     }
@@ -2460,6 +2563,9 @@ def _build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--self-test-dp", dest="self_test_dp", action="store_true",
                    help="Run the synthetic DP-SGD accountant self-test (no model download, "
                         "no Opacus import) and exit. Exit 0 pass / 5 fail.")
+    p.add_argument("--self-test-bond", dest="self_test_bond", action="store_true",
+                   help="Run the BOND Jeffreys-divergence self-test (no torch, model "
+                        "download, or network) and exit. Exit 0 pass / 5 fail.")
     p.set_defaults(dp_sgd=_env_truthy("KOLM_DP_SGD", False))
     p.add_argument("--dp-sgd", dest="dp_sgd", action="store_true",
                    help="Enable Opacus DP-SGD for the student trainer. Fails loud if Opacus "
@@ -2583,6 +2689,18 @@ def main(argv: Optional[list[str]] = None) -> int:
             print(json.dumps(
                 {"ok": False, "error": "self_test_dp_failed", "detail": str(e),
                  "dp_training_version": DP_TRAINING_VERSION},
+                indent=2,
+            ))
+            return 5
+        print(json.dumps(env, indent=2))
+        return 0 if env.get("ok") else 5
+    if getattr(args, "self_test_bond", False):
+        try:
+            env = _self_test_bond()
+        except AssertionError as e:
+            print(json.dumps(
+                {"ok": False, "error": "self_test_bond_failed", "detail": str(e),
+                 "bond_training_version": BOND_TRAINING_VERSION},
                 indent=2,
             ))
             return 5

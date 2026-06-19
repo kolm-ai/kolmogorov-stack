@@ -223,6 +223,7 @@ export function trainPreference({
 
 export const PREFERENCE_MINER_VERSION = 'w921-preference-miner-1';
 export const BON_TARGETS_VERSION = 'w619-bon-targets-1';
+export const BOND_TARGET_OBJECTIVE = 'bond_jeffreys';
 
 // tokenOverlap(candidate, reference) -> Jaccard-ish overlap in [0,1] or null.
 // Returns null when either side is empty (no signal). Lowercased word-set
@@ -440,6 +441,12 @@ export function buildBonTargets(rows, opts = {}) {
       output: best.text,
       teacher_output: best.text,
       target_source: 'best_of_n',
+      distill_objective_hint: BOND_TARGET_OBJECTIVE,
+      bond_distribution_matching: {
+        objective: BOND_TARGET_OBJECTIVE,
+        divergence: 'jeffreys',
+        source: 'best_of_n_selected_target',
+      },
       bon: {
         version: BON_TARGETS_VERSION,
         n_requested: n,
@@ -464,6 +471,7 @@ export function buildBonTargets(rows, opts = {}) {
       skipped_below_threshold: skippedBelowThreshold,
       n,
       min_score: minScore,
+      distill_objective_hint: BOND_TARGET_OBJECTIVE,
       mean_selected_score: targets.length ? Number((scoreSum / targets.length).toFixed(4)) : null,
     },
     version: BON_TARGETS_VERSION,
@@ -545,6 +553,7 @@ export default {
   // W921 additive
   PREFERENCE_MINER_VERSION,
   BON_TARGETS_VERSION,
+  BOND_TARGET_OBJECTIVE,
   tokenOverlap,
   scoreCandidateLocal,
   mineDisagreementPairs,

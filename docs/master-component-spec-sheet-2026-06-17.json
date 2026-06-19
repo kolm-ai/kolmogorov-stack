@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2026,
+          "js_family": 2027,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -129,11 +129,11 @@
       "id": "distillation",
       "stack_area": "training",
       "status": "sota_review_complete_local_frontier_aligned",
-      "already_at_frontier_count": 13,
+      "already_at_frontier_count": 14,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 1,
+      "minor_gaps": 0,
       "required_components": 3,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -5256,7 +5256,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave728-its.test.js",
-          "tests/wave957-apps-atomic-scope.test.js"
+          "tests/wave957-apps-atomic-scope.test.js",
+          "tests/wave973-bond-jeffreys-trainer.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -7765,16 +7766,16 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 116078,
-          "lines": 2640,
+          "bytes": 121503,
+          "lines": 2758,
           "imports": 0,
-          "exports": 74,
+          "exports": 78,
           "routes": 8,
           "env_refs": 4,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 1,
+          "crypto_refs": 2,
           "markers": 0
         },
         "risk_signals": [
@@ -7787,7 +7788,7 @@
         ],
         "priority_score": 12,
         "priority_band": "high",
-        "sha256": "9d9c0b3c99942059e1d2adc42aa3a2109b68c0b819469e65804c7557ab36adc1"
+        "sha256": "f43703660f71a24fc5b9785c95c31f6f8ce63dcad7c1998cfb7b3b56700dbd71"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -27378,7 +27379,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave972-distill-method-bakeoff.test.js"
+          "tests/wave972-distill-method-bakeoff.test.js",
+          "tests/wave973-bond-jeffreys-trainer.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -27882,10 +27884,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 22629,
-          "lines": 555,
+          "bytes": 22978,
+          "lines": 564,
           "imports": 5,
-          "exports": 13,
+          "exports": 14,
           "routes": 0,
           "env_refs": 9,
           "fs_writes": 0,
@@ -27900,7 +27902,7 @@
         ],
         "priority_score": 2,
         "priority_band": "normal",
-        "sha256": "3708086f93413d3d6d06fe7c9514e4b2b70b0638eee9f03f5be7dd29fe349df4"
+        "sha256": "787edb5abbc0adb187988567ad17e1c6389b3b72bf89ceb5c912356768f43503"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -27912,7 +27914,8 @@
           "tests/sota-cli.test.js",
           "tests/sota-distill.test.js",
           "tests/wave921-preference-miner.test.js",
-          "tests/wave921-studio-cli.test.js"
+          "tests/wave921-studio-cli.test.js",
+          "tests/wave973-bond-jeffreys-trainer.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -28199,8 +28202,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 23080,
-          "lines": 532,
+          "bytes": 23928,
+          "lines": 550,
           "imports": 2,
           "exports": 3,
           "routes": 0,
@@ -28216,7 +28219,7 @@
         ],
         "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "982b77504405c3de129dfe02f6f0c49a1efa7cdeb643b5bdffd3b5f63bd45c85"
+        "sha256": "341083f156d8a1ffaa49c95813488af5ee1ca288874f6e3a9569276abe61f05e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -28228,7 +28231,8 @@
           "tests/wave584-distill-strategy.test.js",
           "tests/wave602-backend-atomic-deep-dive.test.js",
           "tests/wave604-distill-strategy-frontier.test.js",
-          "tests/wave958-moe-to-dense.test.js"
+          "tests/wave958-moe-to-dense.test.js",
+          "tests/wave973-bond-jeffreys-trainer.test.js"
         ],
         "category_links": [
           {

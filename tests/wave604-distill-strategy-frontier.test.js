@@ -59,7 +59,7 @@ test('W604 #3 - local teacher access keeps GKD first and logit objectives feasib
 
 test('W604 #4 - backend spec records recommender closure and GAD implementation closure', () => {
   const section = distillationSection();
-  assert.match(section, /RECOMMENDER ORACLE \(src\/distill-strategy\.js, W604(?:\+W956)?\)/);
+  assert.match(section, /RECOMMENDER ORACLE \(src\/distill-strategy\.js, W604(?:\+W956)?(?:\+W973)?\)/);
   assert.match(section, /\(completed-local, W604\)/);
   assert.match(section, /\[closed W956\] GAD/);
   assert.doesNotMatch(section, /\[critical\] GAD/);

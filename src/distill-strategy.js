@@ -85,6 +85,22 @@ const STRATEGIES = Object.freeze([
     best_for: ['noisy-labels', 'creative-generation', 'low-teacher-agreement'],
   },
   {
+    id: 'bond_jeffreys',
+    label: 'BOND Jeffreys distribution matching',
+    family: 'distill',
+    command_kind: 'local-worker-objective',
+    objective: 'bond_jeffreys',
+    min_real_pairs: 1000,
+    min_holdout_pairs: 200,
+    teacher_required: true,
+    requires_teacher_logits: true,
+    privacy: ['standard', 'regulated', 'zero_retention', 'airgap'],
+    best_for: ['generation', 'chat', 'best-of-n-targets', 'local-teacher', 'open-weights-teacher'],
+    references: [
+      { name: 'BOND: Aligning LLMs with Best-of-N Distillation', method: 'jeffreys-distribution-matching', status: 'frontier_reference', paper: 'arXiv:2407.14622' },
+    ],
+  },
+  {
     id: 'ropd',
     label: 'ROPD black-box on-policy distillation',
     family: 'online',
@@ -438,7 +454,9 @@ function scoreStrategy(strategy, profile) {
   if (profile.teacher_access.text_only && strategy.id === 'rejection_sampling') score += 8;
   if (profile.teacher_access.has_open_weights_teacher && strategy.id === 'gkd_onpolicy') score += 24;
   if (profile.teacher_access.has_open_weights_teacher && strategy.id === 'distillm2') score += 14;
+  if (profile.teacher_access.has_open_weights_teacher && strategy.id === 'bond_jeffreys') score += 13;
   if (profile.teacher_access.has_open_weights_teacher && strategy.id === 'reverse_kl_minillm') score += 12;
+  if (profile.teacher_agreement < 0.7 && strategy.id === 'bond_jeffreys') score += 8;
   if (strategy.id === 'moe_to_dense_distill') {
     if (profile.moe.teacher_is_moe) score += 48;
     if (profile.moe.base_is_moe) score += 22;
