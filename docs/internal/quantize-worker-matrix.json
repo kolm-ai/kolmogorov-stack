@@ -2,67 +2,72 @@
   "cli_flags": [
     {
       "flag": "--bits",
-      "line": 73,
+      "line": 121,
       "opt_in": false
     },
     {
       "flag": "--calib",
-      "line": 68,
+      "line": 116,
       "opt_in": false
     },
     {
       "flag": "--calib-fp4",
-      "line": 96,
+      "line": 144,
       "opt_in": true
     },
     {
       "flag": "--calib-fp4-block",
-      "line": 106,
+      "line": 161,
       "opt_in": true
     },
     {
       "flag": "--calib-fp4-max-layers",
-      "line": 110,
+      "line": 165,
+      "opt_in": true
+    },
+    {
+      "flag": "--calib-fp4-scale-format",
+      "line": 155,
       "opt_in": true
     },
     {
       "flag": "--device",
-      "line": 75,
+      "line": 123,
       "opt_in": false
     },
     {
       "flag": "--group-size",
-      "line": 71,
+      "line": 119,
       "opt_in": false
     },
     {
       "flag": "--in",
-      "line": 66,
+      "line": 114,
       "opt_in": false
     },
     {
       "flag": "--method",
-      "line": 61,
+      "line": 109,
       "opt_in": false
     },
     {
       "flag": "--mixed-precision",
-      "line": 78,
+      "line": 126,
       "opt_in": false
     },
     {
       "flag": "--out",
-      "line": 67,
+      "line": 115,
       "opt_in": false
     },
     {
       "flag": "--self-test-moe",
-      "line": 115,
+      "line": 170,
       "opt_in": true
     },
     {
       "flag": "--trust-remote-code",
-      "line": 87,
+      "line": 135,
       "opt_in": true
     }
   ],
@@ -241,51 +246,51 @@
   ],
   "run_functions": [
     {
-      "line": 447,
+      "line": 502,
       "name": "_run_exllamav2"
     },
     {
-      "line": 342,
+      "line": 397,
       "name": "run_aqlm"
     },
     {
-      "line": 312,
+      "line": 367,
       "name": "run_awq"
     },
     {
-      "line": 481,
+      "line": 536,
       "name": "run_exl2"
     },
     {
-      "line": 487,
+      "line": 542,
       "name": "run_exl3"
     },
     {
-      "line": 742,
+      "line": 797,
       "name": "run_fp4_calibration"
     },
     {
-      "line": 278,
+      "line": 333,
       "name": "run_gptq"
     },
     {
-      "line": 493,
+      "line": 548,
       "name": "run_hqq"
     },
     {
-      "line": 239,
+      "line": 294,
       "name": "run_int_bnb"
     },
     {
-      "line": 534,
+      "line": 589,
       "name": "run_qat"
     },
     {
-      "line": 397,
+      "line": 452,
       "name": "run_quip"
     },
     {
-      "line": 636,
+      "line": 691,
       "name": "run_rotation_external"
     }
   ],
@@ -332,7 +337,7 @@
     {
       "check_false": true,
       "function": "_run_exllamav2",
-      "line": 447,
+      "line": 502,
       "module_names": [
         "exllamav2.conversion.convert"
       ],
@@ -342,7 +347,7 @@
     {
       "check_false": true,
       "function": "run_aqlm",
-      "line": 342,
+      "line": 397,
       "module_names": [
         "aqlm.main"
       ],
@@ -354,7 +359,7 @@
     {
       "check_false": true,
       "function": "run_qat",
-      "line": 534,
+      "line": 589,
       "module_names": [
         "efficient_qat.main_block_ap"
       ],
@@ -366,7 +371,7 @@
     {
       "check_false": true,
       "function": "run_quip",
-      "line": 397,
+      "line": 452,
       "module_names": [
         "quip_sharp.quantize_llama"
       ],
@@ -378,22 +383,22 @@
     {
       "check_false": true,
       "function": "run_rotation_external",
-      "line": 636,
+      "line": 691,
       "module_names": [],
       "repo_envs": [],
       "returncode_checked": true
     }
   ],
   "summary": {
-    "cli_flag_count": 13,
+    "cli_flag_count": 14,
     "dispatch_covered_methods": 15,
     "exit_code_count": 4,
     "experimental_method_count": 11,
     "failed_safety_guards": 0,
     "method_count": 15,
     "missing_test_evidence": 0,
-    "quantize_bytes": 82773,
-    "quantize_lines": 1831,
+    "quantize_bytes": 85227,
+    "quantize_lines": 1895,
     "receipt_field_count": 19,
     "required_receipt_field_gaps": 0,
     "run_function_count": 12,

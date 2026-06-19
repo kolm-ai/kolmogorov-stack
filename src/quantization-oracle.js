@@ -6,7 +6,7 @@
 // context length, calibration availability, privacy mode) into ranked methods
 // the actual quantize/export surfaces can execute or honestly mark external.
 
-import { buildFp4CalibPlan } from './fp4-calib-plan.js';
+import { buildFp4CalibPlan, FP4_SCALE_FORMATS } from './fp4-calib-plan.js';
 import { detectMoE, recommendMoeRuntimePlan, recommendQuantPolicy } from './moe-support.js';
 import { getFamily } from './moe-registry.js';
 
@@ -111,6 +111,7 @@ const METHOD_CATALOG = Object.freeze({
     compression: 0.30,
     quality_loss: 0.018,
     quality_loss_model_size_curve: FP4_MODEL_SIZE_QUALITY_CURVES.nvfp4,
+    scale_format: FP4_SCALE_FORMATS.nvfp4,
     latency_gain: 2.85,
     calibration_required: true,
     runtimes: ['tensorrt', 'vllm'],
@@ -127,6 +128,7 @@ const METHOD_CATALOG = Object.freeze({
     compression: 0.29,
     quality_loss: 0.026,
     quality_loss_model_size_curve: FP4_MODEL_SIZE_QUALITY_CURVES.mxfp4,
+    scale_format: FP4_SCALE_FORMATS.mxfp4,
     latency_gain: 2.65,
     calibration_required: true,
     runtimes: ['tensorrt', 'vllm'],
@@ -394,6 +396,7 @@ function buildFp4CalibrationPlan(candidate) {
       dtype: candidate.method === 'mxfp4' ? 'mxfp4' : 'nvfp4',
       quant_level: candidate.export_quant,
       weight_dtype: candidate.export_quant === 'w8a8' ? 'fp8_e4m3' : 'nvfp4',
+      scale_format: candidate.scale_format?.family || candidate.method,
     },
   });
   return plan.enabled ? plan : null;
@@ -661,6 +664,7 @@ function scoreCandidate({ method, methodId, task, device, paramsB, contextTokens
     moe_only: Boolean(method.moe_only),
     export_format: method.export_format || null,
     export_quant: method.export_quant || null,
+    scale_format: method.scale_format || null,
     hardware_native: nativeHardwareScore > 0,
     experimental,
     experimental_gated: experimentalGatedOff,

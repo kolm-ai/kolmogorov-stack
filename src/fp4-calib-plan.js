@@ -10,7 +10,9 @@
 //         error and is pointless for fp8 / int8 / fp16 targets.
 //
 //   2) WHICH exact python flags realize that calibration?
-//      -> { python_flags: ['--calib-fp4', '--calib-fp4-block=32',
+//      -> { python_flags: ['--calib-fp4',
+//                          '--calib-fp4-scale-format=nvfp4',
+//                          '--calib-fp4-block=16',
 //                          '--calib-fp4-max-layers=64'] }
 //
 // The calibration itself (block-granular learnable affine transform +
@@ -25,11 +27,18 @@
 //
 // Pure: no I/O, no clock, no global random. Every input is a function argument.
 
-export const FP4_CALIB_PLAN_VERSION = 'fp4-calib-plan-v1';
+export const FP4_CALIB_PLAN_VERSION = 'fp4-calib-plan-v2';
 
-// MXFP4 / NVFP4 hardware-native micro-scaling block size (elements per FP8
-// scale). The same constant fp4_calib.py uses (MXFP4_BLOCK = 32).
-export const DEFAULT_FP4_BLOCK = 32;
+// FP4-family micro-scale defaults are not interchangeable:
+// - NVFP4 uses E2M1 elements with E4M3 block scales at 16-element granularity
+//   plus a tensor-level FP32 scale.
+// - MXFP4 uses E2M1 elements with E8M0 power-of-two block scales at
+//   32-element granularity.
+export const DEFAULT_NVFP4_BLOCK = 16;
+export const DEFAULT_MXFP4_BLOCK = 32;
+
+// Back-compat default for generic FP4 / MXFP4 callers.
+export const DEFAULT_FP4_BLOCK = DEFAULT_MXFP4_BLOCK;
 
 // Cap on how many of the largest weight tensors the calibration profiles,
 // largest-first, to bound calibration time on big models. 0 == all layers.
@@ -52,8 +61,45 @@ const FP4_WEIGHT_QUANT_LEVELS = new Set([
   'w4a8',
 ]);
 
+export const FP4_SCALE_FORMATS = Object.freeze({
+  nvfp4: Object.freeze({
+    family: 'nvfp4',
+    element_dtype: 'e2m1',
+    scale_dtype: 'e4m3',
+    scale_encoding: 'fp8_block_scale',
+    scale_granularity: 'per_16_elements',
+    tensor_scale: 'fp32_tensor_scale',
+    block: DEFAULT_NVFP4_BLOCK,
+  }),
+  mxfp4: Object.freeze({
+    family: 'mxfp4',
+    element_dtype: 'e2m1',
+    scale_dtype: 'e8m0',
+    scale_encoding: 'power_of_two_block_scale',
+    scale_granularity: 'per_32_elements',
+    tensor_scale: null,
+    block: DEFAULT_MXFP4_BLOCK,
+  }),
+  fp4: Object.freeze({
+    family: 'fp4',
+    element_dtype: 'e2m1',
+    scale_dtype: 'caller_defined',
+    scale_encoding: 'caller_defined',
+    scale_granularity: 'caller_defined',
+    tensor_scale: null,
+    block: DEFAULT_FP4_BLOCK,
+  }),
+});
+
 function _norm(s) {
   return String(s == null ? '' : s).toLowerCase().trim();
+}
+
+function _scaleKey(value) {
+  if (value && typeof value === 'object') {
+    return _norm(value.family || value.format || value.id || value.name || value.scale_format);
+  }
+  return _norm(value);
 }
 
 /**
@@ -92,6 +138,33 @@ export function isFp4Target(target = {}) {
 }
 
 /**
+ * Resolve which FP4 scale format the calibration target is aiming at.
+ * Quant levels alone are ambiguous (w4a4 can be NVFP4 export or MXFP4 policy),
+ * so dtype/weight_dtype/format/scale_format win.
+ *
+ * @param {object} target
+ * @param {string|null} [matched] matched token from isFp4Target
+ * @returns {typeof FP4_SCALE_FORMATS.nvfp4}
+ */
+export function resolveFp4ScaleFormat(target = {}, matched = null) {
+  const candidates = [
+    target.scale_format,
+    target.scale_family,
+    target.dtype,
+    target.weight_dtype,
+    target.format,
+    matched,
+  ];
+  for (const raw of candidates) {
+    const key = _scaleKey(raw).replace(/[\s_-]+/g, '');
+    if (key === 'nvfp4' || key.includes('nvfp4')) return FP4_SCALE_FORMATS.nvfp4;
+    if (key === 'mxfp4' || key.includes('mxfp4')) return FP4_SCALE_FORMATS.mxfp4;
+    if (key === 'fp4' || key === 'fp4e2m1' || key === 'e2m1') return FP4_SCALE_FORMATS.fp4;
+  }
+  return FP4_SCALE_FORMATS.fp4;
+}
+
+/**
  * Build the FP4-aware calibration plan: whether to enable --calib-fp4 and the
  * exact python flags to pass to workers/quantize/scripts/quantize.py.
  *
@@ -100,7 +173,7 @@ export function isFp4Target(target = {}) {
  *
  * @param {object} args
  * @param {object} args.target            see isFp4Target
- * @param {number} [args.block]           MXFP4 micro-scale block (default 32)
+ * @param {number} [args.block]           micro-scale block override
  * @param {number} [args.max_layers]      largest-N tensors to profile (default 64; 0=all)
  * @param {boolean} [args.force]          enable calibration even for a non-FP4 target
  *                                        (e.g. to study INT4 error; default false)
@@ -118,17 +191,23 @@ export function isFp4Target(target = {}) {
  */
 export function buildFp4CalibPlan(args = {}) {
   const target = args.target || {};
-  const block = Number.isInteger(args.block) && args.block > 0 ? args.block : DEFAULT_FP4_BLOCK;
   const maxLayers = Number.isInteger(args.max_layers) && args.max_layers >= 0
     ? args.max_layers
     : DEFAULT_MAX_LAYERS;
   const force = args.force === true;
 
   const fp4 = isFp4Target(target);
+  const scaleFormat = resolveFp4ScaleFormat(target, fp4.matched);
+  const block = Number.isInteger(args.block) && args.block > 0 ? args.block : scaleFormat.block;
   const enabled = fp4.is_fp4 || force;
 
   const python_flags = enabled
-    ? ['--calib-fp4', `--calib-fp4-block=${block}`, `--calib-fp4-max-layers=${maxLayers}`]
+    ? [
+        '--calib-fp4',
+        `--calib-fp4-scale-format=${scaleFormat.family}`,
+        `--calib-fp4-block=${block}`,
+        `--calib-fp4-max-layers=${maxLayers}`,
+      ]
     : [];
 
   let reason;
@@ -145,6 +224,8 @@ export function buildFp4CalibPlan(args = {}) {
     enabled,
     reason,
     target_is_fp4: fp4.is_fp4,
+    scale_family: scaleFormat.family,
+    scale_format: scaleFormat,
     block,
     max_layers: maxLayers,
     algorithm: 'batquant-block-affine+block-clip',
@@ -170,9 +251,13 @@ export function withFp4CalibFlags(baseArgv, planArgs = {}) {
 
 export default {
   FP4_CALIB_PLAN_VERSION,
+  FP4_SCALE_FORMATS,
+  DEFAULT_NVFP4_BLOCK,
+  DEFAULT_MXFP4_BLOCK,
   DEFAULT_FP4_BLOCK,
   DEFAULT_MAX_LAYERS,
   isFp4Target,
+  resolveFp4ScaleFormat,
   buildFp4CalibPlan,
   withFp4CalibFlags,
 };

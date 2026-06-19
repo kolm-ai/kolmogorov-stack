@@ -59,7 +59,7 @@ test('W941 generated matrix is current and all hard quantize worker gates are gr
   assert.equal(m.summary.experimental_method_count, 11);
   assert.equal(m.summary.dispatch_covered_methods, 15);
   assert.equal(m.summary.run_function_count, 12);
-  assert.equal(m.summary.cli_flag_count, 13);
+  assert.equal(m.summary.cli_flag_count, 14);
   assert.equal(m.summary.receipt_field_count, 19);
   assert.equal(m.summary.required_receipt_field_gaps, 0);
   assert.equal(m.summary.subprocess_boundary_count, 5);
@@ -80,7 +80,7 @@ test('W941 matrix captures methods, flags, dispatch coverage, and receipt fields
   }
 
   const flags = new Set(m.cli_flags.map((row) => row.flag));
-  for (const flag of ['--method', '--in', '--out', '--calib', '--group-size', '--bits', '--device', '--mixed-precision', '--trust-remote-code', '--calib-fp4', '--calib-fp4-block', '--calib-fp4-max-layers', '--self-test-moe']) {
+  for (const flag of ['--method', '--in', '--out', '--calib', '--group-size', '--bits', '--device', '--mixed-precision', '--trust-remote-code', '--calib-fp4', '--calib-fp4-scale-format', '--calib-fp4-block', '--calib-fp4-max-layers', '--self-test-moe']) {
     assert.ok(flags.has(flag), `missing CLI flag ${flag}`);
   }
 

@@ -21,6 +21,8 @@ import {
   buildFp4CalibPlan,
   withFp4CalibFlags,
   DEFAULT_FP4_BLOCK,
+  DEFAULT_NVFP4_BLOCK,
+  DEFAULT_MXFP4_BLOCK,
   DEFAULT_MAX_LAYERS,
 } from '../src/fp4-calib-plan.js';
 
@@ -87,9 +89,10 @@ test('NOW1 #4 — trust_remote_code is recorded in the receipt for a verifier', 
 // NEXT-3 — FP4-aware PTQ calibration (BATQuant-style)
 // ---------------------------------------------------------------------------
 
-test('NEXT3 #1 — --calib-fp4 + tuning flags are additive opt-in (default False / 32 / 64)', () => {
+test('NEXT3 #1 — --calib-fp4 + tuning flags are additive opt-in with scale-format defaults', () => {
   assert.match(QUANTIZE, /add_argument\("--calib-fp4",\s*dest="calib_fp4",\s*\n?\s*action="store_true",\s*default=False/);
-  assert.match(QUANTIZE, /--calib-fp4-block".*\n?.*default=32/s);
+  assert.match(QUANTIZE, /--calib-fp4-scale-format"[\s\S]*?default="mxfp4"/);
+  assert.match(QUANTIZE, /--calib-fp4-block"[\s\S]*?default=None/);
   assert.match(QUANTIZE, /--calib-fp4-max-layers".*\n?.*default=64/s);
 });
 
@@ -100,8 +103,9 @@ test('NEXT3 #2 — fp4_calib implements the BATQuant levers + the real E2M1 FP4 
   assert.match(FP4, /def fit_block_diag_transform/, 'block-granular affine transform');
   // E2M1 grid {0,.5,1,1.5,2,3,4,6} +/-.
   assert.match(FP4, /_E2M1_POS\s*=\s*\(0\.0,\s*0\.5,\s*1\.0,\s*1\.5,\s*2\.0,\s*3\.0,\s*4\.0,\s*6\.0\)/);
-  // MXFP4 micro-scaling block size 32.
+  // MXFP4 micro-scaling block size 32; NVFP4 uses the surfaced 16-element default.
   assert.match(FP4, /MXFP4_BLOCK\s*=\s*32/);
+  assert.match(FP4, /NVFP4_BLOCK\s*=\s*16/);
   // Cites the paper.
   assert.match(FP4, /2603\.16590/);
 });
@@ -184,13 +188,22 @@ test('PICKER #2 — plan emits the exact python flags + defaults', () => {
   const plan = buildFp4CalibPlan({ target: { dtype: 'nvfp4' } });
   assert.deepEqual([...plan.python_flags], [
     '--calib-fp4',
-    `--calib-fp4-block=${DEFAULT_FP4_BLOCK}`,
+    '--calib-fp4-scale-format=nvfp4',
+    `--calib-fp4-block=${DEFAULT_NVFP4_BLOCK}`,
     `--calib-fp4-max-layers=${DEFAULT_MAX_LAYERS}`,
   ]);
-  assert.equal(plan.block, 32);
+  assert.equal(plan.block, 16);
+  assert.equal(plan.scale_family, 'nvfp4');
+  assert.equal(plan.scale_format.scale_dtype, 'e4m3');
+  assert.equal(plan.scale_format.tensor_scale, 'fp32_tensor_scale');
   assert.equal(plan.max_layers, 64);
   assert.equal(plan.algorithm, 'batquant-block-affine+block-clip');
   assert.equal(plan.source, 'arXiv:2603.16590');
+  const mx = buildFp4CalibPlan({ target: { dtype: 'mxfp4' } });
+  assert.equal(mx.block, DEFAULT_MXFP4_BLOCK);
+  assert.equal(mx.scale_family, 'mxfp4');
+  assert.equal(mx.scale_format.scale_dtype, 'e8m0');
+  assert.equal(DEFAULT_FP4_BLOCK, DEFAULT_MXFP4_BLOCK);
   // A disabled plan emits zero flags.
   assert.deepEqual([...buildFp4CalibPlan({ target: { dtype: 'fp8' } }).python_flags], []);
 });
@@ -198,7 +211,7 @@ test('PICKER #2 — plan emits the exact python flags + defaults', () => {
 test('PICKER #3 — custom block/max_layers + force override', () => {
   const plan = buildFp4CalibPlan({ target: { dtype: 'mxfp4' }, block: 16, max_layers: 0 });
   assert.deepEqual([...plan.python_flags], [
-    '--calib-fp4', '--calib-fp4-block=16', '--calib-fp4-max-layers=0',
+    '--calib-fp4', '--calib-fp4-scale-format=mxfp4', '--calib-fp4-block=16', '--calib-fp4-max-layers=0',
   ]);
   // force enables for a non-FP4 target (e.g. studying INT4 error) but flags it.
   const forced = buildFp4CalibPlan({ target: { dtype: 'int4' }, force: true });
@@ -213,7 +226,7 @@ test('PICKER #4 — withFp4CalibFlags appends flags without mutating base argv',
   const { argv, plan } = withFp4CalibFlags(base, { target: { dtype: 'nvfp4' } });
   assert.equal(base.length, 4, 'base argv must not be mutated');
   assert.ok(argv.includes('--calib-fp4'));
-  assert.equal(argv.length, base.length + 3);
+  assert.equal(argv.length, base.length + 4);
   assert.equal(plan.enabled, true);
   // Non-FP4 target returns a copy of base, unchanged.
   const r2 = withFp4CalibFlags(base, { target: { dtype: 'fp8' } });

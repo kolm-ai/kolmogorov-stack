@@ -51,6 +51,54 @@ import traceback
 from pathlib import Path
 
 
+FP4_SCALE_FORMATS = {
+    "nvfp4": {
+        "family": "nvfp4",
+        "element_dtype": "e2m1",
+        "scale_dtype": "e4m3",
+        "scale_encoding": "fp8_block_scale",
+        "scale_granularity": "per_16_elements",
+        "tensor_scale": "fp32_tensor_scale",
+        "block": 16,
+    },
+    "mxfp4": {
+        "family": "mxfp4",
+        "element_dtype": "e2m1",
+        "scale_dtype": "e8m0",
+        "scale_encoding": "power_of_two_block_scale",
+        "scale_granularity": "per_32_elements",
+        "tensor_scale": None,
+        "block": 32,
+    },
+    "fp4": {
+        "family": "fp4",
+        "element_dtype": "e2m1",
+        "scale_dtype": "caller_defined",
+        "scale_encoding": "caller_defined",
+        "scale_granularity": "caller_defined",
+        "tensor_scale": None,
+        "block": 32,
+    },
+}
+
+
+def resolve_fp4_scale_format(scale_format="mxfp4", block=None):
+    key = str(scale_format or "mxfp4").lower().replace("-", "").replace("_", "").strip()
+    if "nvfp4" in key:
+        base = FP4_SCALE_FORMATS["nvfp4"]
+    elif "mxfp4" in key:
+        base = FP4_SCALE_FORMATS["mxfp4"]
+    else:
+        base = FP4_SCALE_FORMATS["fp4"]
+    resolved = dict(base)
+    if isinstance(block, int) and block > 0:
+        resolved["block"] = block
+        resolved["block_source"] = "explicit_override"
+    else:
+        resolved["block_source"] = "scale_format_default"
+    return resolved
+
+
 def parse_args():
     p = argparse.ArgumentParser(prog="kolm-quantize", add_help=True)
     # --method / --in / --out are required for a real quantize run, but the
@@ -102,11 +150,18 @@ def parse_args():
                         "per-layer calibration plan + measured reconstruction-error "
                         "reduction in the receipt. Reduces FP4/INT4 error vs naive "
                         "round-to-nearest. Additive: omit the flag for the pre-W921 "
-                        "behavior. See --calib-fp4-block / --calib-fp4-max-layers.")
-    p.add_argument("--calib-fp4-block", dest="calib_fp4_block", type=int, default=32,
-                   help="(W921 NEXT-3) MXFP4/NVFP4 micro-scaling block size for the "
-                        "--calib-fp4 pass (default 32 — the hardware-native FP4 "
-                        "block).")
+                        "behavior. See --calib-fp4-scale-format / "
+                        "--calib-fp4-block / --calib-fp4-max-layers.")
+    p.add_argument("--calib-fp4-scale-format", dest="calib_fp4_scale_format",
+                   choices=["mxfp4", "nvfp4", "fp4"], default="mxfp4",
+                   help="(W1014) FP4 scale family for --calib-fp4. mxfp4 uses "
+                        "E8M0 power-of-two scales at block 32; nvfp4 uses E4M3 "
+                        "block scales at block 16 plus a tensor FP32 scale. "
+                        "Default mxfp4 preserves the original worker behavior.")
+    p.add_argument("--calib-fp4-block", dest="calib_fp4_block", type=int, default=None,
+                   help="(W921 NEXT-3) optional micro-scaling block override for "
+                        "the --calib-fp4 pass. Omit to use the scale-format "
+                        "default (nvfp4=16, mxfp4/fp4=32).")
     p.add_argument("--calib-fp4-max-layers", dest="calib_fp4_max_layers",
                    type=int, default=64,
                    help="(W921 NEXT-3) cap how many weight tensors the --calib-fp4 "
@@ -739,31 +794,34 @@ def _iter_safetensor_weights(src, max_layers, min_numel=4096):
         yield name, arr
 
 
-def run_fp4_calibration(src, block=32, max_layers=64, grid_steps=24):
+def run_fp4_calibration(src, block=None, max_layers=64, grid_steps=24, scale_format="mxfp4"):
     """Build the FP4-aware calibration plan for a model dir. Returns the plan
     dict (see fp4_calib.build_calibration_plan) plus a status. Never raises into
     the main quantize flow — calibration failure degrades gracefully to a
     recorded warning so the int4 quantize still proceeds.
     """
+    fp4_scale = resolve_fp4_scale_format(scale_format, block)
+    used_block = fp4_scale["block"]
     try:
         import numpy as np  # noqa: F401
         import fp4_calib
     except ImportError as e:
-        return {"ok": False, "reason": f"fp4 calibration deps missing: {e}"}
+        return {"ok": False, "reason": f"fp4 calibration deps missing: {e}", "scale_format": fp4_scale}
     try:
         weights = {}
         for name, arr in _iter_safetensor_weights(src, max_layers):
             weights[name] = arr
         if not weights:
-            return {"ok": False, "reason": "no 2-D float weight tensors found for FP4 calibration"}
+            return {"ok": False, "reason": "no 2-D float weight tensors found for FP4 calibration", "scale_format": fp4_scale}
         import numpy as np
         plan = fp4_calib.build_calibration_plan(
-            np, weights, block=block, grid_steps=grid_steps, use_transform=True)
+            np, weights, block=used_block, grid_steps=grid_steps, use_transform=True)
         plan["ok"] = True
         plan["layers_calibrated"] = len(weights)
+        plan["scale_format"] = fp4_scale
         return plan
     except Exception as e:  # degrade gracefully — calibration must never block quantize
-        return {"ok": False, "reason": f"fp4 calibration raised: {e.__class__.__name__}: {e}"}
+        return {"ok": False, "reason": f"fp4 calibration raised: {e.__class__.__name__}: {e}", "scale_format": fp4_scale}
 
 
 def _fp4_grid_torch(torch, device):
@@ -866,6 +924,7 @@ def apply_fp4_calibration_to_model(model, calibration, block=None, max_layers=No
         "fused_layers": fused,
         "calibrated_layers": len(selected),
         "block": used_block,
+        "scale_format": calibration.get("scale_format"),
         "mean_block_mse": (total_mse / total_blocks) if total_blocks else 0.0,
     }
 
@@ -1728,10 +1787,15 @@ def main():
     fp4_calib_plan = None
     if args.calib_fp4:
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        fp4_scale_format = resolve_fp4_scale_format(
+            args.calib_fp4_scale_format,
+            args.calib_fp4_block,
+        )
         fp4_calib_plan = run_fp4_calibration(
             str(src),
-            block=args.calib_fp4_block,
+            block=fp4_scale_format["block"],
             max_layers=args.calib_fp4_max_layers,
+            scale_format=fp4_scale_format["family"],
         )
 
     # W921 NEXT-4 — MoE detection + per-group / per-expert run-meta. GATED on

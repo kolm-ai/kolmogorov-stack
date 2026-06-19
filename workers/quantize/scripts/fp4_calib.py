@@ -13,8 +13,8 @@ Algorithm (BATQuant — arXiv 2603.16590, "Outlier-resilient MXFP4 Quantization
 via Learnable Block-wise Optimization", 2026-03-17; web-confirmed 2026-05-29):
 
   1. Block-diagonal *affine* transform P = diag(P_1, ..., P_k), each
-     P_i in R^{g x g} aligned to the MXFP micro-scaling block granularity g
-     (g = 32 for MXFP4 / NVFP4). NO orthogonality constraint (relaxing it is
+     P_i in R^{g x g} aligned to the FP4 micro-scaling block granularity g
+     (g = 32 for MXFP4; NVFP4 callers pass g = 16 via quantize.py). NO orthogonality constraint (relaxing it is
      what lets the transform reshape the per-block distribution instead of
      merely rotating outlier energy around). Applied to activations as X·P and
      to weights as P^{-1}·W^T, so the linear layer output is unchanged in
@@ -43,9 +43,10 @@ the wall clock or a global random source).
 
 The FP4 (E2M1) grid is the hardware-native NVFP4 / MXFP4 element format: 1 sign,
 2 exponent, 1 mantissa bit -> the 16 representable magnitudes
-{0, .5, 1, 1.5, 2, 3, 4, 6} (and their negatives), micro-scaled per 32-element
-block by an FP8 (E4M3) scale. We model exactly that grid so the calibration
-optimises the real quantiser, not a generic int4 stand-in.
+{0, .5, 1, 1.5, 2, 3, 4, 6} (and their negatives), micro-scaled per caller
+selected block (16 for NVFP4, 32 for MXFP4) by an FP8-style scale. We model
+exactly that grid so the calibration optimises the real quantiser, not a
+generic int4 stand-in.
 
 Self-test:  python3 fp4_calib.py --self-test
 """
@@ -66,7 +67,8 @@ _E2M1_POS = (0.0, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0)
 FP4_E2M1_GRID = tuple(sorted(set([-v for v in _E2M1_POS] + list(_E2M1_POS))))
 _E2M1_MAX = 6.0  # largest representable magnitude
 
-# MXFP4 / NVFP4 micro-scaling block size (elements sharing one FP8 scale).
+# MXFP4 default micro-scaling block size (elements sharing one FP8-style scale).
+NVFP4_BLOCK = 16
 MXFP4_BLOCK = 32
 
 
@@ -543,7 +545,7 @@ def main(argv=None):
     p.add_argument("--seed", type=int, default=20260529,
                    help="seed for the self-test synthetic tensors")
     p.add_argument("--block", type=int, default=MXFP4_BLOCK,
-                   help="MXFP4 micro-scaling block size (default 32)")
+                   help="FP4 micro-scaling block size (MXFP4 default 32; NVFP4 default 16)")
     args = p.parse_args(argv)
     if args.self_test:
         res = self_test(seed=args.seed)

@@ -21,11 +21,15 @@ test('1. catalog exposes Blackwell FP4 export methods and device presets', () =>
   assert.equal(catalog.methods.nvfp4.export_format, 'nvfp4');
   assert.equal(catalog.methods.nvfp4.export_quant, 'w4a8');
   assert.equal(catalog.methods.nvfp4.blackwell_required, true);
+  assert.equal(catalog.methods.nvfp4.scale_format.block, 16);
+  assert.equal(catalog.methods.nvfp4.scale_format.scale_dtype, 'e4m3');
   assert.deepEqual(catalog.methods.nvfp4.quality_loss_model_size_curve.map((row) => row.max_params_b), [14, 34, null]);
 
   assert.equal(catalog.methods.mxfp4.execution_status, 'export_nvfp4');
   assert.equal(catalog.methods.mxfp4.export_quant, 'w4a4');
   assert.equal(catalog.methods.mxfp4.blackwell_required, true);
+  assert.equal(catalog.methods.mxfp4.scale_format.block, 32);
+  assert.equal(catalog.methods.mxfp4.scale_format.scale_dtype, 'e8m0');
   assert.deepEqual(catalog.methods.mxfp4.quality_loss_model_size_curve.map((row) => row.max_params_b), [14, 34, null]);
 
   assert.equal(catalog.methods.moe_mixed_policy.execution_status, 'advisory_policy');
@@ -67,7 +71,8 @@ test('2. Blackwell TensorRT workload chooses NVFP4 export command', () => {
   assert.equal(plan.recommendation.primary.export_format, 'nvfp4');
   assert.equal(plan.recommendation.primary.export_quant, 'w4a8');
   assert.equal(plan.recommendation.fp4_calibration_plan.enabled, true);
-  assert.match(plan.recommendation.command, /^kolm export <artifact\.kolm> --format nvfp4 --quant w4a8 --calib-fp4 --calib-fp4-block=32 --calib-fp4-max-layers=64 --out <out-dir>$/);
+  assert.equal(plan.recommendation.fp4_calibration_plan.scale_family, 'nvfp4');
+  assert.match(plan.recommendation.command, /^kolm export <artifact\.kolm> --format nvfp4 --quant w4a8 --calib-fp4 --calib-fp4-scale-format=nvfp4 --calib-fp4-block=16 --calib-fp4-max-layers=64 --out <out-dir>$/);
 });
 
 test('3. Hopper TensorRT and Ada CUDA targets do not get Blackwell-only FP4 recommendations', () => {
@@ -149,6 +154,7 @@ test('5. backend spec records W605/W613/W964/W965 and W1010/W1011 closures', () 
   assert.match(spec, /pre-round FP4 fusion/);
   assert.match(spec, /W1010/);
   assert.match(spec, /W1011/);
+  assert.match(spec, /W1014/);
 });
 
 test('6. W4A4 rotation frontier methods are command-backed experimental worker lanes', () => {

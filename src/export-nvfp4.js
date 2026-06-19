@@ -68,10 +68,12 @@ function _resolveFp4CalibrationPlan(parsed, requested) {
   if (!enabled) return null;
   const block = _intOr(requested?.block ?? requested?.calib_fp4_block, undefined);
   const max_layers = _intOr(requested?.max_layers ?? requested?.calib_fp4_max_layers, undefined);
+  const scale_format = requested?.scale_format || requested?.scale_family || parsed.weight_dtype;
   const plan = buildFp4CalibPlan({
     target: {
       weight_dtype: parsed.weight_dtype,
       quant_level: parsed.mode,
+      scale_format,
     },
     block,
     max_layers,
@@ -259,7 +261,7 @@ export async function runExport({ artifact, quant, target_dir, force = false, fp
       `sys.path.insert(0, ${JSON.stringify(FP4_CALIB_SCRIPT_DIR)})`,
       'try:',
       '    from quantize import run_fp4_calibration, apply_fp4_calibration_to_model',
-      `    fp4_calibration = run_fp4_calibration(${JSON.stringify(artifact.merged_dir)}, block=${JSON.stringify(fp4Plan.block)}, max_layers=${JSON.stringify(fp4Plan.max_layers)})`,
+      `    fp4_calibration = run_fp4_calibration(${JSON.stringify(artifact.merged_dir)}, block=${JSON.stringify(fp4Plan.block)}, max_layers=${JSON.stringify(fp4Plan.max_layers)}, scale_format=${JSON.stringify(fp4Plan.scale_family)})`,
       'except Exception as e:',
       '    fp4_calibration = {"ok": False, "error": str(e), "stage": "fp4_calibration"}',
     ] : []),

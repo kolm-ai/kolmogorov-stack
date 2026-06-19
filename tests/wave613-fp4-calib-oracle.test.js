@@ -29,9 +29,13 @@ test('1. Blackwell NVFP4 oracle recommendation attaches the FP4 calibration plan
   assert.equal(plan.recommendation.primary.method, 'nvfp4');
   assert.equal(fp4.enabled, true);
   assert.equal(fp4.algorithm, 'batquant-block-affine+block-clip');
+  assert.equal(fp4.scale_family, 'nvfp4');
+  assert.equal(fp4.scale_format.scale_dtype, 'e4m3');
+  assert.equal(fp4.scale_format.scale_granularity, 'per_16_elements');
   assert.deepEqual([...fp4.python_flags], [
     '--calib-fp4',
-    '--calib-fp4-block=32',
+    '--calib-fp4-scale-format=nvfp4',
+    '--calib-fp4-block=16',
     '--calib-fp4-max-layers=64',
   ]);
   for (const flag of fp4.python_flags) {
@@ -71,10 +75,12 @@ test('3. CLI preview parses oracle-style --calib-fp4 tuning flags for NVFP4 expo
 
   const preview = JSON.parse(stdout);
   assert.equal(preview.fp4_calibration_plan.enabled, true);
+  assert.equal(preview.fp4_calibration_plan.scale_family, 'nvfp4');
   assert.equal(preview.fp4_calibration_plan.block, 16);
   assert.equal(preview.fp4_calibration_plan.max_layers, 0);
   assert.deepEqual([...preview.fp4_calibration_plan.python_flags], [
     '--calib-fp4',
+    '--calib-fp4-scale-format=nvfp4',
     '--calib-fp4-block=16',
     '--calib-fp4-max-layers=0',
   ]);
@@ -98,4 +104,6 @@ test('5. backend spec records W613 closure and W1011 pre-round fusion closure', 
   assert.match(spec, /FP4 calibration plan into the oracle recommendation/);
   assert.match(spec, /W1011/);
   assert.match(spec, /pre-round FP4 fusion/);
+  assert.match(spec, /W1014/);
+  assert.match(spec, /NVFP4-vs-MXFP4 scale-format/);
 });

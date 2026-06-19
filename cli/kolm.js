@@ -42548,6 +42548,7 @@ async function cmdExport(args) {
         if (fmt === 'nvfp4' && args.includes('--calib-fp4')) {
           previewArgs.fp4_calibration = {
             enabled: true,
+            scale_format: get('--calib-fp4-scale-format'),
             block: getInt('--calib-fp4-block'),
             max_layers: getInt('--calib-fp4-max-layers'),
           };
@@ -42568,6 +42569,7 @@ async function cmdExport(args) {
     if (fmt === 'nvfp4' && args.includes('--calib-fp4')) {
       exportArgs.fp4_calibration = {
         enabled: true,
+        scale_format: get('--calib-fp4-scale-format'),
         block: getInt('--calib-fp4-block'),
         max_layers: getInt('--calib-fp4-max-layers'),
       };

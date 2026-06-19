@@ -224,6 +224,7 @@ if (args['mixed-precision']) {
 if (args['trust-remote-code']) passthrough.push('--trust-remote-code');
 if (args['calib-fp4']) {
   passthrough.push('--calib-fp4');
+  if (args['calib-fp4-scale-format']) passthrough.push(`--calib-fp4-scale-format=${args['calib-fp4-scale-format']}`);
   if (args['calib-fp4-block']) passthrough.push(`--calib-fp4-block=${args['calib-fp4-block']}`);
   if (args['calib-fp4-max-layers'] !== undefined) passthrough.push(`--calib-fp4-max-layers=${args['calib-fp4-max-layers']}`);
 }
