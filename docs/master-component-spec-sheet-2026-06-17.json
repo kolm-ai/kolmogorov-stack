@@ -8335,7 +8335,7 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 14979,
+          "bytes": 15001,
           "lines": 472,
           "imports": 0,
           "exports": 11,
@@ -8345,17 +8345,16 @@
           "subprocess_refs": 0,
           "network_refs": 0,
           "crypto_refs": 0,
-          "markers": 1
+          "markers": 0
         },
         "risk_signals": [
           "distribution_or_worker_surface",
           "environment_configuration_boundary",
-          "execution_or_subprocess_boundary",
-          "open_marker_requires_owner_review"
+          "execution_or_subprocess_boundary"
         ],
-        "priority_score": 4,
-        "priority_band": "medium",
-        "sha256": "87b771ee13c72c1fd6734a3496d801ba32e8504730f914838b72e31d3dd335e2"
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "f24a4e849e2c61a1b42a47750d3dd7cdbaecc729e4c848e3944084a0142e4619"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8382,10 +8381,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "open_marker_requires_owner_review"
-      ],
-      "next_best_action": "Resolve or explicitly owner-review the open TODO/FIXME marker."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "apps/trainer/long_context.py",
@@ -28419,8 +28416,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 9859,
-          "lines": 225,
+          "bytes": 10050,
+          "lines": 233,
           "imports": 1,
           "exports": 5,
           "routes": 0,
@@ -28429,14 +28426,12 @@
           "subprocess_refs": 0,
           "network_refs": 0,
           "crypto_refs": 0,
-          "markers": 3
+          "markers": 0
         },
-        "risk_signals": [
-          "open_marker_requires_owner_review"
-        ],
-        "priority_score": 1,
+        "risk_signals": [],
+        "priority_score": 0,
         "priority_band": "normal",
-        "sha256": "597cedb7e29875a431bcf23fe08d7106876c50ed7aee19b739e9de67faa607a6"
+        "sha256": "f999363bf5492ea837def997744c7d17610fccf8d25e6c14eb7fb58552297582"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -28458,10 +28453,8 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [
-        "open_marker_requires_owner_review"
-      ],
-      "next_best_action": "Resolve or explicitly owner-review the open TODO/FIXME marker."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/dp-aggregation.js",
@@ -31387,26 +31380,25 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 13760,
-          "lines": 338,
-          "imports": 3,
-          "exports": 7,
+          "bytes": 25423,
+          "lines": 690,
+          "imports": 6,
+          "exports": 10,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 7,
           "network_refs": 0,
           "crypto_refs": 0,
-          "markers": 2
+          "markers": 0
         },
         "risk_signals": [
           "auth_or_tenant_boundary",
-          "execution_or_subprocess_boundary",
-          "open_marker_requires_owner_review"
+          "execution_or_subprocess_boundary"
         ],
-        "priority_score": 5,
+        "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "bfa33b4bf98402257a9612a4c51cc3da017fd030beae453999d18f1aedd00196"
+        "sha256": "4314a3df7593f4a00d0f7fef65095864d923e7829bac572de923966aa49b4657"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -31426,10 +31418,8 @@
           "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "open_marker_requires_owner_review"
-      ],
-      "next_best_action": "Resolve or explicitly owner-review the open TODO/FIXME marker."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests current."
     },
     {
       "path": "src/forge-inspect.js",

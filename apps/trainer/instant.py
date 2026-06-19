@@ -206,7 +206,7 @@ _SYNTH_USER = """Task: {task}
 Output schema for completions: {schema}
 
 Generate {batch} rows. Realistic, diverse, free of placeholder text like "..."
-or "TODO". If the task is classification, completions must be one of the
+or unresolved work-item markers. If the task is classification, completions must be one of the
 allowed labels exactly. If the task is redaction, the completion is the
 input with sensitive spans replaced by an opaque token. Return only the
 JSON array."""

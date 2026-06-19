@@ -19,12 +19,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  ARTIFACT_FIT_VERSION,
+  artifactFitDescriptor,
   kvCacheSize,
   maxContextBothModes,
+  readArtifactManifest,
+  willArtifactFit,
 } from '../src/forge-hardware.js';
 import {
   estimateKvCacheBytes,
@@ -98,4 +103,78 @@ test('shard-wire #5 — cmdServe wires KOLM_KV_POLICY into serveEnv', () => {
     'must set KOLM_KV_POLICY on the env passed to apps.runtime.serve');
   assert.match(src, /serveEnv\.KOLM_KV_CACHE_BACKEND\s*=\s*applied\.policy === 'shard' \? 'shard' : 'default'/,
     'must retain KOLM_KV_CACHE_BACKEND shard compatibility');
+});
+
+test('shard-wire #6 - forge-hardware extracts fit descriptor from artifact manifest', () => {
+  const manifest = {
+    spec: 'kolm-artifact-v1',
+    base_model: 'Qwen/Qwen2.5-7B-Instruct',
+    params_b: 7,
+    quantization: 'q4_k_m',
+    context_length: 8192,
+    batch_size: 2,
+    kv_precision: 'fp8',
+  };
+  const descriptor = artifactFitDescriptor(manifest);
+  assert.equal(descriptor.version, ARTIFACT_FIT_VERSION);
+  assert.equal(descriptor.model_params_b, 7);
+  assert.equal(descriptor.quant, 'gguf-q4km');
+  assert.equal(descriptor.context, 8192);
+  assert.equal(descriptor.batch, 2);
+  assert.equal(descriptor.kv_precision, 'fp8');
+  assert.equal(descriptor.has_estimator_inputs, true);
+});
+
+test('shard-wire #7 - readArtifactManifest reads manifest.json directories safely', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-forge-hw-'));
+  fs.writeFileSync(path.join(dir, 'manifest.json'), JSON.stringify({
+    spec: 'kolm-artifact-v1',
+    params_b: 13,
+    quant_descriptor: { method: 'awq' },
+  }));
+  const out = readArtifactManifest(dir);
+  assert.equal(out.ok, true);
+  assert.equal(out.source, 'directory:manifest.json');
+  assert.equal(out.manifest.params_b, 13);
+});
+
+test('shard-wire #8 - willArtifactFit uses manifest estimate before hardware target recommendation', () => {
+  const hardware = {
+    primary: {
+      vendor: 'nvidia',
+      name: 'RTX 4090',
+      vram_gb: 24,
+      native_dtypes: ['fp16', 'bf16', 'int8', 'int4'],
+      supported_methods: ['fp16', 'int8', 'int4', 'gguf-q4km', 'awq-4bit', 'hqq'],
+    },
+    all: [],
+  };
+  const fits = willArtifactFit('', {
+    hardware,
+    manifest: {
+      spec: 'kolm-artifact-v1',
+      params_b: 7,
+      quantization: 'q4_k_m',
+      context_length: 8192,
+      batch_size: 1,
+    },
+  });
+  assert.equal(fits.fits, true);
+  assert.equal(fits.reason, 'manifest_estimate_fits');
+  assert.equal(fits.artifact.quant, 'gguf-q4km');
+  assert.equal(fits.fit.fit_class, 'comfortable');
+  assert.equal(fits.recommended_targets[0], 'gguf-q4km');
+
+  const over = willArtifactFit('', {
+    hardware,
+    manifest: {
+      spec: 'kolm-artifact-v1',
+      params_b: 70,
+      quantization: 'fp16',
+      context_length: 8192,
+    },
+  });
+  assert.equal(over.fits, false);
+  assert.equal(over.reason, 'manifest_estimate_exceeds_vram');
+  assert.equal(over.fit.fit_class, 'over');
 });

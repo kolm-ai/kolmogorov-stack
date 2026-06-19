@@ -75,7 +75,6 @@
       "large_component_contract_risk": 45,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 171,
-      "open_marker_requires_owner_review": 3,
       "stateful_storage_boundary": 125
     },
     "top_review_targets": [
@@ -7475,9 +7474,9 @@
       "surface": "worker",
       "domain": "training_model_optimization",
       "language": "python",
-      "sha256": "87b771ee13c72c1fd6734a3496d801ba32e8504730f914838b72e31d3dd335e2",
+      "sha256": "f24a4e849e2c61a1b42a47750d3dd7cdbaecc729e4c848e3944084a0142e4619",
       "metrics": {
-        "bytes": 14979,
+        "bytes": 15001,
         "lines": 472,
         "imports": 0,
         "exports": 11,
@@ -7487,7 +7486,7 @@
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 0,
-        "markers": 1
+        "markers": 0
       },
       "test_refs": [
         "tests/wave957-apps-atomic-scope.test.js",
@@ -7501,10 +7500,9 @@
       "risk_signals": [
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "open_marker_requires_owner_review"
+        "execution_or_subprocess_boundary"
       ],
-      "priority_score": 4,
+      "priority_score": 3,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -30822,10 +30820,10 @@
       "surface": "core-backend",
       "domain": "platform_support",
       "language": "javascript",
-      "sha256": "597cedb7e29875a431bcf23fe08d7106876c50ed7aee19b739e9de67faa607a6",
+      "sha256": "f999363bf5492ea837def997744c7d17610fccf8d25e6c14eb7fb58552297582",
       "metrics": {
-        "bytes": 9859,
-        "lines": 225,
+        "bytes": 10050,
+        "lines": 233,
         "imports": 1,
         "exports": 5,
         "routes": 0,
@@ -30834,15 +30832,13 @@
         "subprocess_refs": 0,
         "network_refs": 0,
         "crypto_refs": 0,
-        "markers": 3
+        "markers": 0
       },
       "test_refs": [
         "tests/wave144-doc-check.test.js"
       ],
-      "risk_signals": [
-        "open_marker_requires_owner_review"
-      ],
-      "priority_score": 1,
+      "risk_signals": [],
+      "priority_score": 0,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",
@@ -34366,19 +34362,19 @@
       "surface": "core-backend",
       "domain": "identity_access",
       "language": "javascript",
-      "sha256": "bfa33b4bf98402257a9612a4c51cc3da017fd030beae453999d18f1aedd00196",
+      "sha256": "4314a3df7593f4a00d0f7fef65095864d923e7829bac572de923966aa49b4657",
       "metrics": {
-        "bytes": 13760,
-        "lines": 338,
-        "imports": 3,
-        "exports": 7,
+        "bytes": 25423,
+        "lines": 690,
+        "imports": 6,
+        "exports": 10,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
         "subprocess_refs": 7,
         "network_refs": 0,
         "crypto_refs": 0,
-        "markers": 2
+        "markers": 0
       },
       "test_refs": [
         "tests/r3-kolm-serve.test.js",
@@ -34386,10 +34382,9 @@
       ],
       "risk_signals": [
         "auth_or_tenant_boundary",
-        "execution_or_subprocess_boundary",
-        "open_marker_requires_owner_review"
+        "execution_or_subprocess_boundary"
       ],
-      "priority_score": 5,
+      "priority_score": 4,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

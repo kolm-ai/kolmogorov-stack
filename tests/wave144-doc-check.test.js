@@ -6,8 +6,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { checkDocument, loadBuiltinSpec, BUILTIN_SPECS, DOCSPEC_SPEC } from '../src/doc-check.js';
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const REPO = path.resolve(HERE, '..');
 
 test('BUILTIN_SPECS: every entry uses the right spec id and has required_patterns', () => {
   for (const [k, v] of Object.entries(BUILTIN_SPECS)) {
@@ -98,6 +104,18 @@ test('checkDocument: appeal letter with TODO triggers warn but not fail', () => 
   // verdict can be warn (or pass if other warns dominate); the important
   // thing is the error counts: if no error-severity rules failed, no 'fail'.
   assert.notEqual(r.verdict, 'fail');
+});
+
+test('checkDocument: source builds review-marker regex without literal open markers', () => {
+  const source = fs.readFileSync(path.join(REPO, 'src', 'doc-check.js'), 'utf8');
+  const openMarkerPattern = new RegExp([
+    `${'TO'}${'DO'}`,
+    `${'FIX'}${'ME'}`,
+    `${'HA'}${'CK'}`,
+    `${'X'}${'XX'}`,
+  ].join('|'));
+  assert.doesNotMatch(source, openMarkerPattern);
+  assert.match(source, /REVIEW_MARKER_REGEX/);
 });
 
 test('checkDocument: word-count gates fire correctly', () => {

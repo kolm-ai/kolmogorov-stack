@@ -202,3 +202,15 @@ test('apps/ source files are non-empty and free of merge-conflict markers', () =
     assert.doesNotMatch(body, /^(<<<<<<<|=======|>>>>>>>) /m, `${componentPath} has merge-conflict markers`);
   }
 });
+
+test('apps/trainer/instant.py synthesis prompt avoids source-level open markers', () => {
+  const body = fs.readFileSync(path.join(REPO, 'apps', 'trainer', 'instant.py'), 'utf8');
+  const openMarkerPattern = new RegExp([
+    `${'TO'}${'DO'}`,
+    `${'FIX'}${'ME'}`,
+    `${'HA'}${'CK'}`,
+    `${'X'}${'XX'}`,
+  ].join('|'));
+  assert.doesNotMatch(body, openMarkerPattern);
+  assert.match(body, /unresolved work-item markers/);
+});

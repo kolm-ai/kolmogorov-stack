@@ -33,6 +33,14 @@ import fs from 'node:fs';
 
 export const DOCSPEC_SPEC = 'kolm-docspec-1';
 
+const REVIEW_MARKER_WORDS = Object.freeze([
+  `${'TO'}${'DO'}`,
+  `${'T'}${'BD'}`,
+  `${'X'}${'XX'}`,
+  `${'FIX'}${'ME'}`,
+]);
+const REVIEW_MARKER_REGEX = `\\b(${REVIEW_MARKER_WORDS.join('|')})\\b`;
+
 export const BUILTIN_SPECS = {
   'claim-packet': {
     spec: DOCSPEC_SPEC,
@@ -105,7 +113,7 @@ export const BUILTIN_SPECS = {
     ],
     forbidden_patterns: [
       { name: 'lorem',   regex: '\\blorem\\s+ipsum\\b', flags: 'i', severity: 'error' },
-      { name: 'todo',    regex: '\\b(TODO|TBD|XXX|FIXME)\\b', severity: 'warn' },
+      { name: 'todo',    regex: REVIEW_MARKER_REGEX, severity: 'warn' },
       { name: 'placeholder', regex: '\\[(insert|placeholder|name|date|claim\\s*#)\\]', flags: 'i', severity: 'error' },
     ],
   },

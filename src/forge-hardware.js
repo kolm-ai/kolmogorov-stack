@@ -26,7 +26,15 @@
 //   CPU              → GGUF Q4_K_M default, HQQ in CPU mode
 
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
 import os from 'node:os';
+import AdmZip from 'adm-zip';
+import {
+  BYTES_PER_PARAM,
+  estimateMemoryFit,
+  pickBestFitTarget,
+  safeFitError,
+} from './forge-fit.js';
 import {
   estimateKvCacheBytes as _estimateKvCacheBytes,
   estimateShardKvCacheBytes as _estimateShardKvCacheBytes,
@@ -34,6 +42,53 @@ import {
 } from './kv-cache-shard.js';
 
 export const HARDWARE_VERSION = 'forge-hardware-v1';
+export const ARTIFACT_FIT_VERSION = 'w977-artifact-fit-v1';
+const MAX_MANIFEST_BYTES = 2 * 1024 * 1024;
+
+const QUANT_ALIASES = Object.freeze({
+  q2k: 'gguf-q2k',
+  q2_k: 'gguf-q2k',
+  ggufq2k: 'gguf-q2k',
+  q3km: 'gguf-q3km',
+  q3_k_m: 'gguf-q3km',
+  ggufq3km: 'gguf-q3km',
+  q4km: 'gguf-q4km',
+  q4_k_m: 'gguf-q4km',
+  ggufq4km: 'gguf-q4km',
+  q5km: 'gguf-q5km',
+  q5_k_m: 'gguf-q5km',
+  ggufq5km: 'gguf-q5km',
+  q6k: 'gguf-q6k',
+  q6_k: 'gguf-q6k',
+  ggufq6k: 'gguf-q6k',
+  q8: 'gguf-q8',
+  q8_0: 'gguf-q8',
+  ggufq8: 'gguf-q8',
+  iq4xs: 'gguf-iq4xs',
+  iq4_xs: 'gguf-iq4xs',
+  iq3xxs: 'gguf-iq3xxs',
+  iq3_xxs: 'gguf-iq3xxs',
+  iq2xs: 'gguf-iq2xs',
+  iq2_xs: 'gguf-iq2xs',
+  gptq: 'gptq-4bit',
+  gptq4bit: 'gptq-4bit',
+  awq: 'awq-4bit',
+  awq4bit: 'awq-4bit',
+  nf4: 'int4',
+  bnb4bit: 'int4',
+  bitsandbytes4bit: 'int4',
+  fourbit: 'int4',
+  int4: 'int4',
+  int8: 'int8',
+  fp8: 'fp8',
+  nvfp4: 'nvfp4',
+  fp16: 'fp16',
+  bf16: 'bf16',
+  hqq: 'hqq',
+  exl2: 'exl2',
+  mlx4bit: 'mlx-4bit',
+  mlx_4bit: 'mlx-4bit',
+});
 
 // Every quant method the Forge knows how to dispatch. Keep in sync with
 // src/quantization-oracle.js METHOD_CATALOG and tests/wave867+.
@@ -246,24 +301,321 @@ export function detectHardware() {
   };
 }
 
-/**
- * Will this artifact run on this hardware?
- * @param {string} _artifactPath path to .kolm artifact (TODO: parse manifest)
- * @returns {Object} { fits: bool, primary, reason, recommended_targets[] }
- */
-export function willArtifactFit(_artifactPath) {
-  const hw = detectHardware();
-  // For now: any artifact fits if vram >= 4 GB and primary is GPU-class.
-  // TODO W873: parse manifest, compute exact VRAM from quant + ctx + batch.
-  const fits = hw.primary.vram_gb >= 4 && hw.primary.vendor !== 'cpu';
+function positiveNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function positiveInt(value, fallback) {
+  const n = positiveNumber(value);
+  return n == null ? fallback : Math.max(1, Math.trunc(n));
+}
+
+function firstPositive(...values) {
+  for (const value of values) {
+    const n = positiveNumber(value);
+    if (n != null) return n;
+  }
+  return null;
+}
+
+function firstString(...values) {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
+function normalizeQuantMethod(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw) return null;
+  if (BYTES_PER_PARAM[raw]) return raw;
+
+  const compact = raw.replace(/[^a-z0-9]+/g, '');
+  if (QUANT_ALIASES[raw]) return QUANT_ALIASES[raw];
+  if (QUANT_ALIASES[compact]) return QUANT_ALIASES[compact];
+  if (/gptq/.test(raw)) return 'gptq-4bit';
+  if (/awq/.test(raw)) return 'awq-4bit';
+  if (/q4[_-]?k[_-]?m|q4km/.test(raw)) return 'gguf-q4km';
+  if (/q5[_-]?k[_-]?m|q5km/.test(raw)) return 'gguf-q5km';
+  if (/q6[_-]?k|q6k/.test(raw)) return 'gguf-q6k';
+  if (/q8[_-]?0|q8/.test(raw)) return 'gguf-q8';
+  if (/mlx.*4/.test(raw)) return 'mlx-4bit';
+  if (/4\s*bit|nf4|int4/.test(raw)) return 'int4';
+  return null;
+}
+
+function normalizeKvPrecision(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (['fp16', 'bf16', 'fp8', 'int8', 'int4'].includes(raw)) return raw;
+  if (/fp8/.test(raw)) return 'fp8';
+  if (/int8/.test(raw)) return 'int8';
+  if (/int4|4\s*bit/.test(raw)) return 'int4';
+  return 'fp16';
+}
+
+function parseManifestJson(text, source) {
+  if (Buffer.byteLength(String(text || ''), 'utf8') > MAX_MANIFEST_BYTES) {
+    throw new Error('artifact_manifest_too_large');
+  }
+  const manifest = JSON.parse(text);
+  if (!manifest || typeof manifest !== 'object' || Array.isArray(manifest)) {
+    throw new Error('artifact_manifest_not_object');
+  }
+  return { ok: true, manifest, source };
+}
+
+export function readArtifactManifest(artifactPath) {
+  const target = String(artifactPath || '').trim();
+  if (!target) return { ok: false, reason: 'artifact_path_missing', manifest: null, source: null };
+  try {
+    const stat = fs.statSync(target);
+    if (stat.isDirectory()) {
+      const manifestPath = `${target.replace(/[\\/]+$/, '')}/manifest.json`;
+      const manifestStat = fs.statSync(manifestPath);
+      if (manifestStat.size > MAX_MANIFEST_BYTES) throw new Error('artifact_manifest_too_large');
+      return parseManifestJson(fs.readFileSync(manifestPath, 'utf8'), 'directory:manifest.json');
+    }
+    if (!stat.isFile()) return { ok: false, reason: 'artifact_path_not_file', manifest: null, source: null };
+
+    const lower = target.toLowerCase();
+    if (lower.endsWith('.json') || lower.endsWith('.manifest')) {
+      if (stat.size > MAX_MANIFEST_BYTES) throw new Error('artifact_manifest_too_large');
+      return parseManifestJson(fs.readFileSync(target, 'utf8'), 'json:file');
+    }
+
+    const zip = new AdmZip(target);
+    const entry = zip.getEntry('manifest.json');
+    if (!entry) return { ok: false, reason: 'artifact_manifest_missing', manifest: null, source: 'zip' };
+    const data = entry.getData();
+    if (data.length > MAX_MANIFEST_BYTES) throw new Error('artifact_manifest_too_large');
+    return parseManifestJson(data.toString('utf8'), 'zip:manifest.json');
+  } catch (error) {
+    return {
+      ok: false,
+      reason: 'artifact_manifest_unreadable',
+      error: String(error && error.message || error).slice(0, 160),
+      manifest: null,
+      source: null,
+    };
+  }
+}
+
+export function artifactFitDescriptor(manifest = {}) {
+  const target = manifest.target_device && typeof manifest.target_device === 'object'
+    ? manifest.target_device
+    : {};
+  const runtime = manifest.runtime_profile && typeof manifest.runtime_profile === 'object'
+    ? manifest.runtime_profile
+    : {};
+  const runtimeConfig = manifest.runtime_target_config && typeof manifest.runtime_target_config === 'object'
+    ? manifest.runtime_target_config
+    : {};
+  const training = manifest.training && typeof manifest.training === 'object'
+    ? manifest.training
+    : {};
+  const weightManifest = manifest.model_weight_artifact_manifest && typeof manifest.model_weight_artifact_manifest === 'object'
+    ? manifest.model_weight_artifact_manifest
+    : {};
+  const quantBlock = manifest.quant_descriptor || manifest.kernel_descriptor ||
+    manifest.quantization_config || manifest.quantize_config || manifest.quantization || {};
+  const quantObject = quantBlock && typeof quantBlock === 'object' ? quantBlock : {};
+
+  const model_params_b = firstPositive(
+    manifest.model_params_b,
+    manifest.params_b,
+    manifest.total_params_b,
+    manifest.active_params_b,
+    runtime.model_params_b,
+    runtime.params_b,
+    runtimeConfig.model_params_b,
+    runtimeConfig.params_b,
+    training.student_params_b,
+    training.params_b,
+    weightManifest.model_params_b,
+    weightManifest.params_b,
+    target.model_params_b,
+    target.params_b,
+  );
+  const memory_requirement_mb = firstPositive(
+    manifest.memory_requirement_mb,
+    runtime.memory_requirement_mb,
+    runtimeConfig.memory_requirement_mb,
+    weightManifest.memory_requirement_mb,
+    target.memory_requirement_mb,
+  );
+  const quant = normalizeQuantMethod(firstString(
+    manifest.quant,
+    manifest.quantization,
+    manifest.quant_method,
+    quantObject.method,
+    quantObject.quant,
+    quantObject.quantization,
+    quantObject.quant_method,
+    runtime.quant,
+    runtimeConfig.quant,
+    weightManifest.quant,
+    weightManifest.quantization,
+  ));
+
+  return {
+    version: ARTIFACT_FIT_VERSION,
+    model_params_b,
+    quant,
+    context: positiveInt(
+      manifest.context_length ?? manifest.max_context ?? runtime.context_length ??
+        runtimeConfig.context_length ?? weightManifest.context_length,
+      8192,
+    ),
+    batch: positiveInt(
+      manifest.batch ?? manifest.batch_size ?? runtime.batch ?? runtimeConfig.batch_size,
+      1,
+    ),
+    kv_precision: normalizeKvPrecision(firstString(
+      manifest.kv_precision,
+      runtime.kv_precision,
+      runtimeConfig.kv_precision,
+    ) || 'fp16'),
+    memory_requirement_mb,
+    base_model: firstString(manifest.base_model, training.student, runtime.base_model, weightManifest.base_model),
+    has_estimator_inputs: model_params_b != null,
+    has_declared_memory: memory_requirement_mb != null,
+  };
+}
+
+function supportedMethodsForPrimary(primary = {}) {
+  if (Array.isArray(primary.supported_methods) && primary.supported_methods.length > 0) {
+    return primary.supported_methods.slice();
+  }
+  return methodsForDtypes(primary.vendor || 'cpu', Array.isArray(primary.native_dtypes) ? primary.native_dtypes : []);
+}
+
+function fallbackArtifactFit(hw, manifestRead) {
+  const primary = hw.primary || {};
+  const supported = supportedMethodsForPrimary(primary);
+  const fits = positiveNumber(primary.vram_gb) >= 4 && primary.vendor !== 'cpu';
   return {
     fits,
-    primary: hw.primary,
-    reason: fits ? 'gpu_class_with_sufficient_vram'
-                 : (hw.primary.vendor === 'cpu' ? 'cpu_only_falls_back_to_gguf'
-                                                : 'insufficient_vram'),
-    recommended_targets: hw.primary.supported_methods.slice(0, 3),
+    primary,
+    reason: manifestRead && manifestRead.reason
+      ? `manifest_${manifestRead.reason}`
+      : (fits ? 'gpu_class_with_sufficient_vram' : (primary.vendor === 'cpu' ? 'cpu_only_falls_back_to_gguf' : 'insufficient_vram')),
+    recommended_targets: supported.slice(0, 3),
+    manifest_source: manifestRead ? manifestRead.source : null,
+    artifact: null,
+    fit: null,
+    target_pick: null,
+    forge_hardware_version: HARDWARE_VERSION,
+    artifact_fit_version: ARTIFACT_FIT_VERSION,
   };
+}
+
+/**
+ * Will this artifact run on this hardware?
+ * @param {string} artifactPath path to .kolm artifact, manifest directory, or manifest JSON
+ * @returns {Object} { fits: bool, primary, reason, recommended_targets[] }
+ */
+export function willArtifactFit(artifactPath, opts = {}) {
+  const hw = opts.hardware || detectHardware();
+  const primary = hw.primary || {};
+  const vram_gb = positiveNumber(primary.vram_gb);
+  const supported = supportedMethodsForPrimary(primary);
+  const manifestRead = opts.manifest
+    ? { ok: true, manifest: opts.manifest, source: 'opts.manifest' }
+    : readArtifactManifest(artifactPath);
+  if (!manifestRead.ok) return fallbackArtifactFit(hw, manifestRead);
+
+  const artifact = artifactFitDescriptor(manifestRead.manifest);
+  if (!vram_gb) return {
+    fits: false,
+    primary,
+    reason: 'hardware_vram_unknown',
+    recommended_targets: supported.slice(0, 3),
+    manifest_source: manifestRead.source,
+    artifact,
+    fit: null,
+    target_pick: null,
+    forge_hardware_version: HARDWARE_VERSION,
+    artifact_fit_version: ARTIFACT_FIT_VERSION,
+  };
+
+  if (artifact.has_estimator_inputs) {
+    let fit = null;
+    let target_pick = null;
+    try {
+      if (artifact.quant) {
+        fit = estimateMemoryFit({
+          model_params_b: artifact.model_params_b,
+          quant: artifact.quant,
+          vram_gb,
+          context: artifact.context,
+          batch: artifact.batch,
+          kv_precision: artifact.kv_precision,
+        });
+      }
+      target_pick = pickBestFitTarget({
+        model_params_b: artifact.model_params_b,
+        vram_gb,
+        context: artifact.context,
+        batch: artifact.batch,
+        kv_precision: artifact.kv_precision,
+        supported_methods: supported,
+      });
+    } catch (error) {
+      return {
+        fits: false,
+        primary,
+        reason: safeFitError(error),
+        recommended_targets: supported.slice(0, 3),
+        manifest_source: manifestRead.source,
+        artifact,
+        fit,
+        target_pick,
+        forge_hardware_version: HARDWARE_VERSION,
+        artifact_fit_version: ARTIFACT_FIT_VERSION,
+      };
+    }
+    const quantSupported = artifact.quant ? supported.includes(artifact.quant) : Boolean(target_pick && target_pick.picked);
+    const fits = artifact.quant
+      ? Boolean(fit && fit.fits && quantSupported)
+      : Boolean(target_pick && target_pick.picked);
+    const recommended = artifact.quant && quantSupported
+      ? [artifact.quant, ...supported.filter((m) => m !== artifact.quant)].slice(0, 3)
+      : [target_pick && target_pick.picked, ...supported].filter(Boolean).slice(0, 3);
+    return {
+      fits,
+      primary,
+      reason: fits
+        ? 'manifest_estimate_fits'
+        : (quantSupported ? 'manifest_estimate_exceeds_vram' : 'artifact_quant_not_supported_by_primary'),
+      recommended_targets: recommended,
+      manifest_source: manifestRead.source,
+      artifact,
+      fit,
+      target_pick,
+      forge_hardware_version: HARDWARE_VERSION,
+      artifact_fit_version: ARTIFACT_FIT_VERSION,
+    };
+  }
+
+  if (artifact.has_declared_memory) {
+    const required_gb = Math.round((artifact.memory_requirement_mb / 1024) * 10) / 10;
+    const fits = required_gb <= vram_gb;
+    return {
+      fits,
+      primary,
+      reason: fits ? 'manifest_memory_requirement_fits' : 'manifest_memory_requirement_exceeds_vram',
+      recommended_targets: supported.slice(0, 3),
+      manifest_source: manifestRead.source,
+      artifact: { ...artifact, required_gb },
+      fit: null,
+      target_pick: null,
+      forge_hardware_version: HARDWARE_VERSION,
+      artifact_fit_version: ARTIFACT_FIT_VERSION,
+    };
+  }
+
+  return fallbackArtifactFit(hw, { ...manifestRead, reason: 'missing_fit_fields' });
 }
 
 /**
