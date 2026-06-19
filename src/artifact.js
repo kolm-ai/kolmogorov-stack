@@ -85,7 +85,7 @@ import {
 // an OpenSSF Model-Signing (OMS) file manifest. Both seal over the ACTUAL
 // bundled member bytes and are EMITTED AFTER artifact_hash (excluded from it,
 // like signature.sig), gated behind the Ed25519 signer.
-import { emitArtifactAttestation } from './intoto-slsa.js';
+import { emitArtifactAttestation, inferModelDocumentationRole } from './intoto-slsa.js';
 import { toOmsArtifactManifest } from './intoto-receipt.js';
 import { buildSigstoreBundle, isDisabled as isSigstoreDisabled, attestArtifactWithRekor, rekorUrl as sigstoreRekorUrl } from './sigstore.js';
 import { canonicalizeOutputSchemaSpec, validateOutputSchemaSpec, OUTPUT_SCHEMA_VERSION } from './output-schema.js';
@@ -2304,6 +2304,12 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
       if (digest && digest.sha256) memberDigests[f.filename] = digest;
     }
     const memberList = Object.keys(memberDigests).sort().map((name) => ({ name, ...memberDigests[name] }));
+    const documentationDigests = Object.keys(memberDigests).sort()
+      .map((name) => {
+        const role = inferModelDocumentationRole(name);
+        return role ? { name, digest: memberDigests[name], role } : null;
+      })
+      .filter(Boolean);
 
     // SLSA Provenance v1 DSSE sidecar over the real member byte digests.
     try {
@@ -2317,6 +2323,7 @@ export function buildPayload({ job_id, task, base_model, recipes, lora_pointer, 
         jobId: job_id,
         issued_at,
         subjectDigests: memberDigests,
+        documentationDigests,
       });
       files.push({ filename: 'provenance.intoto.dsse.json', content: Buffer.from(dsseJson) });
     } catch (e) {

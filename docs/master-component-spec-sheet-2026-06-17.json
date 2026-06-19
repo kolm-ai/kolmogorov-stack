@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2045,
+          "js_family": 2047,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -321,11 +321,11 @@
       "id": "model-signing-standards",
       "stack_area": "trust",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 8,
-      "improvement_count": 2,
+      "already_at_frontier_count": 9,
+      "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 1,
+      "minor_gaps": 2,
       "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -3209,6 +3209,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave957-apps-atomic-scope.test.js",
+          "tests/model-signing-sidecars.test.js",
           "tests/wave610-small-llm-frontier-registry.test.js"
         ],
         "category_links": [],
@@ -17196,8 +17197,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 152819,
-          "lines": 2836,
+          "bytes": 153131,
+          "lines": 2843,
           "imports": 32,
           "exports": 13,
           "routes": 0,
@@ -17216,7 +17217,7 @@
         ],
         "priority_score": 8,
         "priority_band": "high",
-        "sha256": "77cafaad4fd7dcfa31a61bb3623f7d98f4ee3cca71dbbf578ed2e7f163748346"
+        "sha256": "44c77a871baaaf391f535194197c0c987b7ffb2db1c4e9d863a3b27073918f90"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -33074,10 +33075,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 20067,
-          "lines": 504,
+          "bytes": 22251,
+          "lines": 566,
           "imports": 2,
-          "exports": 14,
+          "exports": 16,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -33091,7 +33092,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "a3f98e0038b01a1471b4d4c03c09dad49a56d0db5f71bd4d2884e83af02793b0"
+        "sha256": "0799a821394aba1926febcbe257afcc45c87d23fc248d7da1607116e42a2f70e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",

@@ -40,7 +40,11 @@ The canonical v1 container uses these members:
 | `splits/eval.jsonl` | provenance | Held-out eval rows or row hashes when a distill/train path was used. |
 | `recipe.json` | optional | Human-readable recipe metadata and schema snapshot. |
 | `sig.ed25519` | optional | Detached Ed25519 signature for external verifiers. The receipt remains authoritative when absent. |
+| `provenance.intoto.dsse.json` | optional | Signed in-toto/SLSA Provenance v1 DSSE sidecar over the artifact member digests. |
+| `model.sig.bundle` | optional | OpenSSF Model Signing / Sigstore-shaped bundle over the artifact member manifest. |
 | `sbom.json` | optional | SBOM/dependency evidence for regulated deployments. |
+| `model-card.{md,json,yaml}` | optional | Model-card documentation; when bundled, its digest is bound into the SLSA provenance sidecar as regulatory/model documentation. |
+| `eu-ai-act-annex-xi.json` / `eu-ai-act-annex-xii.json` | optional | EU AI Act / GPAI technical-documentation evidence; when bundled, its digest is bound into SLSA provenance byproducts. |
 | `attestations/*.json` | optional | Third-party auditor or confidential-compute attestations. |
 
 All file hashes recorded in `manifest.json` or `receipt.json` are SHA-256 hex

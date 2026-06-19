@@ -141,6 +141,31 @@ test('sidecar: DSSE subject digests are the ACTUAL bundled bytes (not lineage-fo
   }
 });
 
+test('sidecar: model-card and EU AI Act document digests are bound into SLSA byproducts', () => {
+  isolatedHome();
+  const modelCard = Buffer.from('model: kolm-test\nintended_use: regression\n', 'utf8');
+  const annex = Buffer.from(JSON.stringify({ annex: 'XI', controls: ['training-data', 'evals'] }), 'utf8');
+  const payload = buildPayload(ruleArgs({
+    extra_files: [
+      { filename: 'model-card.yaml', content: modelCard },
+      { filename: 'eu-ai-act-annex-xi.json', content: annex },
+    ],
+  }));
+  const envelope = JSON.parse(fileBuf(payload, 'provenance.intoto.dsse.json').toString('utf8'));
+  const statement = JSON.parse(Buffer.from(envelope.payload, 'base64').toString('utf8'));
+  const docs = statement.predicate.runDetails.byproducts.filter((row) => row.annotations?.role === 'model_documentation');
+  assert.equal(docs.length, 2);
+  const byName = Object.fromEntries(docs.map((row) => [row.name, row]));
+  assert.equal(byName['model-card.yaml'].annotations.document_role, 'model_card');
+  assert.equal(byName['eu-ai-act-annex-xi.json'].annotations.document_role, 'eu_ai_act_annex_xi');
+  assert.deepEqual(byName['model-card.yaml'].digest, byteDigests(modelCard));
+  assert.deepEqual(byName['eu-ai-act-annex-xi.json'].digest, byteDigests(annex));
+
+  const externalDocs = statement.predicate.buildDefinition.externalParameters.model_documentation;
+  assert.ok(Array.isArray(externalDocs));
+  assert.deepEqual(externalDocs.map((row) => row.name).sort(), ['eu-ai-act-annex-xi.json', 'model-card.yaml']);
+});
+
 // ===========================================================================
 // (2) OMS file-manifest bundle over actual weight members
 // ===========================================================================

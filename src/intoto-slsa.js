@@ -50,6 +50,24 @@ export const KOLM_SLSA_CONFORMANCE = 'SLSA Provenance v1 (Build L2 shape)';
 const HEX64_RE = /^[0-9a-f]{64}$/;
 const HEX128_RE = /^[0-9a-f]{128}$/;
 
+export function inferModelDocumentationRole(name) {
+  const s = String(name || '').toLowerCase().replace(/\\/g, '/');
+  const base = s.split('/').pop() || s;
+  if (/^model[-_ ]?card\.(md|json|ya?ml)$/.test(base) || /(^|\/)model[-_ ]?card\.(md|json|ya?ml)$/.test(s)) {
+    return 'model_card';
+  }
+  if (/annex[-_ ]?xi(\.|-|_|$)/i.test(base) || /annex[-_ ]?11(\.|-|_|$)/i.test(base)) {
+    return 'eu_ai_act_annex_xi';
+  }
+  if (/annex[-_ ]?xii(\.|-|_|$)/i.test(base) || /annex[-_ ]?12(\.|-|_|$)/i.test(base)) {
+    return 'eu_ai_act_annex_xii';
+  }
+  if (/technical[-_ ]?documentation|technical[-_ ]?doc|eu[-_ ]?ai[-_ ]?act|gpai/.test(s)) {
+    return 'technical_documentation';
+  }
+  return null;
+}
+
 function _normalizeDigestValue(v) {
   if (typeof v === 'string') return { sha256: v.toLowerCase() };
   if (!v || typeof v !== 'object') return {};
@@ -82,6 +100,32 @@ function _subjectDigestFromValue(v) {
   if (sha256 && HEX64_RE.test(sha256)) digest.sha256 = sha256;
   if (blake2b && HEX128_RE.test(blake2b)) digest.blake2b = blake2b;
   return Object.keys(digest).length > 0 ? digest : null;
+}
+
+export function normalizeModelDocumentationDigests(documentationDigests) {
+  const rows = Array.isArray(documentationDigests)
+    ? documentationDigests
+    : Object.entries(documentationDigests || {}).map(([name, digest]) => ({ name, digest }));
+  const out = [];
+  const seen = new Set();
+  for (const row of rows) {
+    const name = String(row?.name || '').replace(/\\/g, '/').replace(/^\.\/+/, '');
+    if (!name || seen.has(name)) continue;
+    const digest = _subjectDigestFromValue(row.digest || row);
+    if (!digest) continue;
+    const role = row.role || row.document_role || inferModelDocumentationRole(name);
+    if (!role) continue;
+    seen.add(name);
+    out.push({
+      name,
+      digest,
+      annotations: {
+        role: 'model_documentation',
+        document_role: String(role),
+      },
+    });
+  }
+  return out.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // ---------------------------------------------------------------------------
@@ -189,6 +233,7 @@ export function buildSlsaProvenancePredicate({
   manifest = {},
   hashes = {},
   lineage = null,
+  documentationDigests = null,
   builderId,
   builderVersion,
   jobId,
@@ -202,6 +247,14 @@ export function buildSlsaProvenancePredicate({
   if (manifest.cid !== undefined) externalParameters.cid = manifest.cid;
   if (hashes && hashes.recipes_json) externalParameters.recipes_hash = hashes.recipes_json;
   if (jobId !== undefined) externalParameters.job_id = jobId;
+  const modelDocumentation = normalizeModelDocumentationDigests(documentationDigests);
+  if (modelDocumentation.length) {
+    externalParameters.model_documentation = modelDocumentation.map((d) => ({
+      name: d.name,
+      digest: d.digest,
+      document_role: d.annotations.document_role,
+    }));
+  }
 
   const resolvedDependencies = resourceDescriptorsFromLineage(lineage);
   // When there is no distillation lineage, degrade to recipes/evals as inputs
@@ -235,7 +288,14 @@ export function buildSlsaProvenancePredicate({
         startedOn: startedOn || finishedOn || new Date().toISOString(),
         finishedOn: finishedOn || new Date().toISOString(),
       },
-      byproducts: [],
+      byproducts: modelDocumentation.map((d) => ({
+        name: d.name,
+        digest: d.digest,
+        annotations: {
+          ...d.annotations,
+          slsa_relation: 'regulatory_documentation',
+        },
+      })),
     },
   };
 }
@@ -431,6 +491,7 @@ export function emitArtifactAttestation({
   manifest = {},
   hashes = {},
   lineage = null,
+  documentationDigests = null,
   artifact_hash,
   cid,
   jobId,
@@ -471,6 +532,7 @@ export function emitArtifactAttestation({
     manifest: { ...manifest, cid: cid !== undefined ? cid : manifest.cid },
     hashes,
     lineage,
+    documentationDigests,
     builderId,
     builderVersion,
     jobId,

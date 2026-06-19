@@ -356,7 +356,7 @@
         "probeBytes",
         "Pass 2"
       ],
-      "line": 2384,
+      "line": 2391,
       "owner": "buildAndZip",
       "phase": "two_pass_kscore_zip",
       "present": true
@@ -367,7 +367,7 @@
         "cleanupOnFail",
         "fs.unlinkSync(p)"
       ],
-      "line": 2429,
+      "line": 2436,
       "owner": "cleanupOnFail",
       "phase": "outpath_preflight_cleanup",
       "present": true
@@ -389,7 +389,7 @@
         "constantTimeEqualHex",
         "hmac mismatch"
       ],
-      "line": 2563,
+      "line": 2570,
       "owner": "verifyManifestSignature",
       "phase": "manifest_signature_verify",
       "present": true
@@ -400,7 +400,7 @@
         "./devices.js",
         "vram_gb"
       ],
-      "line": 2622,
+      "line": 2629,
       "owner": "verifyDeviceFit",
       "phase": "device_fit",
       "present": true
@@ -411,7 +411,7 @@
         "HETEROGENEOUS_WEIGHTS_VERSION",
         "present_modalities"
       ],
-      "line": 2721,
+      "line": 2728,
       "owner": "addHeterogeneousWeights",
       "phase": "heterogeneous_weights",
       "present": true
@@ -601,37 +601,37 @@
     {
       "async": false,
       "kind": "function",
-      "line": 2347,
+      "line": 2354,
       "name": "packageArtifact"
     },
     {
       "async": true,
       "kind": "function",
-      "line": 2384,
+      "line": 2391,
       "name": "buildAndZip"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 2563,
+      "line": 2570,
       "name": "verifyManifestSignature"
     },
     {
       "async": true,
       "kind": "function",
-      "line": 2622,
+      "line": 2629,
       "name": "verifyDeviceFit"
     },
     {
       "async": false,
       "kind": "const",
-      "line": 2690,
+      "line": 2697,
       "name": "HETEROGENEOUS_WEIGHTS_VERSION"
     },
     {
       "async": false,
       "kind": "function",
-      "line": 2724,
+      "line": 2731,
       "name": "addHeterogeneousWeights"
     }
   ],
@@ -772,55 +772,55 @@
     {
       "async": false,
       "exported": true,
-      "line": 2347,
+      "line": 2354,
       "name": "packageArtifact"
     },
     {
       "async": true,
       "exported": true,
-      "line": 2384,
+      "line": 2391,
       "name": "buildAndZip"
     },
     {
       "async": false,
       "exported": true,
-      "line": 2563,
+      "line": 2570,
       "name": "verifyManifestSignature"
     },
     {
       "async": false,
       "exported": false,
-      "line": 2608,
+      "line": 2615,
       "name": "constantTimeEqualHex"
     },
     {
       "async": true,
       "exported": true,
-      "line": 2622,
+      "line": 2629,
       "name": "verifyDeviceFit"
     },
     {
       "async": false,
       "exported": false,
-      "line": 2709,
+      "line": 2716,
       "name": "_looksLikeWeightBuffer"
     },
     {
       "async": false,
       "exported": false,
-      "line": 2717,
+      "line": 2724,
       "name": "_toBuffer"
     },
     {
       "async": false,
       "exported": true,
-      "line": 2724,
+      "line": 2731,
       "name": "addHeterogeneousWeights"
     },
     {
       "async": false,
       "exported": false,
-      "line": 2808,
+      "line": 2815,
       "name": "_normalizeWeightRecords"
     }
   ],
@@ -968,9 +968,9 @@
     "tests/wave948-artifact-matrix.test.js"
   ],
   "summary": {
-    "artifact_bytes": 152819,
+    "artifact_bytes": 153131,
     "artifact_hash_slot_count": 36,
-    "artifact_lines": 2836,
+    "artifact_lines": 2843,
     "build_and_zip_field_count": 57,
     "build_payload_field_count": 61,
     "direct_test_evidence_count": 102,
@@ -1152,9 +1152,9 @@
       "ARTIFACT_CLASSES_refs": 0,
       "HETEROGENEOUS_WEIGHTS_VERSION_refs": 0,
       "addHeterogeneousWeights_refs": 0,
-      "artifact_workflow_refs": 49,
+      "artifact_workflow_refs": 51,
       "buildAndZip_refs": 0,
-      "buildPayload_refs": 9,
+      "buildPayload_refs": 10,
       "buildRecipeBundleMjs_refs": 0,
       "computeKScore_refs": 0,
       "decodeIndex_refs": 0,
@@ -1162,7 +1162,7 @@
       "packageArtifact_refs": 0,
       "path": "tests/model-signing-sidecars.test.js",
       "source_lock": true,
-      "total_symbol_refs": 9,
+      "total_symbol_refs": 10,
       "verifyDeviceFit_refs": 0,
       "verifyManifestSignature_refs": 0
     },
