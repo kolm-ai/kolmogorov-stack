@@ -8,17 +8,18 @@ function read(rel) {
   return fs.readFileSync(new URL(`../${rel}`, import.meta.url), 'utf8');
 }
 
-test('W1032 Distill Studio is a real no-code distill workspace', () => {
+test('W1032 Distill Studio is a real no-code train, distill, compile workspace', () => {
   const html = read('public/studio.html');
-  assert.match(html, /data-studio-version="w1032-distill-studio-v1"/);
+  assert.match(html, /data-studio-version="w1033-distill-compile-studio-v1"/);
   assert.match(html, /Distill Studio/);
-  assert.match(html, /No-code distill loop/);
+  assert.match(html, /No-code train, distill, compile loop/);
   assert.match(html, /id="namespace"/);
   assert.match(html, /id="preset"/);
   assert.match(html, /QDoRA/);
   assert.match(html, /id="backend"/);
   assert.match(html, /id="provider"/);
   assert.match(html, /id="startDistill"/);
+  assert.match(html, /id="startCompile"/);
   assert.match(html, /id="submitCloud"/);
   assert.match(html, /aria-live="polite"/);
 });
@@ -30,6 +31,8 @@ test('W1032 Studio wires the production distill APIs without unsafe DOM sinks', 
     '/v1/distill/from-captures',
     '/v1/distill/strategy',
     '/v1/cloud/distill/submit',
+    '/v1/compile',
+    '/v1/compile/stream/:job',
     '/v1/distill/runs',
     '/v1/captures/list',
   ]) {

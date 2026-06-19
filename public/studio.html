@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Distill Studio - kolm.ai</title>
-<meta name="description" content="No-code workspace for capture preview, distill strategy, trainer settings, cloud dispatch, and run monitoring.">
+<meta name="description" content="No-code workspace for model training, distillation, compilation, capture preview, cloud dispatch, and run monitoring.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#08090A">
 <link rel="canonical" href="https://kolm.ai/studio">
@@ -71,7 +71,7 @@
   @media (max-width:620px){.studio{padding-top:18px}.studio-top{align-items:flex-start;flex-direction:column}.studio-nav{justify-content:flex-start}.status,.flow,.settings{grid-template-columns:1fr}.run-row,.row{grid-template-columns:1fr}.row span,.run-row span{text-align:left}.btnbar .btn{flex:1 1 auto}}
 </style>
 </head>
-<body data-studio-version="w1032-distill-studio-v1">
+<body data-studio-version="w1033-distill-compile-studio-v1">
 <a class="skip-link" href="#main">Skip to content</a>
 <main id="main" class="studio">
   <header class="studio-top">
@@ -81,6 +81,7 @@
     </a>
     <nav class="studio-nav" aria-label="Workspace">
       <a class="badge" href="/account/train">Train</a>
+      <a class="badge" href="/account/train">Compile</a>
       <a class="badge" href="/account/api-control-center">API Control</a>
       <a class="badge" href="/account/overview">Overview</a>
       <a class="badge" href="/docs">Docs</a>
@@ -91,8 +92,8 @@
     <aside class="rail" aria-label="Studio controls">
       <div>
         <p class="eyebrow">Distill Studio</p>
-        <h1>No-code distill loop</h1>
-        <p>Capture preview, strategy selection, trainer settings, dispatch, and run status in one workspace.</p>
+        <h1>No-code train, distill, compile loop</h1>
+        <p>Capture preview, strategy selection, trainer settings, dispatch, compilation, and run status in one workspace.</p>
       </div>
       <label>API key
         <input id="apiKey" type="password" autocomplete="off" placeholder="ks_..." aria-describedby="keyNote">
@@ -133,7 +134,7 @@
             <div class="flow-step"><b>Capture</b><span id="phaseCapture">waiting</span></div>
             <div class="flow-step"><b>Curate</b><span id="phaseCurate">waiting</span></div>
             <div class="flow-step"><b>Train</b><span id="phaseTrain">waiting</span></div>
-            <div class="flow-step"><b>Package</b><span id="phasePackage">waiting</span></div>
+            <div class="flow-step"><b>Compile</b><span id="phasePackage">waiting</span></div>
           </div>
         </div>
 
@@ -177,6 +178,7 @@
           <div class="btnbar" style="margin-top:12px">
             <button class="btn" id="planStrategy" type="button">Plan Strategy</button>
             <button class="btn btn--primary" id="startDistill" type="button">Start Distill</button>
+            <button class="btn" id="startCompile" type="button">Compile Artifact</button>
             <button class="btn" id="submitCloud" type="button">Cloud Submit</button>
           </div>
         </div>
@@ -208,6 +210,11 @@
   function number(n){ return Number.isFinite(Number(n)) ? Number(n).toLocaleString() : '0'; }
   function notice(msg, warn){ var el = $('notice'); el.textContent = msg; el.className = warn ? 'banner warn' : 'banner'; }
   function write(obj){ $('output').textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2); }
+  function appendLog(line){
+    var out = $('output');
+    out.textContent += (out.textContent ? '\n' : '') + line;
+    out.scrollTop = out.scrollHeight;
+  }
   function key(){ return val('apiKey') || localStorage.getItem(storeKey) || ''; }
   function headers(body){
     var h = { accept: 'application/json' };
@@ -255,7 +262,7 @@
     text('phaseCapture', state.captures ? 'ready' : 'empty');
     text('phaseCurate', data.total_captures ? 'previewed' : 'waiting');
     text('phaseTrain', data.specialist_eligible ? 'eligible' : 'gated');
-    text('phasePackage', data.recipe_eligible || data.specialist_eligible ? 'available after run' : 'waiting');
+    text('phasePackage', data.recipe_eligible || data.specialist_eligible ? 'ready after distill' : 'waiting');
     var list = $('clusterRows'); clearNode(list);
     var clusters = Array.isArray(data.top_clusters) ? data.top_clusters : [];
     if (!clusters.length) row(list, 'No cluster yet', '0', 'capture more');
@@ -327,6 +334,71 @@
       write(err.payload || err.message);
     }
   }
+  async function startCompile(){
+    var btn = $('startCompile');
+    try {
+      if (btn) btn.disabled = true;
+      notice('Starting compile...');
+      write('Starting compile for namespace ' + (val('namespace') || 'default') + '...');
+      var namespace = val('namespace') || 'default';
+      var body = {
+        task: 'distill namespace ' + namespace,
+        corpus_namespace: namespace,
+        source: 'studio',
+        quality_preset: val('preset'),
+        backend: val('backend'),
+      };
+      var data = await api('/v1/compile', { method: 'POST', headers: headers(true), body: JSON.stringify(body) });
+      write(data);
+      var streamUrl = data.stream_url || (data.job ? '/v1/compile/stream/' + data.job : '');
+      if (!streamUrl) {
+        notice('Compile submitted.');
+        if (btn) btn.disabled = false;
+        return;
+      }
+      streamCompile(streamUrl, btn);
+    } catch (err) {
+      if (btn) btn.disabled = false;
+      notice(err.message, true);
+      write(err.payload || err.message);
+    }
+  }
+  function streamCompile(url, btn){
+    var ended = false;
+    var k = key();
+    var streamUrl = url + (k ? (url.indexOf('?') < 0 ? '?' : '&') + 'key=' + encodeURIComponent(k) : '');
+    var src;
+    try {
+      src = new EventSource(streamUrl, { withCredentials: true });
+    } catch (_) {
+      notice('Compile started, but the browser blocked the live stream.', true);
+      if (btn) btn.disabled = false;
+      return;
+    }
+    notice('Compile running...');
+    appendLog('compile stream connected');
+    function parse(ev){ try { return JSON.parse(ev.data || '{}'); } catch (_) { return { raw: ev.data || '' }; } }
+    src.addEventListener('hello', function(ev){ appendLog('hello ' + JSON.stringify(parse(ev))); });
+    src.addEventListener('step', function(ev){ appendLog('step ' + JSON.stringify(parse(ev))); });
+    src.addEventListener('metric', function(ev){ appendLog('metric ' + JSON.stringify(parse(ev))); });
+    src.addEventListener('done', function(ev){
+      ended = true;
+      var data = parse(ev);
+      appendLog('done ' + JSON.stringify(data));
+      notice('Compile done' + (data.k_score != null ? ' - K ' + Number(data.k_score).toFixed(3) : '') + '.');
+      src.close();
+      if (btn) btn.disabled = false;
+      loadRuns();
+    });
+    src.addEventListener('error', function(ev){
+      if (ended) return;
+      var data = ev && ev.data ? parse(ev) : {};
+      appendLog('stream interrupted' + (data.error || data.message ? ': ' + (data.error || data.message) : ''));
+      notice('Compile stream interrupted. Check Runs for final status.', true);
+      src.close();
+      if (btn) btn.disabled = false;
+    });
+  }
   async function loadRuns(){
     try {
       notice('Loading runs...');
@@ -351,9 +423,10 @@
     $('loadRuns').addEventListener('click', loadRuns);
     $('planStrategy').addEventListener('click', planStrategy);
     $('startDistill').addEventListener('click', startDistill);
+    $('startCompile').addEventListener('click', startCompile);
     $('submitCloud').addEventListener('click', submitCloud);
     renderPreview({ total_captures: 0, top_clusters: [] });
-    write({ studio_version: 'w1032-distill-studio-v1', endpoints: ['/v1/distill/from-captures/preview', '/v1/distill/from-captures', '/v1/distill/strategy', '/v1/cloud/distill/submit', '/v1/distill/runs', '/v1/captures/list'] });
+    write({ studio_version: 'w1033-distill-compile-studio-v1', endpoints: ['/v1/distill/from-captures/preview', '/v1/distill/from-captures', '/v1/distill/strategy', '/v1/cloud/distill/submit', '/v1/compile', '/v1/compile/stream/:job', '/v1/distill/runs', '/v1/captures/list'] });
   }
   init();
 })();
