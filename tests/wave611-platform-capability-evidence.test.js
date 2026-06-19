@@ -45,6 +45,7 @@ test('W611 #2 - wasm-webgpu row now cites only real public/device runner evidenc
     'public/device/webgpu-runner.js',
     'public/device/onnx-web-runner.js',
     'public/device/webllm-runner.js',
+    'public/device/llamaweb-runner.js',
     'public/device/fixtures/tiny-linear.manifest.json',
     'server.js',
     'docs/kolm-format-v1.md',
@@ -53,7 +54,7 @@ test('W611 #2 - wasm-webgpu row now cites only real public/device runner evidenc
   assert.match(row.note, /verifies signed weight bytes/i);
   assert.match(row.note, /signed ONNX bytes/i);
   assert.match(row.note, /signed WebLLM\/MLC bytes/i);
-  assert.match(row.note, /LlamaWeb GGUF browser execution remains/i);
+  assert.match(row.note, /signed GGUF bytes/i);
 });
 
 test('W611 #3 - browser WebGPU has real proof-harness evidence and platform validation still passes', () => {
@@ -63,9 +64,11 @@ test('W611 #3 - browser WebGPU has real proof-harness evidence and platform vali
   assert.ok(browser.evidence.includes('public/device/webgpu-runner.js'));
   assert.ok(browser.evidence.includes('public/device/onnx-web-runner.js'));
   assert.ok(browser.evidence.includes('public/device/webllm-runner.js'));
+  assert.ok(browser.evidence.includes('public/device/llamaweb-runner.js'));
   assert.ok(browser.evidence.includes('public/device/webgpu-runner.html'));
   assert.ok(browser.runtimes.includes('onnxruntime-web'));
   assert.ok(browser.runtimes.includes('webllm'));
+  assert.ok(browser.runtimes.includes('llama.cpp-webgpu'));
   assert.equal(browser.evidence.every((rel) => exists(rel)), true);
   assert.equal(validatePlatformCapabilities().ok, true);
 });

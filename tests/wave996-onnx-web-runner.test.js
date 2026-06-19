@@ -214,5 +214,6 @@ test('W996 platform evidence and stack spec record ONNX-Web closure honestly', (
   const spec = fs.readFileSync(SPEC_PATH, 'utf8');
   assert.match(spec, /CLOSED W996: wire signed ONNX-Web browser runner/);
   assert.match(spec, /CLOSED W999: wire signed WebLLM browser runner/);
-  assert.match(spec, /LlamaWeb GGUF execution remains unwired/i);
+  assert.match(spec, /CLOSED W1000: wire signed LlamaWeb GGUF browser runner/);
+  assert.doesNotMatch(spec, /\[major\] LlamaWeb GGUF execution remains unwired/i);
 });
