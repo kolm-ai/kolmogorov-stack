@@ -38,6 +38,8 @@
 import { embed, cosine, DIMENSIONS } from './embedding.js';
 import { estimateCost } from './cost-estimator.js';
 import { buildChainFromNamespace, selectRoute, parseChainEntry } from './gateway-router.js';
+import { classifyPromptAdversarial, ADVERSARIAL_PROMPTS_VERSION } from './adversarial-prompts.js';
+import { scanSensitive } from './sensitive-data.js';
 // READ-ONLY import: ewmaLatencyMs is a pure getter on the process-wide health
 // registry (no mutation). scoreRoute only ever READS the EWMA p50 latency for a
 // provider; it never records outcomes or opens circuits here. Callers/tests can
@@ -45,7 +47,7 @@ import { buildChainFromNamespace, selectRoute, parseChainEntry } from './gateway
 // singleton. Importing the function (not calling a mutator) keeps this additive.
 import { ewmaLatencyMs as _ewmaLatencyMs } from './provider-health.js';
 
-export const SEMANTIC_ROUTER_VERSION = 'w984-v2';
+export const SEMANTIC_ROUTER_VERSION = 'w986-v3';
 export const EMBEDDER_ID = 'hashed-ngram-256';
 
 const DEFAULT_K = 32;
@@ -63,18 +65,21 @@ const DEFAULT_MIN_SAMPLES = 20;
 // threshold), Avengers-Pro (DAI'25, arXiv 2508.12631 - embed -> cluster ->
 // performance-efficiency score), and RouterWise (arXiv 2604.10907, 2026-04 - 
 // proves per-model latency is NOT fixed but a function of request LOAD on the
-// shared GPU pool, making load a first-class routing determinant). NEXT-5 in
-// KOLM_W921_FRONTIER_REVIEW.md asks to fuse multiple signals into one weighted
-// score while keeping the auditable-receipt edge.
+// shared GPU pool, making load a first-class routing determinant). W986 adds
+// the vLLM-Semantic-Router/Iris-style safety/privacy signal: jailbreak/prompt-
+// injection plus PII/secret detection can bias risky traffic toward candidates
+// explicitly marked as higher-safety, while benign traffic stays neutral.
 //
-// The five canonical signals, each min-max normalized within the candidate set
-// into [0,1] and ORIENTED so higher == more preferred:
+// The six canonical signals, each min-max normalized within the candidate set
+// into [0,1] and ORIENTED so higher == more preferred unless noted:
 //   quality    cluster accuracy (already [0,1]); higher better. As-is.
 //   cost       lower USD better -> normalized then INVERTED (1 - cost~).
 //   latency    lower ms better  -> normalized then INVERTED (1 - lat~).
 //   load       lower in-flight/util better -> normalized then INVERTED.
 //   similarity cosine(prompt, each candidate's historical cluster window);
 //              higher better.
+//   safety     absolute [0,1] candidate safety tier, used only when the prompt
+//              is risky; benign prompts produce a neutral 0.5 for every model.
 //
 // Final per-candidate score = sum_s w_s * signal_s~  /  sum_s w_s  (weights
 // renormalized over the signals actually present so an absent signal neither
@@ -89,8 +94,9 @@ const DEFAULT_MIN_SAMPLES = 20;
 
 // The canonical signal identifiers, in a STABLE order (used for deterministic
 // receipt/serialization ordering). 'similarity' is the only one that needs the
-// raw prompt vector + centroid; the rest derive from aggregates/load/health.
-export const ROUTE_SIGNALS = Object.freeze(['quality', 'cost', 'latency', 'load', 'similarity']);
+// raw prompt vector + centroid; safety uses privacy-safe prompt-risk classes
+// plus explicit per-candidate safety tiers.
+export const ROUTE_SIGNALS = Object.freeze(['quality', 'cost', 'latency', 'load', 'similarity', 'safety']);
 
 // Signals where a LOWER raw value is better (so we invert after min-max norm).
 const _LOWER_IS_BETTER = Object.freeze(new Set(['cost', 'latency', 'load']));
@@ -103,6 +109,7 @@ export const DEFAULT_ROUTE_WEIGHTS = Object.freeze({
   latency: 0.0,
   load: 0.0,
   similarity: 0.0,
+  safety: 0.0,
 });
 
 // Rough length-based token estimate used BEFORE dispatch (we have no usage
@@ -112,6 +119,104 @@ export const DEFAULT_ROUTE_WEIGHTS = Object.freeze({
 function _estTokensFromText(text) {
   const s = String(text == null ? '' : text);
   return Math.max(1, Math.ceil(s.length / 4));
+}
+
+function _stableList(values) {
+  if (!Array.isArray(values)) return [];
+  return Array.from(new Set(values.map((v) => String(v || '').trim()).filter(Boolean))).sort();
+}
+
+function _safeSafetyTierValue(raw) {
+  if (raw == null) return null;
+  if (typeof raw === 'object') {
+    if (Object.prototype.hasOwnProperty.call(raw, 'score')) return _safeSafetyTierValue(raw.score);
+    if (Object.prototype.hasOwnProperty.call(raw, 'tier')) return _safeSafetyTierValue(raw.tier);
+    if (Object.prototype.hasOwnProperty.call(raw, 'level')) return _safeSafetyTierValue(raw.level);
+    if (Object.prototype.hasOwnProperty.call(raw, 'safety_score')) return _safeSafetyTierValue(raw.safety_score);
+    if (Object.prototype.hasOwnProperty.call(raw, 'safety_tier')) return _safeSafetyTierValue(raw.safety_tier);
+    return null;
+  }
+  const n = Number(raw);
+  if (Number.isFinite(n)) return _clamp01(n);
+  const s = String(raw).trim().toLowerCase().replace(/[\s_-]+/g, '-');
+  if (!s) return null;
+  if (['frontier', 'strict', 'high', 'enhanced', 'regulated', 'trusted', 'safe'].includes(s)) return 1.0;
+  if (['standard', 'medium', 'moderate', 'default'].includes(s)) return 0.65;
+  if (['basic', 'low', 'weak'].includes(s)) return 0.3;
+  if (['none', 'off', 'unsafe', 'untrusted'].includes(s)) return 0.0;
+  return null;
+}
+
+function _resolveSafetyTier(cand, key, safetyTiers = {}) {
+  const direct = _safeSafetyTierValue(
+    cand && (cand.safety_score ?? cand.safety_tier ?? cand.safety_profile ?? cand.safety_level),
+  );
+  if (direct != null) return direct;
+
+  const tiers = safetyTiers && typeof safetyTiers === 'object' ? safetyTiers : {};
+  const provider = cand && cand.provider ? String(cand.provider) : '';
+  const model = cand && cand.model ? String(cand.model) : '';
+  const probes = [
+    key,
+    provider && model ? `${provider}:${model}` : '',
+    model,
+    provider,
+    'default',
+  ].filter(Boolean);
+  for (const probe of probes) {
+    if (Object.prototype.hasOwnProperty.call(tiers, probe)) {
+      const v = _safeSafetyTierValue(tiers[probe]);
+      if (v != null) return v;
+    }
+  }
+  return null;
+}
+
+function _analyzeRouteSafety(prompt, opts = {}) {
+  const text = String(prompt == null ? '' : prompt);
+  const classifier = typeof opts.safetyClassifier === 'function'
+    ? opts.safetyClassifier
+    : classifyPromptAdversarial;
+  const scanner = typeof opts.sensitiveScanner === 'function'
+    ? opts.sensitiveScanner
+    : scanSensitive;
+
+  let adversarial = null;
+  try { adversarial = classifier(text); } catch { adversarial = null; }
+  let sensitive = null;
+  try { sensitive = scanner(text); } catch { sensitive = null; }
+
+  const adversarialCategories = _stableList(adversarial && adversarial.categories_matched);
+  const piiClasses = _stableList(sensitive && sensitive.pii_classes);
+  const secretClasses = _stableList(sensitive && sensitive.secret_classes);
+  const adversarialConfidence = _clamp01(Number(adversarial && adversarial.confidence) || 0);
+  const isAdversarial = !!(adversarial && adversarial.is_adversarial) || adversarialCategories.length > 0;
+  const isSensitive = !!(sensitive && sensitive.has_sensitive) || piiClasses.length > 0 || secretClasses.length > 0;
+
+  let riskScore = 0;
+  if (isAdversarial) riskScore = Math.max(riskScore, adversarialConfidence || 0.5);
+  if (secretClasses.length) riskScore = Math.max(riskScore, 0.9);
+  if (piiClasses.length) riskScore = Math.max(riskScore, 0.75);
+
+  return {
+    risk_score: Number(_clamp01(riskScore).toFixed(6)),
+    is_adversarial: isAdversarial,
+    is_sensitive: isSensitive,
+    adversarial_categories: adversarialCategories,
+    adversarial_confidence: Number(adversarialConfidence.toFixed(6)),
+    pii_classes: piiClasses,
+    secret_classes: secretClasses,
+    detector_versions: {
+      adversarial: String((adversarial && adversarial.version) || ADVERSARIAL_PROMPTS_VERSION),
+      sensitive: 'sensitive-data-v1',
+    },
+  };
+}
+
+function _candidateSafetySignal({ cand, key, safetyAnalysis, safetyTiers }) {
+  if (!safetyAnalysis || !(Number(safetyAnalysis.risk_score) > 0)) return 0.5;
+  const tier = _resolveSafetyTier(cand, key, safetyTiers);
+  return tier == null ? 0.5 : tier;
 }
 
 // A stable per-(provider,model) key for the scoresByModel / stats maps.
@@ -481,6 +586,9 @@ export function scoreRoute({
   // Read-only param; lower == less loaded == better. Defaults to {} (no load
   // data => the load signal contributes nothing, weights renormalize around it).
   const loadByKey = (opts && opts.load && typeof opts.load === 'object') ? opts.load : {};
+  const safetyTiers = (opts && opts.safety_tiers && typeof opts.safety_tiers === 'object') ? opts.safety_tiers
+    : ((cfg.safety_tiers && typeof cfg.safety_tiers === 'object') ? cfg.safety_tiers
+      : ((cfg.route_safety_tiers && typeof cfg.route_safety_tiers === 'object') ? cfg.route_safety_tiers : {}));
   // latencyFn: injectable for determinism. Defaults to the read-only EWMA getter
   // on the provider-health singleton. Called as latencyFn(provider) -> ms|null.
   const latencyFn = (opts && typeof opts.latencyFn === 'function') ? opts.latencyFn : _ewmaLatencyMs;
@@ -584,6 +692,7 @@ export function scoreRoute({
   // preference.
   const headCentroid = (Array.isArray(stats.centroids) && stats.centroids[clusterId]) || null;
   const clusterSimilarity = headCentroid ? _clamp01((cosine(vec, headCentroid) + 1) / 2) : null;
+  const routeSafety = routeWeights && routeWeights.safety ? _analyzeRouteSafety(prompt, opts) : null;
 
   const rows = [];
   let totalSamples = 0;
@@ -625,6 +734,9 @@ export function scoreRoute({
       latency,
       load,
       similarity: _candidateClusterFit(stats, vec, clusterIds, cand.model, clusterSimilarity),
+      safety: routeWeights && routeWeights.safety
+        ? _candidateSafetySignal({ cand, key, safetyAnalysis: routeSafety, safetyTiers })
+        : null,
       hasQuality: agg.n > 0,
     });
   }
@@ -646,7 +758,7 @@ export function scoreRoute({
   // ------------------------------------------------------------------------
   if (routeWeights) {
     return _scoreRouteMultiSignal({
-      rows, routeWeights, clusterSimilarity, minQuality, alpha, beta,
+      rows, routeWeights, clusterSimilarity, routeSafety, minQuality, alpha, beta,
       staticChain, clusterId, totalSamples,
     });
   }
@@ -767,11 +879,13 @@ export function scoreRoute({
 //   similarity: per-candidate cluster-fit over that model's historical samples
 //               in the top-p window. This is intentionally not min-maxed again:
 //               it is already an absolute [0,1] confidence/similarity score.
+//   safety:     absolute [0,1] candidate safety tier when request risk is
+//               detected; neutral 0.5 for benign prompts or unknown tiers.
 // A candidate missing a signal gets null for it (blendSignals renormalizes the
 // weights over only the present signals - never penalized into oblivion).
 // --------------------------------------------------------------------------
 function _scoreRouteMultiSignal({
-  rows, routeWeights, clusterSimilarity, minQuality, alpha, beta,
+  rows, routeWeights, clusterSimilarity, routeSafety, minQuality, alpha, beta,
   staticChain, clusterId, totalSamples,
 }) {
   // Helper: min-max normalize ONE raw dimension across rows that have a value,
@@ -805,6 +919,9 @@ function _scoreRouteMultiSignal({
   const costMap = routeWeights.cost ? normDim((r) => r.cost, true) : null;
   const latMap = routeWeights.latency ? normDim((r) => r.latency, true) : null;
   const loadMap = routeWeights.load ? normDim((r) => r.load, true) : null;
+  const safetyMap = routeWeights.safety
+    ? new Map(rows.map((r) => [r.key, r.safety == null ? null : _clamp01(Number(r.safety))]))
+    : null;
 
   // Assemble the oriented-normalized signal vector per candidate.
   const normedSignalsByKey = new Map();
@@ -815,6 +932,7 @@ function _scoreRouteMultiSignal({
     if (routeWeights.latency) sig.latency = latMap.get(r.key);
     if (routeWeights.load) sig.load = loadMap.get(r.key);
     if (routeWeights.similarity) sig.similarity = r.similarity == null ? clusterSimilarity : r.similarity;
+    if (routeWeights.safety) sig.safety = safetyMap.get(r.key);
     normedSignalsByKey.set(r.key, sig);
   }
 
@@ -897,6 +1015,7 @@ function _scoreRouteMultiSignal({
     route_weights: { ...routeWeights },
     route_signals: signalsOut,
     cluster_similarity: clusterSimilarity == null ? null : Number(clusterSimilarity.toFixed(6)),
+    ...(routeSafety ? { route_safety: routeSafety } : {}),
   };
 }
 
@@ -936,6 +1055,9 @@ export function buildRouterDecisionBlock({ scored, alpha, beta = DEFAULT_BETA, c
   if (Array.isArray(s.route_signals)) block.route_signals = s.route_signals;
   if (s.cluster_similarity != null && Number.isFinite(Number(s.cluster_similarity))) {
     block.cluster_similarity = Number(s.cluster_similarity);
+  }
+  if (s.route_safety && typeof s.route_safety === 'object') {
+    block.route_safety = JSON.parse(JSON.stringify(s.route_safety));
   }
   return block;
 }
