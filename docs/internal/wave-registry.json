@@ -3,18 +3,18 @@
     "docs_only_waves": 0,
     "multi_test_letter_suffixes": 3,
     "orphan_plan_items": 5,
-    "orphan_tests": 435,
+    "orphan_tests": 436,
     "plan_files": 8,
     "plan_only_waves": 5,
     "state_historical": 9,
-    "state_local_green": 438,
+    "state_local_green": 439,
     "state_planned": 5,
     "state_unknown": 0,
-    "test_files": 615,
-    "test_only_waves": 435,
-    "waves": 452
+    "test_files": 616,
+    "test_only_waves": 436,
+    "waves": 453
   },
-  "generated_at": "2026-06-19T10:08:05.528Z",
+  "generated_at": "2026-06-19T10:23:06.923Z",
   "plan_files": [
     "KOLM_CATEGORY_ONE_PLAN.md",
     "KOLM_DATA_ENGINE_PLAN.md",
@@ -515,7 +515,8 @@
       "W999",
       "W1000",
       "W1001",
-      "W1002"
+      "W1002",
+      "W1003"
     ],
     "plan_only_waves": [
       "W850",
@@ -959,7 +960,8 @@
       "W999",
       "W1000",
       "W1001",
-      "W1002"
+      "W1002",
+      "W1003"
     ]
   },
   "schema": "kolm.wave_registry.v1",
@@ -3963,7 +3965,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -4340,7 +4342,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8029,11 +8031,11 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
           "script": "npm:verify:distill-strategy"
         },
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8077,7 +8079,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8172,7 +8174,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8191,7 +8193,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8210,7 +8212,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8248,7 +8250,7 @@
       "plan_files": [],
       "proof_commands": [
         {
-          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js",
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
           "script": "npm:verify:distill-strategy"
         }
       ],
@@ -8593,6 +8595,25 @@
       "state": "local_green",
       "test_files": [
         "tests/wave1002-nras-live-readiness.test.js"
+      ],
+      "test_letter_suffixes": []
+    },
+    {
+      "canonical_wave_id": "W1003",
+      "claim_scope": "internal",
+      "docs_sources": [],
+      "owner_lane": "backend",
+      "plan_files": [],
+      "proof_commands": [
+        {
+          "command": "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready && node --test --test-concurrency=1 tests/wave584-distill-strategy.test.js tests/wave604-distill-strategy-frontier.test.js tests/wave956-gad-onpolicy.test.js tests/wave956-gad-cli.test.js tests/wave958-moe-to-dense.test.js tests/wave971-dp-sgd-trainer.test.js tests/wave972-distill-method-bakeoff.test.js tests/wave973-bond-jeffreys-trainer.test.js tests/wave975-python-runtime-boundary.test.js tests/wave1003-user-level-dp-contract.test.js",
+          "script": "npm:verify:distill-strategy"
+        }
+      ],
+      "secondary_sources": [],
+      "state": "local_green",
+      "test_files": [
+        "tests/wave1003-user-level-dp-contract.test.js"
       ],
       "test_letter_suffixes": []
     }

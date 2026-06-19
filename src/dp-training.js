@@ -67,6 +67,37 @@
 import crypto from 'node:crypto';
 
 export const DP_TRAINING_VERSION = 'finalized-c2-v1';
+export const USER_LEVEL_DP_VERSION = 'w1003-user-level-dp-v1';
+
+export const USER_LEVEL_DP_PRESETS = Object.freeze({
+  regulated_strict: Object.freeze({
+    id: 'regulated_strict',
+    target_epsilon: 2,
+    delta: 1e-6,
+    noise_multiplier: 1.6,
+    max_examples_per_user: 32,
+    min_users: 1000,
+    intended_use: 'regulated fine-tuning where user-level leakage is the primary risk',
+  }),
+  balanced: Object.freeze({
+    id: 'balanced',
+    target_epsilon: 4,
+    delta: 1e-6,
+    noise_multiplier: 1.1,
+    max_examples_per_user: 64,
+    min_users: 500,
+    intended_use: 'default user-level DP starting point before benchmark calibration',
+  }),
+  utility_first: Object.freeze({
+    id: 'utility_first',
+    target_epsilon: 8,
+    delta: 1e-5,
+    noise_multiplier: 0.8,
+    max_examples_per_user: 128,
+    min_users: 250,
+    intended_use: 'exploratory runs where utility loss is being measured before any regulated claim',
+  }),
+});
 
 // ---------------------------------------------------------------------------
 // Crypto-grade standard normal sampler. node:crypto CSPRNG -> Box-Muller.
@@ -625,6 +656,12 @@ export function buildPrivacyBudgetBlock({
     steps: budget.steps ?? null,
     n_queries: budget.n_queries ?? null,
     optimal_order: budget.optimal_order ?? null,
+    privacy_unit: budget.privacy_unit ?? null,
+    user_count: budget.user_count ?? null,
+    total_examples: budget.total_examples ?? null,
+    max_examples_per_user: budget.max_examples_per_user ?? null,
+    clipped_user_count: budget.clipped_user_count ?? null,
+    accountant_comparison: budget.accountant_comparison ?? null,
     region_allocation: region_allocation ?? null,
     cross_region: cross_region ?? null,
   };
@@ -707,5 +744,221 @@ export function buildDpTrainerEnv({
     // The Python trainer (apps/trainer/distill.py) reads KOLM_DP_SGD and, if
     // set, REQUIRES opacus. This hint is what it must print on ImportError.
     install_hint: 'DP-SGD requested (KOLM_DP_SGD=1) but the GPU trainer needs Opacus. Install with: pip install opacus>=1.4 . The trainer MUST fail rather than train without DP.',
+  };
+}
+
+function _clonePreset(preset) {
+  return JSON.parse(JSON.stringify(preset));
+}
+
+export function userLevelDpPresets() {
+  return Object.fromEntries(Object.entries(USER_LEVEL_DP_PRESETS).map(([k, v]) => [k, _clonePreset(v)]));
+}
+
+export function recommendUserLevelDpPreset({ regime = 'balanced', user_count = null } = {}) {
+  const key = USER_LEVEL_DP_PRESETS[regime] ? regime
+    : (regime === 'regulated' || regime === 'strict' ? 'regulated_strict'
+      : (regime === 'utility' ? 'utility_first' : 'balanced'));
+  const preset = _clonePreset(USER_LEVEL_DP_PRESETS[key]);
+  const users = Number(user_count);
+  return {
+    ...preset,
+    user_count: Number.isFinite(users) && users > 0 ? Math.floor(users) : null,
+    ready_for_default: Number.isFinite(users) && users >= preset.min_users,
+    warning: Number.isFinite(users) && users < preset.min_users
+      ? `user_count ${Math.floor(users)} is below preset min_users ${preset.min_users}; treat as benchmark-only`
+      : null,
+    version: USER_LEVEL_DP_VERSION,
+  };
+}
+
+export function summarizeUserContributions(rows, {
+  user_key = 'user_id',
+  max_examples_per_user = USER_LEVEL_DP_PRESETS.balanced.max_examples_per_user,
+} = {}) {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    throw new Error('rows must be a non-empty array');
+  }
+  const maxPerUser = Math.max(1, Math.floor(Number(max_examples_per_user)));
+  const groups = new Map();
+  let missing_user_id = 0;
+  for (const row of rows) {
+    const id = row && row[user_key] != null && String(row[user_key]).trim() !== ''
+      ? String(row[user_key])
+      : null;
+    if (!id) {
+      missing_user_id += 1;
+      continue;
+    }
+    if (!groups.has(id)) groups.set(id, []);
+    groups.get(id).push(row);
+  }
+  if (groups.size === 0) {
+    throw new Error(`no rows carried user key ${user_key}`);
+  }
+
+  const users = [];
+  let retained = 0;
+  let clipped_user_count = 0;
+  let clipped_examples = 0;
+  for (const [user_id, userRows] of groups.entries()) {
+    const kept = userRows.slice(0, maxPerUser);
+    retained += kept.length;
+    if (userRows.length > kept.length) {
+      clipped_user_count += 1;
+      clipped_examples += userRows.length - kept.length;
+    }
+    users.push({
+      user_id,
+      original_examples: userRows.length,
+      retained_examples: kept.length,
+      clipped_examples: userRows.length - kept.length,
+    });
+  }
+  users.sort((a, b) => b.original_examples - a.original_examples || a.user_id.localeCompare(b.user_id));
+
+  return {
+    privacy_unit: 'user',
+    user_key,
+    user_count: users.length,
+    total_examples: rows.length,
+    retained_examples: retained,
+    missing_user_id,
+    max_examples_per_user: maxPerUser,
+    clipped_user_count,
+    clipped_examples,
+    max_user_examples_observed: users[0]?.original_examples || 0,
+    users,
+    version: USER_LEVEL_DP_VERSION,
+  };
+}
+
+export function computeUserLevelDpSgdBudget({
+  rows = null,
+  user_key = 'user_id',
+  user_count = null,
+  total_examples = null,
+  batch_users = null,
+  epochs = 1,
+  steps = null,
+  noise_multiplier = USER_LEVEL_DP_PRESETS.balanced.noise_multiplier,
+  max_examples_per_user = USER_LEVEL_DP_PRESETS.balanced.max_examples_per_user,
+  delta = USER_LEVEL_DP_PRESETS.balanced.delta,
+  preset = null,
+  accountant_comparison = true,
+} = {}) {
+  const selectedPreset = preset ? recommendUserLevelDpPreset({ regime: preset, user_count }) : null;
+  const summary = rows
+    ? summarizeUserContributions(rows, { user_key, max_examples_per_user: selectedPreset?.max_examples_per_user || max_examples_per_user })
+    : {
+        privacy_unit: 'user',
+        user_key,
+        user_count: Math.floor(Number(user_count)),
+        total_examples: Math.floor(Number(total_examples || 0)),
+        retained_examples: Math.floor(Number(total_examples || 0)),
+        missing_user_id: 0,
+        max_examples_per_user: selectedPreset?.max_examples_per_user || max_examples_per_user,
+        clipped_user_count: 0,
+        clipped_examples: 0,
+        users: [],
+        version: USER_LEVEL_DP_VERSION,
+      };
+  if (!Number.isFinite(summary.user_count) || summary.user_count <= 0) {
+    throw new Error('user_count must be > 0 for user-level DP');
+  }
+  const usersPerStep = batch_users != null
+    ? Math.max(1, Math.floor(Number(batch_users)))
+    : Math.max(1, Math.ceil(Math.sqrt(summary.user_count)));
+  const sampleRate = Math.min(1, usersPerStep / summary.user_count);
+  const resolvedSteps = steps != null
+    ? Math.max(0, Math.floor(Number(steps)))
+    : Math.ceil(summary.user_count / usersPerStep) * Math.max(1, Math.ceil(Number(epochs)));
+  const sigma = selectedPreset?.noise_multiplier ?? noise_multiplier;
+  const resolvedDelta = selectedPreset?.delta ?? delta;
+  const budget = computeDpSgdBudget({
+    noise_multiplier: sigma,
+    sample_rate: sampleRate,
+    steps: resolvedSteps,
+    delta: resolvedDelta,
+  });
+
+  const comparison = accountant_comparison ? {
+    primary: 'rdp_integer_upper_bound',
+    secondary: 'pld_or_fractional_order_external_check_required',
+    status: 'safe_upper_bound_only',
+    note: 'The local claim uses the conservative integer-order RDP upper bound; PLD/fractional-order runs may only lower epsilon after an external accountant report is attached.',
+  } : null;
+
+  return {
+    ...budget,
+    mechanism: 'user_level_dp_sgd_sampled_gaussian',
+    privacy_unit: 'user',
+    user_key: summary.user_key,
+    user_count: summary.user_count,
+    total_examples: summary.total_examples,
+    retained_examples: summary.retained_examples,
+    missing_user_id: summary.missing_user_id,
+    max_examples_per_user: summary.max_examples_per_user,
+    clipped_user_count: summary.clipped_user_count,
+    clipped_examples: summary.clipped_examples,
+    batch_users: usersPerStep,
+    sample_rate: sampleRate,
+    steps: resolvedSteps,
+    preset: selectedPreset?.id || null,
+    target_epsilon: selectedPreset?.target_epsilon || null,
+    ready_for_default: selectedPreset ? selectedPreset.ready_for_default : null,
+    accountant_comparison: comparison,
+    contribution_summary: summary,
+    version: USER_LEVEL_DP_VERSION,
+  };
+}
+
+export function buildUserLevelDpBenchmarkPlan({
+  model_id,
+  dataset_id,
+  user_key = 'user_id',
+  preset = 'balanced',
+  user_count = null,
+  baseline_metric = null,
+  dp_metric = null,
+  metric_name = 'eval_accuracy',
+  receipt_hash = null,
+  report_url = null,
+} = {}) {
+  const recommendation = recommendUserLevelDpPreset({ regime: preset, user_count });
+  const hasMeasuredUtility = Number.isFinite(Number(baseline_metric))
+    && Number.isFinite(Number(dp_metric))
+    && typeof receipt_hash === 'string'
+    && /^[0-9a-f]{64}$/i.test(receipt_hash);
+  const utility_delta = hasMeasuredUtility
+    ? Number((Number(dp_metric) - Number(baseline_metric)).toFixed(12))
+    : null;
+  const requirements = [
+    { id: 'model_id', ok: typeof model_id === 'string' && model_id.trim() !== '' },
+    { id: 'dataset_id', ok: typeof dataset_id === 'string' && dataset_id.trim() !== '' },
+    { id: 'user_key', ok: typeof user_key === 'string' && user_key.trim() !== '' },
+    { id: 'preset_ready', ok: recommendation.ready_for_default === true },
+    { id: 'measured_utility_receipt', ok: hasMeasuredUtility },
+  ];
+  const blockers = requirements.filter((r) => !r.ok).map((r) => r.id);
+  return {
+    version: USER_LEVEL_DP_VERSION,
+    model_id: model_id || null,
+    dataset_id: dataset_id || null,
+    user_key,
+    preset: recommendation,
+    metric_name,
+    measured: hasMeasuredUtility,
+    claimable_default: blockers.length === 0,
+    utility: {
+      baseline_metric: baseline_metric == null ? null : Number(baseline_metric),
+      dp_metric: dp_metric == null ? null : Number(dp_metric),
+      utility_delta,
+      receipt_hash: receipt_hash || null,
+      report_url: report_url || null,
+    },
+    requirements,
+    blockers,
+    claim_scope: 'User-level DP math can be reported locally; regulated default claims require measured utility evidence with a receipt hash.',
   };
 }

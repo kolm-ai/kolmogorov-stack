@@ -42,7 +42,7 @@
     "component_count": 977,
     "test_referenced_components": 977,
     "components_without_direct_test_reference": 0,
-    "high_priority_components": 67,
+    "high_priority_components": 68,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -72,7 +72,7 @@
       "environment_configuration_boundary": 373,
       "execution_or_subprocess_boundary": 315,
       "http_route_surface": 41,
-      "large_component_contract_risk": 46,
+      "large_component_contract_risk": 47,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 173,
       "stateful_storage_boundary": 125
@@ -30955,12 +30955,12 @@
       "surface": "core-backend",
       "domain": "training_model_optimization",
       "language": "javascript",
-      "sha256": "8c92c2d188fc224e331f616767b315b51ae25ce3d3c6da2fcfa9ef5347026577",
+      "sha256": "c24f893b381cbafef7999c3e2dbd96c1773f67fd2e72cbb41f6b660e1a2e9ff3",
       "metrics": {
-        "bytes": 30307,
-        "lines": 712,
+        "bytes": 39573,
+        "lines": 965,
         "imports": 1,
-        "exports": 13,
+        "exports": 20,
         "routes": 0,
         "env_refs": 0,
         "fs_writes": 0,
@@ -30970,13 +30970,15 @@
         "markers": 0
       },
       "test_refs": [
-        "tests/finalized-c2-dp-training-dp-sgd-pate.test.js"
+        "tests/finalized-c2-dp-training-dp-sgd-pate.test.js",
+        "tests/wave1003-user-level-dp-contract.test.js"
       ],
       "risk_signals": [
         "cryptographic_or_proof_boundary",
-        "execution_or_subprocess_boundary"
+        "execution_or_subprocess_boundary",
+        "large_component_contract_risk"
       ],
-      "priority_score": 4,
+      "priority_score": 7,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

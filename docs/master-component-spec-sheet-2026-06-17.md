@@ -7,17 +7,17 @@ This is the optimization sheet for the deep-dive workflow. The JSON companion co
 ## How Close To Perfect
 
 - Local engineering perfection: **100/100**
-- Frontier/product perfection: **90.6/100**
+- Frontier/product perfection: **91.6/100**
 - Atomic components inventoried: **977**
 - Atomic deep dives complete: **100%**
 - Direct test referenced: **977/977 (100%)**
-- High-priority direct test referenced: **67/67 (100%)**
+- High-priority direct test referenced: **68/68 (100%)**
 - Local readiness proof coverage: **57/57 (100%)**
 - Claimable readiness closed locally: **49/57 (86%)**
 - Readiness proof surplus hill-climb: **104.3/110**
 - Language fit: **js_control_plane_with_python_rust_native_escape_hatches**
 - SOTA categories still carrying critical work: **0/16**
-- SOTA categories still carrying major work: **7/16**
+- SOTA categories still carrying major work: **6/16**
 
 Interpretation: local code/spec discipline and readiness proof coverage are now complete, but claimable frontier/product perfection remains lower because partner adoption, package release, public benchmark data, certification, and SOTA category gaps are still external or frontier-open. Above-100 scoring is limited to local proof surplus and never upgrades an external gate into a shipped claim.
 
@@ -38,7 +38,7 @@ Interpretation: local code/spec discipline and readiness proof coverage are now 
 | mcp-tool-gateway-receipts | agent-integrations | sota_review_complete_external_or_release_gate_open | at=15 open=0/0/0 | 3 | npm run verify:stack-sota<br>npm run verify:governance-packets |
 | verifiable-inference | trust | sota_review_complete_external_or_release_gate_open | at=15 open=0/0/1 | 5 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | model-signing-standards | trust | sota_review_complete_external_or_release_gate_open | at=9 open=0/0/2 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
-| confidential-compute | enterprise | sota_review_complete_major_frontier_work_open | at=9 open=0/1/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
+| confidential-compute | enterprise | sota_review_complete_external_or_release_gate_open | at=10 open=0/0/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | agent-security-eval | enterprise | sota_review_complete_major_frontier_work_open | at=8 open=0/2/1 | 4 | npm run verify:stack-sota<br>npm run verify:compliance-packet |
 | compile-api-to-model-competitors | compiler-platform | sota_review_complete_major_frontier_work_open | at=10 open=0/2/4 | 4 | npm run verify:stack-sota<br>npm run verify:inventions |
 
