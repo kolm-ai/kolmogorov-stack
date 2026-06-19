@@ -42,7 +42,7 @@
     "component_count": 975,
     "test_referenced_components": 975,
     "components_without_direct_test_reference": 0,
-    "high_priority_components": 66,
+    "high_priority_components": 67,
     "domains": {
       "api_surface": 32,
       "billing_marketplace": 22,
@@ -67,12 +67,12 @@
     },
     "risk_signals": {
       "auth_or_tenant_boundary": 24,
-      "cryptographic_or_proof_boundary": 478,
+      "cryptographic_or_proof_boundary": 479,
       "distribution_or_worker_surface": 306,
       "environment_configuration_boundary": 371,
       "execution_or_subprocess_boundary": 314,
       "http_route_surface": 41,
-      "large_component_contract_risk": 45,
+      "large_component_contract_risk": 46,
       "money_or_entitlement_path": 17,
       "network_or_provider_boundary": 173,
       "stateful_storage_boundary": 125
@@ -362,6 +362,19 @@
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff"
       },
       {
+        "path": "apps/export/probe.py",
+        "domain": "platform_support",
+        "priority_score": 9,
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "distribution_or_worker_surface",
+          "environment_configuration_boundary",
+          "execution_or_subprocess_boundary",
+          "large_component_contract_risk"
+        ],
+        "improvement_track": "maintain_contract_tests_and_claim_scope_mapping"
+      },
+      {
         "path": "workers/distill/scripts/dedup_pairs.py",
         "domain": "training_model_optimization",
         "priority_score": 9,
@@ -461,18 +474,6 @@
           "stateful_storage_boundary"
         ],
         "improvement_track": "split_or_add_generated_contract_map_before_growth"
-      },
-      {
-        "path": "src/data-ingest.js",
-        "domain": "capture_data_eval",
-        "priority_score": 8,
-        "risk_signals": [
-          "cryptographic_or_proof_boundary",
-          "environment_configuration_boundary",
-          "large_component_contract_risk",
-          "network_or_provider_boundary"
-        ],
-        "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards"
       }
     ]
   },
@@ -1805,36 +1806,38 @@
       "surface": "worker",
       "domain": "platform_support",
       "language": "python",
-      "sha256": "970a6a343576f7d0969a8a84f5ac1a9ee51023556664266e0e1ca4ba4c7c0a65",
+      "sha256": "f46617ea13de9915cc107ddcbadb88bbba887d6b814ee9163f22e07ac88e93f3",
       "metrics": {
-        "bytes": 24977,
-        "lines": 576,
+        "bytes": 40038,
+        "lines": 924,
         "imports": 0,
-        "exports": 17,
+        "exports": 31,
         "routes": 0,
         "env_refs": 1,
         "fs_writes": 0,
         "subprocess_refs": 5,
         "network_refs": 0,
-        "crypto_refs": 0,
+        "crypto_refs": 1,
         "markers": 0
       },
       "test_refs": [
         "tests/wave957-apps-atomic-scope.test.js",
+        "tests/wave994-runtime-probe-paired-baseline.test.js",
         "tests/active-redteam.test.js",
         "tests/agent-attestation-report.test.js",
         "tests/agent-audit-ingest.test.js",
         "tests/artifact-end-to-end.test.js",
         "tests/connector-mcp.test.js",
-        "tests/connector-openai-agents.test.js",
-        "tests/finalized-c1-sensitive-domain-local-generator-guardrail.test.js"
+        "tests/connector-openai-agents.test.js"
       ],
       "risk_signals": [
+        "cryptographic_or_proof_boundary",
         "distribution_or_worker_surface",
         "environment_configuration_boundary",
-        "execution_or_subprocess_boundary"
+        "execution_or_subprocess_boundary",
+        "large_component_contract_risk"
       ],
-      "priority_score": 3,
+      "priority_score": 9,
       "deep_dive": {
         "status": "atomic_deep_dive_complete",
         "reviewed_at": "2026-06-17",

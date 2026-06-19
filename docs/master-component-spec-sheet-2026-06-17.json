@@ -10,7 +10,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 100,
-    "frontier_product_score": 86.3,
+    "frontier_product_score": 87.2,
     "readiness_proof_surplus_score": 104.3,
     "readiness_proof_surplus_ceiling": 110,
     "score_notes": [
@@ -42,14 +42,14 @@
     "direct_test_referenced_components": 975,
     "direct_test_reference_pct": 100,
     "components_without_direct_test_reference": 0,
-    "high_priority_components": 66,
-    "high_priority_direct_test_referenced": 66,
+    "high_priority_components": 67,
+    "high_priority_direct_test_referenced": 67,
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 2,
-    "categories_with_major_frontier_work_open": 9,
+    "categories_with_major_frontier_work_open": 8,
     "critical_sota_category_closed_pct": 87.5,
-    "major_sota_category_closed_pct": 43.8,
+    "major_sota_category_closed_pct": 50,
     "readiness": {
       "total": 57,
       "closed": 49,
@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2041,
+          "js_family": 2043,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -192,11 +192,11 @@
     {
       "id": "speculative-decoding",
       "stack_area": "runtime",
-      "status": "sota_review_complete_major_frontier_work_open",
+      "status": "sota_review_complete_external_or_release_gate_open",
       "already_at_frontier_count": 8,
-      "improvement_count": 3,
+      "improvement_count": 2,
       "critical_gaps": 0,
-      "major_gaps": 1,
+      "major_gaps": 0,
       "minor_gaps": 1,
       "required_components": 5,
       "suggested_verification": [
@@ -459,7 +459,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -619,7 +619,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -693,7 +693,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -767,7 +767,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -841,7 +841,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -875,6 +875,44 @@
         "npm run verify:distill-pipeline-matrix",
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
+      ]
+    },
+    {
+      "path": "apps/export/probe.py",
+      "domain": "platform_support",
+      "surface": "worker",
+      "priority_score": 9,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "distribution_or_worker_surface",
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary",
+        "large_component_contract_risk"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "quantization",
+          "stack_area": "compiler-runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "llm-routing",
+          "stack_area": "gateway",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping.",
+      "suggested_verification": [
+        "npm run verify:daemon-connector-matrix",
+        "npm run verify:binder-contract-matrix",
+        "npm run verify:intent-contract-matrix",
+        "npm run verify:otel-matrix",
+        "npm run verify:codegraph"
       ]
     },
     {
@@ -914,7 +952,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1145,7 +1183,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1372,7 +1410,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1445,7 +1483,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1518,7 +1556,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1667,7 +1705,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1893,7 +1931,7 @@
         {
           "id": "speculative-decoding",
           "stack_area": "runtime",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1953,12 +1991,6 @@
         {
           "id": "moe-distill-quant",
           "stack_area": "training",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "quantization",
-          "stack_area": "compiler-runtime",
           "status": "sota_review_complete_major_frontier_work_open",
           "relation": "sampled"
         },
@@ -2159,36 +2191,6 @@
         }
       ],
       "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate.",
-      "suggested_verification": [
-        "npm run verify:api-contract-matrix",
-        "npm run lint:refs",
-        "npm run verify:surfaces"
-      ]
-    },
-    {
-      "path": "api/r2.js",
-      "domain": "api_surface",
-      "surface": "api-http",
-      "priority_score": 7,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "http_route_surface",
-        "network_or_provider_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix.",
       "suggested_verification": [
         "npm run verify:api-contract-matrix",
         "npm run lint:refs",
@@ -3282,26 +3284,28 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 24977,
-          "lines": 576,
+          "bytes": 40038,
+          "lines": 924,
           "imports": 0,
-          "exports": 17,
+          "exports": 31,
           "routes": 0,
           "env_refs": 1,
           "fs_writes": 0,
           "subprocess_refs": 5,
           "network_refs": 0,
-          "crypto_refs": 0,
+          "crypto_refs": 1,
           "markers": 0
         },
         "risk_signals": [
+          "cryptographic_or_proof_boundary",
           "distribution_or_worker_surface",
           "environment_configuration_boundary",
-          "execution_or_subprocess_boundary"
+          "execution_or_subprocess_boundary",
+          "large_component_contract_risk"
         ],
-        "priority_score": 3,
-        "priority_band": "normal",
-        "sha256": "970a6a343576f7d0969a8a84f5ac1a9ee51023556664266e0e1ca4ba4c7c0a65"
+        "priority_score": 9,
+        "priority_band": "high",
+        "sha256": "f46617ea13de9915cc107ddcbadb88bbba887d6b814ee9163f22e07ac88e93f3"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -3311,15 +3315,28 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave957-apps-atomic-scope.test.js",
+          "tests/wave994-runtime-probe-paired-baseline.test.js",
           "tests/active-redteam.test.js",
           "tests/agent-attestation-report.test.js",
           "tests/agent-audit-ingest.test.js",
           "tests/artifact-end-to-end.test.js",
           "tests/connector-mcp.test.js",
-          "tests/connector-openai-agents.test.js",
-          "tests/finalized-c1-sensitive-domain-local-generator-guardrail.test.js"
+          "tests/connector-openai-agents.test.js"
         ],
-        "category_links": [],
+        "category_links": [
+          {
+            "id": "quantization",
+            "stack_area": "compiler-runtime",
+            "status": "sota_review_complete_major_frontier_work_open",
+            "relation": "sampled"
+          },
+          {
+            "id": "llm-routing",
+            "stack_area": "gateway",
+            "status": "sota_review_complete_external_or_release_gate_open",
+            "relation": "sampled"
+          }
+        ],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules behind generated lifecycle, verifier, provider, privacy, storage, and claim-scope contracts before adding more daemon, binder, or orchestration behavior.",
         "suggested_verification": [
@@ -3330,8 +3347,10 @@
           "npm run verify:codegraph"
         ]
       },
-      "perfection_gaps": [],
-      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "next_best_action": "Execute the linked frontier track: maintain_contract_tests_and_claim_scope_mapping."
     },
     {
       "path": "apps/export/registry.py",
@@ -3813,7 +3832,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -4053,14 +4072,7 @@
           "tests/wave679-sdk-rn-contract.test.js",
           "tests/wave680-sdk-swift-contract.test.js"
         ],
-        "category_links": [
-          {
-            "id": "llm-routing",
-            "stack_area": "gateway",
-            "status": "sota_review_complete_external_or_release_gate_open",
-            "relation": "sampled"
-          }
-        ],
+        "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
         "innovation_opportunity": "Keep support modules behind generated lifecycle, verifier, provider, privacy, storage, and claim-scope contracts before adding more daemon, binder, or orchestration behavior.",
         "suggested_verification": [
@@ -6409,7 +6421,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -6706,7 +6718,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -6963,7 +6975,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -7130,7 +7142,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -7846,7 +7858,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -7986,7 +7998,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -7999,10 +8011,8 @@
           "npm run verify:quant-oracle"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: frontier_method_wiring_probe_harness_and_method_bakeoff."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep frontier_method_wiring_probe_harness_and_method_bakeoff current."
     },
     {
       "path": "apps/trainer/embedding.py",
@@ -8561,7 +8571,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -8954,7 +8964,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -15752,7 +15762,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -15763,10 +15773,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: closed_loop_routing_outcome_learning_and_verified_cache."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep closed_loop_routing_outcome_learning_and_verified_cache current."
     },
     {
       "path": "src/account-ui-routes.js",
@@ -16623,7 +16631,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -20970,7 +20978,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -21544,12 +21552,6 @@
           {
             "id": "moe-distill-quant",
             "stack_area": "training",
-            "status": "sota_review_complete_major_frontier_work_open",
-            "relation": "sampled"
-          },
-          {
-            "id": "quantization",
-            "stack_area": "compiler-runtime",
             "status": "sota_review_complete_major_frontier_work_open",
             "relation": "sampled"
           },
@@ -27845,7 +27847,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -40140,7 +40142,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           },
           {
@@ -46644,7 +46646,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -46658,10 +46660,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/speculative-decoding.js",
@@ -46706,7 +46706,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -46720,10 +46720,8 @@
           "npm run verify:artifact-matrix"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep stage_receipts_dsse_sidecars_and_replayable_artifact_dag current."
     },
     {
       "path": "src/speculative-teacher.js",
@@ -51744,7 +51742,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -52056,7 +52054,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -52750,7 +52748,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -52856,7 +52854,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -54146,7 +54144,7 @@
           {
             "id": "speculative-decoding",
             "stack_area": "runtime",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {

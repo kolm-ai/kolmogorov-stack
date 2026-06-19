@@ -38,6 +38,7 @@ Refs:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -54,6 +55,23 @@ DEFAULT_PROBE_PROMPT = (
     "distillation for serving small language models in two sentences."
 )
 PROBE_VERSION = "runtime-probe-v1"
+PROBE_HARNESS_VERSION = "probe-harness-v1"
+PROBE_MEASUREMENT_RECEIPT_SCHEMA = "kolm.probe_measurement_receipt.v1"
+RAW_TEXT_KEYS = {
+    "prompt",
+    "prompt_text",
+    "attack_prompt",
+    "benign_prompt",
+    "response",
+    "response_text",
+    "assistant_response",
+    "completion",
+    "content",
+    "output",
+    "model_output",
+    "candidate_output",
+    "messages",
+}
 
 
 # --------------------------------------------------------------------------
@@ -84,6 +102,251 @@ def _percentiles(samples: List[Dict[str, Any]], field: str,
     for p in pcts:
         out[f"p{p}"] = _percentile(vals, p)
     return out
+
+
+def _sha256hex(value: Any) -> str:
+    return hashlib.sha256(str(value).encode("utf-8")).hexdigest()
+
+
+def _stable_for_digest(value: Any) -> Any:
+    if isinstance(value, list):
+        return [_stable_for_digest(v) for v in value]
+    if isinstance(value, dict):
+        out: Dict[str, Any] = {}
+        for key in sorted(value.keys()):
+            if key in RAW_TEXT_KEYS:
+                out[f"{key}_sha256"] = _sha256hex(json.dumps(value[key], sort_keys=True, separators=(",", ":")))
+            else:
+                out[key] = _stable_for_digest(value[key])
+        return out
+    return value
+
+
+def _digest_object(value: Any) -> str:
+    return _sha256hex(json.dumps(_stable_for_digest(value), sort_keys=True, separators=(",", ":")))
+
+
+def _finite_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def _round_number(value: Any, places: int = 6) -> Optional[float]:
+    if not _finite_number(value):
+        return None
+    return round(float(value), places)
+
+
+def _numeric(obj: Dict[str, Any], keys: List[str]) -> Optional[float]:
+    if not isinstance(obj, dict):
+        return None
+    for key in keys:
+        value = obj.get(key)
+        if _finite_number(value):
+            return float(value)
+        try:
+            parsed = float(value)
+            if math.isfinite(parsed):
+                return parsed
+        except (TypeError, ValueError):
+            pass
+    return None
+
+
+def _public_id(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    if isinstance(value, str):
+        return value[:160]
+    if isinstance(value, dict):
+        for key in ("id", "artifact_id", "target_id", "model", "runtime"):
+            if value.get(key) is not None:
+                return str(value[key])[:160]
+    return None
+
+
+def _derive_paired_runtime_deltas(
+        baseline: Optional[Dict[str, Any]],
+        candidate: Optional[Dict[str, Any]],
+        require_same: Optional[List[str]] = None) -> Dict[str, Any]:
+    required = require_same or ["runtime", "model", "workload_id"]
+    if not isinstance(baseline, dict):
+        return {"ok": False, "measured": False, "reason": "baseline_required",
+                "version": PROBE_HARNESS_VERSION}
+    if not isinstance(candidate, dict):
+        return {"ok": False, "measured": False, "reason": "candidate_required",
+                "version": PROBE_HARNESS_VERSION}
+    for field in required:
+        b = baseline.get(field)
+        c = candidate.get(field)
+        if b is None or c is None:
+            return {"ok": False, "measured": False, "reason": f"{field}_required",
+                    "field": field, "baseline": b, "candidate": c,
+                    "version": PROBE_HARNESS_VERSION}
+        if str(b).lower() != str(c).lower():
+            return {"ok": False, "measured": False, "reason": f"{field}_mismatch",
+                    "field": field, "baseline": b, "candidate": c,
+                    "version": PROBE_HARNESS_VERSION}
+
+    baseline_tok_s = _numeric(baseline, ["tok_s", "tokens_per_second", "throughput_tok_s"])
+    candidate_tok_s = _numeric(candidate, ["tok_s", "tokens_per_second", "throughput_tok_s"])
+    baseline_memory = _numeric(baseline, ["memory_mb", "peak_memory_mb", "peak_kv_mb"])
+    candidate_memory = _numeric(candidate, ["memory_mb", "peak_memory_mb", "peak_kv_mb"])
+    baseline_quality = _numeric(baseline, ["quality_score", "kscore", "eval_score", "accuracy"])
+    candidate_quality = _numeric(candidate, ["quality_score", "kscore", "eval_score", "accuracy"])
+    return {
+        "ok": True,
+        "measured": True,
+        "version": PROBE_HARNESS_VERSION,
+        "baseline_id": _public_id(baseline),
+        "candidate_id": _public_id(candidate),
+        "baseline_digest": _digest_object(baseline),
+        "candidate_digest": _digest_object(candidate),
+        "throughput_speedup": _round_number(candidate_tok_s / baseline_tok_s) if baseline_tok_s and candidate_tok_s else None,
+        "baseline_tok_s": baseline_tok_s,
+        "candidate_tok_s": candidate_tok_s,
+        "memory_delta_mb": _round_number(candidate_memory - baseline_memory, 3)
+        if _finite_number(baseline_memory) and _finite_number(candidate_memory) else None,
+        "memory_ratio": _round_number(candidate_memory / baseline_memory) if baseline_memory and candidate_memory else None,
+        "quality_delta": _round_number(candidate_quality - baseline_quality)
+        if _finite_number(baseline_quality) and _finite_number(candidate_quality) else None,
+    }
+
+
+def _runtime_pair_measurement(result: Dict[str, Any], workload_id: str,
+                              *, baseline: bool = False) -> Dict[str, Any]:
+    spec = result.get("speculative_decoding") if isinstance(result, dict) else {}
+    spec = spec if isinstance(spec, dict) else {}
+    return {
+        "id": "no-draft-baseline" if baseline else "speculative-candidate",
+        "runtime": result.get("engine"),
+        "target_model": spec.get("target_model") or result.get("model"),
+        "workload_id": workload_id,
+        "tok_s": result.get("tok_s"),
+        "memory_mb": result.get("memory_mb"),
+        "quality_score": result.get("quality_score"),
+        "head_kind": spec.get("head_kind"),
+        "head_id": spec.get("head_id"),
+        "num_speculative_tokens": spec.get("num_speculative_tokens"),
+        "acceptance_rate": spec.get("acceptance_rate"),
+        "accepted_length": spec.get("accepted_length") or spec.get("mean_accept_length"),
+    }
+
+
+def _measured_speculative_from_pair(resolved: Dict[str, Any],
+                                    baseline: Dict[str, Any],
+                                    candidate: Dict[str, Any]) -> Dict[str, Any]:
+    pair = _derive_paired_runtime_deltas(
+        baseline, candidate, ["runtime", "target_model", "workload_id"])
+    if not pair.get("ok") or not _finite_number(pair.get("throughput_speedup")):
+        return {
+            "method": "speculative_decoding",
+            "status": "unmeasured",
+            "reason": pair.get("reason") or "paired_throughput_required",
+            "version": PROBE_HARNESS_VERSION,
+        }
+    return {
+        "method": "speculative_decoding",
+        "status": "tested",
+        "head_kind": resolved.get("head_kind") or candidate.get("head_kind") or "draft_model",
+        "head_id": resolved.get("head_id") or candidate.get("head_id") or None,
+        "target_model": candidate.get("target_model"),
+        "runtime": candidate.get("runtime"),
+        "num_speculative_tokens": _numeric(candidate, ["num_speculative_tokens"]),
+        "acceptance_rate": _numeric(candidate, ["acceptance_rate"]),
+        "accepted_length": _numeric(candidate, ["accepted_length", "mean_accept_length"]),
+        "throughput_speedup": pair.get("throughput_speedup"),
+        "baseline_tok_s": pair.get("baseline_tok_s"),
+        "candidate_tok_s": pair.get("candidate_tok_s"),
+        "workload_digest": _digest_object(candidate.get("workload_id")),
+        "version": PROBE_HARNESS_VERSION,
+    }
+
+
+def _probe_workload(prompt: str, max_new_tokens: int, concurrency: int,
+                    warmup: int, steady_requests: int,
+                    steady_seconds: Optional[float]) -> Dict[str, Any]:
+    return {
+        "prompt": prompt,
+        "max_new_tokens": max_new_tokens,
+        "concurrency": concurrency,
+        "warmup": warmup,
+        "steady_requests": steady_requests,
+        "steady_seconds": steady_seconds,
+    }
+
+
+def _public_probe_summary(result: Dict[str, Any], workload_id: str) -> Dict[str, Any]:
+    return {
+        "ok": bool(result.get("ok")),
+        "tested": bool(result.get("tested")),
+        "reason": result.get("reason"),
+        "probe_version": result.get("probe_version") or PROBE_VERSION,
+        "engine": result.get("engine"),
+        "runtime_version": result.get("runtime_version"),
+        "model": result.get("model"),
+        "precision": result.get("precision"),
+        "tok_s": result.get("tok_s"),
+        "memory_mb": result.get("memory_mb"),
+        "workload_id": workload_id,
+    }
+
+
+def _build_probe_measurement_receipt(domain: str, *, artifact: Dict[str, Any],
+                                     config: Dict[str, Any], workload: Dict[str, Any],
+                                     baseline: Optional[Dict[str, Any]],
+                                     candidate: Optional[Dict[str, Any]],
+                                     metrics: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "schema": PROBE_MEASUREMENT_RECEIPT_SCHEMA,
+        "version": PROBE_HARNESS_VERSION,
+        "domain": domain,
+        "artifact_id": _public_id(artifact),
+        "artifact_digest": _digest_object(artifact),
+        "config_digest": _digest_object(config),
+        "workload_digest": _digest_object(workload),
+        "baseline_digest": _digest_object(baseline) if baseline else None,
+        "candidate_digest": _digest_object(candidate) if candidate else None,
+        "metrics_digest": _digest_object(metrics),
+        "sample_count": 0,
+        "sample_digests": [],
+        "evidence_digest": _digest_object({"probe_version": PROBE_VERSION}),
+        "started_at": None,
+        "completed_at": None,
+        "claim_scope": "paired_measurement_receipt_digest_only" if baseline and candidate else "unpaired_measurement_receipt_digest_only",
+    }
+
+
+def _attach_paired_speculative_speedup(candidate_result: Dict[str, Any],
+                                       baseline_result: Dict[str, Any],
+                                       *, artifact_path: str,
+                                       runtime: Optional[str],
+                                       workload: Dict[str, Any]) -> Dict[str, Any]:
+    spec = candidate_result.get("speculative_decoding")
+    if not isinstance(spec, dict):
+        return candidate_result
+    workload_id = candidate_result.get("workload_id") or f"probe-{_digest_object(workload)[:16]}"
+    baseline_pair = _runtime_pair_measurement(baseline_result, workload_id, baseline=True)
+    candidate_pair = _runtime_pair_measurement(candidate_result, workload_id, baseline=False)
+    measured = _measured_speculative_from_pair(spec, baseline_pair, candidate_pair)
+    merged_spec = dict(spec)
+    if measured.get("status") == "tested":
+        merged_spec.update(measured)
+    else:
+        merged_spec["throughput_speedup"] = None
+        merged_spec["paired_measurement_status"] = "unmeasured"
+        merged_spec["paired_measurement_reason"] = measured.get("reason")
+    candidate_result["speculative_decoding"] = merged_spec
+    candidate_result["paired_speculative_baseline"] = _public_probe_summary(baseline_result, workload_id)
+    candidate_result["probe_measurement_receipt"] = _build_probe_measurement_receipt(
+        "speculative-decoding",
+        artifact={"id": os.path.basename(artifact_path), "path_sha256": _sha256hex(os.path.abspath(artifact_path))},
+        config={"runtime": runtime, "baseline": "no-draft", "candidate": "speculative"},
+        workload=workload,
+        baseline=baseline_pair,
+        candidate=candidate_pair,
+        metrics=merged_spec,
+    )
+    return candidate_result
 
 
 # --------------------------------------------------------------------------
@@ -310,7 +573,9 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
                    steady_requests: int = 30, steady_seconds: Optional[float] = None,
                    max_new_tokens: int = 128, prompt: str = DEFAULT_PROBE_PROMPT,
                    prefix_cache_probe: bool = True, batching_probe: bool = True,
-                   timeout_s: int = 300) -> Dict[str, Any]:
+                   timeout_s: int = 300,
+                   paired_speculative_baseline: bool = True,
+                   env_overrides: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     """Boot the real serve.py, drive warmup+steady-state, harvest counters.
 
     Returns a ProbeResult dict. When the host cannot boot a runtime the dict has
@@ -321,6 +586,11 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
     env: Dict[str, str] = {}
     if runtime:
         env["KOLM_SERVE_RUNTIME"] = runtime
+    if env_overrides:
+        env.update(env_overrides)
+    workload = _probe_workload(prompt, max_new_tokens, concurrency, warmup,
+                               steady_requests, steady_seconds)
+    workload_id = f"probe-{_digest_object(workload)[:16]}"
 
     proc, base_url = _boot_serve(artifact_path, port, env)
     result: Dict[str, Any] = {"ok": False, "tested": False, "reason": None,
@@ -404,6 +674,7 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
         result.update({
             "ok": True,
             "tested": tok_s is not None and peak["memory_mb"] is not None,
+            "workload_id": workload_id,
             "engine": info.get("engine"),
             "runtime_version": info.get("runtime_version") or info.get("engine"),
             "model": info.get("model"),
@@ -425,6 +696,30 @@ def probe_artifact(artifact_path: str, *, runtime: Optional[str] = None,
         })
         if not result["tested"]:
             result["reason"] = "missing tok_s or memory_mb; staying estimated"
+        if paired_speculative_baseline and result.get("speculative_decoding"):
+            baseline_result = probe_artifact(
+                artifact_path,
+                runtime=runtime,
+                port=0,
+                concurrency=concurrency,
+                warmup=warmup,
+                steady_requests=steady_requests,
+                steady_seconds=steady_seconds,
+                max_new_tokens=max_new_tokens,
+                prompt=prompt,
+                prefix_cache_probe=False,
+                batching_probe=False,
+                timeout_s=timeout_s,
+                paired_speculative_baseline=False,
+                env_overrides={
+                    "KOLM_SERVE_SPECULATIVE_DRAFT": "",
+                    "KOLM_NUM_SPECULATIVE_TOKENS": "0",
+                    "KOLM_SPEC_HEAD_KIND": "",
+                },
+            )
+            _attach_paired_speculative_speedup(
+                result, baseline_result, artifact_path=artifact_path,
+                runtime=runtime, workload=workload)
         return result
     finally:
         try:
@@ -474,6 +769,8 @@ def emit_passport_json(result: Dict[str, Any]) -> Dict[str, Any]:
         # v2 enrichment sub-objects:
         "time_to_first_token_ms": result.get("ttft_p50_ms"),
         "speculative_decoding": result.get("speculative_decoding"),
+        "paired_speculative_baseline": result.get("paired_speculative_baseline"),
+        "probe_measurement_receipt": result.get("probe_measurement_receipt"),
         "prompt_cache": result.get("prompt_cache"),
         "continuous_batching": result.get("continuous_batching"),
         "kv_policy": result.get("kv_policy"),
@@ -519,10 +816,17 @@ def _self_test() -> int:
     spec = emit_passport_json({
         "ok": True,
         "tested": True,
+        "workload_id": "probe-test",
         "engine": "vllm",
+        "model": "qwen-target",
+        "tok_s": 88.0,
+        "memory_mb": 9000.0,
         "speculative_decoding": {
+            "method": "speculative_decoding",
             "head_kind": "eagle3",
             "head_id": "h",
+            "target_model": "qwen-target",
+            "runtime": "vllm",
             "num_speculative_tokens": 5,
             "acceptance_rate": 0.5,
             "accepted_length": 5.0,
@@ -530,6 +834,48 @@ def _self_test() -> int:
     })
     assert spec["speculative_decoding"]["accepted_length"] == 5.0
     assert spec["speculative_decoding"]["acceptance_rate"] == 0.5
+
+    workload = _probe_workload("SECRET_PROMPT", 32, 1, 1, 2, None)
+    candidate = {
+        "ok": True,
+        "tested": True,
+        "workload_id": f"probe-{_digest_object(workload)[:16]}",
+        "engine": "vllm",
+        "runtime_version": "vllm 0.10.0",
+        "model": "qwen-target",
+        "precision": "fp16",
+        "tok_s": 84.0,
+        "memory_mb": 1000.0,
+        "speculative_decoding": {
+            "method": "speculative_decoding",
+            "head_kind": "eagle3",
+            "head_id": "h",
+            "target_model": "qwen-target",
+            "runtime": "vllm",
+            "num_speculative_tokens": 5,
+            "acceptance_rate": 0.5,
+            "accepted_length": 4.0,
+            "throughput_speedup": None,
+        },
+    }
+    baseline = {
+        "ok": True,
+        "tested": True,
+        "engine": "vllm",
+        "runtime_version": "vllm 0.10.0",
+        "model": "qwen-target",
+        "precision": "fp16",
+        "tok_s": 42.0,
+        "memory_mb": 1000.0,
+    }
+    attached = _attach_paired_speculative_speedup(
+        candidate, baseline, artifact_path="artifact.kolm", runtime="vllm", workload=workload)
+    assert attached["speculative_decoding"]["throughput_speedup"] == 2.0, attached
+    receipt = attached["probe_measurement_receipt"]
+    assert receipt["schema"] == PROBE_MEASUREMENT_RECEIPT_SCHEMA
+    assert receipt["claim_scope"] == "paired_measurement_receipt_digest_only"
+    flat = json.dumps(receipt)
+    assert "SECRET_PROMPT" not in flat
 
     print("apps.export.probe self-test: OK")
     return 0
@@ -547,6 +893,7 @@ def main() -> int:
     ap.add_argument("--max-new-tokens", type=int, default=128)
     ap.add_argument("--no-prefix-cache-probe", action="store_true")
     ap.add_argument("--no-batching-probe", action="store_true")
+    ap.add_argument("--no-paired-speculative-baseline", action="store_true")
     ap.add_argument("--timeout-s", type=int, default=300)
     ap.add_argument("--self-test", action="store_true")
     args = ap.parse_args()
@@ -566,7 +913,8 @@ def main() -> int:
         steady_requests=args.steady_requests, steady_seconds=args.steady_seconds,
         max_new_tokens=args.max_new_tokens,
         prefix_cache_probe=not args.no_prefix_cache_probe,
-        batching_probe=not args.no_batching_probe, timeout_s=args.timeout_s)
+        batching_probe=not args.no_batching_probe, timeout_s=args.timeout_s,
+        paired_speculative_baseline=not args.no_paired_speculative_baseline)
     print(json.dumps(emit_passport_json(result)))
     return 0 if result.get("ok") else 2
 
