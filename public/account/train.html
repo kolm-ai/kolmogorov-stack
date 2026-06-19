@@ -371,7 +371,8 @@
     fetch('/v1/compile', { method:'POST', credentials:'same-origin', headers: headers({ 'content-type':'application/json' }), body: JSON.stringify({ task: 'distill namespace '+STATE.namespace, corpus_namespace: STATE.namespace }) })
       .then(function(res){ return res.json().then(function(j){ return { ok:res.ok, status:res.status, body:j }; }); })
       .then(function(o){
-        var streamUrl = o.body && (o.body.stream_url || (o.body.job ? '/v1/compile/stream/'+o.body.job : null));
+        var compileJob = o.body && (o.body.job_id || o.body.job || o.body.id);
+        var streamUrl = o.body && (o.body.stream_url || (compileJob ? '/v1/compile/stream/'+compileJob : null));
         if (!o.ok || !streamUrl){
           runPanel().innerHTML = '<div class="banner warn">'+esc((o.body && (o.body.error||o.body.message)) || 'Could not start the compile.')+'</div>';
           return done();
@@ -391,8 +392,19 @@
     src.addEventListener('hello', function(ev){
       try { var d = JSON.parse(ev.data); steps = (d.steps||[]).map(function(s){ return { id:s.id, label:s.label, status:s.status||'pending' }; }); renderSteps(steps); } catch(e){}
     });
+    function applyStepEvent(d, fallbackStatus){
+      var sid = d.id || d.step;
+      var s = steps.find(function(x){ return x.id===sid; });
+      if (s){ s.status = d.status || fallbackStatus || s.status; renderSteps(steps); }
+    }
+    src.addEventListener('step.start', function(ev){
+      try { applyStepEvent(JSON.parse(ev.data), 'running'); } catch(e){}
+    });
+    src.addEventListener('step.end', function(ev){
+      try { applyStepEvent(JSON.parse(ev.data), 'done'); } catch(e){}
+    });
     src.addEventListener('step', function(ev){
-      try { var d = JSON.parse(ev.data); var s = steps.find(function(x){ return x.id===d.id; }); if (s){ s.status = d.status || s.status; renderSteps(steps); } } catch(e){}
+      try { applyStepEvent(JSON.parse(ev.data)); } catch(e){}
     });
     src.addEventListener('metric', function(ev){
       try { var d = JSON.parse(ev.data); var s = steps.find(function(x){ return x.id===d.step; }); if (s){ s.k_score = d.k_score; renderSteps(steps); } } catch(e){}

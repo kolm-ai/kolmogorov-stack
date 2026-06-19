@@ -10,7 +10,7 @@ function read(rel) {
 
 test('W1032 Distill Studio is a real no-code train, distill, compile workspace', () => {
   const html = read('public/studio.html');
-  assert.match(html, /data-studio-version="w1033-distill-compile-studio-v1"/);
+  assert.match(html, /data-studio-version="w1034-studio-evidence-cockpit-v1"/);
   assert.match(html, /Distill Studio/);
   assert.match(html, /No-code train, distill, compile loop/);
   assert.match(html, /id="namespace"/);
@@ -21,6 +21,9 @@ test('W1032 Distill Studio is a real no-code train, distill, compile workspace',
   assert.match(html, /id="startDistill"/);
   assert.match(html, /id="startCompile"/);
   assert.match(html, /id="submitCloud"/);
+  assert.match(html, /id="artifactLink"/);
+  assert.match(html, /Live run timeline/);
+  assert.match(html, /Readiness and provenance/);
   assert.match(html, /aria-live="polite"/);
 });
 
@@ -31,6 +34,7 @@ test('W1032 Studio wires the production distill APIs without unsafe DOM sinks', 
     '/v1/distill/from-captures',
     '/v1/distill/strategy',
     '/v1/cloud/distill/submit',
+    '/v1/account/compiler-overview',
     '/v1/compile',
     '/v1/compile/stream/:job',
     '/v1/distill/runs',
@@ -42,9 +46,15 @@ test('W1032 Studio wires the production distill APIs without unsafe DOM sinks', 
   assert.match(html, /textContent/);
   assert.match(html, /localStorage/);
   assert.match(html, /authorization.*Bearer/s);
+  assert.match(html, /job_id \|\| data\.job/);
+  assert.match(html, /step\.start/);
+  assert.match(html, /step\.end/);
 });
 
 test('W1032 Studio is linked from the existing train workspace', () => {
   const train = read('public/account/train.html');
   assert.match(train, /href="\/studio"/);
+  assert.match(train, /job_id \|\| o\.body\.job/);
+  assert.match(train, /step\.start/);
+  assert.match(train, /step\.end/);
 });

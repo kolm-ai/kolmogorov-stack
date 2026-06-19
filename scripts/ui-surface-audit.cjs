@@ -311,15 +311,18 @@ async function runCliSurfaceChecks(base, auth, serverEnv, outDir) {
   if (auth && auth.token) env.KOLM_API_KEY = auth.token;
   const commands = [
     ['root-help', ['--help']],
-    ['doctor-json', ['doctor', '--json']],
+    // Doctor probes Python, GPU, package imports, and network reachability.
+    // On Windows GPU workstations that can legitimately exceed the generic
+    // 25s CLI smoke budget even when it exits successfully.
+    ['doctor-json', ['doctor', '--json'], 60000],
     ['whoami-json', ['whoami', '--json']],
     ['billing-tiers-json', ['billing', 'tiers', '--json']],
     ['tui-help', ['tui', '--help']],
     ['chat-tui-help', ['chat-tui', '--help']],
   ];
   const results = [];
-  for (const [name, argv] of commands) {
-    results.push(await runCommand(name, argv, env, cliDir));
+  for (const [name, argv, timeoutMs] of commands) {
+    results.push(await runCommand(name, argv, env, cliDir, timeoutMs || 25000));
   }
   return results;
 }

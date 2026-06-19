@@ -22,7 +22,7 @@
   .brand svg{width:23px;height:23px;fill:var(--accent)}
   .studio-nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
   .studio-grid{display:grid;grid-template-columns:292px minmax(0,1fr);gap:16px;align-items:start}
-  .rail,.pane,.meter,.run-row,.flow-step{border:1px solid var(--line);border-top-color:var(--line-top);border-radius:8px;background:var(--panel);box-shadow:var(--plate)}
+  .rail,.pane,.meter,.run-row,.flow-step,.evidence-card,.timeline-step{border:1px solid var(--line);border-top-color:var(--line-top);border-radius:8px;background:var(--panel);box-shadow:var(--plate)}
   .rail{position:sticky;top:18px;padding:16px;display:grid;gap:14px}
   .pane{padding:16px;min-width:0}
   .eyebrow{font:var(--w-ui) 11px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
@@ -40,7 +40,7 @@
   .btn--primary{background:var(--cta-fill);color:var(--cta-ink);border-color:transparent}
   .btn--primary:hover{background:var(--cta-fill-hover)}
   .btn:disabled{opacity:.48;cursor:not-allowed}
-  .status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+  .status{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
   .meter{padding:13px;min-height:92px}
   .meter span{display:block;color:var(--ink-3);font:11px/1.35 var(--font-mono);text-transform:uppercase;letter-spacing:.08em}
   .meter b{display:block;margin-top:10px;color:var(--ink);font:var(--w-display) 27px/1 var(--font-mono);font-variant-numeric:tabular-nums}
@@ -61,6 +61,22 @@
   .run-row{display:grid;grid-template-columns:minmax(0,1fr) 112px 112px;gap:10px;align-items:center;padding:10px}
   .run-row b{font-size:13px;color:var(--ink);overflow-wrap:anywhere}
   .run-row span{font:12px/1.35 var(--font-mono);color:var(--ink-3);text-align:right}
+  .evidence-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .evidence-card{padding:11px;min-height:86px}
+  .evidence-card span{display:block;color:var(--ink-3);font:11px/1.35 var(--font-mono);text-transform:uppercase;letter-spacing:.08em}
+  .evidence-card b{display:block;margin-top:8px;color:var(--ink);font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+  .evidence-card small{display:block;margin-top:7px;color:var(--ink-3);font:12px/1.4 var(--font-mono);overflow-wrap:anywhere}
+  .artifact-link{display:inline-flex;align-items:center;min-height:38px;margin-top:10px;color:var(--accent);font:12px/1 var(--font-mono)}
+  .timeline{display:grid;gap:8px}
+  .timeline-step{display:grid;grid-template-columns:minmax(0,1fr) 94px;gap:10px;align-items:center;padding:10px}
+  .timeline-step b{display:block;color:var(--ink);font-size:13px}
+  .timeline-step small{display:block;margin-top:4px;color:var(--ink-3);font:12px/1.35 var(--font-mono);overflow-wrap:anywhere}
+  .timeline-step span{justify-self:end;border:1px solid var(--line-2);border-radius:999px;padding:4px 8px;color:var(--ink-3);font:11px/1 var(--font-mono);text-transform:uppercase;letter-spacing:.06em}
+  .timeline-step[data-state="running"]{border-color:rgba(63,229,160,.42)}
+  .timeline-step[data-state="running"] span{border-color:var(--accent-edge);color:var(--accent)}
+  .timeline-step[data-state="done"] span{border-color:var(--accent-edge);color:var(--accent)}
+  .timeline-step[data-state="error"]{border-color:rgba(224,122,110,.52)}
+  .timeline-step[data-state="error"] span{border-color:rgba(224,122,110,.72);color:var(--accent-dead)}
   .badge{display:inline-flex;align-items:center;min-height:22px;padding:2px 7px;border:1px solid var(--line-2);border-radius:5px;background:var(--well);color:var(--ink-2);font:11px/1 var(--font-mono)}
   .badge.ok{border-color:var(--accent-edge);color:var(--accent)}
   .banner{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:11px 12px;color:var(--ink-2);font-size:13px;line-height:1.5}
@@ -68,10 +84,10 @@
   .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
   [hidden]{display:none!important}
   @media (max-width:980px){.studio-grid,.split{grid-template-columns:1fr}.rail{position:static}.status,.flow{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media (max-width:620px){.studio{padding-top:18px}.studio-top{align-items:flex-start;flex-direction:column}.studio-nav{justify-content:flex-start}.status,.flow,.settings{grid-template-columns:1fr}.run-row,.row{grid-template-columns:1fr}.row span,.run-row span{text-align:left}.btnbar .btn{flex:1 1 auto}}
+  @media (max-width:620px){.studio{padding-top:18px}.studio-top{align-items:flex-start;flex-direction:column}.studio-nav{justify-content:flex-start}.status,.flow,.settings,.evidence-grid{grid-template-columns:1fr}.run-row,.row,.timeline-step{grid-template-columns:1fr}.row span,.run-row span,.timeline-step span{text-align:left;justify-self:start}.btnbar .btn{flex:1 1 auto}}
 </style>
 </head>
-<body data-studio-version="w1033-distill-compile-studio-v1">
+<body data-studio-version="w1034-studio-evidence-cockpit-v1">
 <a class="skip-link" href="#main">Skip to content</a>
 <main id="main" class="studio">
   <header class="studio-top">
@@ -113,6 +129,7 @@
       <div class="btnbar">
         <button class="btn btn--primary" id="loadPreview" type="button">Load Preview</button>
         <button class="btn" id="loadRuns" type="button">Runs</button>
+        <button class="btn" id="loadOverview" type="button">Overview</button>
       </div>
       <div id="notice" class="banner" aria-live="polite">Idle.</div>
     </aside>
@@ -123,6 +140,8 @@
         <div class="meter"><span>Recipe ready</span><b id="mRecipe">No</b><small>template cluster</small></div>
         <div class="meter"><span>Specialist ready</span><b id="mSpecialist">No</b><small>1,000+ pairs</small></div>
         <div class="meter"><span>Teacher source</span><b id="mTeacher">-</b><small id="mPolicy">policy pending</small></div>
+        <div class="meter"><span>K-score</span><b id="mKScore">-</b><small id="mKSource">not measured</small></div>
+        <div class="meter"><span>Artifact</span><b id="mArtifact">-</b><small id="mArtifactMeta">not compiled</small></div>
       </section>
 
       <section class="split">
@@ -186,6 +205,33 @@
 
       <section class="split">
         <div class="pane">
+          <p class="eyebrow">Evidence</p>
+          <h2>Readiness and provenance</h2>
+          <div class="evidence-grid" aria-live="polite">
+            <div class="evidence-card"><span>Data budget</span><b id="evBudget">Waiting</b><small id="evBudgetNote">Load a namespace preview.</small></div>
+            <div class="evidence-card"><span>Teacher policy</span><b id="evTeacher">Unchecked</b><small id="evTeacherNote">Policy verdict appears after preview.</small></div>
+            <div class="evidence-card"><span>Holdout gate</span><b id="evHoldout">Pending</b><small id="evHoldoutNote">Compile emits holdout evidence.</small></div>
+            <div class="evidence-card"><span>Regression gate</span><b id="evGate">Pending</b><small id="evGateNote">Promotion blocks on regressions.</small></div>
+            <div class="evidence-card"><span>Compile artifact</span><b id="evArtifact">None</b><small id="evArtifactNote">A signed .kolm link appears after compile.</small><a id="artifactLink" class="artifact-link" href="#" hidden>Download .kolm</a></div>
+            <div class="evidence-card"><span>Workspace state</span><b id="evWorkspace">Local</b><small id="evWorkspaceNote">Sync overview to load account counts.</small></div>
+          </div>
+        </div>
+        <div class="pane">
+          <p class="eyebrow">Pipeline</p>
+          <h2>Live run timeline</h2>
+          <div class="timeline" aria-live="polite">
+            <div class="timeline-step" id="tlCapture" data-state="pending"><div><b>Capture</b><small>Namespace traffic lands in the capture lake.</small></div><span>pending</span></div>
+            <div class="timeline-step" id="tlCurate" data-state="pending"><div><b>Curate</b><small>Dedup, policy, and train/holdout prep.</small></div><span>pending</span></div>
+            <div class="timeline-step" id="tlTrain" data-state="pending"><div><b>Train or synthesize</b><small>Recipe or specialist distill path.</small></div><span>pending</span></div>
+            <div class="timeline-step" id="tlEval" data-state="pending"><div><b>Evaluate</b><small>Real holdout K-score, not a demo score.</small></div><span>pending</span></div>
+            <div class="timeline-step" id="tlPackage" data-state="pending"><div><b>Package</b><small>Compile target artifact.</small></div><span>pending</span></div>
+            <div class="timeline-step" id="tlSign" data-state="pending"><div><b>Sign</b><small>Signed .kolm receipt and download URL.</small></div><span>pending</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="split">
+        <div class="pane">
           <p class="eyebrow">Runs</p>
           <h2>Recent distill runs</h2>
           <div id="runs" class="runs" aria-live="polite"></div>
@@ -204,7 +250,7 @@
   'use strict';
   var $ = function(id){ return document.getElementById(id); };
   var storeKey = 'kolm_studio_api_key';
-  var state = { captures: 0, preview: null };
+  var state = { captures: 0, preview: null, compileJob: null };
   function text(id, value){ var el = $(id); if (el) el.textContent = String(value == null ? '' : value); }
   function val(id){ var el = $(id); return el ? String(el.value || '').trim() : ''; }
   function number(n){ return Number.isFinite(Number(n)) ? Number(n).toLocaleString() : '0'; }
@@ -214,6 +260,76 @@
     var out = $('output');
     out.textContent += (out.textContent ? '\n' : '') + line;
     out.scrollTop = out.scrollHeight;
+  }
+  function fixed(n, digits){
+    var x = Number(n);
+    return Number.isFinite(x) ? x.toFixed(digits == null ? 3 : digits) : '-';
+  }
+  function compact(n){
+    var x = Number(n);
+    if (!Number.isFinite(x)) return '-';
+    if (Math.abs(x) >= 1000) return Math.round(x).toLocaleString();
+    return String(x);
+  }
+  function evidence(id, value, note){
+    text(id, value);
+    text(id + 'Note', note);
+  }
+  function timeline(id, status, note){
+    var el = $(id);
+    if (!el) return;
+    var stateName = status || 'pending';
+    el.setAttribute('data-state', stateName);
+    var pill = el.querySelector('span');
+    var small = el.querySelector('small');
+    if (pill) pill.textContent = stateName;
+    if (small && note) small.textContent = note;
+  }
+  function resetTimeline(){
+    timeline('tlCapture', 'pending', 'Namespace traffic lands in the capture lake.');
+    timeline('tlCurate', 'pending', 'Dedup, policy, and train/holdout prep.');
+    timeline('tlTrain', 'pending', 'Recipe or specialist distill path.');
+    timeline('tlEval', 'pending', 'Real holdout K-score, not a demo score.');
+    timeline('tlPackage', 'pending', 'Compile target artifact.');
+    timeline('tlSign', 'pending', 'Signed .kolm receipt and download URL.');
+  }
+  function kscore(value, source){
+    text('mKScore', value == null ? '-' : fixed(value, 3));
+    text('mKSource', source || (value == null ? 'not measured' : 'source pending'));
+  }
+  function artifact(value, note, href){
+    text('mArtifact', value || '-');
+    text('mArtifactMeta', note || 'not compiled');
+    evidence('evArtifact', value || 'None', note || 'A signed .kolm link appears after compile.');
+    var link = $('artifactLink');
+    if (link) {
+      if (href) { link.href = href; link.hidden = false; }
+      else { link.removeAttribute('href'); link.hidden = true; }
+    }
+  }
+  function renderBudget(data){
+    var db = data && (data.data_budget || data.planDataBudget || data.plan_data_budget);
+    if (!db) return evidence('evBudget', 'Unavailable', 'No scaling-law anchors returned for this namespace.');
+    if (db.basis === 'insufficient') {
+      return evidence('evBudget', 'Need anchors', 'Need measured K-score observations before estimating rows.');
+    }
+    var remaining = db.pairs_remaining != null ? Number(db.pairs_remaining) : null;
+    var required = db.required_examples != null ? Number(db.required_examples) : null;
+    if (Number.isFinite(remaining)) {
+      return evidence('evBudget', remaining <= 0 ? 'Ready' : compact(remaining) + ' pairs', Number.isFinite(required) ? 'Target estimate: ' + compact(required) + ' examples.' : 'Rows estimate available.');
+    }
+    evidence('evBudget', 'Planned', db.target_k != null ? 'Target K ' + fixed(db.target_k, 3) + '.' : 'Scaling-law plan returned.');
+  }
+  function renderPolicy(data){
+    var policy = data.teacher_source_policy || data.teacher_source || 'unchecked';
+    var risk = data.teacher_source_tos_risk || data.policy_enforced || 'policy pending';
+    evidence('evTeacher', policy, risk);
+  }
+  function setHoldout(value, note){
+    evidence('evHoldout', value || 'Pending', note || 'Compile emits holdout evidence.');
+  }
+  function setGate(value, note){
+    evidence('evGate', value || 'Pending', note || 'Promotion blocks on regressions.');
   }
   function key(){ return val('apiKey') || localStorage.getItem(storeKey) || ''; }
   function headers(body){
@@ -263,6 +379,12 @@
     text('phaseCurate', data.total_captures ? 'previewed' : 'waiting');
     text('phaseTrain', data.specialist_eligible ? 'eligible' : 'gated');
     text('phasePackage', data.recipe_eligible || data.specialist_eligible ? 'ready after distill' : 'waiting');
+    renderBudget(data);
+    renderPolicy(data);
+    timeline('tlCapture', state.captures ? 'done' : 'pending', state.captures ? number(state.captures) + ' captures in ' + (val('namespace') || 'default') + '.' : 'No captures in this namespace yet.');
+    timeline('tlCurate', data.total_captures ? 'done' : 'pending', data.total_captures ? 'Preview clustered and policy checked.' : 'Waiting for captures.');
+    timeline('tlTrain', data.specialist_eligible ? 'done' : (data.recipe_eligible ? 'running' : 'pending'), data.specialist_eligible ? 'Specialist distill threshold met.' : (data.recipe_eligible ? 'Recipe path is ready; specialist needs 1,000+ pairs.' : 'Capture at least 4 matching examples for recipe path.'));
+    setGate(data.specialist_eligible || data.recipe_eligible ? 'Preflight pass' : 'Gated', data.specialist_eligible ? 'Specialist path eligible.' : (data.recipe_eligible ? 'Recipe path eligible.' : 'More captures required before distill.'));
     var list = $('clusterRows'); clearNode(list);
     var clusters = Array.isArray(data.top_clusters) ? data.top_clusters : [];
     if (!clusters.length) row(list, 'No cluster yet', '0', 'capture more');
@@ -291,6 +413,9 @@
       var teacher = encodeURIComponent(val('teacher') || 'anthropic');
       var data = await api('/v1/distill/strategy?task=generation&real_pairs=' + rows + '&teacher=' + teacher, { headers: headers() });
       write(data);
+      var plan = data && data.data && data.data.plan ? data.data.plan : data;
+      if (plan && plan.recommendation) setGate(plan.recommendation, 'Strategy planner returned the next backend action.');
+      else if (data && data.readiness && data.readiness.status) setGate(data.readiness.status, 'Strategy planner readiness status.');
       notice('Strategy ready.');
     } catch (err) {
       notice(err.message, true);
@@ -298,8 +423,11 @@
     }
   }
   async function startDistill(){
+    var btn = $('startDistill');
     try {
+      if (btn) btn.disabled = true;
       notice('Starting distill...');
+      timeline('tlTrain', 'running', 'Submitting distill job for ' + (val('namespace') || 'default') + '.');
       var body = {
         namespace: val('namespace') || 'default',
         mode: val('mode'),
@@ -309,11 +437,16 @@
       };
       var data = await api('/v1/distill/from-captures', { method: 'POST', headers: headers(true), body: JSON.stringify(body) });
       write(data);
+      timeline('tlTrain', data.job_id ? 'running' : 'done', data.job_id ? 'Job ' + data.job_id + ' submitted.' : 'Recipe distill response returned.');
+      setGate(data.status || 'Submitted', data.poll_url || data.status_url || data.bridge_source || 'Distill job accepted.');
       notice('Distill submitted.');
       loadRuns();
     } catch (err) {
+      timeline('tlTrain', 'error', err.message);
       notice(err.message, true);
       write(err.payload || err.message);
+    } finally {
+      if (btn) btn.disabled = false;
     }
   }
   async function submitCloud(){
@@ -328,6 +461,7 @@
       };
       var data = await api('/v1/cloud/distill/submit', { method: 'POST', headers: headers(true), body: JSON.stringify(body) });
       write(data);
+      evidence('evWorkspace', data.cloud_backend_status || data.status || 'Queued', data.cloud_distill_job_id || data.job_id || 'Managed distill request accepted.');
       notice('Cloud request submitted.');
     } catch (err) {
       notice(err.message, true);
@@ -339,25 +473,33 @@
     try {
       if (btn) btn.disabled = true;
       notice('Starting compile...');
+      resetTimeline();
+      timeline('tlCapture', state.captures ? 'done' : 'pending', state.captures ? number(state.captures) + ' captures available.' : 'Compile can still run, but this namespace has no previewed captures.');
+      timeline('tlCurate', 'running', 'Submitting compile job and preparing holdout split.');
       write('Starting compile for namespace ' + (val('namespace') || 'default') + '...');
       var namespace = val('namespace') || 'default';
       var body = {
         task: 'distill namespace ' + namespace,
         corpus_namespace: namespace,
         source: 'studio',
-        quality_preset: val('preset'),
-        backend: val('backend'),
+        preset: val('preset'),
+        recipe_class: 'distilled_model',
       };
       var data = await api('/v1/compile', { method: 'POST', headers: headers(true), body: JSON.stringify(body) });
       write(data);
-      var streamUrl = data.stream_url || (data.job ? '/v1/compile/stream/' + data.job : '');
+      var jobId = data.job_id || data.job || data.id || '';
+      state.compileJob = jobId || null;
+      var streamUrl = data.stream_url || (jobId ? '/v1/compile/stream/' + jobId : '');
       if (!streamUrl) {
         notice('Compile submitted.');
+        setGate(data.status || 'Submitted', data.poll || 'Compile accepted without a stream URL.');
         if (btn) btn.disabled = false;
         return;
       }
+      setGate(data.status || 'Streaming', 'Compile job ' + jobId + ' accepted.');
       streamCompile(streamUrl, btn);
     } catch (err) {
+      timeline('tlCurate', 'error', err.message);
       if (btn) btn.disabled = false;
       notice(err.message, true);
       write(err.payload || err.message);
@@ -378,13 +520,42 @@
     notice('Compile running...');
     appendLog('compile stream connected');
     function parse(ev){ try { return JSON.parse(ev.data || '{}'); } catch (_) { return { raw: ev.data || '' }; } }
-    src.addEventListener('hello', function(ev){ appendLog('hello ' + JSON.stringify(parse(ev))); });
-    src.addEventListener('step', function(ev){ appendLog('step ' + JSON.stringify(parse(ev))); });
-    src.addEventListener('metric', function(ev){ appendLog('metric ' + JSON.stringify(parse(ev))); });
+    function applyStep(data, status){
+      var step = String(data.step || data.id || '');
+      var next = status || data.status || 'running';
+      if (step === 'prepare') timeline('tlCurate', next === 'done' || next === 'skipped' ? 'done' : next, 'Prepare + holdout split.');
+      else if (step === 'synthesize') timeline('tlTrain', next === 'done' || next === 'skipped' ? 'done' : next, 'Synthesize recipe or distill from train split.');
+      else if (step === 'evaluate') timeline('tlEval', next === 'done' || next === 'skipped' ? 'done' : next, 'Holdout evaluation step.');
+      else if (step === 'package') {
+        timeline('tlPackage', next === 'done' || next === 'skipped' ? 'done' : next, 'Package artifact bytes.');
+        if (next === 'done' || next === 'skipped') timeline('tlSign', next === 'done' ? 'running' : 'pending', 'Waiting for signed artifact URL.');
+      }
+    }
+    function applyMetric(data){
+      if (data.k_score != null) {
+        kscore(data.k_score, data.source || data.k_source || 'holdout');
+        setHoldout('K ' + fixed(data.k_score, 3), data.source || data.k_source || 'holdout score');
+      }
+    }
+    src.addEventListener('hello', function(ev){
+      var data = parse(ev);
+      appendLog('hello ' + JSON.stringify(data));
+      timeline('tlCurate', 'running', 'Compile stream connected for ' + (data.job || state.compileJob || 'job') + '.');
+    });
+    src.addEventListener('step.start', function(ev){ var data = parse(ev); appendLog('step.start ' + JSON.stringify(data)); applyStep(data, 'running'); });
+    src.addEventListener('step.end', function(ev){ var data = parse(ev); appendLog('step.end ' + JSON.stringify(data)); applyStep(data, data.status || 'done'); });
+    src.addEventListener('step', function(ev){ var data = parse(ev); appendLog('step ' + JSON.stringify(data)); applyStep(data); });
+    src.addEventListener('metric', function(ev){ var data = parse(ev); appendLog('metric ' + JSON.stringify(data)); applyMetric(data); });
     src.addEventListener('done', function(ev){
       ended = true;
       var data = parse(ev);
       appendLog('done ' + JSON.stringify(data));
+      applyMetric(data);
+      timeline('tlPackage', 'done', data.artifact_class ? 'Artifact class: ' + data.artifact_class + '.' : 'Artifact packaged.');
+      timeline('tlSign', 'done', data.artifact_url || 'Signed artifact ready.');
+      artifact(data.slug || data.job || 'Ready', data.artifact_class || data.k_source || 'signed .kolm ready', data.artifact_url || '');
+      if (data.holdout_count != null) setHoldout(data.k_score != null ? 'K ' + fixed(data.k_score, 3) : 'Measured', compact(data.holdout_count) + ' holdout rows.');
+      setGate('Promotable', data.k_source || 'Compile completed without regression block.');
       notice('Compile done' + (data.k_score != null ? ' - K ' + Number(data.k_score).toFixed(3) : '') + '.');
       src.close();
       if (btn) btn.disabled = false;
@@ -394,6 +565,8 @@
       if (ended) return;
       var data = ev && ev.data ? parse(ev) : {};
       appendLog('stream interrupted' + (data.error || data.message ? ': ' + (data.error || data.message) : ''));
+      timeline('tlSign', 'error', data.error || data.message || 'Stream interrupted.');
+      setGate(data.error_code || 'Stream error', data.error || data.message || 'Check the run status.');
       notice('Compile stream interrupted. Check Runs for final status.', true);
       src.close();
       if (btn) btn.disabled = false;
@@ -402,15 +575,40 @@
   async function loadRuns(){
     try {
       notice('Loading runs...');
-      var data = await api('/v1/distill/runs', { headers: headers() });
+      var ns = encodeURIComponent(val('namespace') || 'default');
+      var data = await api('/v1/distill/runs?namespace=' + ns + '&limit=8', { headers: headers() });
       var parent = $('runs'); clearNode(parent);
       var runs = Array.isArray(data.runs) ? data.runs : [];
       if (!runs.length) runRow(parent, 'No distill runs yet', '-', '-');
       runs.slice(0, 8).forEach(function(r){
-        runRow(parent, r.id || r.run_id || 'run', r.status || r.telemetry_source || '-', r.namespace || r.created_at || '-');
+        var k = r.k_final != null ? 'K ' + fixed(r.k_final, 3) + ' ' + (r.k_source || '') : (r.loss_final != null ? 'loss ' + fixed(r.loss_final, 3) : r.telemetry_source || '-');
+        var meta = (r.namespace || '-') + (r.step_count != null ? ' / ' + compact(r.step_count) + ' steps' : '');
+        runRow(parent, r.id || r.run_id || 'run', k, meta);
       });
       write(data);
+      if (runs[0]) {
+        if (!state.compileJob && runs[0].k_final != null) kscore(runs[0].k_final, runs[0].k_source || runs[0].telemetry_source || 'distill run');
+        evidence('evWorkspace', runs.length + ' runs', 'Namespace ' + (val('namespace') || 'default') + ' recent distill history.');
+      }
       notice('Runs loaded.');
+    } catch (err) {
+      notice(err.message, true);
+      write(err.payload || err.message);
+    }
+  }
+  async function loadOverview(){
+    try {
+      notice('Loading overview...');
+      var data = await api('/v1/account/compiler-overview', { headers: headers() });
+      write(data);
+      var counts = data.counts || {};
+      evidence('evWorkspace', (counts.observed_captures != null ? compact(counts.observed_captures) + ' captures' : 'Synced'), (counts.artifacts != null ? compact(counts.artifacts) + ' artifacts' : 'Account overview loaded.'));
+      if (counts.artifacts != null) artifact(counts.artifacts ? compact(counts.artifacts) : '0', counts.compile_jobs != null ? compact(counts.compile_jobs) + ' compile jobs' : 'overview synced', '');
+      if (Array.isArray(data.recent_compile_jobs) && data.recent_compile_jobs.length) {
+        var job = data.recent_compile_jobs[0];
+        artifact(job.artifact_ready ? 'Ready' : (job.status || 'Job'), job.id || job.task || 'recent compile job', job.artifact_ready && job.id ? '/v1/compile/' + encodeURIComponent(job.id) + '/.kolm' : '');
+      }
+      notice('Overview loaded.');
     } catch (err) {
       notice(err.message, true);
       write(err.payload || err.message);
@@ -421,12 +619,15 @@
     if (existing) $('apiKey').value = existing;
     $('loadPreview').addEventListener('click', loadPreview);
     $('loadRuns').addEventListener('click', loadRuns);
+    $('loadOverview').addEventListener('click', loadOverview);
     $('planStrategy').addEventListener('click', planStrategy);
     $('startDistill').addEventListener('click', startDistill);
     $('startCompile').addEventListener('click', startCompile);
     $('submitCloud').addEventListener('click', submitCloud);
     renderPreview({ total_captures: 0, top_clusters: [] });
-    write({ studio_version: 'w1033-distill-compile-studio-v1', endpoints: ['/v1/distill/from-captures/preview', '/v1/distill/from-captures', '/v1/distill/strategy', '/v1/cloud/distill/submit', '/v1/compile', '/v1/compile/stream/:job', '/v1/distill/runs', '/v1/captures/list'] });
+    artifact('', '', '');
+    kscore(null, 'not measured');
+    write({ studio_version: 'w1034-studio-evidence-cockpit-v1', endpoints: ['/v1/account/compiler-overview', '/v1/distill/from-captures/preview', '/v1/distill/from-captures', '/v1/distill/strategy', '/v1/cloud/distill/submit', '/v1/compile', '/v1/compile/stream/:job', '/v1/distill/runs', '/v1/captures/list'] });
   }
   init();
 })();
