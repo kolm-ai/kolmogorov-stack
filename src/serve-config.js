@@ -29,7 +29,8 @@
 //                        buildVllmSpeculativeConfig()decoding with the MODERN vLLM
 //                        buildSglangSpecArgs()       speculative_config dict (no
 //                        buildLlamaCppDraftArgs()    deprecated flat kwargs) +
-//                        EAGLE_HEAD_REGISTRY         SGLang + llama.cpp arg lists.
+//                        EAGLE_HEAD_REGISTRY         SGLang + llama.cpp arg lists,
+//                        SPECULATIVE_METHOD_SPECS   with P-EAGLE/MTP/Hydra gates.
 //
 //   4. SERVING FEATURES  resolveServingFeatures()    prefix/radix prompt caching +
 //                        emitVllmServeArgs()         chunked prefill + batched-token
@@ -66,7 +67,7 @@ import { buildItkvProfile, hashItkvProfile } from './itkv-profile.js';
 export const SERVE_CONFIG_VERSION = 'serve-config-v1';
 export const QUANT_KERNEL_ORACLE_VERSION = 'qko-v1';
 export const KV_POLICY_VERSION = 'kv-policy-v4-runtime-frontier';
-export const EAGLE_RESOLVER_VERSION = 'eagle-resolver-v1';
+export const EAGLE_RESOLVER_VERSION = 'eagle-resolver-v2-frontier-methods';
 
 // ===========================================================================
 // Small deterministic helpers (no globals, no wall-clock, no RNG).
@@ -861,12 +862,61 @@ export function emitKvPolicyVllmConfig(policy, kvCacheDtype = 'auto') {
 // EAGLE reuses the TARGET's own hidden states instead of a second full model.
 // The kolm-trained EAGLE3 head must be served via the MODERN vLLM
 // speculative_config dict ({'method','model','num_speculative_tokens'}), not the
-// deprecated flat speculative_model kwargs (removed in vLLM >=0.10). Refs:
+// deprecated flat speculative_model kwargs (removed in vLLM >=0.10). Frontier
+// variants P-EAGLE, DeepSeek-MTP, and Hydra are represented as advisory method
+// specs until runtime support is feature-detected and measured. Refs:
 //   EAGLE arXiv:2401.15077  EAGLE-2 arXiv:2406.16858  EAGLE-3 arXiv:2503.01840
+//   P-EAGLE (parallel EAGLE drafting)  Hydra arXiv:2402.05109
+//   DeepSeek-V3 technical report (multi-token prediction, arXiv:2412.19437)
 //   vLLM EAGLE https://docs.vllm.ai/en/latest/features/speculative_decoding/eagle/
 //   SGLang     https://docs.sglang.ai/advanced_features/speculative_decoding.html
 
-export const EAGLE_HEAD_KINDS = Object.freeze(['eagle', 'eagle2', 'eagle3', 'medusa', 'draft_model']);
+export const EAGLE_HEAD_KINDS = Object.freeze([
+  'eagle',
+  'eagle2',
+  'eagle3',
+  'eagle3_parallel',
+  'deepseek_mtp',
+  'hydra',
+  'medusa',
+  'draft_model',
+]);
+
+export const SPECULATIVE_METHOD_SPECS = Object.freeze({
+  eagle: { kind: 'eagle_head', runtimes: ['vllm', 'sglang', 'transformers'], supported: true },
+  eagle2: { kind: 'eagle_head', runtimes: ['vllm', 'sglang', 'transformers'], supported: true },
+  eagle3: { kind: 'eagle_head', runtimes: ['vllm', 'sglang', 'transformers'], supported: true },
+  medusa: { kind: 'medusa_head', runtimes: ['vllm', 'sglang', 'transformers'], supported: true },
+  draft_model: { kind: 'separate_draft', runtimes: ['vllm', 'sglang', 'transformers', 'llama.cpp'], supported: true },
+  eagle3_parallel: {
+    kind: 'parallel_eagle',
+    runtimes: ['vllm'],
+    external_executor: 'p-eagle',
+    executor_status: 'external_required',
+    label: 'P-EAGLE parallel drafting',
+  },
+  deepseek_mtp: {
+    kind: 'native_mtp',
+    runtimes: ['vllm', 'sglang'],
+    external_executor: 'deepseek-mtp',
+    executor_status: 'external_required',
+    label: 'DeepSeek native multi-token prediction',
+  },
+  hydra: {
+    kind: 'hydra_heads',
+    runtimes: ['vllm', 'transformers'],
+    external_executor: 'hydra',
+    executor_status: 'external_required',
+    label: 'Hydra sequentially-dependent draft heads',
+  },
+});
+
+const SPECULATIVE_EXTERNAL_METHODS = Object.freeze(
+  Object.fromEntries(
+    Object.entries(SPECULATIVE_METHOD_SPECS)
+      .filter(([, spec]) => spec.executor_status === 'external_required')
+  )
+);
 
 // target id -> a verified pretrained EAGLE3 head HF repo. Verified repos only.
 export const EAGLE_HEAD_REGISTRY = Object.freeze({
@@ -880,9 +930,23 @@ const EAGLE_TREE_DEFAULTS = Object.freeze({
   eagle:      { eagle_topk: 8, num_steps: 5, num_draft_tokens: 32, num_speculative_tokens: 5 },
   eagle2:     { eagle_topk: 10, num_steps: 6, num_draft_tokens: 60, num_speculative_tokens: 5 },
   eagle3:     { eagle_topk: 8, num_steps: 5, num_draft_tokens: 32, num_speculative_tokens: 5 },
+  eagle3_parallel: { eagle_topk: 8, num_steps: 5, num_draft_tokens: 64, num_speculative_tokens: 5 },
+  deepseek_mtp: { eagle_topk: null, num_steps: null, num_draft_tokens: null, num_speculative_tokens: 2 },
+  hydra:      { eagle_topk: null, num_steps: null, num_draft_tokens: 32, num_speculative_tokens: 5 },
   medusa:     { eagle_topk: null, num_steps: null, num_draft_tokens: null, num_speculative_tokens: 5 },
   draft_model:{ eagle_topk: null, num_steps: null, num_draft_tokens: null, num_speculative_tokens: 5 },
 });
+
+function _normalizeSpeculativeHeadKind(kind) {
+  const k = _lower(kind);
+  if (['p-eagle', 'peagle', 'p_eagle', 'parallel-eagle', 'parallel_eagle', 'eagle3-parallel'].includes(k)) {
+    return 'eagle3_parallel';
+  }
+  if (['deepseek-mtp', 'deepseek mtp', 'mtp', 'native_mtp', 'native-mtp'].includes(k)) {
+    return 'deepseek_mtp';
+  }
+  return k;
+}
 
 /**
  * Resolve the EAGLE/Medusa/draft head to serve. Priority:
@@ -911,6 +975,29 @@ export function resolveEagleHead({ target, manifest, runtime = 'vllm', flag, num
     return { ...t, num_speculative_tokens: k };
   };
 
+  const frontierDescriptor = (kind, headId, source, overrides = {}) => {
+    const methodSpec = SPECULATIVE_METHOD_SPECS[kind];
+    const d = kDefault(kind);
+    const supportedRuntime = Array.isArray(methodSpec?.runtimes) && methodSpec.runtimes.includes(rt);
+    const label = methodSpec?.label || kind;
+    const executor = methodSpec?.external_executor || kind;
+    return {
+      head_kind: kind,
+      head_id: String(headId || ''),
+      num_speculative_tokens: overrides.num_speculative_tokens ?? d.num_speculative_tokens,
+      eagle_topk: overrides.eagle_topk ?? d.eagle_topk,
+      num_steps: overrides.num_steps ?? d.num_steps,
+      num_draft_tokens: overrides.num_draft_tokens ?? d.num_draft_tokens,
+      source,
+      supported: false,
+      reason: supportedRuntime
+        ? `${label} requires external/upstream ${executor} executor support before Kolm can enforce it`
+        : `${label} is not drivable on ${rt}; requires external/upstream ${executor} executor support`,
+      external_executor: executor,
+      executor_status: methodSpec?.executor_status || 'external_required',
+    };
+  };
+
   // Runtimes that can drive an EAGLE head natively. llama.cpp only does the
   // separate-draft GGUF path (no EAGLE head support upstream).
   const eagleCapable = (rt === 'vllm' || rt === 'sglang' || rt === 'transformers');
@@ -918,8 +1005,18 @@ export function resolveEagleHead({ target, manifest, runtime = 'vllm', flag, num
   // 1. Manifest speculative_decoding block (compile-time choice wins).
   const spec = (manifest && typeof manifest === 'object' && manifest.speculative_decoding) || null;
   if (spec && typeof spec === 'object') {
-    const headKind = _lower(spec.head_kind || spec.method || (spec.version ? 'eagle3' : ''));
+    const headKind = _normalizeSpeculativeHeadKind(spec.head_kind || spec.method || (spec.version ? 'eagle3' : ''));
     const headId = spec.head_id || spec.head_path || spec.draft_model || '';
+    if (SPECULATIVE_EXTERNAL_METHODS[headKind]) {
+      return frontierDescriptor(headKind, headId, 'manifest', {
+        num_speculative_tokens: _isFiniteNumber(spec.num_speculative_tokens) && spec.num_speculative_tokens > 0
+          ? Math.floor(spec.num_speculative_tokens)
+          : undefined,
+        eagle_topk: _isFiniteNumber(spec.eagle_topk) ? spec.eagle_topk : undefined,
+        num_steps: _isFiniteNumber(spec.num_steps) ? spec.num_steps : undefined,
+        num_draft_tokens: _isFiniteNumber(spec.num_draft_tokens) ? spec.num_draft_tokens : undefined,
+      });
+    }
     if (headId) {
       const isEagle = ['eagle', 'eagle2', 'eagle3', 'medusa'].includes(headKind);
       const kind = isEagle ? headKind : 'draft_model';
@@ -941,14 +1038,19 @@ export function resolveEagleHead({ target, manifest, runtime = 'vllm', flag, num
 
   // 2. Explicit non-off flag: treat as a head id (or 'eagle3'/'auto' keyword).
   if (flagStr && !['auto', 'on'].includes(flagStr)) {
+    const requestedKind = _normalizeSpeculativeHeadKind(flagStr);
+    if (SPECULATIVE_EXTERNAL_METHODS[requestedKind]) {
+      const regHead = requestedKind === 'eagle3_parallel' ? (EAGLE_HEAD_REGISTRY[_lower(target)] || '') : '';
+      return frontierDescriptor(requestedKind, regHead, 'explicit');
+    }
     // A bare 'eagle3'/'eagle2' keyword means "use the registry head for target".
-    if (['eagle', 'eagle2', 'eagle3', 'medusa'].includes(flagStr)) {
+    if (['eagle', 'eagle2', 'eagle3', 'medusa'].includes(requestedKind)) {
       const regHead = EAGLE_HEAD_REGISTRY[_lower(target)];
       if (regHead) {
-        const d = kDefault(flagStr);
-        return { head_kind: flagStr, head_id: regHead, num_speculative_tokens: d.num_speculative_tokens, eagle_topk: d.eagle_topk, num_steps: d.num_steps, num_draft_tokens: d.num_draft_tokens, source: 'registry', supported: eagleCapable, reason: eagleCapable ? `registry ${flagStr} head for ${target}` : `${flagStr} not drivable on ${rt}` };
+        const d = kDefault(requestedKind);
+        return { head_kind: requestedKind, head_id: regHead, num_speculative_tokens: d.num_speculative_tokens, eagle_topk: d.eagle_topk, num_steps: d.num_steps, num_draft_tokens: d.num_draft_tokens, source: 'registry', supported: eagleCapable, reason: eagleCapable ? `registry ${requestedKind} head for ${target}` : `${requestedKind} not drivable on ${rt}` };
       }
-      return { head_kind: flagStr, head_id: '', num_speculative_tokens: kDefault(flagStr).num_speculative_tokens, eagle_topk: null, num_steps: null, num_draft_tokens: null, source: 'explicit', supported: false, reason: `no registry ${flagStr} head for target ${target}` };
+      return { head_kind: requestedKind, head_id: '', num_speculative_tokens: kDefault(requestedKind).num_speculative_tokens, eagle_topk: null, num_steps: null, num_draft_tokens: null, source: 'explicit', supported: false, reason: `no registry ${requestedKind} head for target ${target}` };
     }
     // Otherwise it's a concrete head/draft id.
     const d = kDefault('draft_model');
@@ -983,6 +1085,9 @@ export function buildVllmSpeculativeConfig(resolved, { tp = 1 } = {}) {
   if (!resolved || !resolved.head_id || !resolved.supported || resolved.num_speculative_tokens <= 0) {
     return null;
   }
+  if (resolved.executor_status === 'external_required' || SPECULATIVE_EXTERNAL_METHODS[resolved.head_kind]) {
+    return null;
+  }
   const k = Math.max(1, Math.floor(resolved.num_speculative_tokens));
   if (resolved.head_kind === 'eagle' || resolved.head_kind === 'eagle2' || resolved.head_kind === 'eagle3') {
     // Current vLLM SpeculativeConfig accepts method/model/K/TP, but does not
@@ -1011,7 +1116,7 @@ export function buildVllmSpeculativeConfig(resolved, { tp = 1 } = {}) {
  * audit/runtime visibility without adding unsupported speculative_config keys.
  */
 export function buildSpeculativeTreePolicy(resolved, { runtime = 'vllm' } = {}) {
-  if (!resolved || !['eagle', 'eagle2', 'eagle3'].includes(resolved.head_kind)) {
+  if (!resolved || !['eagle', 'eagle2', 'eagle3', 'eagle3_parallel'].includes(resolved.head_kind)) {
     return null;
   }
   const rt = _lower(runtime) || 'vllm';
@@ -1039,6 +1144,9 @@ export function buildSglangSpecArgs(resolved) {
   if (!resolved || !resolved.head_id || !resolved.supported || resolved.num_speculative_tokens <= 0) {
     return [];
   }
+  if (resolved.executor_status === 'external_required' || SPECULATIVE_EXTERNAL_METHODS[resolved.head_kind]) {
+    return [];
+  }
   const algoMap = { eagle: 'EAGLE', eagle2: 'EAGLE', eagle3: 'EAGLE3', medusa: 'EAGLE' };
   const algo = algoMap[resolved.head_kind];
   if (!algo) return []; // draft_model has no SGLang EAGLE algo
@@ -1055,6 +1163,7 @@ export function buildSglangSpecArgs(resolved) {
  */
 export function buildLlamaCppDraftArgs(resolved) {
   if (!resolved || !resolved.head_id || resolved.num_speculative_tokens <= 0) return [];
+  if (resolved.executor_status === 'external_required' || SPECULATIVE_EXTERNAL_METHODS[resolved.head_kind]) return [];
   if (resolved.head_kind !== 'draft_model') return []; // EAGLE not supported on llama.cpp
   const k = Math.max(1, Math.floor(resolved.num_speculative_tokens));
   return ['--model-draft', resolved.head_id, '--draft-max', String(k), '--draft-min', '1'];
@@ -1091,6 +1200,8 @@ export function speculativeHeadPassportEntry({ measured } = {}) {
     num_speculative_tokens: _isFiniteNumber(m.num_speculative_tokens) ? Math.floor(m.num_speculative_tokens) : 0,
     eagle_topk: numOrNull(m.eagle_topk),
     num_steps: numOrNull(m.num_steps),
+    external_executor: typeof m.external_executor === 'string' ? m.external_executor : null,
+    executor_status: typeof m.executor_status === 'string' ? m.executor_status : null,
     acceptance_rate: numOrNull(m.acceptance_rate),
     accepted_length: numOrNull(acceptedLength),
     throughput_speedup: numOrNull(m.throughput_speedup),
@@ -1487,6 +1598,13 @@ export function buildServeConfig({
 /** Multi-line --dry-run banner for the whole serve config. */
 export function formatServeConfigReport(cfg) {
   if (!cfg || typeof cfg !== 'object') return '(no serve config)';
+  const speculativeText = (() => {
+    const s = cfg.speculative;
+    if (!s || s.num_speculative_tokens <= 0) return 'off';
+    const suffix = s.supported ? '' : ' [advisory]';
+    if (s.head_id) return `${s.head_kind} ${s.head_id} K=${s.num_speculative_tokens}${suffix}`;
+    return `${s.head_kind} K=${s.num_speculative_tokens}${suffix}`;
+  })();
   const lines = [
     `kolm serve config (${cfg.version})`,
     `  target          : ${cfg.target_model || '(unknown)'}`,
@@ -1496,7 +1614,7 @@ export function formatServeConfigReport(cfg) {
     `    gate          : ${cfg.kernel.gate.reason}${cfg.kernel.gate.blocked ? ' [BLOCKED]' : ''}`,
     `    est speedup   : ${cfg.kernel.est_speedup_x != null ? cfg.kernel.est_speedup_x + 'x' : 'n/a'}`,
     `  kv policy       : ${cfg.kv.policy} (${cfg.kv.kind}, enforce=${cfg.kv.runtime_can_enforce})`,
-    `  speculative     : ${cfg.speculative && cfg.speculative.head_id ? `${cfg.speculative.head_kind} ${cfg.speculative.head_id} K=${cfg.speculative.num_speculative_tokens}` : 'off'}`,
+    `  speculative     : ${speculativeText}`,
     `  spec tree       : ${cfg.speculative_tree_policy ? `topk=${cfg.speculative_tree_policy.eagle_topk ?? 'n/a'} steps=${cfg.speculative_tree_policy.num_steps ?? 'n/a'} draft_tokens=${cfg.speculative_tree_policy.num_draft_tokens ?? 'n/a'} enforced=${cfg.speculative_tree_policy.engine_configurable}` : 'off'}`,
     `  prefix_cache    : ${cfg.features.prefix_cache}`,
     `  chunked_prefill : ${cfg.features.chunked_prefill}`,
@@ -1526,6 +1644,7 @@ export default {
   emitKvPolicyVllmConfig,
   // speculative
   EAGLE_HEAD_KINDS,
+  SPECULATIVE_METHOD_SPECS,
   EAGLE_HEAD_REGISTRY,
   resolveEagleHead,
   buildVllmSpeculativeConfig,

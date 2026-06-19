@@ -284,7 +284,8 @@
       "Multi-backend dispatch matches frontier support matrix: vLLM (modern dict), SGLang (--speculative-algorithm EAGLE3 + tree args), llama.cpp (separate-draft GGUF only, EAGLE correctly refused) — serve-config.js buildSglangSpecArgs/buildLlamaCppDraftArgs L847-870; eagle3.py L150-182.",
       "Lookahead decoding (draft-free n-gram, arXiv:2402.02057) has a real working session-local cache implementation (apps/runtime/lookahead.py LookaheadCache L68-162), matching the zero-training-cost frontier option.",
       "Honest gating + null-until-measured discipline: unsupported (dtype, runtime) combos return supported:false with reasons rather than configs the engine would reject; acceptance_rate/throughput are null until actually measured (serve-config.js speculativeHeadPassportEntry L877-908) — avoids the fabricated-speedup trap.",
-      "Auto-pairing draft registry concept and tensor-parallel draft (draft_tensor_parallel_size) support are present (serve-config.js L830-838)."
+      "Auto-pairing draft registry concept and tensor-parallel draft (draft_tensor_parallel_size) support are present (serve-config.js L830-838).",
+      "W1017 registers P-EAGLE/eagle3_parallel, DeepSeek native MTP/deepseek_mtp, and Hydra/hydra as advisory method specs with aliases, executor metadata, passport fields, and JS/Python guards that emit no unsupported runtime config until a real executor is installed."
     ],
     "gaps": [
       {
@@ -300,7 +301,7 @@
         "severity": "major"
       },
       {
-        "gap": "No P-EAGLE (parallel drafting, up to 1.69x over EAGLE-3, in vLLM early 2026), no DeepSeek-MTP method, no Hydra. method values are limited to eagle/eagle2/eagle3/medusa/draft_model.",
+        "gap": "CLOSED W1017: P-EAGLE/eagle3_parallel, DeepSeek native MTP/deepseek_mtp, and Hydra/hydra are registered as advisory method specs with aliases, executor metadata, passport fields, and runtime guards. Remaining work is a real upstream/custom executor plus paired probe receipts before claiming shipped speedups.",
         "severity": "minor"
       },
       {
@@ -359,10 +360,19 @@
         "value": 9
       },
       {
-        "title": "Add P-EAGLE (parallel drafting) as a selectable method once vLLM exposes it",
+        "title": "CLOSED W1017: Register P-EAGLE/DeepSeek-MTP/Hydra without executor overclaim",
+        "type": "surgical-now",
+        "where": "src/serve-config.js SPECULATIVE_METHOD_SPECS + resolveEagleHead + buildVllmSpeculativeConfig; apps/runtime/eagle3.py; tests/wave921-serve-config.test.js",
+        "what": "Add eagle3_parallel/p-eagle, deepseek_mtp, and hydra method specs with alias normalization, advisory executor metadata, passport fields, dry-run reporting, and JS/Python runtime guards so unsupported methods cannot fall through to draft_model configs.",
+        "effort": "S",
+        "risk": "low",
+        "value": 6
+      },
+      {
+        "title": "Install and measure real P-EAGLE/DeepSeek-MTP/Hydra executors",
         "type": "spec-followup",
-        "where": "src/serve-config.js EAGLE_HEAD_KINDS (L706) + resolveEagleHead + buildVllmSpeculativeConfig; apps/runtime/eagle3.py",
-        "what": "Add 'eagle3_parallel'/p-eagle head_kind that emits the vLLM P-EAGLE speculative_config variant (up to 1.69x over EAGLE-3) when the installed vLLM supports it, with a version gate that falls back to plain eagle3 otherwise. Pair with a DeepSeek-MTP path for MTP-native targets.",
+        "where": "src/serve-config.js buildVllmSpeculativeConfig; apps/runtime/eagle3.py build_vllm_speculative_config; apps/runtime/serve.py _try_vllm; reports/runtime-speculative",
+        "what": "Feature-gate a vLLM/custom proposer path for P-EAGLE, native MTP handling for DeepSeek-family targets, and Hydra head execution. Add GPU integration tests and W994 paired no-draft receipts before claiming shipped runtime speedups.",
         "effort": "M",
         "risk": "med",
         "value": 5

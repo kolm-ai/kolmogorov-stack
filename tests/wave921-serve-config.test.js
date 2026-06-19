@@ -37,6 +37,7 @@ import {
   buildSglangSpecArgs,
   buildLlamaCppDraftArgs,
   speculativeHeadPassportEntry,
+  SPECULATIVE_METHOD_SPECS,
   resolveServingFeatures,
   emitVllmServeArgs,
   emitSglangServeArgs,
@@ -522,6 +523,45 @@ test('resolveEagleHead: explicit concrete head id', () => {
   assert.equal(r.head_id, 'custom/eagle3-head');
 });
 
+test('resolveEagleHead: frontier speculative methods are registered but external-gated', () => {
+  const peagle = resolveEagleHead({
+    target: 'meta-llama/llama-3.1-8b-instruct',
+    runtime: 'vllm',
+    flag: 'p-eagle',
+  });
+  assert.equal(peagle.head_kind, 'eagle3_parallel');
+  assert.equal(peagle.head_id, EAGLE_HEAD_REGISTRY['meta-llama/llama-3.1-8b-instruct']);
+  assert.equal(peagle.supported, false);
+  assert.equal(peagle.executor_status, 'external_required');
+  assert.equal(peagle.external_executor, 'p-eagle');
+  assert.match(peagle.reason, /P-EAGLE/);
+  assert.equal(buildVllmSpeculativeConfig(peagle), null);
+  assert.deepEqual(buildSglangSpecArgs(peagle), []);
+
+  const mtp = resolveEagleHead({
+    target: 'deepseek-ai/DeepSeek-V3',
+    runtime: 'sglang',
+    flag: 'deepseek-mtp',
+  });
+  assert.equal(mtp.head_kind, 'deepseek_mtp');
+  assert.equal(mtp.num_speculative_tokens, 2);
+  assert.equal(mtp.executor_status, 'external_required');
+  assert.equal(buildVllmSpeculativeConfig(mtp), null);
+
+  const hydra = resolveEagleHead({
+    target: 'x/y',
+    runtime: 'vllm',
+    manifest: { speculative_decoding: { head_kind: 'hydra', head_id: 'kolm/hydra-head', num_speculative_tokens: 4 } },
+  });
+  assert.equal(hydra.source, 'manifest');
+  assert.equal(hydra.head_kind, 'hydra');
+  assert.equal(hydra.head_id, 'kolm/hydra-head');
+  assert.equal(hydra.num_speculative_tokens, 4);
+  assert.equal(hydra.supported, false);
+  assert.equal(hydra.external_executor, 'hydra');
+  assert.equal(SPECULATIVE_METHOD_SPECS.hydra.kind, 'hydra_heads');
+});
+
 test('buildVllmSpeculativeConfig: eagle3 modern dict, NO flat kwargs', () => {
   const r = resolveEagleHead({ target: 'meta-llama/llama-3.1-8b-instruct', runtime: 'vllm', flag: 'auto' });
   const cfg = buildVllmSpeculativeConfig(r, { tp: 2 });
@@ -635,6 +675,9 @@ test('speculativeHeadPassportEntry validates ranges + freezes', () => {
   const legacy = speculativeHeadPassportEntry({ measured: { head_kind: 'eagle3', head_id: 'h', target_model: 't', runtime: 'vllm', num_speculative_tokens: 5, acceptance_rate: 0.5, mean_accept_length: 5.0 } });
   assert.equal(legacy.status, 'tested');
   assert.equal(legacy.accepted_length, 5.0);
+  const advisory = speculativeHeadPassportEntry({ measured: { head_kind: 'hydra', head_id: 'h', target_model: 't', runtime: 'vllm', num_speculative_tokens: 5, external_executor: 'hydra', executor_status: 'external_required' } });
+  assert.equal(advisory.external_executor, 'hydra');
+  assert.equal(advisory.executor_status, 'external_required');
   assert.throws(() => speculativeHeadPassportEntry({ measured: { head_kind: 'bogus' } }), /head_kind/);
   assert.throws(() => speculativeHeadPassportEntry({ measured: { head_kind: 'eagle3', acceptance_rate: 1.5 } }), /acceptance_rate/);
 });

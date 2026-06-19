@@ -17,6 +17,10 @@ target-model quality. The training recipe is what differs; serving-side
 this module accepts an EAGLE-3 checkpoint and dispatches it to vLLM or to
 a HuggingFace `generate(..., assistant_model=...)` path.
 
+P-EAGLE, DeepSeek native multi-token prediction, and Hydra are tracked by the
+JS resolver as advisory frontier methods. This Python mirror refuses to emit a
+runtime config for those methods until a concrete executor/API is wired.
+
 This module is config + dispatch. The training side lives in a companion
 script outside this wave because EAGLE-3 training requires a target-rollout
 dataset that is not bundled with the trainer; we link the buyer to the
@@ -43,6 +47,8 @@ Citations:
   EAGLE:      Li et al 2024, arXiv:2401.15077
   EAGLE-2:    Li et al 2024, arXiv:2406.16858
   EAGLE-3:    Li et al 2025, arXiv:2503.01840
+  DeepSeek-V3: Liu et al 2024, arXiv:2412.19437 (native MTP)
+  Hydra:      Ankner et al 2024, arXiv:2402.05109
   Medusa:     Cai et al 2024, arXiv:2401.10774 (companion in medusa.py)
 """
 
@@ -54,6 +60,8 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+FRONTIER_ADVISORY_HEAD_KINDS = frozenset({"eagle3_parallel", "deepseek_mtp", "hydra"})
+
 
 @dataclasses.dataclass(frozen=True)
 class Eagle3Config:
@@ -63,6 +71,7 @@ class Eagle3Config:
                               (the kolm-trained head, or a pretrained one)
     head_kind                 'eagle' | 'eagle2' | 'eagle3' — the vLLM
                               speculative_config 'method' value
+                              Frontier values are advisory until an executor lands.
     num_speculative_tokens    tree depth; 5-7 is the published sweet spot
     eagle_topk                dynamic draft-tree branching factor (EAGLE-2/3)
     num_steps                 dynamic draft-tree depth (EAGLE-2/3)
@@ -139,6 +148,8 @@ def build_vllm_speculative_config(resolved: dict, tp: int = 1):
     if not head_id or not resolved.get("supported", True) or k <= 0:
         return None
     head_kind = (resolved.get("head_kind") or "draft_model").lower()
+    if resolved.get("executor_status") == "external_required" or head_kind in FRONTIER_ADVISORY_HEAD_KINDS:
+        return None
     if head_kind in ("eagle", "eagle2", "eagle3"):
         cfg = {"method": head_kind, "model": head_id, "num_speculative_tokens": k}
         if isinstance(tp, int) and tp > 1:
@@ -157,7 +168,7 @@ def build_speculative_tree_policy(resolved: dict, runtime: str = "vllm"):
     if not resolved or not isinstance(resolved, dict):
         return None
     head_kind = (resolved.get("head_kind") or "").lower()
-    if head_kind not in ("eagle", "eagle2", "eagle3"):
+    if head_kind not in ("eagle", "eagle2", "eagle3", "eagle3_parallel"):
         return None
     tree = {}
     for key in ("eagle_topk", "num_steps", "num_draft_tokens"):
@@ -184,8 +195,11 @@ def build_sglang_spec_args(resolved: dict) -> list:
     k = int(resolved.get("num_speculative_tokens") or 0)
     if not head_id or not resolved.get("supported", True) or k <= 0:
         return []
+    head_kind = (resolved.get("head_kind") or "").lower()
+    if resolved.get("executor_status") == "external_required" or head_kind in FRONTIER_ADVISORY_HEAD_KINDS:
+        return []
     algo_map = {"eagle": "EAGLE", "eagle2": "EAGLE", "eagle3": "EAGLE3", "medusa": "EAGLE"}
-    algo = algo_map.get((resolved.get("head_kind") or "").lower())
+    algo = algo_map.get(head_kind)
     if not algo:
         return []
     args = ["--speculative-algorithm", algo, "--speculative-draft-model-path", head_id]
@@ -206,7 +220,10 @@ def build_llamacpp_draft_args(resolved: dict) -> list:
     k = int(resolved.get("num_speculative_tokens") or 0)
     if not head_id or k <= 0:
         return []
-    if (resolved.get("head_kind") or "").lower() != "draft_model":
+    head_kind = (resolved.get("head_kind") or "").lower()
+    if resolved.get("executor_status") == "external_required" or head_kind in FRONTIER_ADVISORY_HEAD_KINDS:
+        return []
+    if head_kind != "draft_model":
         return []  # EAGLE heads unsupported on llama.cpp upstream
     return ["--model-draft", head_id, "--draft-max", str(k), "--draft-min", "1"]
 
@@ -300,6 +317,21 @@ def _self_test() -> int:
 
     off = build_vllm_speculative_config({"head_kind": "eagle3", "head_id": "x", "num_speculative_tokens": 0, "supported": True})
     assert off is None, off
+
+    advisory = {
+        "head_kind": "eagle3_parallel",
+        "head_id": "h",
+        "num_speculative_tokens": 5,
+        "eagle_topk": 8,
+        "num_steps": 5,
+        "num_draft_tokens": 64,
+        "supported": False,
+        "executor_status": "external_required",
+    }
+    assert build_vllm_speculative_config(advisory) is None
+    assert build_sglang_spec_args(advisory) == []
+    assert build_llamacpp_draft_args(advisory) == []
+    assert build_speculative_tree_policy(advisory, runtime="vllm")["num_draft_tokens"] == 64
 
     # attach_eagle3 sets the REAL 'method' key on a fake engine.
     class _FakeEngine:
