@@ -2459,6 +2459,11 @@ LOCAL-WORKER OBJECTIVE + TRAINER VARIANTS (wave 921)
   --galore-rank <N> --galore-proj-gap <N>
                        GaLore low-rank-gradient projection knobs (galore_* optims).
   --packing            example packing for higher token throughput.
+  --torch-compile [default|reduce-overhead|max-autotune]
+                       optional PyTorch compile on the HF trainer path.
+  --torch-compile-mode default|reduce-overhead|max-autotune
+  --torch-compile-backend <name>
+                       backend defaults to inductor.
   Recipe \`train\` blocks carrying these keys are auto-mapped to the same
   trainer env; explicit flags override the recipe.
 `,
@@ -22619,10 +22624,30 @@ async function cmdDistill(args) {
   const precisionFlag = pickFlag(args, '--precision');
   const gradCheckpointFlag = args.includes('--gradient-checkpointing') || args.includes('--grad-checkpoint');
   const earlyStopPatienceFlag = pickFlag(args, '--early-stop-patience');
-  if (precisionFlag) {
-    const { PRECISION_MODES } = await import('../src/distill-efficiency.js');
-    if (!PRECISION_MODES.includes(precisionFlag)) {
-      console.error(`error: --precision must be one of: ${PRECISION_MODES.join(', ')} (got '${precisionFlag}')`);
+  const torchCompileEq = args.find((a) => a.startsWith('--torch-compile='));
+  const torchCompileRaw = torchCompileEq ? torchCompileEq.slice('--torch-compile='.length) : pickFlag(args, '--torch-compile');
+  const torchCompileFlag = torchCompileEq || args.includes('--torch-compile') ? (torchCompileRaw || true) : null;
+  const torchCompileModeFlag = pickFlag(args, '--torch-compile-mode');
+  const torchCompileBackendFlag = pickFlag(args, '--torch-compile-backend');
+  const torchCompileDynamicFlag = pickFlag(args, '--torch-compile-dynamic');
+  const torchCompileFullgraphFlag = args.includes('--torch-compile-fullgraph');
+  if (precisionFlag || torchCompileFlag != null || torchCompileModeFlag || torchCompileBackendFlag || torchCompileDynamicFlag != null || torchCompileFullgraphFlag) {
+    const eff = await import('../src/distill-efficiency.js');
+    if (precisionFlag && !eff.PRECISION_MODES.includes(precisionFlag)) {
+      console.error(`error: --precision must be one of: ${eff.PRECISION_MODES.join(', ')} (got '${precisionFlag}')`);
+      process.exit(EXIT.BAD_ARGS);
+    }
+    try {
+      eff.normalizeEfficiencyOptions({
+        precision_mode: precisionFlag || undefined,
+        torch_compile: torchCompileFlag == null ? undefined : torchCompileFlag,
+        torch_compile_mode: torchCompileModeFlag || undefined,
+        torch_compile_backend: torchCompileBackendFlag || undefined,
+        torch_compile_dynamic: torchCompileDynamicFlag == null ? undefined : torchCompileDynamicFlag,
+        torch_compile_fullgraph: torchCompileFullgraphFlag ? true : undefined,
+      });
+    } catch (e) {
+      console.error(`error: ${e.message}`);
       process.exit(EXIT.BAD_ARGS);
     }
   }
@@ -22671,6 +22696,11 @@ async function cmdDistill(args) {
   // call passes these through normalizeEfficiencyOptions.
   if (precisionFlag) body.precision_mode = precisionFlag;
   if (gradCheckpointFlag) body.gradient_checkpointing = true;
+  if (torchCompileFlag != null) body.torch_compile = torchCompileFlag;
+  if (torchCompileModeFlag) body.torch_compile_mode = torchCompileModeFlag;
+  if (torchCompileBackendFlag) body.torch_compile_backend = torchCompileBackendFlag;
+  if (torchCompileDynamicFlag != null) body.torch_compile_dynamic = torchCompileDynamicFlag;
+  if (torchCompileFullgraphFlag) body.torch_compile_fullgraph = true;
   if (earlyStopPatienceFlag) {
     const p = Number(earlyStopPatienceFlag);
     if (!Number.isFinite(p) || p <= 0) {
@@ -27227,13 +27257,27 @@ async function cmdDistillLocalWorker(args) {
   const _w787Precision = pick('--precision');
   const _w787GradCkpt = args.includes('--gradient-checkpointing') || args.includes('--grad-checkpoint');
   const _w787EsPatience = pick('--early-stop-patience');
+  const _w787TorchCompilePresent = args.includes('--torch-compile') || args.some((a) => a.startsWith('--torch-compile='));
+  const _w787TorchCompileRaw = pick('--torch-compile');
+  const _w787TorchCompile = _w787TorchCompilePresent ? (_w787TorchCompileRaw || true) : null;
+  const _w787TorchCompileMode = pick('--torch-compile-mode');
+  const _w787TorchCompileBackend = pick('--torch-compile-backend');
+  const _w787TorchCompileDynamic = pick('--torch-compile-dynamic');
+  const _w787TorchCompileFullgraph = args.includes('--torch-compile-fullgraph');
   let _w787Env = {};
-  if (_w787Precision || _w787GradCkpt || _w787EsPatience) {
+  if (_w787Precision || _w787GradCkpt || _w787EsPatience
+      || _w787TorchCompile != null || _w787TorchCompileMode || _w787TorchCompileBackend
+      || _w787TorchCompileDynamic != null || _w787TorchCompileFullgraph) {
     try {
       const eff = await import('../src/distill-efficiency.js');
       const eopts = {};
       if (_w787Precision) eopts.precision_mode = _w787Precision;
       if (_w787GradCkpt) eopts.gradient_checkpointing = true;
+      if (_w787TorchCompile != null) eopts.torch_compile = _w787TorchCompile;
+      if (_w787TorchCompileMode) eopts.torch_compile_mode = _w787TorchCompileMode;
+      if (_w787TorchCompileBackend) eopts.torch_compile_backend = _w787TorchCompileBackend;
+      if (_w787TorchCompileDynamic != null) eopts.torch_compile_dynamic = _w787TorchCompileDynamic;
+      if (_w787TorchCompileFullgraph) eopts.torch_compile_fullgraph = true;
       if (_w787EsPatience) {
         const p = Number(_w787EsPatience);
         if (!Number.isFinite(p) || p <= 0) {

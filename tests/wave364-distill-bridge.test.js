@@ -14,9 +14,10 @@
 //   2. startDistillJob() throws when captures are missing.
 //   3. The spawned worker process gets the expected argv (spec/seeds/out/mode).
 //   4. The job record meta includes pair_count, tmp_dir, out_dir, mode.
-//   5. Mode picks: stub when no teacher key, collect when teacher set,
+//   5. Efficiency options are normalized into job meta + worker env.
+//   6. Mode picks: stub when no teacher key, collect when teacher set,
 //      full when KOLM_DISTILL_FULL=1 + teacher set.
-//   6. src/router.js no longer contains 503 distill_bridge_not_configured
+//   7. src/router.js no longer contains 503 distill_bridge_not_configured
 //      in the from-captures handler.
 
 import { test } from 'node:test';
@@ -65,6 +66,10 @@ function withEnv(extra = {}) {
     'KOLM_DISTILL_FULL', 'KOLM_DISTILL_TEACHER', 'KOLM_DISTILL_MAX_ROWS',
     'KOLM_DISTILL_TMP_DIR', 'KOLM_JOBS_DIR', 'KOLM_JOBS_FILE',
     'KOLM_JOB_LOG_DIR', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY',
+    'KOLM_PRECISION', 'KOLM_GRAD_CHECKPOINT', 'KOLM_EARLY_STOP',
+    'KOLM_TORCH_COMPILE', 'KOLM_TORCH_COMPILE_MODE',
+    'KOLM_TORCH_COMPILE_BACKEND', 'KOLM_TORCH_COMPILE_DYNAMIC',
+    'KOLM_TORCH_COMPILE_FULLGRAPH',
   ];
   for (const k of TARGETS) {
     if (k in process.env) { SAVED[k] = process.env[k]; delete process.env[k]; }
@@ -171,6 +176,43 @@ test('W364 #4 — job meta has pair_count + tmp_dir + out_dir + mode', async () 
     assert.ok(['stub', 'collect', 'full'].includes(job.meta.mode));
     assert.equal(job.meta.tenant, 't');
     assert.equal(job.meta.namespace, 'n');
+  } finally {
+    restore();
+    cleanup();
+  }
+});
+
+test('W364 #4b — efficiency options stamp job meta + worker env', async () => {
+  const { tmp, cleanup } = withTmpDir();
+  const restore = withEnv({
+    KOLM_DISTILL_TMP_DIR: path.join(tmp, 'workspace'),
+    KOLM_JOBS_DIR: path.join(tmp, 'jobs'),
+    KOLM_JOBS_FILE: path.join(tmp, 'jobs.jsonl'),
+    KOLM_JOB_LOG_DIR: path.join(tmp, 'logs'),
+  });
+  try {
+    const { startDistillJob } = await freshImport();
+    const mock = makeSpawnMock();
+    const job = await startDistillJob({
+      tenant: 't',
+      namespace: 'n',
+      captures: [{ id: 'c1', variable_input: 'x', response: 'y' }],
+      spawnOverride: mock.fn,
+      precision_mode: 'mixed-bf16',
+      gradient_checkpointing: true,
+      torch_compile: true,
+      torch_compile_mode: 'reduce-overhead',
+      torch_compile_dynamic: false,
+    });
+    assert.equal(job.meta.efficiency.precision_mode, 'mixed-bf16');
+    assert.equal(job.meta.efficiency.torch_compile.enabled, true);
+    const env = mock.calls[0].spawnOpts.env;
+    assert.equal(env.KOLM_PRECISION, 'mixed-bf16');
+    assert.equal(env.KOLM_GRAD_CHECKPOINT, '1');
+    assert.equal(env.KOLM_TORCH_COMPILE, '1');
+    assert.equal(env.KOLM_TORCH_COMPILE_MODE, 'reduce-overhead');
+    assert.equal(env.KOLM_TORCH_COMPILE_BACKEND, 'inductor');
+    assert.equal(env.KOLM_TORCH_COMPILE_DYNAMIC, '0');
   } finally {
     restore();
     cleanup();

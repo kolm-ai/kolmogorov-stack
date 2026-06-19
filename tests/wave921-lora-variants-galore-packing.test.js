@@ -14,9 +14,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {
+  normalizeEfficiencyOptions, buildEfficiencyEnv,
   normalizeTrainerVariantOptions, buildTrainerVariantEnv,
   LORA_VARIANTS, DEFAULT_LORA_VARIANT, LORA_INITS, TRAINER_OPTIMS,
-  TRAINER_PRESET_NAMES,
+  TRAINER_PRESET_NAMES, TORCH_COMPILE_MODES,
 } from '../src/distill-efficiency.js';
 import { loadRecipe } from '../src/distill-recipe-loader.js';
 
@@ -27,7 +28,41 @@ test('frozen enums present', () => {
   assert.ok(LORA_INITS.includes('pissa_niter_16'));
   assert.ok(TRAINER_OPTIMS.includes('galore_adamw'));
   assert.ok(TRAINER_PRESET_NAMES.includes('qdora'));
+  assert.ok(TORCH_COMPILE_MODES.includes('reduce-overhead'));
   assert.ok(Object.isFrozen(LORA_VARIANTS));
+});
+
+test('normalizeEfficiencyOptions wires torch.compile env exactly', () => {
+  const v = normalizeEfficiencyOptions({
+    precision_mode: 'mixed-bf16',
+    gradient_checkpointing: 'true',
+    torch_compile: true,
+    torch_compile_mode: 'reduce-overhead',
+    torch_compile_backend: 'inductor',
+    torch_compile_dynamic: false,
+  });
+  assert.equal(v.torch_compile.requested, true);
+  assert.equal(v.torch_compile.enabled, true);
+  assert.equal(v.torch_compile.mode, 'reduce-overhead');
+  assert.equal(v.torch_compile.dynamic, false);
+  assert.deepEqual(buildEfficiencyEnv(v), {
+    KOLM_PRECISION: 'mixed-bf16',
+    KOLM_GRAD_CHECKPOINT: '1',
+    KOLM_EARLY_STOP: '0',
+    KOLM_TORCH_COMPILE: '1',
+    KOLM_TORCH_COMPILE_MODE: 'reduce-overhead',
+    KOLM_TORCH_COMPILE_BACKEND: 'inductor',
+    KOLM_TORCH_COMPILE_DYNAMIC: '0',
+  });
+
+  const required = buildEfficiencyEnv(normalizeEfficiencyOptions({
+    torch_compile: 'required',
+    torch_compile_fullgraph: true,
+  }));
+  assert.equal(required.KOLM_TORCH_COMPILE, 'required');
+  assert.equal(required.KOLM_TORCH_COMPILE_MODE, 'default');
+  assert.equal(required.KOLM_TORCH_COMPILE_FULLGRAPH, '1');
+  assert.throws(() => normalizeEfficiencyOptions({ torch_compile_mode: 'bogus' }), /torch_compile_mode/);
 });
 
 test('normalizeTrainerVariantOptions accepts valid + rejects out-of-enum', () => {

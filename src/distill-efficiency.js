@@ -1,6 +1,6 @@
 // W787 - Compute-efficiency optimizations for the distill pipeline.
 //
-// Three atomic levers, each independently testable:
+// Four atomic levers, each independently testable:
 //
 //   W787-1  Early stopping when K-Score plateaus.
 //           shouldStopEarly({ kscore_history, patience, delta, min_steps })
@@ -20,16 +20,19 @@
 //           gradient_checkpointing=True; W787 makes it opt-out + surfaces it
 //           in the distill envelope so users see whether it was used.
 //
+//   W979    Optional torch.compile for the HF Python trainer path.
+//           KOLM_TORCH_COMPILE=1|required plus backend/mode/dynamic/fullgraph
+//           env vars flow to workers/distill/scripts/train_lora.py, which owns
+//           the PyTorch call and records the plan in training-summary.json.
+//
 // HONESTY CONTRACT
 //   The Node-side surface in this file is FULLY WIRED - opts validate, the
 //   pipeline passes env vars to the worker, the worker forwards to Python.
 //   On the Python side: train_lora.py reads KOLM_PRECISION + KOLM_GRAD_CHECKPOINT
-//   + KOLM_EARLY_STOP_* envs (W787 patch). trainer_real.py reads the same envs
-//   when the operator invokes that path. early_stop is implemented via a
-//   transformers EarlyStoppingCallback hook the Python side has the option to
-//   wire; absent that wiring, the run completes max_steps and Node-side detects
-//   plateau from the worker progress.jsonl post-hoc (still useful for
-//   "should I re-run with --early-stop?" decisions).
+//   + KOLM_EARLY_STOP_* + KOLM_TORCH_COMPILE* envs. trainer_real.py reads the
+//   same precision/grad envs when the operator invokes that path; torch.compile
+//   is deliberately scoped to the HF worker first because Unsloth already owns
+//   kernel rewriting and needs separate parity coverage.
 //
 // W604 anti-brittleness: version strings use regex /^w787-/, no literal eq.
 //
@@ -57,6 +60,7 @@ export const EARLY_STOP_DEFAULTS = Object.freeze({
 // state (the modern standard via torch.cuda.amp). Anything outside this list
 // is rejected by normalizeEfficiencyOptions.
 export const PRECISION_MODES = Object.freeze(['fp32', 'fp16', 'bf16', 'mixed-fp16', 'mixed-bf16']);
+export const TORCH_COMPILE_MODES = Object.freeze(['default', 'reduce-overhead', 'max-autotune']);
 
 // W787-2 - friendly hints surfaced through efficiencyDoctor() output. Kept here
 // (frozen, single source of truth) so docs/efficiency.html can rebuild the
@@ -68,6 +72,14 @@ export const PRECISION_HINTS = Object.freeze({
   'mixed-fp16': 'Autocast forward in fp16, master copy in fp32; balances speed + stability.',
   'mixed-bf16': 'Autocast forward in bf16, master copy in fp32; preferred on Ampere+ for stability.',
 });
+
+function _trueish(v) {
+  return v === true || v === 1 || ['1', 'true', 'yes', 'on'].includes(String(v).trim().toLowerCase());
+}
+
+function _falseish(v) {
+  return v === false || v === 0 || ['', '0', 'false', 'no', 'off'].includes(String(v).trim().toLowerCase());
+}
 
 // W787-1 - shouldStopEarly: pure inspection of a K-Score history array.
 // Returns { stop: bool, reason: 'plateau'|'min_steps_not_met'|'history_too_short'|'no_plateau', observed_delta: number|null }.
@@ -122,6 +134,7 @@ export function shouldStopEarly({
 //     precision_mode: <one of PRECISION_MODES>,
 //     gradient_checkpointing: bool,
 //     early_stop: { enabled, patience, delta_kscore, min_steps },
+//     torch_compile: { requested, enabled, required, mode, backend, dynamic, fullgraph },
 //     version: EFFICIENCY_VERSION,
 //     surface_only: bool,   // true when trainer wiring is partial (see honesty contract)
 //   }
@@ -155,6 +168,44 @@ export function normalizeEfficiencyOptions(opts = {}) {
     || esRaw.enabled === 'true'
     || esRaw.enabled === 1
     || (raw.early_stop === true);
+  const compileRaw = raw.torch_compile ?? raw.compile ?? null;
+  const compileText = compileRaw == null ? '' : String(compileRaw).trim().toLowerCase();
+  const compileModeFromValue = TORCH_COMPILE_MODES.includes(compileText) ? compileText : null;
+  const compileRequested = raw.torch_compile != null
+    || raw.compile != null
+    || raw.torch_compile_mode != null
+    || raw.torch_compile_backend != null
+    || raw.torch_compile_dynamic != null
+    || raw.torch_compile_fullgraph != null;
+  const compileConfigImpliesEnabled = raw.torch_compile_mode != null
+    || raw.torch_compile_backend != null
+    || raw.torch_compile_dynamic != null
+    || _trueish(raw.torch_compile_fullgraph);
+  const compileRequired = ['required', 'require', 'strict'].includes(compileText);
+  const compileEnabled = !_falseish(compileRaw)
+    && (_trueish(compileRaw) || compileRequired || compileModeFromValue != null || (compileRaw == null && compileConfigImpliesEnabled));
+  const compileMode = raw.torch_compile_mode == null
+    ? (compileModeFromValue || 'default')
+    : String(raw.torch_compile_mode).trim().toLowerCase();
+  if (!TORCH_COMPILE_MODES.includes(compileMode)) {
+    const err = new Error(`torch_compile_mode must be one of [${TORCH_COMPILE_MODES.join(', ')}]; got ${JSON.stringify(raw.torch_compile_mode)}`);
+    err.code = 'invalid_torch_compile_mode';
+    throw err;
+  }
+  const compileBackend = raw.torch_compile_backend == null || String(raw.torch_compile_backend).trim() === ''
+    ? 'inductor'
+    : String(raw.torch_compile_backend).trim();
+  let compileDynamic = null;
+  if (raw.torch_compile_dynamic != null && String(raw.torch_compile_dynamic).trim() !== '') {
+    if (_trueish(raw.torch_compile_dynamic)) compileDynamic = true;
+    else if (_falseish(raw.torch_compile_dynamic)) compileDynamic = false;
+    else {
+      const err = new Error(`torch_compile_dynamic must be boolean-like; got ${JSON.stringify(raw.torch_compile_dynamic)}`);
+      err.code = 'invalid_torch_compile_dynamic';
+      throw err;
+    }
+  }
+  const compileFullgraph = _trueish(raw.torch_compile_fullgraph);
   return {
     precision_mode: precision_raw,
     gradient_checkpointing,
@@ -163,6 +214,15 @@ export function normalizeEfficiencyOptions(opts = {}) {
       patience,
       delta_kscore: delta,
       min_steps,
+    },
+    torch_compile: {
+      requested: !!compileRequested,
+      enabled: !!compileEnabled,
+      required: !!compileRequired,
+      mode: compileMode,
+      backend: compileBackend,
+      dynamic: compileDynamic,
+      fullgraph: !!compileFullgraph,
     },
     version: EFFICIENCY_VERSION,
     // Surface-only for the early-stop branch until the trainer-side
@@ -273,6 +333,21 @@ export function buildEfficiencyEnv(normalized) {
     out.KOLM_EARLY_STOP_MIN_STEPS = String(normalized.early_stop.min_steps);
   } else {
     out.KOLM_EARLY_STOP = '0';
+  }
+  if (normalized.torch_compile && normalized.torch_compile.requested) {
+    out.KOLM_TORCH_COMPILE = normalized.torch_compile.enabled
+      ? (normalized.torch_compile.required ? 'required' : '1')
+      : '0';
+    if (normalized.torch_compile.enabled) {
+      out.KOLM_TORCH_COMPILE_MODE = normalized.torch_compile.mode || 'default';
+      out.KOLM_TORCH_COMPILE_BACKEND = normalized.torch_compile.backend || 'inductor';
+      if (normalized.torch_compile.dynamic !== null && normalized.torch_compile.dynamic !== undefined) {
+        out.KOLM_TORCH_COMPILE_DYNAMIC = normalized.torch_compile.dynamic ? '1' : '0';
+      }
+      if (normalized.torch_compile.fullgraph) {
+        out.KOLM_TORCH_COMPILE_FULLGRAPH = '1';
+      }
+    }
   }
   return out;
 }
@@ -494,6 +569,7 @@ export default {
   EFFICIENCY_VERSION,
   EARLY_STOP_DEFAULTS,
   PRECISION_MODES,
+  TORCH_COMPILE_MODES,
   PRECISION_HINTS,
   LORA_VARIANTS,
   DEFAULT_LORA_VARIANT,

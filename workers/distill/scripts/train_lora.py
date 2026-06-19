@@ -134,6 +134,103 @@ def _fail_liger_required(plan):
     sys.exit(14)
 
 
+def _torch_compile_config():
+    raw = str(os.environ.get("KOLM_TORCH_COMPILE", "") or "").strip().lower()
+    explicit_modes = ("default", "reduce-overhead", "max-autotune")
+    requested = raw in ("1", "true", "yes", "on", "required", "require", "strict") or raw in explicit_modes
+    required = raw in ("required", "require", "strict")
+    mode = str(os.environ.get("KOLM_TORCH_COMPILE_MODE", "") or "").strip().lower()
+    if not mode and raw in explicit_modes:
+        mode = raw
+    if not mode:
+        mode = "default"
+    backend = str(os.environ.get("KOLM_TORCH_COMPILE_BACKEND", "") or "").strip() or "inductor"
+    dynamic_raw = str(os.environ.get("KOLM_TORCH_COMPILE_DYNAMIC", "") or "").strip().lower()
+    if dynamic_raw in ("1", "true", "yes", "on"):
+        dynamic = True
+    elif dynamic_raw in ("0", "false", "no", "off"):
+        dynamic = False
+    else:
+        dynamic = None
+    fullgraph = str(os.environ.get("KOLM_TORCH_COMPILE_FULLGRAPH", "") or "").strip().lower() in ("1", "true", "yes", "on")
+    return raw, requested, required, mode, backend, dynamic, fullgraph
+
+
+def _fail_torch_compile_required(plan):
+    sys.stderr.write("[train_lora] KOLM_TORCH_COMPILE strict/required failed: "
+                     + str(plan.get("skipped_reason") or plan.get("error") or "unknown") + "\n")
+    if plan.get("install_hint"):
+        sys.stderr.write(f"             install hint: {plan['install_hint']}\n")
+    sys.exit(16)
+
+
+def _maybe_torch_compile(model=None, torch_mod=None, apply_compile=False):
+    raw, requested, required, mode, backend, dynamic, fullgraph = _torch_compile_config()
+    plan = {
+        "requested": requested,
+        "required": required,
+        "mode": mode,
+        "backend": backend,
+        "dynamic": dynamic,
+        "fullgraph": fullgraph,
+        "available": False,
+        "would_apply": False,
+        "applied": False,
+        "skipped_reason": "disabled" if not requested else None,
+        "install_hint": "pip install torch>=2.0",
+    }
+    if not requested:
+        return model, plan
+    if torch_mod is None:
+        if importlib.util.find_spec("torch") is None:
+            plan["skipped_reason"] = "torch_not_installed"
+            if required:
+                _fail_torch_compile_required(plan)
+            return model, plan
+        try:
+            torch_mod = importlib.import_module("torch")
+        except Exception as e:
+            plan["skipped_reason"] = "torch_import_failed"
+            plan["error"] = str(e)
+            if required:
+                _fail_torch_compile_required(plan)
+            return model, plan
+    compile_fn = getattr(torch_mod, "compile", None)
+    if not callable(compile_fn):
+        plan["skipped_reason"] = "torch_compile_unavailable"
+        if required:
+            _fail_torch_compile_required(plan)
+        return model, plan
+    plan["available"] = True
+    plan["would_apply"] = True
+    plan["skipped_reason"] = None
+    if not apply_compile:
+        return model, plan
+    if model is None:
+        plan["skipped_reason"] = "no_model"
+        plan["would_apply"] = False
+        if required:
+            _fail_torch_compile_required(plan)
+        return model, plan
+    kwargs = {"backend": backend, "mode": mode, "fullgraph": fullgraph}
+    if dynamic is not None:
+        kwargs["dynamic"] = dynamic
+    try:
+        compiled = compile_fn(model, **kwargs)
+        plan["applied"] = True
+        print(f"[train_lora] torch.compile applied backend={backend} mode={mode}")
+        return compiled, plan
+    except Exception as e:
+        plan["applied"] = False
+        plan["would_apply"] = False
+        plan["skipped_reason"] = "torch_compile_failed"
+        plan["error"] = str(e)
+        if required:
+            _fail_torch_compile_required(plan)
+        sys.stderr.write(f"[train_lora] torch.compile failed ({e}); continuing without it\n")
+        return model, plan
+
+
 def _maybe_apply_liger(student_base, apply_patch=False):
     mode, requested, required = _liger_mode()
     family, api_name = _liger_api_for_model(student_base)
@@ -591,6 +688,7 @@ def main():
                        or trainer_optim != "adamw_torch" or packing_enabled)
     backend_plan = _backend_plan_for_args(args, lora_variant, lora_init, trainer_optim, packing_enabled)
     liger_plan = _maybe_apply_liger(args.student_base, apply_patch=False)
+    _, torch_compile_plan = _maybe_torch_compile(apply_compile=False)
     bitsandbytes_importable = importlib.util.find_spec("bitsandbytes") is not None
 
     # ── W921 preflight: probe variant deps; FAIL LOUD on missing support. ──
@@ -618,6 +716,7 @@ def main():
             "student_base": args.student_base,
             "student_base_requested": requested_student_base,
             "liger": liger_plan,
+            "torch_compile": torch_compile_plan,
         }
         print(json.dumps({
             "preflight": "ok",
@@ -631,6 +730,9 @@ def main():
                 "bitsandbytes_importable": bitsandbytes_importable,
                 "liger_available": liger_plan["available"],
                 "liger_api": liger_plan["api"],
+                "torch_compile_available": torch_compile_plan["available"],
+                "torch_compile_backend": torch_compile_plan["backend"],
+                "torch_compile_mode": torch_compile_plan["mode"],
             },
             "ok": True,
         }))
@@ -923,9 +1025,11 @@ def main():
             return super()._get_train_sampler(*a, **k)
 
     TrainerCls = _KolmOrderedTrainer if (_curriculum_active or _weighted_sampler is not None) else Trainer
+    train_model, torch_compile_plan = _maybe_torch_compile(model, torch_mod=torch, apply_compile=True)
+    save_model = getattr(train_model, "_orig_mod", model)
 
     trainer_kwargs = dict(
-        model=model,
+        model=train_model,
         args=training,
         train_dataset=ds,
         data_collator=DataCollatorForLanguageModeling(tok, mlm=False),
@@ -952,16 +1056,16 @@ def main():
     # standard-base form so it loads on the ORIGINAL published base.
     pissa_converted = False
     if pissa_init_path and _lv is not None:
-        conv = _lv.convert_pissa_save(model, args.out, pissa_init_path)
+        conv = _lv.convert_pissa_save(save_model, args.out, pissa_init_path)
         pissa_converted = bool(conv.get("pissa_converted"))
     else:
-        model.save_pretrained(args.out)
+        save_model.save_pretrained(args.out)
     tok.save_pretrained(args.out)
 
     holdout_metrics = {}
     if args.holdout:
         try:
-            holdout_metrics = evaluate_student_holdout(model, tok, args.holdout, args.max_length, torch)
+            holdout_metrics = evaluate_student_holdout(train_model, tok, args.holdout, args.max_length, torch)
             if holdout_metrics.get("student_holdout_accuracy") is not None:
                 print("[train_lora] holdout student token accuracy: "
                       f"{holdout_metrics['student_holdout_accuracy']:.4f} "
@@ -1025,6 +1129,8 @@ def main():
                 "early_stop_delta": float(os.environ.get("KOLM_EARLY_STOP_DELTA", "0.005")) if early_stop_enabled else None,
                 "liger_kernel": bool(liger_plan.get("applied")),
                 "liger": liger_plan,
+                "torch_compile": bool(torch_compile_plan.get("applied")),
+                "torch_compile_plan": torch_compile_plan,
             },
             # W921 — LoRA-variant / optimizer / packing provenance so the .kolm
             # receipt chain documents the REAL training objective. Defaults

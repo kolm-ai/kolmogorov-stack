@@ -98,6 +98,11 @@ test('W921-STUDIO.5 merge rejects an unknown method against the model-merge enum
 test('W921-STUDIO.6 local-worker accepts + normalizes the trainer-variant flags', () => {
   const start = SRC.indexOf('async function cmdDistillLocalWorker(args');
   const body = SRC.slice(start, start + 18000);
+  assert.match(body, /pick\('--torch-compile'\)/);
+  assert.match(body, /pick\('--torch-compile-mode'\)/);
+  assert.match(body, /pick\('--torch-compile-backend'\)/);
+  assert.match(body, /eff\.normalizeEfficiencyOptions\(eopts\)/, 'normalizes efficiency via distill-efficiency');
+  assert.match(body, /eff\.buildEfficiencyEnv\(normalised\)/, 'builds the efficiency env');
   assert.match(body, /pick\('--lora-variant'\)/);
   assert.match(body, /pick\('--lora-init'\)/);
   assert.match(body, /pick\('--neftune'\)/);
@@ -115,9 +120,15 @@ test('W921-STUDIO.7 the variant env is merged into the worker spawn env', () => 
   assert.match(SRC, /env: \{ \.\.\.process\.env, \.\.\._w870ProxyEnv, \.\.\._w787Env, \.\.\._w921VariantEnv, \.\.\._w921ObjectiveEnv \}/);
 });
 
+test('W921-STUDIO.7b bad torch compile mode fails before spawn', () => {
+  const r = runKolm(['distill', '--local-worker', '--mode', 'stub', '--spec', '/tmp/x', '--seeds', '/tmp/y', '--out', '/tmp/z', '--torch-compile-mode', 'bogus']);
+  assert.notEqual(r.status, 0);
+  assert.match(r.stderr, /torch_compile_mode must be one of/);
+});
+
 test('W921-STUDIO.8 local-worker auto-maps recipe.train.* to the same env', () => {
   const start = SRC.indexOf('async function cmdDistillLocalWorker(args');
-  const body = SRC.slice(start, start + 14000);
+  const body = SRC.slice(start, start + 19000);
   assert.match(body, /_w921RecipeTrain/, 'reads a recipe train block from --spec');
   assert.match(body, /if \(t\.preset != null\) vopts\.preset = t\.preset/);
   assert.match(body, /if \(t\.lora_variant != null\) vopts\.lora_variant = t\.lora_variant/);

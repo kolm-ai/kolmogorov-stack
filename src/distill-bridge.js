@@ -46,6 +46,7 @@ import {
   pateBudget,
   buildDpTrainerEnv,
 } from './dp-training.js';
+import { normalizeEfficiencyOptions, buildEfficiencyEnv } from './distill-efficiency.js';
 // CD-01 - default-on light curation at the REAL product distill entry point.
 // The router distill routes (/v1/distill/from-captures specialist arm +
 // /v1/specialists/auto-distill) flow through startDistillJob, which assembles
@@ -187,6 +188,15 @@ export async function startDistillJob({
   curriculum = 'ascending',
   // CD-01 - default-on light curation of the train rows. Pass false to skip.
   curate = true,
+  // W787/W979 - compute-efficiency knobs for the Python trainer path.
+  precision_mode = null,
+  gradient_checkpointing = null,
+  early_stop_config = null,
+  torch_compile = null,
+  torch_compile_mode = null,
+  torch_compile_backend = null,
+  torch_compile_dynamic = null,
+  torch_compile_fullgraph = null,
   // Finalized C2 - DP-training knobs (default OFF). When dp_path is set the
   // bridge spawn env carries the DP knobs to the worker (Python trainer must
   // FAIL LOUD if Opacus absent) and the job record stamps the (eps, delta).
@@ -201,6 +211,27 @@ export async function startDistillJob({
   if (!Array.isArray(captures) || captures.length === 0) {
     throw new Error('startDistillJob: captures required');
   }
+  const _efficiencyRequested = precision_mode != null
+    || gradient_checkpointing != null
+    || early_stop_config != null
+    || torch_compile != null
+    || torch_compile_mode != null
+    || torch_compile_backend != null
+    || torch_compile_dynamic != null
+    || torch_compile_fullgraph != null;
+  const _efficiency = _efficiencyRequested
+    ? normalizeEfficiencyOptions({
+        precision_mode: precision_mode == null ? undefined : precision_mode,
+        gradient_checkpointing: gradient_checkpointing == null ? undefined : gradient_checkpointing,
+        early_stop_config: early_stop_config == null ? undefined : early_stop_config,
+        torch_compile: torch_compile == null ? undefined : torch_compile,
+        torch_compile_mode: torch_compile_mode == null ? undefined : torch_compile_mode,
+        torch_compile_backend: torch_compile_backend == null ? undefined : torch_compile_backend,
+        torch_compile_dynamic: torch_compile_dynamic == null ? undefined : torch_compile_dynamic,
+        torch_compile_fullgraph: torch_compile_fullgraph == null ? undefined : torch_compile_fullgraph,
+      })
+    : null;
+  const _efficiencyEnv = _efficiency ? buildEfficiencyEnv(_efficiency) : {};
   // Finalized C2 - resolve the DP budget + trainer env up front. Throws LOUD
   // (DP_ZERO_NOISE) on a zero-noise config BEFORE any worker spawn.
   let _dpBudget;
@@ -261,6 +292,7 @@ export async function startDistillJob({
       // record so the receipt/audit can prove the DP guarantee (or its explicit
       // 'none' absence). Always present.
       privacy_budget: _dpBudget,
+      efficiency: _efficiency,
       tmp_dir: tmpDir,
       out_dir: outDir,
     },
@@ -288,7 +320,7 @@ export async function startDistillJob({
     child = spawnFn(process.execPath, args, {
       detached: true,
       stdio: ['ignore', logOut, logOut],
-      env: { ...process.env, ..._dpEnv, KOLM_JOB_ID: rec.id },
+      env: { ...process.env, ..._efficiencyEnv, ..._dpEnv, KOLM_JOB_ID: rec.id },
       windowsHide: true,
     });
   } catch (e) {

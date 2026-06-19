@@ -110,6 +110,7 @@ spec = importlib.util.spec_from_file_location("train_lora_probe", os.path.join(h
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 os.environ["KOLM_USE_LIGER"] = "0"
+os.environ["KOLM_TORCH_COMPILE"] = "0"
 out = {
   "families": list(mod.UNSLOTH_FAMILIES),
   "qwen_supported": mod._is_unsloth_supported("Qwen/Qwen2.5-7B-Instruct"),
@@ -127,6 +128,7 @@ out = {
   "liger_phi": list(mod._liger_api_for_model("microsoft/Phi-3-mini-4k-instruct")),
   "liger_unsupported": list(mod._liger_api_for_model("microsoft/DialoGPT-medium")),
   "liger_disabled": mod._maybe_apply_liger("Qwen/Qwen2.5-7B-Instruct", apply_patch=False),
+  "torch_compile_disabled": mod._maybe_torch_compile(apply_compile=False)[1],
 }
 print(json.dumps(out))
 `;
@@ -148,6 +150,8 @@ print(json.dumps(out))
   assert.deepEqual(got.liger_unsupported, [null, null]);
   assert.equal(got.liger_disabled.requested, false);
   assert.equal(got.liger_disabled.skipped_reason, 'disabled');
+  assert.equal(got.torch_compile_disabled.requested, false);
+  assert.equal(got.torch_compile_disabled.skipped_reason, 'disabled');
   if (got.unsloth_importable) {
     assert.deepEqual(got.auto_supported, ['unsloth', 'auto_family_match']);
   } else {
@@ -172,7 +176,7 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   fs.writeFileSync(pairs, '{"input":"hi","teacher_output":"hello"}\n');
   const out = path.join(os.tmpdir(), 'kolm-tu-out-' + Date.now());
   const script = path.join(repoRoot, 'workers/distill/scripts/train_lora.py');
-  const noLigerEnv = { ...process.env, KOLM_USE_LIGER: '0' };
+  const noLigerEnv = { ...process.env, KOLM_USE_LIGER: '0', KOLM_TORCH_COMPILE: '0' };
   const def = spawnSync(PY, [script, '--pairs', pairs, '--out', out, '--preflight-only'], { stdio: 'pipe', timeout: 60000, env: noLigerEnv });
   assert.equal(def.status, 0, (def.stderr || '').toString());
   const defJson = JSON.parse((def.stdout || '').toString());
@@ -183,6 +187,8 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   assert.equal(typeof defJson.checks.unsloth_importable, 'boolean');
   assert.equal(defJson.config.liger.requested, false);
   assert.equal(defJson.config.liger.skipped_reason, 'disabled');
+  assert.equal(defJson.config.torch_compile.requested, false);
+  assert.equal(defJson.config.torch_compile.skipped_reason, 'disabled');
   const forcedHf = spawnSync(PY, [script, '--backend', 'hf', '--preflight-only'], { stdio: 'pipe', timeout: 60000, env: noLigerEnv });
   assert.equal(forcedHf.status, 0, (forcedHf.stderr || '').toString());
   assert.equal(JSON.parse((forcedHf.stdout || '').toString()).backend.selected, 'hf');
@@ -228,6 +234,26 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   } else {
     assert.equal(ligerJson.config.liger.skipped_reason, 'liger_kernel_not_installed');
   }
+  const torchCompile = spawnSync(PY, [script, '--pairs', pairs, '--out', out, '--preflight-only'], {
+    stdio: 'pipe', timeout: 60000, env: {
+      ...process.env,
+      KOLM_USE_LIGER: '0',
+      KOLM_TORCH_COMPILE: 'reduce-overhead',
+      KOLM_TORCH_COMPILE_BACKEND: 'inductor',
+      KOLM_LORA_VARIANT: 'lora',
+    },
+  });
+  assert.equal(torchCompile.status, 0, (torchCompile.stderr || '').toString());
+  const torchCompileJson = JSON.parse((torchCompile.stdout || '').toString());
+  assert.equal(torchCompileJson.config.torch_compile.requested, true);
+  assert.equal(torchCompileJson.config.torch_compile.mode, 'reduce-overhead');
+  assert.equal(torchCompileJson.config.torch_compile.backend, 'inductor');
+  assert.equal(typeof torchCompileJson.checks.torch_compile_available, 'boolean');
+  if (torchCompileJson.config.torch_compile.available) {
+    assert.equal(torchCompileJson.config.torch_compile.would_apply, true);
+  } else {
+    assert.match(torchCompileJson.config.torch_compile.skipped_reason, /torch_(not_installed|import_failed|compile_unavailable)/);
+  }
   const strictUnsupported = spawnSync(PY, [script, '--student-base', 'microsoft/DialoGPT-medium', '--preflight-only'], {
     stdio: 'pipe', timeout: 60000, env: { ...process.env, KOLM_USE_LIGER: 'strict' },
   });
@@ -247,6 +273,9 @@ test('W616 trainer backend wiring spans recipe, CLI, worker, and mirror', () => 
   assert.match(train, /def _maybe_apply_liger/);
   assert.match(train, /_maybe_apply_liger\(args\.student_base, apply_patch=True\)/);
   assert.match(train, /"liger_kernel": bool\(liger_plan\.get\("applied"\)\)/);
+  assert.match(train, /def _maybe_torch_compile/);
+  assert.match(train, /_maybe_torch_compile\(model, torch_mod=torch, apply_compile=True\)/);
+  assert.match(train, /"torch_compile_plan": torch_compile_plan/);
   const worker = fs.readFileSync(path.join(repoRoot, 'workers/distill/distill.mjs'), 'utf8');
   assert.match(worker, /spec\.train\.backend/);
   assert.match(worker, /train preset must be one of \[qdora\]/);

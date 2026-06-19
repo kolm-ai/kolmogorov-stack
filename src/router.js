@@ -19218,6 +19218,14 @@ export function buildRouter() {
             base_model,
             target_size,
             pair_count: obs.length,
+            precision_mode: (req.body || {}).precision_mode,
+            gradient_checkpointing: (req.body || {}).gradient_checkpointing,
+            early_stop_config: (req.body || {}).early_stop_config,
+            torch_compile: (req.body || {}).torch_compile,
+            torch_compile_mode: (req.body || {}).torch_compile_mode,
+            torch_compile_backend: (req.body || {}).torch_compile_backend,
+            torch_compile_dynamic: (req.body || {}).torch_compile_dynamic,
+            torch_compile_fullgraph: (req.body || {}).torch_compile_fullgraph,
             callback_url: `${process.env.PUBLIC_BASE || 'https://kolm.ai'}/v1/specialists/auto-distill/callback`,
           }),
         });
@@ -19262,6 +19270,14 @@ export function buildRouter() {
         baseModel: base_model,
         targetSize: target_size,
         source: 'auto_distill',
+        precision_mode: _dpBody.precision_mode,
+        gradient_checkpointing: _dpBody.gradient_checkpointing,
+        early_stop_config: _dpBody.early_stop_config,
+        torch_compile: _dpBody.torch_compile,
+        torch_compile_mode: _dpBody.torch_compile_mode,
+        torch_compile_backend: _dpBody.torch_compile_backend,
+        torch_compile_dynamic: _dpBody.torch_compile_dynamic,
+        torch_compile_fullgraph: _dpBody.torch_compile_fullgraph,
         ...( _dpBody.dp_path ? {
           dp_path: _dpBody.dp_path,
           dp_noise_multiplier: _dpBody.dp_noise_multiplier,
@@ -19286,7 +19302,9 @@ export function buildRouter() {
         bridge_source: 'local_worker',
       });
     } catch (e) {
-      return res.status(500).json({ error: 'distill_bridge_spawn_failed', message: String(e.message || e), namespace });
+      const code = e && e.code ? String(e.code) : '';
+      const status = code.startsWith('invalid_') ? 400 : 500;
+      return res.status(status).json({ error: status === 400 ? code : 'distill_bridge_spawn_failed', message: String(e.message || e), namespace });
     }
   });
 

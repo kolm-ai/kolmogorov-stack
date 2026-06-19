@@ -732,6 +732,11 @@ export async function* distill({
   precision_mode = null,
   gradient_checkpointing = null,
   early_stop_config = null,
+  torch_compile = null,
+  torch_compile_mode = null,
+  torch_compile_backend = null,
+  torch_compile_dynamic = null,
+  torch_compile_fullgraph = null,
   // W713/W711 - curriculum ordering + importance weighting knobs (default off);
   // resolved by _resolveOrderingPolicy (see the body for the full contract).
   curriculum = null,
@@ -749,12 +754,24 @@ export async function* distill({
   // W787 - normalise the compute-efficiency block ONCE up front. Throws on a
   // bogus precision_mode (caller bug) BEFORE any worker spawn. Safe to call
   // with all-nulls - defaults to bf16 + no grad-checkpoint + no early-stop.
-  const _efficiencyRequested = (precision_mode != null) || (gradient_checkpointing != null) || (early_stop_config != null);
+  const _efficiencyRequested = (precision_mode != null)
+    || (gradient_checkpointing != null)
+    || (early_stop_config != null)
+    || (torch_compile != null)
+    || (torch_compile_mode != null)
+    || (torch_compile_backend != null)
+    || (torch_compile_dynamic != null)
+    || (torch_compile_fullgraph != null);
   const _efficiency = _efficiencyRequested
     ? normalizeEfficiencyOptions({
         precision_mode: precision_mode == null ? undefined : precision_mode,
         gradient_checkpointing: gradient_checkpointing == null ? undefined : gradient_checkpointing,
         early_stop_config: early_stop_config == null ? undefined : early_stop_config,
+        torch_compile: torch_compile == null ? undefined : torch_compile,
+        torch_compile_mode: torch_compile_mode == null ? undefined : torch_compile_mode,
+        torch_compile_backend: torch_compile_backend == null ? undefined : torch_compile_backend,
+        torch_compile_dynamic: torch_compile_dynamic == null ? undefined : torch_compile_dynamic,
+        torch_compile_fullgraph: torch_compile_fullgraph == null ? undefined : torch_compile_fullgraph,
       })
     : null;
   const _efficiencyEnv = _efficiency ? buildEfficiencyEnv(_efficiency) : {};
@@ -1040,8 +1057,8 @@ export async function* distill({
     const child = spawn(process.execPath, args, {
       detached: true,
       stdio: ['ignore', logFd, logFd],
-      // W787 - efficiencyEnv adds KOLM_PRECISION + KOLM_GRAD_CHECKPOINT +
-      // KOLM_EARLY_STOP_* so the worker (and the Python trainer it spawns)
+      // W787/W979 - efficiencyEnv adds KOLM_PRECISION + KOLM_GRAD_CHECKPOINT +
+      // KOLM_EARLY_STOP_* + KOLM_TORCH_COMPILE* so the worker (and the Python trainer it spawns)
       // pick up the caller's compute-efficiency choice. Empty object when
       // no efficiency knobs were passed, so the spread is a no-op.
       env: { ...process.env, ..._efficiencyEnv, ..._dpEnv, KOLM_JOB_ID: jobId, KOLM_DISTILL_ATTEMPT: String(attemptIdx + 1) },
