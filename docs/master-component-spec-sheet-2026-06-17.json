@@ -10,7 +10,7 @@
   },
   "perfection_model": {
     "local_engineering_score": 100,
-    "frontier_product_score": 92.5,
+    "frontier_product_score": 93.5,
     "readiness_proof_surplus_score": 104.3,
     "readiness_proof_surplus_ceiling": 110,
     "score_notes": [
@@ -47,9 +47,9 @@
     "high_priority_direct_test_reference_pct": 100,
     "category_count": 16,
     "categories_with_critical_frontier_work_open": 0,
-    "categories_with_major_frontier_work_open": 5,
+    "categories_with_major_frontier_work_open": 4,
     "critical_sota_category_closed_pct": 100,
-    "major_sota_category_closed_pct": 68.8,
+    "major_sota_category_closed_pct": 75,
     "readiness": {
       "total": 57,
       "closed": 49,
@@ -80,7 +80,7 @@
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
         "tracked_file_counts": {
-          "js_family": 2059,
+          "js_family": 2060,
           "ts_family": 60,
           "python": 209,
           "rust": 17,
@@ -352,11 +352,11 @@
     {
       "id": "agent-security-eval",
       "stack_area": "enterprise",
-      "status": "sota_review_complete_major_frontier_work_open",
+      "status": "sota_review_complete_external_or_release_gate_open",
       "already_at_frontier_count": 8,
       "improvement_count": 2,
       "critical_gaps": 0,
-      "major_gaps": 2,
+      "major_gaps": 0,
       "minor_gaps": 1,
       "required_components": 4,
       "suggested_verification": [
@@ -383,44 +383,6 @@
     }
   ],
   "top_component_gaps": [
-    {
-      "path": "src/router.js",
-      "domain": "api_surface",
-      "surface": "api-http",
-      "priority_score": 13,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "execution_or_subprocess_boundary",
-        "http_route_surface",
-        "large_component_contract_risk",
-        "network_or_provider_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "llm-routing",
-          "stack_area": "gateway",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_and_route_split_plan.",
-      "suggested_verification": [
-        "npm run verify:api-contract-matrix",
-        "npm run lint:refs",
-        "npm run verify:surfaces"
-      ]
-    },
     {
       "path": "apps/trainer/distill.py",
       "domain": "training_model_optimization",
@@ -493,42 +455,6 @@
         "npm run verify:distill-pipeline-matrix",
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
-      ]
-    },
-    {
-      "path": "src/audit-routes.js",
-      "domain": "api_surface",
-      "surface": "api-http",
-      "priority_score": 11,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "http_route_surface",
-        "large_component_contract_risk",
-        "network_or_provider_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "llm-routing",
-          "stack_area": "gateway",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_and_route_split_plan.",
-      "suggested_verification": [
-        "npm run verify:api-contract-matrix",
-        "npm run lint:refs",
-        "npm run verify:surfaces"
       ]
     },
     {
@@ -975,7 +901,7 @@
         {
           "id": "agent-security-eval",
           "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1030,7 +956,7 @@
         {
           "id": "agent-security-eval",
           "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1644,35 +1570,6 @@
       ]
     },
     {
-      "path": "server.js",
-      "domain": "api_surface",
-      "surface": "api-http",
-      "priority_score": 8,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "http_route_surface",
-        "network_or_provider_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix.",
-      "suggested_verification": [
-        "npm run verify:api-contract-matrix",
-        "npm run lint:refs",
-        "npm run verify:surfaces"
-      ]
-    },
-    {
       "path": "src/artifact.js",
       "domain": "compile_artifact_runtime",
       "surface": "core-backend",
@@ -1743,58 +1640,6 @@
         "npm run verify:wrapper-cli-matrix",
         "npm run verify:spec-compile-matrix",
         "npm run verify:artifact-matrix"
-      ]
-    },
-    {
-      "path": "src/attestation-report-builder.js",
-      "domain": "trust_security_compliance",
-      "surface": "core-backend",
-      "priority_score": 8,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "large_component_contract_risk",
-        "network_or_provider_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "mcp-tool-gateway-receipts",
-          "stack_area": "agent-integrations",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "verifiable-inference",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "model-signing-standards",
-          "stack_area": "trust",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "confidential-compute",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth.",
-      "suggested_verification": [
-        "npm run verify:claims-scope",
-        "npm run verify:compliance-packet"
       ]
     },
     {
@@ -1972,7 +1817,7 @@
         {
           "id": "agent-security-eval",
           "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
+          "status": "sota_review_complete_external_or_release_gate_open",
           "relation": "sampled"
         },
         {
@@ -1988,99 +1833,6 @@
         "npm run verify:quality-calibration",
         "npm run verify:data-curate-matrix",
         "npm run verify:bench-harness-matrix"
-      ]
-    },
-    {
-      "path": "src/red-team.js",
-      "domain": "identity_access",
-      "surface": "core-backend",
-      "priority_score": 8,
-      "risk_signals": [
-        "auth_or_tenant_boundary",
-        "cryptographic_or_proof_boundary",
-        "large_component_contract_risk",
-        "network_or_provider_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "required"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests.",
-      "suggested_verification": [
-        "npm run verify:auth-boundary-matrix",
-        "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
-      ]
-    },
-    {
-      "path": "src/transparency-log-routes.js",
-      "domain": "api_surface",
-      "surface": "api-http",
-      "priority_score": 8,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "http_route_surface",
-        "network_or_provider_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "llm-routing",
-          "stack_area": "gateway",
-          "status": "sota_review_complete_external_or_release_gate_open",
-          "relation": "sampled"
-        },
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate.",
-      "suggested_verification": [
-        "npm run verify:api-contract-matrix",
-        "npm run lint:refs",
-        "npm run verify:surfaces"
-      ]
-    },
-    {
-      "path": "api/r2.js",
-      "domain": "api_surface",
-      "surface": "api-http",
-      "priority_score": 7,
-      "risk_signals": [
-        "cryptographic_or_proof_boundary",
-        "environment_configuration_boundary",
-        "http_route_surface",
-        "network_or_provider_boundary",
-        "stateful_storage_boundary"
-      ],
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "category_links": [
-        {
-          "id": "agent-security-eval",
-          "stack_area": "enterprise",
-          "status": "sota_review_complete_major_frontier_work_open",
-          "relation": "sampled"
-        }
-      ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix.",
-      "suggested_verification": [
-        "npm run verify:api-contract-matrix",
-        "npm run lint:refs",
-        "npm run verify:surfaces"
       ]
     },
     {
@@ -2192,6 +1944,346 @@
         "node scripts/distill-strategy.mjs --simulate anthropic --task generation --real-pairs 1500 --holdout-pairs 300 --summary --require-ready",
         "npm run verify:quant-oracle"
       ]
+    },
+    {
+      "path": "apps/trainer/inference_cache.py",
+      "domain": "storage_state",
+      "surface": "worker",
+      "priority_score": 7,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "distribution_or_worker_surface",
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary",
+        "stateful_storage_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "kv-cache",
+          "stack_area": "runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "verifiable-inference",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: tenant_scoped_cas_storage_retention_and_migration_simulation.",
+      "suggested_verification": [
+        "node --test --test-concurrency=1 tests/*store*.test.js tests/*storage*.test.js"
+      ]
+    },
+    {
+      "path": "src/compile.js",
+      "domain": "compile_artifact_runtime",
+      "surface": "core-backend",
+      "priority_score": 7,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary",
+        "network_or_provider_boundary",
+        "stateful_storage_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "kv-cache",
+          "stack_area": "runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "ondevice-inference",
+          "stack_area": "cross-device",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "verifiable-inference",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "model-signing-standards",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "compile-api-to-model-competitors",
+          "stack_area": "compiler-platform",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "suggested_verification": [
+        "npm run verify:inventions",
+        "npm run verify:benchmark-evidence",
+        "npm run verify:wrapper-cli-matrix",
+        "npm run verify:spec-compile-matrix",
+        "npm run verify:artifact-matrix"
+      ]
+    },
+    {
+      "path": "src/kscore-axis-theory.js",
+      "domain": "compile_artifact_runtime",
+      "surface": "core-backend",
+      "priority_score": 7,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
+        "large_component_contract_risk"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "kv-cache",
+          "stack_area": "runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "ondevice-inference",
+          "stack_area": "cross-device",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "verifiable-inference",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "model-signing-standards",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "compile-api-to-model-competitors",
+          "stack_area": "compiler-platform",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "suggested_verification": [
+        "npm run verify:inventions",
+        "npm run verify:benchmark-evidence",
+        "npm run verify:wrapper-cli-matrix",
+        "npm run verify:spec-compile-matrix",
+        "npm run verify:artifact-matrix"
+      ]
+    },
+    {
+      "path": "src/self-synthesis-engine.js",
+      "domain": "compile_artifact_runtime",
+      "surface": "core-backend",
+      "priority_score": 7,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "environment_configuration_boundary",
+        "large_component_contract_risk"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "kv-cache",
+          "stack_area": "runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "ondevice-inference",
+          "stack_area": "cross-device",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "verifiable-inference",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "model-signing-standards",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "compile-api-to-model-competitors",
+          "stack_area": "compiler-platform",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "suggested_verification": [
+        "npm run verify:inventions",
+        "npm run verify:benchmark-evidence",
+        "npm run verify:wrapper-cli-matrix",
+        "npm run verify:spec-compile-matrix",
+        "npm run verify:artifact-matrix"
+      ]
+    },
+    {
+      "path": "workers/compile-server/server.mjs",
+      "domain": "compile_artifact_runtime",
+      "surface": "worker",
+      "priority_score": 7,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "distribution_or_worker_surface",
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary",
+        "network_or_provider_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "kv-cache",
+          "stack_area": "runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "ondevice-inference",
+          "stack_area": "cross-device",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "verifiable-inference",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "model-signing-standards",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "compile-api-to-model-competitors",
+          "stack_area": "compiler-platform",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "suggested_verification": [
+        "npm run verify:inventions",
+        "npm run verify:benchmark-evidence",
+        "npm run verify:wrapper-cli-matrix",
+        "npm run verify:spec-compile-matrix",
+        "npm run verify:artifact-matrix"
+      ]
+    },
+    {
+      "path": "apps/trainer/backends/lambda_runner.py",
+      "domain": "compile_artifact_runtime",
+      "surface": "worker",
+      "priority_score": 6,
+      "risk_signals": [
+        "distribution_or_worker_surface",
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary",
+        "http_route_surface"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "kv-cache",
+          "stack_area": "runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "verifiable-inference",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "model-signing-standards",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "suggested_verification": [
+        "npm run verify:inventions",
+        "npm run verify:benchmark-evidence",
+        "npm run verify:wrapper-cli-matrix",
+        "npm run verify:spec-compile-matrix",
+        "npm run verify:artifact-matrix"
+      ]
+    },
+    {
+      "path": "apps/trainer/backends/modal_runner.py",
+      "domain": "compile_artifact_runtime",
+      "surface": "worker",
+      "priority_score": 6,
+      "risk_signals": [
+        "cryptographic_or_proof_boundary",
+        "distribution_or_worker_surface",
+        "environment_configuration_boundary",
+        "execution_or_subprocess_boundary"
+      ],
+      "perfection_gaps": [
+        "linked_frontier_work_open"
+      ],
+      "category_links": [
+        {
+          "id": "kv-cache",
+          "stack_area": "runtime",
+          "status": "sota_review_complete_major_frontier_work_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "verifiable-inference",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        },
+        {
+          "id": "model-signing-standards",
+          "stack_area": "trust",
+          "status": "sota_review_complete_external_or_release_gate_open",
+          "relation": "sampled"
+        }
+      ],
+      "next_best_action": "Execute the linked frontier track: stage_receipts_dsse_sidecars_and_replayable_artifact_dag.",
+      "suggested_verification": [
+        "npm run verify:inventions",
+        "npm run verify:benchmark-evidence",
+        "npm run verify:wrapper-cli-matrix",
+        "npm run verify:spec-compile-matrix",
+        "npm run verify:artifact-matrix"
+      ]
     }
   ],
   "components": [
@@ -2289,7 +2381,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -2301,10 +2393,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
     },
     {
       "path": "api/runpod.js",
@@ -2406,7 +2496,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -2418,10 +2508,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
     },
     {
       "path": "apps/capture/image.py",
@@ -15263,7 +15351,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -15275,10 +15363,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
     },
     {
       "path": "services/embed/multimodal.js",
@@ -15587,7 +15673,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -15599,10 +15685,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: route_contract_auth_idempotency_and_error_shape_matrix."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep route_contract_auth_idempotency_and_error_shape_matrix current."
     },
     {
       "path": "src/ab-routes.js",
@@ -16048,6 +16132,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1005-adversarial-bakeoff-route.test.js",
           "tests/wave646-adversarial-calibration.test.js"
         ],
         "category_links": [],
@@ -17154,10 +17239,10 @@
           "tests/finalized-c7-artifact-provenance-repro.test.js",
           "tests/path-to-100-w1-tui-real-runner.test.js",
           "tests/sota-tui.test.js",
+          "tests/wave1005-adversarial-bakeoff-route.test.js",
           "tests/wave144-distill-worker.test.js",
           "tests/wave144-moe-compose.test.js",
-          "tests/wave144-seeds-gate.test.js",
-          "tests/wave145-kscore-t-axis.test.js"
+          "tests/wave144-seeds-gate.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -17677,7 +17762,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -17688,10 +17773,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: split_or_add_generated_contract_map_before_growth."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep split_or_add_generated_contract_map_before_growth current."
     },
     {
       "path": "src/audio-bakeoff.js",
@@ -18101,7 +18184,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -18112,10 +18195,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/audit-retention.js",
@@ -18229,7 +18310,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -18241,10 +18322,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_and_route_split_plan."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_and_route_split_plan current."
     },
     {
       "path": "src/audit-trail-analyzer.js",
@@ -18754,7 +18833,7 @@
           "tests/wave446-value-loop-audit-finish.test.js",
           "tests/wave809-structured-output.test.js",
           "tests/finalized-c5-accuracy-recovery-kscore-gate.test.js",
-          "tests/wave384-cli-wiring.test.js"
+          "tests/wave1005-adversarial-bakeoff-route.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -18940,7 +19019,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -25141,7 +25220,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -25467,7 +25546,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           },
           {
@@ -35796,7 +35875,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -35808,10 +35887,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/marketplace-store.js",
@@ -36029,7 +36106,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -36041,10 +36118,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/mcp-gateway.js",
@@ -36667,7 +36742,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -36679,10 +36754,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/metrics.js",
@@ -40201,7 +40274,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -40212,10 +40285,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/probe-harness.js",
@@ -40275,7 +40346,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -42626,7 +42697,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "required"
           }
         ],
@@ -42637,10 +42708,8 @@
           "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests current."
     },
     {
       "path": "src/redaction-benchmark.js",
@@ -43449,9 +43518,9 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1475379,
-          "lines": 30937,
-          "imports": 536,
+          "bytes": 1476084,
+          "lines": 30952,
+          "imports": 537,
           "exports": 8,
           "routes": 810,
           "env_refs": 197,
@@ -43472,7 +43541,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "4f00195e11d8f7027e2f5ebc4ec50ceb9768e8e191b032021d4710382388520b"
+        "sha256": "e5afc55b493ce27c33165b5a37841d465f84723ad3225d771fb51fa43a17d014"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -43500,7 +43569,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -43512,10 +43581,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_and_route_split_plan."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_and_route_split_plan current."
     },
     {
       "path": "src/routing-events.js",
@@ -49081,7 +49148,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -49093,10 +49160,8 @@
           "npm run verify:surfaces"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_generated_api_contract_matrix_auth_idempotency_and_error_shape_gate current."
     },
     {
       "path": "src/transparency-log.js",
@@ -49268,7 +49333,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -49279,10 +49344,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/tsac-compiler.js",
@@ -53548,7 +53611,7 @@
           {
             "id": "agent-security-eval",
             "stack_area": "enterprise",
-            "status": "sota_review_complete_major_frontier_work_open",
+            "status": "sota_review_complete_external_or_release_gate_open",
             "relation": "sampled"
           }
         ],
@@ -53559,10 +53622,8 @@
           "npm run verify:compliance-packet"
         ]
       },
-      "perfection_gaps": [
-        "linked_frontier_work_open"
-      ],
-      "next_best_action": "Execute the linked frontier track: unified_proof_chain_revocation_transparency_and_audit_exports."
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "workers/multimodal-redact-audio/package.json",

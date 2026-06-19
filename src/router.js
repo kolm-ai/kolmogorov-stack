@@ -25714,15 +25714,30 @@ res.json({
       const n_per_category = Number.isFinite(Number(body.n_per_category))
         ? Math.max(1, Math.min(50, Math.trunc(Number(body.n_per_category))))
         : 5;
-      // Hosted route has NO runOnArtifact wired by default - honest
-      // envelope. Production wires runOnArtifact via req.app.locals
-      // (DI seam used by tests / self-hosted operators).
+      if (typeof body.artifact_path !== 'string' || !body.artifact_path.trim()) {
+        return res.status(400).json({
+          ok: false,
+          error: 'artifact_path_required',
+          hint: 'pass {artifact_path:"/path/to/student.kolm"} so the hosted bake-off can replay prompts through the signed artifact runner',
+          version: 'w762-v1',
+        });
+      }
+      // Hosted route defaults to the signed artifact runner. The app.locals
+      // seam remains for tests/self-hosted operators that need to route prompts
+      // through a remote deployment or a stricter sandbox.
       let runOnArtifact = null;
       try { runOnArtifact = req.app && req.app.locals && req.app.locals._w762_run_on_artifact; } catch (_) {} // deliberate: cleanup
+      if (typeof runOnArtifact !== 'function') {
+        const { runArtifact } = await import('./artifact-runner.js');
+        runOnArtifact = async (artifactPath, prompt) => runArtifact(artifactPath, prompt, {
+          tenant_id: req.tenant_record.id,
+          timeoutMs: 2000,
+        });
+      }
       let judge = null;
       try { judge = req.app && req.app.locals && req.app.locals._w762_judge; } catch (_) {} // deliberate: cleanup
       const env = await runAdversarialBakeoff({
-        artifact_path: body.artifact_path,
+        artifact_path: body.artifact_path.trim(),
         n_per_category,
         runOnArtifact,
         judge,
