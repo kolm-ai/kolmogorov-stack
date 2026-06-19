@@ -24,6 +24,59 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { isMobileDevice } from './devices.js';
 
+export const MODEL_BENCHMARK_METRICS = Object.freeze(['mmlu_pro', 'ifeval', 'gsm8k', 'bfcl']);
+
+const MODEL_BENCHMARK_ALIASES = Object.freeze({
+  mmlupro: 'mmlu_pro',
+  mmlu_pro: 'mmlu_pro',
+  'mmlu-pro': 'mmlu_pro',
+  ifeval: 'ifeval',
+  if_eval: 'ifeval',
+  'if-eval': 'ifeval',
+  gsm8k: 'gsm8k',
+  bfcl: 'bfcl',
+  bfclv3: 'bfcl',
+  bfcl_v3: 'bfcl',
+  'bfcl-v3': 'bfcl',
+});
+
+function finiteBenchmarkScore(value) {
+  if (value == null) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+export function normalizeBenchmarkMetric(metric) {
+  if (metric == null || metric === '') return null;
+  const key = String(metric).trim().toLowerCase().replace(/\s+/g, '_');
+  const normalized = MODEL_BENCHMARK_ALIASES[key] || key;
+  return MODEL_BENCHMARK_METRICS.includes(normalized) ? normalized : null;
+}
+
+export function benchmarkScoreFor(model, metric) {
+  const normalized = normalizeBenchmarkMetric(metric);
+  if (!normalized || !model || !model.benchmarks || !model.benchmarks.metrics) {
+    return {
+      metric: normalized,
+      score: null,
+      normalized_score: null,
+      source_url: null,
+      source_scope: null,
+    };
+  }
+  const score = finiteBenchmarkScore(model.benchmarks.metrics[normalized]);
+  const normalizedScore = score == null ? null : Math.max(0, Math.min(1, score > 1 ? score / 100 : score));
+  return {
+    metric: normalized,
+    score,
+    normalized_score: normalizedScore,
+    source_url: model.benchmarks.source_url || null,
+    source_label: model.benchmarks.source_label || null,
+    source_scope: model.benchmarks.source_scope || null,
+    verified_at: model.benchmarks.verified_at || null,
+  };
+}
+
 export const MODELS = [
   // ----- Qwen 2.5 family (legacy/current-compatible baseline) -----
   {
@@ -133,6 +186,19 @@ export const MODELS = [
     official_source_url: 'https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507',
     architecture_features: ['agentic tool use', '262K context', 'non-thinking instruction mode'],
     frontier_student: true,
+    benchmarks: {
+      verified_at: '2026-06-19',
+      source_url: 'https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507',
+      source_label: 'Hugging Face model card performance table',
+      source_scope: 'exact_instruct_model_card',
+      scale: 'percent_higher_is_better',
+      metrics: {
+        mmlu_pro: 69.6,
+        ifeval: 83.4,
+        gsm8k: null,
+        bfcl: 61.9,
+      },
+    },
     notes: 'DEFAULT. Apache 2.0 Qwen3 4B refresh; stronger agent/tool default than Qwen2.5-3B with 262K context.',
     use_for: ['default', 'chat', 'agent', 'healthcare', 'finance', 'legal', 'long-context', 'rag', 'frontier-student'],
   },
@@ -151,6 +217,19 @@ export const MODELS = [
     official_source_url: 'https://huggingface.co/Qwen/Qwen3-8B',
     architecture_features: ['hybrid thinking', 'agentic tool use', 'multilingual reasoning'],
     frontier_student: true,
+    benchmarks: {
+      verified_at: '2026-06-19',
+      source_url: 'https://ar5iv.labs.arxiv.org/html/2505.09388v1',
+      source_label: 'Qwen3 technical report table 6',
+      source_scope: 'qwen3_8b_base_report_for_shared_backbone',
+      scale: 'percent_higher_is_better',
+      metrics: {
+        mmlu_pro: 56.73,
+        ifeval: null,
+        gsm8k: 89.84,
+        bfcl: null,
+      },
+    },
     notes: 'Apache 2.0 Qwen3 8B dense student for quality/reasoning tiers where 4B is too small.',
     use_for: ['quality', 'reasoning-quality', 'agent', 'frontier-student'],
   },
@@ -169,6 +248,19 @@ export const MODELS = [
     official_source_url: 'https://huggingface.co/microsoft/Phi-4-mini-instruct',
     architecture_features: ['128K context', 'reasoning-optimized small model', 'MIT license'],
     frontier_student: true,
+    benchmarks: {
+      verified_at: '2026-06-19',
+      source_url: 'https://huggingface.co/microsoft/Phi-4-mini-instruct',
+      source_label: 'Hugging Face model card model-quality table',
+      source_scope: 'exact_instruct_model_card',
+      scale: 'percent_higher_is_better',
+      metrics: {
+        mmlu_pro: 52.8,
+        ifeval: null,
+        gsm8k: 88.6,
+        bfcl: null,
+      },
+    },
     notes: 'MIT-licensed Phi-4 mini 3.8B. Current small reasoning default; supersedes Phi-3.5-mini for new distillation plans.',
     use_for: ['reasoning', 'classifier', 'extractor', 'mit-only', 'frontier-student'],
   },
@@ -188,6 +280,23 @@ export const MODELS = [
     official_source_url: 'https://huggingface.co/HuggingFaceTB/SmolLM3-3B',
     architecture_features: ['think/no-think control', 'long-context extension', 'compact Apache student'],
     frontier_student: true,
+    benchmarks: {
+      verified_at: '2026-06-19',
+      source_url: 'https://huggingface.co/HuggingFaceTB/SmolLM3-3B',
+      source_label: 'Hugging Face model card instruction/base benchmark tables',
+      source_scope: 'mixed_exact_instruct_and_base_card_metrics',
+      scale: 'percent_higher_is_better',
+      metrics: {
+        mmlu_pro: null,
+        ifeval: 76.7,
+        gsm8k: null,
+        bfcl: 92.3,
+      },
+      adjacent_metrics: {
+        mmlu_pro_mcf_base: 32.7,
+        gsm_plus_instruct: 72.8,
+      },
+    },
     notes: 'Apache 2.0 compact 3B student. Prefer when small artifact size and permissive licensing matter more than Qwen tokenizer continuity.',
     use_for: ['default-alternate', 'chat', 'classifier', 'extractor', 'frontier-student'],
   },
@@ -207,6 +316,19 @@ export const MODELS = [
     architecture_features: ['liquid foundation model', 'edge optimized', 'hybrid structured output'],
     frontier_student: true,
     mobile_friendly: true,
+    benchmarks: {
+      verified_at: '2026-06-19',
+      source_url: 'https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct',
+      source_label: 'Hugging Face model card benchmark table',
+      source_scope: 'exact_instruct_model_card',
+      scale: 'percent_higher_is_better',
+      metrics: {
+        mmlu_pro: 44.35,
+        ifeval: 86.23,
+        gsm8k: null,
+        bfcl: 49.12,
+      },
+    },
     notes: 'Current 1.2B edge/agentic student. License is LFM-1.0, not Apache/MIT, so permissive filters correctly exclude it.',
     use_for: ['edge', 'laptop', 'classifier', 'extractor', 'mobile', 'agent', 'frontier-student'],
   },
@@ -681,6 +803,9 @@ export function recommend(reqs = {}) {
   const explicit = TIER_BY_USE[use];
   let vram = reqs.vram_gb != null ? Number(reqs.vram_gb) : null;
   const requirePermissive = reqs.permissive === true;
+  const requestedBenchmarkRaw = reqs.benchmark_metric ?? reqs.optimize_for ?? null;
+  const requestedBenchmarkMetric = normalizeBenchmarkMetric(requestedBenchmarkRaw);
+  const requireBenchmark = reqs.require_benchmark === true || reqs.benchmark_required === true;
 
   // Resolve device-derived vram if devices are passed.
   if (reqs.target_device && vram == null) {
@@ -696,6 +821,7 @@ export function recommend(reqs = {}) {
   // Score every candidate; pick max.
   const scored = MODELS.map(m => {
     let s = 0;
+    const benchmark = requestedBenchmarkMetric ? benchmarkScoreFor(m, requestedBenchmarkMetric) : null;
     // license: apache/mit > gemma > llama-community > mrl-research
     if (m.license === 'apache-2.0') s += 0.30;
     else if (m.license === 'mit') s += 0.28;
@@ -736,6 +862,17 @@ export function recommend(reqs = {}) {
     // W610: prefer current 2026 student rows over legacy same-size ties.
     if (m.frontier_student === true) s += 0.04;
 
+    // W977: optional benchmark-aware ranking. Scores are only used when the
+    // caller names a metric, and missing sourced data is penalized rather than
+    // treated as zero or guessed.
+    if (requestedBenchmarkMetric) {
+      if (benchmark && benchmark.normalized_score != null) {
+        s += 0.35 * benchmark.normalized_score;
+      } else {
+        s -= requireBenchmark ? 1.0 : 0.08;
+      }
+    }
+
     // W349: mobile-target boost. When the caller asks for a mobile pick,
     // a phone-verified model (Gemma 3n, etc.) should beat a small generic
     // model on license alone. mobile_friendly is a curator-set flag - the
@@ -756,7 +893,7 @@ export function recommend(reqs = {}) {
       if (!trainOn(m.id, reqs.train_device)) s -= 1.0;
     }
 
-    return { model: m, score: Number(s.toFixed(4)) };
+    return { model: m, score: Number(s.toFixed(4)), benchmark };
   }).sort((a, b) => b.score - a.score);
 
   // Filter out negative-score picks (failed device gate) from the public result.
@@ -777,6 +914,10 @@ export function recommend(reqs = {}) {
       summaryParts.push(`device_effective_gb: ${fitExplain.device_effective_gb}`);
     }
   }
+  if (requestedBenchmarkMetric) {
+    const pickedBenchmark = pickRow.benchmark || benchmarkScoreFor(pickRow.model, requestedBenchmarkMetric);
+    summaryParts.push(`benchmark_${requestedBenchmarkMetric}: ${pickedBenchmark.score != null ? pickedBenchmark.score : 'n/a'}`);
+  }
   summaryParts.push(`picked: ${pickRow.model.id}`);
   summaryParts.push(fitExplain.ok ? 'fit_ok' : 'fit_FAILED');
   const summary = summaryParts.join(' / ');
@@ -784,7 +925,20 @@ export function recommend(reqs = {}) {
   return {
     pick: pickRow.model.id,
     explicit_tier_pick: explicit || null,
-    top: scored.slice(0, 5).map(s => ({ id: s.model.id, score: s.score })),
+    benchmark_requested: requestedBenchmarkRaw == null ? null : String(requestedBenchmarkRaw),
+    benchmark_metric: requestedBenchmarkMetric,
+    benchmark_optimized: Boolean(requestedBenchmarkMetric),
+    benchmark_required: requireBenchmark,
+    top: scored.slice(0, 5).map(s => {
+      const row = { id: s.model.id, score: s.score };
+      if (requestedBenchmarkMetric) {
+        row.benchmark_metric = requestedBenchmarkMetric;
+        row.benchmark_score = s.benchmark?.score ?? null;
+        row.benchmark_source_url = s.benchmark?.source_url ?? null;
+        row.benchmark_source_scope = s.benchmark?.source_scope ?? null;
+      }
+      return row;
+    }),
     device_fit: reqs.target_device ? fitsOn(pickRow.model.id, reqs.target_device) : null,
     device_train: reqs.train_device ? trainOn(pickRow.model.id, reqs.train_device) : null,
     device_fit_explanation: fitExplain.reason,
@@ -920,4 +1074,19 @@ export async function resolveBase(opts = {}) {
   return DEFAULT_MODEL;
 }
 
-export default { MODELS, DEFAULT_MODEL, TIER_BY_USE, list, info, recommend, getPin, setPin, resolveBase, fitsOn, trainOn };
+export default {
+  MODELS,
+  DEFAULT_MODEL,
+  TIER_BY_USE,
+  MODEL_BENCHMARK_METRICS,
+  list,
+  info,
+  recommend,
+  normalizeBenchmarkMetric,
+  benchmarkScoreFor,
+  getPin,
+  setPin,
+  resolveBase,
+  fitsOn,
+  trainOn,
+};

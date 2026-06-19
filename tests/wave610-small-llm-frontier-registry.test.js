@@ -13,9 +13,11 @@ import { fileURLToPath } from 'node:url';
 
 import {
   DEFAULT_MODEL,
+  MODEL_BENCHMARK_METRICS,
   TIER_BY_USE,
   info,
   list,
+  normalizeBenchmarkMetric,
   recommend,
 } from '../src/models.js';
 import {
@@ -102,11 +104,56 @@ test('W610 #6 - TAAS architecture catalog links each class to a real model row',
   }
 });
 
-test('W610 #7 - backend spec marks small-LLM surgical registry work closed', () => {
+test('W977 #7 - frontier student rows carry sourced benchmark score fields', () => {
+  for (const id of FRONTIER_STUDENT_IDS) {
+    const row = info(id);
+    const benchmarks = row?.benchmarks;
+    assert.ok(benchmarks, `${id} must carry benchmarks`);
+    assert.equal(benchmarks.verified_at, '2026-06-19', `${id} benchmark source date must be pinned`);
+    assert.equal(typeof benchmarks.source_url, 'string', `${id} benchmark source URL missing`);
+    assert.match(benchmarks.source_url, /^https:\/\//, `${id} benchmark source must be an https URL`);
+    assert.equal(benchmarks.scale, 'percent_higher_is_better', `${id} benchmark scale must be explicit`);
+    assert.ok(benchmarks.metrics && typeof benchmarks.metrics === 'object', `${id} benchmark metrics missing`);
+
+    for (const metric of MODEL_BENCHMARK_METRICS) {
+      assert.ok(metric in benchmarks.metrics, `${id} missing canonical benchmark key ${metric}`);
+      const value = benchmarks.metrics[metric];
+      assert.ok(
+        value === null || (Number.isFinite(value) && value >= 0 && value <= 100),
+        `${id} ${metric} must be a percent score or null, got ${value}`,
+      );
+    }
+    assert.ok(
+      Object.values(benchmarks.metrics).some((value) => Number.isFinite(value)),
+      `${id} must have at least one sourced benchmark score`,
+    );
+  }
+});
+
+test('W977 #8 - recommend() can rank by a sourced benchmark metric', () => {
+  assert.equal(normalizeBenchmarkMetric('BFCL-v3'), 'bfcl');
+  assert.equal(normalizeBenchmarkMetric('MMLU-Pro'), 'mmlu_pro');
+  assert.equal(normalizeBenchmarkMetric('not-a-real-metric'), null);
+
+  const rec = recommend({ use: 'edge', vram_gb: 2, optimize_for: 'ifeval' });
+  assert.equal(rec.benchmark_metric, 'ifeval');
+  assert.equal(rec.benchmark_optimized, true);
+  assert.equal(rec.pick, 'LiquidAI/LFM2.5-1.2B-Instruct');
+  assert.match(rec.summary, /benchmark_ifeval: 86\.23/);
+
+  const picked = rec.top.find((row) => row.id === rec.pick);
+  assert.ok(picked, 'picked row must appear in top list');
+  assert.equal(picked.benchmark_metric, 'ifeval');
+  assert.equal(picked.benchmark_score, 86.23);
+  assert.equal(picked.benchmark_source_scope, 'exact_instruct_model_card');
+});
+
+test('W610/W977 #9 - backend spec marks small-LLM registry and benchmark work closed', () => {
   const spec = fs.readFileSync(path.join(ROOT, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
   assert.match(spec, /CLOSED W610: add 2026 frontier students/i);
   assert.match(spec, /CLOSED W610: re-point default\/3-4B tier picks off Qwen2\.5/i);
   assert.match(spec, /LFM-1\.0/i, 'spec must record the current LFM license instead of Apache');
-  assert.match(spec, /benchmark score fields/i, 'benchmark-field follow-up must remain tracked');
+  assert.match(spec, /CLOSED W977: Add benchmark score fields/i);
+  assert.doesNotMatch(spec, /\[minor\] No benchmark\/score fields/i);
   assert.match(spec, /real neural-distillation path/i, 'neural training gap must remain tracked');
 });

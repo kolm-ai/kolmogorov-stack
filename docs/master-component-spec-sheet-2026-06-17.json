@@ -241,11 +241,11 @@
       "id": "small-llm-students",
       "stack_area": "model-registry",
       "status": "sota_review_complete_critical_frontier_work_open",
-      "already_at_frontier_count": 9,
-      "improvement_count": 2,
+      "already_at_frontier_count": 10,
+      "improvement_count": 1,
       "critical_gaps": 1,
       "major_gaps": 0,
-      "minor_gaps": 2,
+      "minor_gaps": 1,
       "required_components": 3,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -3195,7 +3195,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave957-apps-atomic-scope.test.js"
+          "tests/wave957-apps-atomic-scope.test.js",
+          "tests/wave610-small-llm-frontier-registry.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -37322,10 +37323,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 34174,
-          "lines": 924,
+          "bytes": 39726,
+          "lines": 1093,
           "imports": 3,
-          "exports": 14,
+          "exports": 17,
           "routes": 0,
           "env_refs": 5,
           "fs_writes": 2,
@@ -37341,7 +37342,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "cea1dc0f39e6861b19d56a9dbed0aed648cb4a4db9c55e77a4d31e922416eb71"
+        "sha256": "0bbdae782eb4a1581379d54a68ff74049b39434f2aa01e77d1bea545a2f3f970"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
