@@ -2,7 +2,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import express from 'express';
 
@@ -11,13 +13,16 @@ import {
   FORMAT_GOVERNANCE_REQUIRED_FILES,
   FORMAT_GOVERNANCE_SUBMISSION_SPEC,
   formatGovernanceSubmissionTemplate,
+  validateFormatGovernanceArtifacts,
   validateFormatGovernanceSubmission,
 } from '../src/format-governance-packet.js';
 import {
   auditRuntimeAdoptionPackets,
   RUNTIME_ADOPTION_MANIFEST_SPEC,
+  RUNTIME_ADOPTION_REQUIRED_FILES,
   RUNTIME_ADOPTION_TARGETS,
   runtimeAdoptionManifestTemplate,
+  validateRuntimeAdoptionArtifacts,
   validateRuntimeAdoptionManifest,
 } from '../src/runtime-adoption-packets.js';
 import {
@@ -61,6 +66,16 @@ function validSha(seed) {
   return seed.padEnd(64, 'b').slice(0, 64);
 }
 
+function sha256(value) {
+  return crypto.createHash('sha256').update(value).digest('hex');
+}
+
+function writeFile(root, rel, value) {
+  const full = path.join(root, rel);
+  fs.mkdirSync(path.dirname(full), { recursive: true });
+  fs.writeFileSync(full, value);
+}
+
 function completeGovernanceSubmission() {
   return {
     ...formatGovernanceSubmissionTemplate(),
@@ -81,6 +96,20 @@ function completeGovernanceSubmission() {
   };
 }
 
+function attachGovernanceArtifacts(root, manifest) {
+  for (const [pathField, hashField, label] of [
+    ['spec_artifact_path', 'spec_sha256', 'spec'],
+    ['conformance_suite_artifact_path', 'conformance_suite_sha256', 'conformance'],
+    ['maintainer_policy_artifact_path', 'maintainer_policy_sha256', 'maintainer'],
+    ['trademark_policy_artifact_path', 'trademark_policy_sha256', 'trademark'],
+  ]) {
+    const body = `${label} accepted governance artifact\n`;
+    writeFile(root, manifest[pathField], body);
+    manifest[hashField] = sha256(body);
+  }
+  return manifest;
+}
+
 function completeRuntimeAdoption() {
   const manifest = runtimeAdoptionManifestTemplate();
   manifest.generated_at = '2026-05-23T00:00:00.000Z';
@@ -98,6 +127,18 @@ function completeRuntimeAdoption() {
   return manifest;
 }
 
+function attachRuntimeArtifacts(root, manifest) {
+  for (const target of manifest.targets) {
+    const evidence = JSON.stringify({ target: target.id, kind: 'external-evidence' }, null, 2);
+    writeFile(root, target.evidence_artifact_path, `${evidence}\n`);
+    target.evidence_sha256 = sha256(`${evidence}\n`);
+    const conformance = JSON.stringify({ target: target.id, kind: 'conformance-report' }, null, 2);
+    writeFile(root, target.conformance_report_path, `${conformance}\n`);
+    target.conformance_report_sha256 = sha256(`${conformance}\n`);
+  }
+  return manifest;
+}
+
 test('W590 #5 - governance submission manifest validates accepted neutral venue evidence', () => {
   const template = formatGovernanceSubmissionTemplate();
   assert.equal(template.spec, FORMAT_GOVERNANCE_SUBMISSION_SPEC);
@@ -109,7 +150,8 @@ test('W590 #5 - governance submission manifest validates accepted neutral venue 
 
   const good = validateFormatGovernanceSubmission(completeGovernanceSubmission());
   assert.equal(good.ok, true, good.failures.join('\n'));
-  assert.equal(good.external_acceptance_verified, true);
+  assert.equal(good.external_acceptance_manifest_valid, true);
+  assert.equal(good.external_acceptance_verified, false);
 });
 
 test('W590 #6 - runtime adoption manifest validates every external target', () => {
@@ -125,8 +167,49 @@ test('W590 #6 - runtime adoption manifest validates every external target', () =
 
   const good = validateRuntimeAdoptionManifest(completeRuntimeAdoption());
   assert.equal(good.ok, true, good.failures.join('\n'));
-  assert.equal(good.external_adoption_verified, true);
+  assert.equal(good.external_adoption_manifest_valid, true);
+  assert.equal(good.external_adoption_verified, false);
   assert.equal(good.counts.complete_targets, RUNTIME_ADOPTION_TARGETS.length);
+});
+
+test('W590 #6a - governance acceptance requires retained artifacts before promotion', () => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w590-governance-'));
+  for (const rel of FORMAT_GOVERNANCE_REQUIRED_FILES) writeFile(temp, rel, `${rel}\n`);
+
+  const manifestPath = 'reports/format-governance-submission.json';
+  writeFile(temp, manifestPath, `${JSON.stringify(completeGovernanceSubmission(), null, 2)}\n`);
+  const missingAudit = auditFormatGovernancePacket({ root: temp });
+  assert.equal(missingAudit.ok, true, missingAudit.blockers.join('\n'));
+  assert.equal(missingAudit.external_acceptance_verified, false);
+  assert.ok(missingAudit.blockers.includes('retained_governance_artifacts_missing'));
+  assert.ok(missingAudit.external_submission_artifacts.failures.some((failure) => failure.endsWith(':missing')));
+
+  const manifest = attachGovernanceArtifacts(temp, completeGovernanceSubmission());
+  writeFile(temp, manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  const artifactValidation = validateFormatGovernanceArtifacts(temp, manifest);
+  assert.equal(artifactValidation.ok, true, artifactValidation.failures.join('\n'));
+  const audit = auditFormatGovernancePacket({ root: temp });
+  assert.equal(audit.external_acceptance_verified, true, audit.blockers.join('\n'));
+});
+
+test('W590 #6b - runtime adoption requires retained per-target artifacts before promotion', () => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w590-runtime-'));
+  for (const rel of RUNTIME_ADOPTION_REQUIRED_FILES) writeFile(temp, rel, `${rel}\n`);
+
+  const manifestPath = 'reports/runtime-adoption-manifest.json';
+  writeFile(temp, manifestPath, `${JSON.stringify(completeRuntimeAdoption(), null, 2)}\n`);
+  const missingAudit = auditRuntimeAdoptionPackets({ root: temp });
+  assert.equal(missingAudit.ok, true, missingAudit.blockers.join('\n'));
+  assert.equal(missingAudit.external_adoption_verified, false);
+  assert.ok(missingAudit.blockers.includes('retained_runtime_adoption_artifacts_missing'));
+  assert.ok(missingAudit.external_adoption_artifacts.failures.some((failure) => failure.endsWith(':missing')));
+
+  const manifest = attachRuntimeArtifacts(temp, completeRuntimeAdoption());
+  writeFile(temp, manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  const artifactValidation = validateRuntimeAdoptionArtifacts(temp, manifest);
+  assert.equal(artifactValidation.ok, true, artifactValidation.failures.join('\n'));
+  const audit = auditRuntimeAdoptionPackets({ root: temp });
+  assert.equal(audit.external_adoption_verified, true, audit.blockers.join('\n'));
 });
 
 test('W590 #7 - governance/runtime template and validate routes fail closed', async () => {
@@ -150,6 +233,10 @@ test('W590 #7 - governance/runtime template and validate routes fail closed', as
       body: JSON.stringify(completeGovernanceSubmission()),
     });
     assert.equal(govGood.status, 200);
+    const govGoodBody = await govGood.json();
+    assert.equal(govGoodBody.readiness.status, 'needs_external_partner');
+    assert.equal(govGoodBody.data.validation.ok, true);
+    assert.equal(govGoodBody.data.validation.external_acceptance_verified, false);
 
     const runtimeTemplate = await fetch(base + '/v1/runtime/adoption-packets/template');
     assert.equal(runtimeTemplate.status, 200);
@@ -167,6 +254,10 @@ test('W590 #7 - governance/runtime template and validate routes fail closed', as
       body: JSON.stringify(completeRuntimeAdoption()),
     });
     assert.equal(runtimeGood.status, 200);
+    const runtimeGoodBody = await runtimeGood.json();
+    assert.equal(runtimeGoodBody.readiness.status, 'needs_external_partner');
+    assert.equal(runtimeGoodBody.data.validation.ok, true);
+    assert.equal(runtimeGoodBody.data.validation.external_adoption_verified, false);
   });
 });
 

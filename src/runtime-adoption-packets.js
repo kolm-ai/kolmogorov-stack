@@ -7,6 +7,7 @@ export const RUNTIME_ADOPTION_MANIFEST_SPEC = 'kolm-runtime-adoption-manifest-1'
 
 const SECRET_VALUE_RE = /\b(?:ks_[a-z0-9_]{12,}|sk-[a-z0-9_-]{12,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{20,})\b/i;
 const SHA256_RE = /^(?:sha256:)?[a-f0-9]{64}$/i;
+const RUNTIME_ADOPTION_ARTIFACT_PATH_RE = /^reports\/runtime-adoption\/[a-z0-9][a-z0-9._/-]*\.(?:md|json|jsonl|txt|log|sig)$/i;
 
 export const RUNTIME_ADOPTION_TARGETS = [
   {
@@ -88,6 +89,21 @@ function validSha(value) {
   return typeof value === 'string' && SHA256_RE.test(value) && !/^(?:sha256:)?0{64}$/i.test(value);
 }
 
+function normalizeSha(value) {
+  return String(value || '').replace(/^sha256:/i, '').toLowerCase();
+}
+
+function sha256Buffer(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+function validArtifactPath(value) {
+  return typeof value === 'string'
+    && RUNTIME_ADOPTION_ARTIFACT_PATH_RE.test(value)
+    && !value.includes('..')
+    && !value.includes('\\');
+}
+
 function parseJsonFile(root, rel) {
   const full = path.join(root, rel);
   if (!fs.existsSync(full)) return null;
@@ -149,7 +165,9 @@ export function runtimeAdoptionManifestTemplate() {
       external_url: target.url,
       integration_ref: 'REPLACE_WITH_PR_COMMIT_PACKAGE_OR_MARKETPLACE_REF',
       adopted_at: 'REPLACE_WITH_ISO_TIMESTAMP',
+      evidence_artifact_path: `reports/runtime-adoption/${target.id}/evidence.json`,
       evidence_sha256: null,
+      conformance_report_path: `reports/runtime-adoption/${target.id}/conformance-report.json`,
       conformance_report_sha256: null,
       supported_artifact_subset: 'REPLACE_WITH_SUPPORTED_KOLM_ARTIFACT_SUBSET',
       implemented_fields: target.required_fields.slice(),
@@ -184,7 +202,9 @@ export function validateRuntimeAdoptionManifest(manifest = {}) {
     if (!isHttpsUrl(row.external_url)) failures.push(`${target.id}:external_url_https_required`);
     if (!nonEmpty(row.integration_ref, 8)) failures.push(`${target.id}:integration_ref_missing`);
     if (!validIsoDate(row.adopted_at)) failures.push(`${target.id}:adopted_at_invalid`);
+    if (!validArtifactPath(row.evidence_artifact_path)) failures.push(`${target.id}:evidence_artifact_path_invalid`);
     if (!validSha(row.evidence_sha256)) failures.push(`${target.id}:evidence_sha256_invalid`);
+    if (!validArtifactPath(row.conformance_report_path)) failures.push(`${target.id}:conformance_report_path_invalid`);
     if (!validSha(row.conformance_report_sha256)) failures.push(`${target.id}:conformance_report_sha256_invalid`);
     if (!nonEmpty(row.supported_artifact_subset, 20)) failures.push(`${target.id}:supported_artifact_subset_too_short`);
     if (!nonEmpty(row.maintainer_or_owner, 2)) failures.push(`${target.id}:maintainer_or_owner_missing`);
@@ -202,7 +222,8 @@ export function validateRuntimeAdoptionManifest(manifest = {}) {
   return {
     spec: RUNTIME_ADOPTION_MANIFEST_SPEC,
     ok: failures.length === 0,
-    external_adoption_verified: failures.length === 0,
+    external_adoption_manifest_valid: failures.length === 0,
+    external_adoption_verified: false,
     secret_values_included: false,
     counts: {
       targets: rows.length,
@@ -214,6 +235,38 @@ export function validateRuntimeAdoptionManifest(manifest = {}) {
   };
 }
 
+export function validateRuntimeAdoptionArtifacts(root, manifest = {}) {
+  const failures = [];
+  const rows = Array.isArray(manifest.targets) ? manifest.targets : [];
+  for (const row of rows) {
+    const id = row && row.id ? row.id : 'unknown';
+    for (const [pathField, hashField] of [
+      ['evidence_artifact_path', 'evidence_sha256'],
+      ['conformance_report_path', 'conformance_report_sha256'],
+    ]) {
+      const rel = row && row[pathField];
+      if (!validArtifactPath(rel)) {
+        failures.push(`${id}:${pathField}_invalid`);
+        continue;
+      }
+      const full = path.join(root, rel);
+      if (!fs.existsSync(full)) {
+        failures.push(`${id}:${rel}:missing`);
+        continue;
+      }
+      const actual = sha256Buffer(fs.readFileSync(full));
+      if (validSha(row[hashField]) && actual !== normalizeSha(row[hashField])) {
+        failures.push(`${id}:${hashField}_mismatch`);
+      }
+    }
+  }
+  return {
+    ok: failures.length === 0,
+    artifact_count: rows.length * 2,
+    failures,
+  };
+}
+
 export function auditRuntimeAdoptionPackets(options = {}) {
   const root = path.resolve(options.root || process.cwd());
   const files = RUNTIME_ADOPTION_REQUIRED_FILES.map((rel) => fileEvidence(root, rel));
@@ -221,21 +274,27 @@ export function auditRuntimeAdoptionPackets(options = {}) {
   const local_contract_ok = missing.length === 0;
   let adoption_manifest = null;
   let adoption_validation = null;
+  let artifact_validation = null;
   try {
     adoption_manifest = parseJsonFile(root, 'reports/runtime-adoption-manifest.json')
       || parseJsonFile(root, 'docs/runtime-adoption-external-prs.json');
     adoption_validation = adoption_manifest ? validateRuntimeAdoptionManifest(adoption_manifest) : null;
+    artifact_validation = adoption_manifest && adoption_validation && adoption_validation.ok
+      ? validateRuntimeAdoptionArtifacts(root, adoption_manifest)
+      : null;
   } catch (e) {
     adoption_validation = {
       spec: RUNTIME_ADOPTION_MANIFEST_SPEC,
       ok: false,
+      external_adoption_manifest_valid: false,
       external_adoption_verified: false,
       secret_values_included: false,
       counts: { targets: 0, required_targets: RUNTIME_ADOPTION_TARGETS.length, complete_targets: 0, failures: 1 },
       failures: [`runtime_adoption_manifest:invalid_json:${String(e.message || e)}`],
     };
+    artifact_validation = null;
   }
-  const external_adoption_verified = Boolean(adoption_validation && adoption_validation.ok);
+  const external_adoption_verified = Boolean(adoption_validation && adoption_validation.ok && artifact_validation && artifact_validation.ok);
   const targets = RUNTIME_ADOPTION_TARGETS.map((target) => ({
     id: target.id,
     label: target.label,
@@ -248,7 +307,9 @@ export function auditRuntimeAdoptionPackets(options = {}) {
     ...missing,
     ...(external_adoption_verified ? [] : [
       ...(adoption_validation ? adoption_validation.failures : ['reports/runtime-adoption-manifest.json:missing']),
+      ...(artifact_validation ? artifact_validation.failures : []),
       ...targets.map((target) => `${target.id}:external_merge_or_package_missing`),
+      'retained_runtime_adoption_artifacts_missing',
     ]),
   ];
 
@@ -260,6 +321,7 @@ export function auditRuntimeAdoptionPackets(options = {}) {
     secret_values_included: false,
     external_adoption_manifest_present: Boolean(adoption_manifest),
     external_adoption_manifest_validation: adoption_validation,
+    external_adoption_artifacts: artifact_validation,
     generated_at: new Date().toISOString(),
     counts: {
       targets: targets.length,

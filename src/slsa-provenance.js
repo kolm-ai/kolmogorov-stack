@@ -36,14 +36,16 @@ import {
   loadOrCreateDefaultSigner,
 } from './ed25519.js';
 import { canonicalizeReport } from './attestation-report-builder.js';
+import { SLSA_PROFILE_IDS, getSlsaProfile } from './slsa-profile-registry.js';
 
 export const SLSA_PROVENANCE_VERSION = 'kolm-slsa-v1';
+export const ASR_REPORT_SLSA_PROFILE = getSlsaProfile(SLSA_PROFILE_IDS.ASR_REPORT);
 
-export const IN_TOTO_STATEMENT_TYPE = 'https://in-toto.io/Statement/v1';
-export const SLSA_PREDICATE_TYPE = 'https://slsa.dev/provenance/v1';
-export const KOLM_BUILD_TYPE = 'https://kolm.ai/asr-audit/v1';
-export const KOLM_BUILDER_ID = 'https://kolm.ai';
-export const INTOTO_PAYLOAD_TYPE = 'application/vnd.in-toto+json';
+export const IN_TOTO_STATEMENT_TYPE = ASR_REPORT_SLSA_PROFILE.statement_type;
+export const SLSA_PREDICATE_TYPE = ASR_REPORT_SLSA_PROFILE.predicate_type;
+export const KOLM_BUILD_TYPE = ASR_REPORT_SLSA_PROFILE.build_type;
+export const KOLM_BUILDER_ID = ASR_REPORT_SLSA_PROFILE.builder_id;
+export const INTOTO_PAYLOAD_TYPE = ASR_REPORT_SLSA_PROFILE.payload_type;
 
 const _emptyHexSha256 = () => crypto.createHash('sha256').update('{}', 'utf8').digest('hex');
 
@@ -227,11 +229,16 @@ export function toDsseProvenance(report, signer) {
 
 export const SLSA_PROVENANCE_SPEC = {
   version: SLSA_PROVENANCE_VERSION,
+  profile_id: ASR_REPORT_SLSA_PROFILE.id,
+  product_surface: ASR_REPORT_SLSA_PROFILE.product_surface,
+  owner_module: ASR_REPORT_SLSA_PROFILE.owner_module,
   statement_type: IN_TOTO_STATEMENT_TYPE,
   predicate_type: SLSA_PREDICATE_TYPE,
   build_type: KOLM_BUILD_TYPE,
   builder_id: KOLM_BUILDER_ID,
   payload_type: INTOTO_PAYLOAD_TYPE,
+  conformance: ASR_REPORT_SLSA_PROFILE.conformance,
+  slsa_build_l3_claim_allowed: ASR_REPORT_SLSA_PROFILE.slsa_build_l3_claim_allowed,
 };
 
 export default {

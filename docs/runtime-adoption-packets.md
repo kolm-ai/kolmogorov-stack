@@ -56,4 +56,7 @@ node scripts/runtime-adoption-packets.mjs --validate reports/runtime-adoption-ma
 The manifest must cover Hugging Face Hub, Ollama, llama.cpp, ONNX/GGUF tooling,
 and hardware partner targets. Each row needs an external HTTPS URL, merged or
 published status, integration reference, evidence hash, conformance-report hash,
-supported artifact subset, and all target-specific implemented fields.
+supported artifact subset, and all target-specific implemented fields. The
+evidence and conformance hashes must point at retained local files under
+`reports/runtime-adoption/`; a shape-valid manifest without retained, matching
+artifacts stays `needs_external_partner`.

@@ -9,6 +9,31 @@ const SECRET_VALUE_RE = /\b(?:ks_[a-z0-9_]{12,}|sk-[a-z0-9_-]{12,}|AKIA[0-9A-Z]{
 const RAW_FIELD_RE = /^(prompt|input|output|raw_prompt|raw_input|raw_output|completion|response)$/i;
 const SHA256_RE = /^(?:sha256:)?[a-f0-9]{64}$/i;
 const REPORT_PATH_RE = /^reports\/benchmarks\/[a-z0-9][a-z0-9._/-]*\.(?:json|jsonl)$/i;
+const HTTPS_URL_RE = /^https:\/\/[a-z0-9][a-z0-9._~:/?#[\]@!$&'()*+,;=%-]*$/i;
+
+export const REQUIRED_PUBLICATION_FIELDS = [
+  'leaderboard_url',
+  'dataset_manifest_path',
+  'signed_raw_output_bundle_path',
+  'hardware_provider_manifest_path',
+  'harness_config_manifest_path',
+  'statistical_analysis_path',
+  'contamination_report_path',
+  'leaderboard_stability_path',
+  'reproducer_command',
+  'reproducer_command_sha256',
+  'freshness_expires_at',
+];
+
+const PUBLICATION_REPORT_PATH_FIELDS = [
+  'dataset_manifest_path',
+  'signed_raw_output_bundle_path',
+  'hardware_provider_manifest_path',
+  'harness_config_manifest_path',
+  'statistical_analysis_path',
+  'contamination_report_path',
+  'leaderboard_stability_path',
+];
 
 export const BENCHMARK_RESEARCH_BASELINE = [
   {
@@ -34,6 +59,30 @@ export const BENCHMARK_RESEARCH_BASELINE = [
     title: 'OpenTelemetry GenAI semantic conventions',
     url: 'https://opentelemetry.io/docs/specs/semconv/gen-ai/',
     signal: 'Production benchmark rows should preserve model, provider, span, metric, and event fields in an interoperable schema.',
+  },
+  {
+    id: 'livebench',
+    title: 'LiveBench contamination-free updates',
+    url: 'https://arxiv.org/abs/2406.19314',
+    signal: 'Public benchmark claims need freshness, objective scoring where possible, and contamination-aware task provenance.',
+  },
+  {
+    id: 'chatbot-arena-statistics',
+    title: 'Chatbot Arena pairwise preference statistics',
+    url: 'https://arxiv.org/abs/2403.04132',
+    signal: 'Leaderboard claims should expose pairwise comparison protocol, rating uncertainty, and agreement checks.',
+  },
+  {
+    id: 'leaderboard-stability',
+    title: 'Leaderboard stability and manipulation analysis',
+    url: 'https://arxiv.org/abs/2605.15761',
+    signal: 'Public rankings need robustness analysis instead of treating close leaderboard positions as deterministic.',
+  },
+  {
+    id: 'harness-bench',
+    title: 'Harness-Bench configuration-level agent evaluation',
+    url: 'https://arxiv.org/abs/2605.27922',
+    signal: 'Agent and tool-using evaluations should report the harness configuration, traces, constraints, and recovery behavior, not only the base model name.',
   },
 ];
 
@@ -216,6 +265,19 @@ function validReportPath(value) {
     && !value.includes('\\');
 }
 
+function validHttpsUrl(value) {
+  return typeof value === 'string' && HTTPS_URL_RE.test(value);
+}
+
+function normalizeSha256(value) {
+  return String(value || '').replace(/^sha256:/i, '').toLowerCase();
+}
+
+function pathExists(root, rel) {
+  if (!validReportPath(rel)) return false;
+  return fs.existsSync(path.join(root, rel));
+}
+
 function findRawFieldKeys(value, pathParts = []) {
   if (!value || typeof value !== 'object') return [];
   const out = [];
@@ -255,6 +317,19 @@ export function benchmarkEvidenceTemplate() {
       scoring: 'Report quality, latency, cost, size, energy, privacy, and receipt metrics separately before composite claims.',
       raw_data_policy: 'Do not include raw prompts, raw outputs, credentials, PHI, PII, or provider secrets. Include hashes and report paths only.',
     },
+    publication: {
+      leaderboard_url: null,
+      dataset_manifest_path: 'reports/benchmarks/dataset-manifest.json',
+      signed_raw_output_bundle_path: 'reports/benchmarks/raw-output-bundle.json',
+      hardware_provider_manifest_path: 'reports/benchmarks/hardware-providers.json',
+      harness_config_manifest_path: 'reports/benchmarks/harness-configs.json',
+      statistical_analysis_path: 'reports/benchmarks/statistical-analysis.json',
+      contamination_report_path: 'reports/benchmarks/contamination-report.json',
+      leaderboard_stability_path: 'reports/benchmarks/leaderboard-stability.json',
+      reproducer_command: null,
+      reproducer_command_sha256: null,
+      freshness_expires_at: null,
+    },
     lanes: REQUIRED_BENCHMARK_LANES.map((lane) => ({
       id: lane.id,
       label: lane.label,
@@ -263,6 +338,45 @@ export function benchmarkEvidenceTemplate() {
       ...Object.fromEntries(lane.required_fields.map((field) => [field, null])),
     })),
   };
+}
+
+function validatePublicationPacket(publication, matrix) {
+  const failures = [];
+  if (!publication || typeof publication !== 'object' || Array.isArray(publication)) {
+    return ['publication:missing_object'];
+  }
+  for (const field of REQUIRED_PUBLICATION_FIELDS) {
+    if (publication[field] == null || publication[field] === '') failures.push(`publication.${field}:missing`);
+  }
+  if (publication.leaderboard_url != null && !validHttpsUrl(publication.leaderboard_url)) {
+    failures.push('publication.leaderboard_url:must_be_https_url');
+  }
+  for (const field of PUBLICATION_REPORT_PATH_FIELDS) {
+    if (publication[field] != null && !validReportPath(publication[field])) {
+      failures.push(`publication.${field}:invalid_report_path`);
+    }
+  }
+  if (publication.reproducer_command != null && !nonEmpty(publication.reproducer_command, 12)) {
+    failures.push('publication.reproducer_command:too_short');
+  }
+  if (publication.reproducer_command_sha256 != null && !looksLikeHash(publication.reproducer_command_sha256)) {
+    failures.push('publication.reproducer_command_sha256:must_be_hash_reference');
+  }
+  if (publication.reproducer_command && looksLikeHash(publication.reproducer_command_sha256)) {
+    const actual = sha256(publication.reproducer_command);
+    if (normalizeSha256(publication.reproducer_command_sha256) !== actual) {
+      failures.push('publication.reproducer_command_sha256:does_not_match_reproducer_command');
+    }
+  }
+  if (publication.freshness_expires_at != null && !validIsoDate(publication.freshness_expires_at)) {
+    failures.push('publication.freshness_expires_at:invalid');
+  }
+  if (validIsoDate(publication.freshness_expires_at) && validIsoDate(matrix.generated_at)) {
+    if (Date.parse(publication.freshness_expires_at) <= Date.parse(matrix.generated_at)) {
+      failures.push('publication.freshness_expires_at:must_be_after_generated_at');
+    }
+  }
+  return failures;
 }
 
 export function validateBenchmarkProviderMatrix(matrix = {}) {
@@ -281,6 +395,7 @@ export function validateBenchmarkProviderMatrix(matrix = {}) {
       failures.push('methodology.raw_data_policy:must_forbid_raw_prompts_and_outputs');
     }
   }
+  failures.push(...validatePublicationPacket(matrix.publication, matrix));
   if (!Array.isArray(matrix.lanes)) failures.push('lanes:missing_array');
   const serialized = JSON.stringify(matrix);
   if (SECRET_VALUE_RE.test(serialized)) failures.push('secret_value_detected');
@@ -328,6 +443,38 @@ export function validateBenchmarkProviderMatrix(matrix = {}) {
   };
 }
 
+function validatePublicClaimPacketFiles(root, matrix = {}) {
+  const blockers = [];
+  const rows = Array.isArray(matrix.lanes) ? matrix.lanes : [];
+  const rowPaths = [...new Set(rows.map((row) => row && row.public_report_path).filter(Boolean))];
+  for (const rel of rowPaths) {
+    if (!pathExists(root, rel)) blockers.push(`${normalizeRel(rel)}:public_report_missing`);
+  }
+  const publication = matrix.publication && typeof matrix.publication === 'object' ? matrix.publication : {};
+  for (const field of PUBLICATION_REPORT_PATH_FIELDS) {
+    const rel = publication[field];
+    if (rel && validReportPath(rel) && !pathExists(root, rel)) {
+      blockers.push(`${normalizeRel(rel)}:${field}:missing`);
+    }
+  }
+  return {
+    ok: blockers.length === 0,
+    required_report_paths: rowPaths,
+    publication: {
+      leaderboard_url: publication.leaderboard_url || null,
+      dataset_manifest_path: publication.dataset_manifest_path || null,
+      signed_raw_output_bundle_path: publication.signed_raw_output_bundle_path || null,
+      hardware_provider_manifest_path: publication.hardware_provider_manifest_path || null,
+      harness_config_manifest_path: publication.harness_config_manifest_path || null,
+      statistical_analysis_path: publication.statistical_analysis_path || null,
+      contamination_report_path: publication.contamination_report_path || null,
+      leaderboard_stability_path: publication.leaderboard_stability_path || null,
+      freshness_expires_at: publication.freshness_expires_at || null,
+    },
+    blockers,
+  };
+}
+
 export function benchmarkEvidenceCatalog() {
   return {
     spec: BENCHMARK_EVIDENCE_SPEC,
@@ -366,6 +513,14 @@ export function auditBenchmarkEvidence(options = {}) {
   if (matrixFile.exists && matrixFile.json && !provider_matrix_validation.ok) {
     failures.push(...provider_matrix_validation.failures.map((failure) => `provider-matrix:${failure}`));
   }
+  const public_claim_packet = matrixFile.exists && matrixFile.json && provider_matrix_validation.ok
+    ? validatePublicClaimPacketFiles(root, matrixFile.json)
+    : {
+        ok: false,
+        required_report_paths: [],
+        publication: null,
+        blockers: matrixFile.exists ? ['provider-matrix:invalid_public_claim_packet'] : ['reports/benchmarks/provider-matrix.json:missing'],
+      };
   const lanes = REQUIRED_BENCHMARK_LANES.map((lane) => laneStatus(lane, rows));
   const lane_blockers = lanes
     .filter((lane) => lane.status !== 'complete_public_data')
@@ -374,7 +529,7 @@ export function auditBenchmarkEvidence(options = {}) {
     .filter((report) => !report.exists)
     .map((report) => `${report.path}:missing`);
   const local_contract_ok = failures.length === 0;
-  const public_claim_ready = local_contract_ok && lane_blockers.length === 0 && optional_blockers.length === 0;
+  const public_claim_ready = local_contract_ok && lane_blockers.length === 0 && optional_blockers.length === 0 && public_claim_packet.ok;
 
   return {
     spec: BENCHMARK_EVIDENCE_SPEC,
@@ -389,16 +544,19 @@ export function auditBenchmarkEvidence(options = {}) {
       required_lanes: lanes.length,
       complete_public_lanes: lanes.filter((lane) => lane.status === 'complete_public_data').length,
       optional_reports_present: optional_reports.filter((item) => item.exists).length,
-      blockers: lane_blockers.length + optional_blockers.length + failures.length,
+      public_claim_packet_blockers: public_claim_packet.blockers.length,
+      blockers: lane_blockers.length + optional_blockers.length + public_claim_packet.blockers.length + failures.length,
     },
     required_artifacts,
     optional_reports,
     provider_matrix_validation,
+    public_claim_packet,
     lanes,
     blockers: [
       ...failures,
       ...lane_blockers,
       ...optional_blockers,
+      ...public_claim_packet.blockers,
     ],
     methodology_controls: [
       'fixed task set with versioned case ids',
@@ -407,6 +565,10 @@ export function auditBenchmarkEvidence(options = {}) {
       'hardware profile, runtime version, and energy fields recorded for local lanes',
       'quality, latency, cost, size, privacy, and receipt metrics reported separately before any composite score',
       'OpenTelemetry-compatible trace fields retained for production replays',
+      'benchmark harness configuration, runtime constraints, and recovery policy versioned with every run',
+      'confidence intervals, paired deltas, and close-rank uncertainty reported before leaderboard claims',
+      'contamination provenance and freshness windows recorded for every public dataset slice',
+      'leaderboard stability analysis attached before public best-in-class ranking claims',
     ],
     research_baseline: BENCHMARK_RESEARCH_BASELINE.map((row) => ({ ...row })),
     note: 'This is the local readiness contract for public benchmark evidence. It does not claim comparative public results until every provider lane has raw reports, hashes, pricing snapshots, and hardware metadata.',

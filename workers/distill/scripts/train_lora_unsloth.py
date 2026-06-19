@@ -35,6 +35,12 @@ import os
 import sys
 import time
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    import lora_variants as _lv  # noqa: E402
+except Exception:  # pragma: no cover - mirror still supports non-packing runs
+    _lv = None
+
 from _console import setup_utf8 as _setup_utf8  # noqa: F401 — import side-effect
 
 
@@ -55,6 +61,72 @@ def _json_float(value):
     if not math.isfinite(n):
         return None
     return n
+
+
+UNSLOTH_NATIVE_LORA_VARIANTS = ("lora", "rslora", "dora", "qdora")
+UNSLOTH_NATIVE_LORA_INITS = ("default", "gaussian", "pissa", "pissa_niter_16", "olora")
+
+
+def build_unsloth_variant_plan(lora_variant="lora", lora_init="default", optim="adamw_torch", packing=False):
+    """Pure planner for the Unsloth mirror's W1024 parity knobs."""
+    variant = str(lora_variant or "lora").strip().lower()
+    init = str(lora_init or "default").strip().lower()
+    trainer_optim = str(optim or "adamw_torch").strip().lower()
+    if variant not in UNSLOTH_NATIVE_LORA_VARIANTS:
+        raise ValueError(f"unsupported Unsloth lora_variant: {variant}")
+    if init not in UNSLOTH_NATIVE_LORA_INITS:
+        raise ValueError(f"unsupported Unsloth lora_init: {init}")
+    peft_kwargs = {}
+    features = []
+    if variant in ("rslora", "qdora"):
+        peft_kwargs["use_rslora"] = True
+        features.append("rslora")
+    if variant in ("dora", "qdora"):
+        peft_kwargs["use_dora"] = True
+        features.append("dora")
+    if init != "default":
+        peft_kwargs["init_lora_weights"] = init
+        features.append(f"lora_init:{init}")
+    if trainer_optim.startswith("galore"):
+        features.append(f"optim:{trainer_optim}")
+    if packing:
+        features.append("packing")
+    return {
+        "version": "w1024-unsloth-native-variant-parity-v1",
+        "lora_variant": variant,
+        "lora_init": init,
+        "optim": trainer_optim,
+        "packing": bool(packing),
+        "peft_kwargs": peft_kwargs,
+        "features": features,
+        "native_parity": {
+            "rslora": variant in ("rslora", "qdora"),
+            "dora": variant in ("dora", "qdora"),
+            "pissa_olora_init": init in ("pissa", "pissa_niter_16", "olora"),
+            "galore_training_args": trainer_optim.startswith("galore"),
+            "packing": bool(packing),
+        },
+    }
+
+
+def _pad_packed_dataset(ds, max_length, pad_token_id):
+    pad_id = 0 if pad_token_id is None else int(pad_token_id)
+
+    def _pad(row):
+        ids = list(row.get("input_ids") or [])[:max_length]
+        labels = list(row.get("labels") or ids)[:max_length]
+        pos = list(row.get("position_ids") or range(len(ids)))[:max_length]
+        n = len(ids)
+        pad = max(0, max_length - n)
+        return {
+            "input_ids": ids + [pad_id] * pad,
+            "labels": labels + [-100] * pad,
+            "attention_mask": [1] * n + [0] * pad,
+            "position_ids": pos + [0] * pad,
+        }
+
+    remove = [c for c in ("seq_boundaries",) if c in getattr(ds, "column_names", [])]
+    return ds.map(_pad, remove_columns=remove)
 
 
 def _holdout_expected(row):
@@ -200,11 +272,35 @@ def main():
     p.add_argument("--save-total-limit", type=int, default=3)
     p.add_argument("--qlora", action="store_true")
     p.add_argument("--optim", default=None)
+    p.add_argument("--lora-variant", default="lora")
+    p.add_argument("--lora-init", default="default")
+    p.add_argument("--packing", action="store_true")
+    p.add_argument("--galore-args", default="")
+    p.add_argument("--galore-targets", default="attn,mlp")
     p.add_argument("--neftune-noise-alpha", dest="neftune_noise_alpha",
                    type=float, default=0.0)
     p.add_argument("--backend-reason", default="requested_unsloth",
                    help="Manifest tag carried from train_lora.py _select_backend.")
     args = p.parse_args()
+    requested_variant = str(args.lora_variant or "lora").strip().lower()
+    optim_for_plan = args.optim or (
+        "paged_adamw_8bit" if requested_variant == "qdora"
+        else ("adamw_8bit" if args.qlora else "adamw_torch")
+    )
+    try:
+        variant_plan = build_unsloth_variant_plan(
+            args.lora_variant,
+            args.lora_init,
+            optim_for_plan,
+            args.packing,
+        )
+    except ValueError as e:
+        sys.stderr.write(f"[train_lora_unsloth] {e}\n")
+        sys.exit(12)
+    if variant_plan["lora_variant"] == "qdora":
+        args.qlora = True
+        if not args.optim:
+            args.optim = optim_for_plan
 
     # Unsloth must be imported FIRST — it monkey-patches torch + transformers.
     # If this import succeeds in the parent dispatch but fails here, it's a
@@ -283,19 +379,44 @@ def main():
         target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                         "gate_proj", "up_proj", "down_proj"],
     )
+    peft_kwargs.update(variant_plan["peft_kwargs"])
     if args.neftune_noise_alpha and args.neftune_noise_alpha > 0:
         peft_kwargs["neftune_noise_alpha"] = float(args.neftune_noise_alpha)
-    model = FastLanguageModel.get_peft_model(model, **peft_kwargs)
+    try:
+        model = FastLanguageModel.get_peft_model(model, **peft_kwargs)
+    except TypeError as e:
+        sys.stderr.write("[train_lora_unsloth] installed Unsloth rejected requested PEFT kwargs: "
+                         + ", ".join(sorted(variant_plan["peft_kwargs"].keys())) + "\n")
+        sys.stderr.write(f"                     error: {e}\n")
+        sys.exit(12)
 
-    def to_example(row):
+    def to_text(row):
         prompt = str(row["input"])
         completion = str(row["teacher_output"])
-        text = f"<|user|>\n{prompt}\n<|assistant|>\n{completion}{tok.eos_token}"
-        enc = tok(text, truncation=True, max_length=args.max_length, padding="max_length")
+        return f"<|user|>\n{prompt}\n<|assistant|>\n{completion}{tok.eos_token}"
+
+    def to_example(row):
+        enc = tok(to_text(row), truncation=True, max_length=args.max_length, padding="max_length")
         enc["labels"] = enc["input_ids"].copy()
         return enc
 
-    ds = Dataset.from_list(rows).map(to_example, remove_columns=Dataset.from_list(rows).column_names)
+    if args.packing:
+        if _lv is None:
+            sys.stderr.write("[train_lora_unsloth] packing requested but lora_variants.py is unavailable\n")
+            sys.exit(12)
+        token_rows = []
+        for row in rows:
+            enc = tok(to_text(row), truncation=True, max_length=args.max_length, padding=False)
+            token_rows.append({"input_ids": enc["input_ids"]})
+        ds, _needs_boundary = _lv.build_packed_dataset(
+            token_rows,
+            tok,
+            int(args.max_length),
+            getattr(tok, "eos_token_id", None),
+        )
+        ds = _pad_packed_dataset(ds, int(args.max_length), getattr(tok, "pad_token_id", None))
+    else:
+        ds = Dataset.from_list(rows).map(to_example, remove_columns=Dataset.from_list(rows).column_names)
 
     eval_ds = None
     if args.val_fraction > 0:
@@ -323,6 +444,16 @@ def main():
         bf16=use_bf16,
         optim=args.optim or ("adamw_8bit" if args.qlora else "adamw_torch"),
     )
+    if str(ta_kwargs["optim"]).startswith("galore"):
+        if args.qlora:
+            sys.stderr.write("[train_lora_unsloth] GaLore is incompatible with --qlora/load_in_4bit\n")
+            sys.exit(12)
+        if ta_kwargs["optim"] == "galore_adamw_layerwise" and int(args.gradient_accumulation_steps) > 1:
+            sys.stderr.write("[train_lora_unsloth] galore_adamw_layerwise requires gradient_accumulation_steps == 1\n")
+            sys.exit(12)
+        ta_kwargs["optim_target_modules"] = [m.strip() for m in str(args.galore_targets).split(",") if m.strip()]
+        if args.galore_args:
+            ta_kwargs["optim_args"] = args.galore_args
     if args.save_steps > 0:
         ta_kwargs["save_steps"] = args.save_steps
     # NEFTune via Trainer kwarg in addition to the embedding-level Unsloth path.
@@ -466,6 +597,15 @@ def main():
                 "early_stop_patience": None,
                 "early_stop_delta": None,
             },
+            "variants": {
+                "lora_variant": variant_plan["lora_variant"],
+                "lora_init": variant_plan["lora_init"],
+                "peft_kwargs": variant_plan["peft_kwargs"],
+                "features": variant_plan["features"],
+                "packing": bool(args.packing),
+                "galore_args": args.galore_args if str(ta_kwargs.get("optim", "")).startswith("galore") else None,
+                "galore_targets": ta_kwargs.get("optim_target_modules"),
+            },
             "massive": {
                 "gradient_accumulation_steps": args.gradient_accumulation_steps,
                 "effective_batch_size": args.batch_size * args.gradient_accumulation_steps,
@@ -486,6 +626,7 @@ def main():
                 "selected": "unsloth",
                 "reason": args.backend_reason,
                 "requested": "auto-or-unsloth",
+                "native_feature_parity": variant_plan["native_parity"],
                 "neftune_noise_alpha": float(args.neftune_noise_alpha) if args.neftune_noise_alpha else 0.0,
             },
         }, f, indent=2)

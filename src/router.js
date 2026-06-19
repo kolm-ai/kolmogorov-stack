@@ -2057,7 +2057,7 @@ export function buildRouter() {
         ],
       });
       attachEnvelopeHeaders(res, envelope);
-      res.status(readiness.local_contract_ok ? 200 : 503).json(envelope);
+      res.status(readiness.external_ready ? 200 : 503).json(envelope);
     } catch (e) {
       res.status(500).json({ ok: false, error: 'evidence_readiness_error', detail: String(e.message || e) });
     }
@@ -2072,7 +2072,7 @@ export function buildRouter() {
       surface: 'public-docs-sdk',
       journey: 'public-docs-sdk',
       readiness: {
-        status: audit.ok ? 'implemented' : 'blocked',
+        status: audit.publish_ready ? 'implemented' : audit.ok ? 'needs_package_release' : 'blocked',
         requirement_ids: ['runtime-wasm', 'ios-android-sdk', 'sdk-depth', 'one-line-install'],
       },
       data: {
@@ -2139,7 +2139,7 @@ export function buildRouter() {
         surface: 'public-docs-sdk',
         journey: 'public-docs-sdk',
         readiness: {
-          status: validation.ok ? 'implemented' : 'needs_package_release',
+          status: 'needs_package_release',
           requirement_ids: ['runtime-wasm', 'ios-android-sdk', 'sdk-depth', 'one-line-install'],
         },
         data: {
@@ -2179,7 +2179,7 @@ export function buildRouter() {
         surface: 'governance-compliance-security',
         journey: 'governance-compliance-security',
         readiness: {
-          status: audit.ok ? 'needs_live_certification' : 'blocked',
+          status: audit.live_certification_verified ? 'implemented' : audit.ok ? 'needs_live_certification' : 'blocked',
           requirement_ids: ['compliance-certifications'],
         },
         data: {
@@ -2205,7 +2205,7 @@ export function buildRouter() {
         ],
       });
       attachEnvelopeHeaders(res, envelope);
-      res.status(audit.ok ? 200 : 503).json(envelope);
+      res.status(audit.live_certification_verified ? 200 : 503).json(envelope);
     } catch (e) {
       res.status(500).json({ ok: false, error: 'compliance_certification_packet_error', detail: String(e.message || e) });
     }
@@ -2262,7 +2262,7 @@ export function buildRouter() {
         surface: 'governance-compliance-security',
         journey: 'governance-compliance-security',
         readiness: {
-          status: validation.ok ? 'implemented' : 'needs_live_certification',
+          status: 'needs_live_certification',
           requirement_ids: ['compliance-certifications'],
         },
         data: {
@@ -2456,7 +2456,7 @@ export function buildRouter() {
         ],
       });
       attachEnvelopeHeaders(res, envelope);
-      res.status(audit.ok ? 200 : 503).json(envelope);
+      res.status(audit.public_claim_ready ? 200 : 503).json(envelope);
     } catch (e) {
       res.status(500).json({ ok: false, error: 'benchmark_evidence_error', detail: String(e.message || e) });
     }
@@ -4166,7 +4166,7 @@ export function buildRouter() {
         surface: 'public-docs-sdk',
         journey: 'public-docs-sdk',
         readiness: {
-          status: validation.ok ? 'implemented' : 'needs_external_partner',
+          status: 'needs_external_partner',
           requirement_ids: ['foundation-standardization'],
         },
         data: { validation, secret_values_included: false },
@@ -4272,7 +4272,7 @@ export function buildRouter() {
         surface: 'runtime-inference-connectors',
         journey: 'runtime-inference-connectors',
         readiness: {
-          status: validation.ok ? 'implemented' : 'needs_external_partner',
+          status: 'needs_external_partner',
           requirement_ids: ['ecosystem-runtime-adoption'],
         },
         data: { validation, secret_values_included: false },
@@ -17982,13 +17982,12 @@ export function buildRouter() {
   // GET /v1/capture/stream - Server-Sent Events live tail of captures.
   // W258-BE-2: was a 2 s poll-and-scan against all('observations') - broken
   // for the Postgres driver and a lambda OOM bomb under fan-out. Now uses
-  // the in-process publish/subscribe broker (src/capture-stream.js) wired
-  // through recordCapture(). Subscriber map is keyed on tenant so
-  // cross-tenant fan-out is structurally impossible.
-  // W645: because the broker is intentionally in-process, reconnects may land
-  // on another replica. The route now subscribes first, then emits a bounded
-  // durable replay filtered by ?since / ?last_seen before keeping the live tail
-  // open. This is a replay safety net, not a cross-instance pubsub claim.
+  // the capture broker (src/capture-stream.js) wired through recordCapture().
+  // The default broker is in-process; W1029 adds an opt-in file-backed pubsub
+  // bridge for multi-replica live fan-out. Tenant/namespace filtering still
+  // happens before delivery, so cross-tenant fan-out is structurally impossible.
+  // W645: the route subscribes first, then emits bounded durable replay filtered
+  // by ?since / ?last_seen before keeping the live tail open.
   //
   // Payload shape is the CLI/UI contract (W258-BE-6): capture_id /
   // captured_at / namespace / model / provider / latency_us / status /
@@ -25753,14 +25752,21 @@ res.json({
         });
       }
       let judge = null;
+      let hostedJudgePlan = null;
       try { judge = req.app && req.app.locals && req.app.locals._w762_judge; } catch (_) {} // deliberate: cleanup
+      if (typeof judge !== 'function') {
+        const { createHostedAgentSecurityJudge } = await import('./agent-security-judge.js');
+        const hosted = createHostedAgentSecurityJudge({ env: process.env });
+        hostedJudgePlan = hosted.plan;
+        if (hosted.ok && typeof hosted.judge === 'function') judge = hosted.judge;
+      }
       const env = await runAdversarialBakeoff({
         artifact_path: body.artifact_path.trim(),
         n_per_category,
         runOnArtifact,
         judge,
       });
-      return res.status(200).json({ ...env, bakeoff_version: ADVERSARIAL_BAKEOFF_VERSION });
+      return res.status(200).json({ ...env, bakeoff_version: ADVERSARIAL_BAKEOFF_VERSION, hosted_judge: hostedJudgePlan });
     } catch (e) {
       return res.status(500).json({ ok: false, error: 'redteam_bakeoff_error', detail: e && e.message });
     }

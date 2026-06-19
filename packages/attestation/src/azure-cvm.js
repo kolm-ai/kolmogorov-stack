@@ -19,11 +19,11 @@ import { parseTdxAttestation } from './tdx.js';
 export function parseAzureCvmAttestation(payload) {
   const env = normalizeEnvelope(payload);
   if (env.sevsnp_report) {
-    const inner = parseSevSnpAttestation(env.sevsnp_report);
+    const inner = parseSevSnpAttestation(env);
     return { ...inner, vendor: 'azure', claims: { ...inner.claims, technology: 'sev-snp', csp: 'azure' } };
   }
   if (env.tdx_quote) {
-    const inner = parseTdxAttestation(env.tdx_quote);
+    const inner = parseTdxAttestation(env);
     return { ...inner, vendor: 'azure', claims: { ...inner.claims, technology: 'tdx', csp: 'azure' } };
   }
   if (env.token) {

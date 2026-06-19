@@ -7,6 +7,7 @@ export const FORMAT_GOVERNANCE_SUBMISSION_SPEC = 'kolm-format-governance-submiss
 
 const SECRET_VALUE_RE = /\b(?:ks_[a-z0-9_]{12,}|sk-[a-z0-9_-]{12,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{20,})\b/i;
 const SHA256_RE = /^(?:sha256:)?[a-f0-9]{64}$/i;
+const FORMAT_GOVERNANCE_ARTIFACT_PATH_RE = /^reports\/format-governance\/[a-z0-9][a-z0-9._/-]*\.(?:md|json|jsonl|pdf|txt|sig)$/i;
 
 export const FORMAT_GOVERNANCE_BASELINE = [
   {
@@ -71,6 +72,21 @@ function validSha(value) {
   return typeof value === 'string' && SHA256_RE.test(value) && !/^(?:sha256:)?0{64}$/i.test(value);
 }
 
+function normalizeSha(value) {
+  return String(value || '').replace(/^sha256:/i, '').toLowerCase();
+}
+
+function sha256Buffer(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+function validArtifactPath(value) {
+  return typeof value === 'string'
+    && FORMAT_GOVERNANCE_ARTIFACT_PATH_RE.test(value)
+    && !value.includes('..')
+    && !value.includes('\\');
+}
+
 function parseJsonFile(root, rel) {
   const full = path.join(root, rel);
   if (!fs.existsSync(full)) return null;
@@ -108,9 +124,13 @@ export function formatGovernanceSubmissionTemplate() {
     submission_url: 'https://example.org/submissions/kolm',
     public_change_control_url: 'https://example.org/projects/kolm/governance',
     governance_record_url: 'https://example.org/projects/kolm',
+    spec_artifact_path: 'reports/format-governance/spec.md',
     spec_sha256: null,
+    conformance_suite_artifact_path: 'reports/format-governance/conformance-suite.json',
     conformance_suite_sha256: null,
+    maintainer_policy_artifact_path: 'reports/format-governance/maintainer-policy.md',
     maintainer_policy_sha256: null,
+    trademark_policy_artifact_path: 'reports/format-governance/trademark-policy.md',
     trademark_policy_sha256: null,
     compatibility_policy: 'semantic versioned .kolm format with verifier behavior pinned by fixtures',
     accepted_scope: 'REPLACE_WITH_ACCEPTED_SCOPE_BOUNDARIES',
@@ -134,13 +154,47 @@ export function validateFormatGovernanceSubmission(manifest = {}) {
   for (const field of ['spec_sha256', 'conformance_suite_sha256', 'maintainer_policy_sha256', 'trademark_policy_sha256']) {
     if (!validSha(manifest[field])) failures.push(`${field}:invalid`);
   }
+  for (const field of ['spec_artifact_path', 'conformance_suite_artifact_path', 'maintainer_policy_artifact_path', 'trademark_policy_artifact_path']) {
+    if (!validArtifactPath(manifest[field])) failures.push(`${field}:invalid`);
+  }
   if (!nonEmpty(manifest.compatibility_policy, 24)) failures.push('compatibility_policy:too_short');
   if (!nonEmpty(manifest.accepted_scope, 24)) failures.push('accepted_scope:too_short');
   return {
     spec: FORMAT_GOVERNANCE_SUBMISSION_SPEC,
     ok: failures.length === 0,
-    external_acceptance_verified: failures.length === 0,
+    external_acceptance_manifest_valid: failures.length === 0,
+    external_acceptance_verified: false,
     secret_values_included: false,
+    failures,
+  };
+}
+
+export function validateFormatGovernanceArtifacts(root, manifest = {}) {
+  const failures = [];
+  for (const [pathField, hashField] of [
+    ['spec_artifact_path', 'spec_sha256'],
+    ['conformance_suite_artifact_path', 'conformance_suite_sha256'],
+    ['maintainer_policy_artifact_path', 'maintainer_policy_sha256'],
+    ['trademark_policy_artifact_path', 'trademark_policy_sha256'],
+  ]) {
+    const rel = manifest[pathField];
+    if (!validArtifactPath(rel)) {
+      failures.push(`${pathField}:invalid`);
+      continue;
+    }
+    const full = path.join(root, rel);
+    if (!fs.existsSync(full)) {
+      failures.push(`${rel}:missing`);
+      continue;
+    }
+    const actual = sha256Buffer(fs.readFileSync(full));
+    if (validSha(manifest[hashField]) && actual !== normalizeSha(manifest[hashField])) {
+      failures.push(`${hashField}:mismatch`);
+    }
+  }
+  return {
+    ok: failures.length === 0,
+    artifact_count: 4,
     failures,
   };
 }
@@ -152,26 +206,34 @@ export function auditFormatGovernancePacket(options = {}) {
   const local_contract_ok = missing.length === 0;
   let submission_manifest = null;
   let submission_validation = null;
+  let artifact_validation = null;
   try {
     submission_manifest = parseJsonFile(root, 'reports/format-governance-submission.json')
       || parseJsonFile(root, 'docs/format-governance-external-submission.json');
     submission_validation = submission_manifest ? validateFormatGovernanceSubmission(submission_manifest) : null;
+    artifact_validation = submission_manifest && submission_validation && submission_validation.ok
+      ? validateFormatGovernanceArtifacts(root, submission_manifest)
+      : null;
   } catch (e) {
     submission_validation = {
       spec: FORMAT_GOVERNANCE_SUBMISSION_SPEC,
       ok: false,
+      external_acceptance_manifest_valid: false,
       external_acceptance_verified: false,
       secret_values_included: false,
       failures: [`format_governance_submission:invalid_json:${String(e.message || e)}`],
     };
+    artifact_validation = null;
   }
-  const external_acceptance_verified = Boolean(submission_validation && submission_validation.ok);
+  const external_acceptance_verified = Boolean(submission_validation && submission_validation.ok && artifact_validation && artifact_validation.ok);
   const blockers = [
     ...missing,
     ...(external_acceptance_verified ? [] : [
       ...(submission_validation ? submission_validation.failures : ['reports/format-governance-submission.json:missing']),
+      ...(artifact_validation ? artifact_validation.failures : []),
       'neutral_venue_acceptance_missing',
       'public_change_control_record_missing',
+      'retained_governance_artifacts_missing',
     ]),
   ];
 
@@ -183,6 +245,7 @@ export function auditFormatGovernancePacket(options = {}) {
     secret_values_included: false,
     external_submission_present: Boolean(submission_manifest),
     external_submission_validation: submission_validation,
+    external_submission_artifacts: artifact_validation,
     generated_at: new Date().toISOString(),
     counts: {
       required_files: files.length,

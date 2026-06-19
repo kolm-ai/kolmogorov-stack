@@ -24,6 +24,7 @@ OUT = os.environ.get("KOLM_32B_OUT", "data/kolm-reason-32b-adapter")
 MAX_STEPS = int(os.environ.get("KOLM_32B_STEPS", "400"))
 MAX_LEN = int(os.environ.get("KOLM_32B_MAXLEN", "1024"))
 N_ROWS = int(os.environ.get("KOLM_32B_ROWS", "6000"))
+PAIRS = os.environ.get("KOLM_32B_PAIRS", "").strip()
 os.makedirs(OUT, exist_ok=True)
 log = lambda m: print(f"[train-32b] {time.strftime('%H:%M:%S')} {m}", flush=True)
 
@@ -50,21 +51,52 @@ lora = LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05, bias="none", task_type
 model = get_peft_model(model, lora)
 model.print_trainable_parameters()
 
-log("streaming + formatting NuminaMath-CoT reasoning data...")
-ds = load_dataset("AI-MO/NuminaMath-CoT", split="train", streaming=True)
 rows = []
-for r in ds:
-    prob = (r.get("problem") or "").strip()
-    sol = (r.get("solution") or "").strip()
-    if not prob or not sol:
-        continue
-    text = tok.apply_chat_template(
-        [{"role": "user", "content": prob}, {"role": "assistant", "content": sol}],
-        tokenize=False)
-    rows.append(text)
-    if len(rows) >= N_ROWS:
-        break
-log(f"{len(rows)} reasoning examples")
+dataset_name = "AI-MO/NuminaMath-CoT"
+if PAIRS:
+    dataset_name = "kolm-distill-pairs"
+    log(f"loading + formatting Kolm distill pairs from {PAIRS}...")
+    with open(PAIRS, "r", encoding="utf-8") as fh:
+        for line in fh:
+            if not line.strip():
+                continue
+            try:
+                r = json.loads(line)
+            except Exception:
+                continue
+            prob = r.get("input", r.get("prompt"))
+            sol = r.get("teacher_output", r.get("response", r.get("output", r.get("seed_output"))))
+            if prob is None or sol is None:
+                continue
+            if not isinstance(prob, str):
+                prob = json.dumps(prob, ensure_ascii=False)
+            if not isinstance(sol, str):
+                sol = json.dumps(sol, ensure_ascii=False)
+            prob = prob.strip()
+            sol = sol.strip()
+            if not prob or not sol:
+                continue
+            text = tok.apply_chat_template(
+                [{"role": "user", "content": prob}, {"role": "assistant", "content": sol}],
+                tokenize=False)
+            rows.append(text)
+            if len(rows) >= N_ROWS:
+                break
+else:
+    log("streaming + formatting NuminaMath-CoT reasoning data...")
+    ds = load_dataset("AI-MO/NuminaMath-CoT", split="train", streaming=True)
+    for r in ds:
+        prob = (r.get("problem") or "").strip()
+        sol = (r.get("solution") or "").strip()
+        if not prob or not sol:
+            continue
+        text = tok.apply_chat_template(
+            [{"role": "user", "content": prob}, {"role": "assistant", "content": sol}],
+            tokenize=False)
+        rows.append(text)
+        if len(rows) >= N_ROWS:
+            break
+log(f"{len(rows)} reasoning examples from {dataset_name}")
 
 def tok_fn(batch):
     enc = tok(batch["text"], truncation=True, max_length=MAX_LEN, padding=False)
@@ -98,10 +130,10 @@ dur = time.time() - t0
 
 model.save_pretrained(OUT)
 tok.save_pretrained(OUT)
-summary = {"base": BASE, "task": "math-cot-reasoning", "dataset": "AI-MO/NuminaMath-CoT",
+summary = {"base": BASE, "task": "math-cot-reasoning", "dataset": dataset_name,
            "examples": len(rows), "steps": MAX_STEPS, "max_len": MAX_LEN,
            "train_runtime_s": round(dur, 1), "train_loss": getattr(result, "training_loss", None),
-           "out": OUT, "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
+           "out": OUT, "pairs_path": PAIRS or None, "finished_at": time.strftime("%Y-%m-%dT%H:%M:%S")}
 with open(os.path.join(OUT, "training-summary.json"), "w") as f:
     json.dump(summary, f, indent=2)
 log(f"DONE in {dur/60:.1f}min — adapter at {OUT}")

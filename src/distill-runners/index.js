@@ -36,6 +36,7 @@ export const GPU_CATALOG = Object.freeze([
   { id: 'L4',        vram_gb: 24,  family: 'ada',      modal: 'L4',        runpod: 'NVIDIA L4' },
   { id: 'A10G',      vram_gb: 24,  family: 'ampere',   modal: 'A10G',      runpod: 'NVIDIA A10G' },
   { id: 'RTX4090',   vram_gb: 24,  family: 'ada',      modal: null,        runpod: 'NVIDIA GeForce RTX 4090' },
+  { id: 'RTX5090',   vram_gb: 32,  family: 'blackwell',modal: null,        runpod: 'NVIDIA GeForce RTX 5090' },
   { id: 'L40S',      vram_gb: 48,  family: 'ada',      modal: 'L40S',      runpod: 'NVIDIA L40S' },
   { id: 'A100-40GB', vram_gb: 40,  family: 'ampere',   modal: 'A100-40GB', runpod: 'NVIDIA A100 40GB PCIe' },
   { id: 'A100-80GB', vram_gb: 80,  family: 'ampere',   modal: 'A100-80GB', runpod: 'NVIDIA A100 80GB PCIe' },
@@ -79,7 +80,7 @@ export function selectGpuForJob(recipe = {}, opts = {}) {
   const params_b = _isFiniteNumber(opts.params_b) ? opts.params_b
     : (_isFiniteNumber(recipe.student_params_b) ? recipe.student_params_b
       : (_isFiniteNumber(recipe.params_b) ? recipe.params_b : null));
-  const est = estimateDistillVramGb({
+  let est = estimateDistillVramGb({
     params_b,
     full_finetune: Boolean(recipe.full_finetune || opts.full_finetune),
     batch_size: recipe.batch_size || opts.batch_size || 1,
@@ -87,6 +88,12 @@ export function selectGpuForJob(recipe = {}, opts = {}) {
     teacher_resident: Boolean(recipe.teacher_resident || opts.teacher_resident),
     teacher_params_b: recipe.teacher_params_b || opts.teacher_params_b || 0,
   });
+  const trainLauncher = recipe.train_launcher || recipe.train_launch_plan?.kind || null;
+  if (trainLauncher === 'single_32b_unsloth') {
+    est = 26.4; // 4-bit base + Unsloth checkpointing on 32GB 5090-class cards.
+  } else if (trainLauncher === 'single_32b_hf') {
+    est = 30.5; // Fits only on cards with very little headroom; planner will prefer 48GB+.
+  }
 
   // Explicit override.
   if (opts.gpu) {
@@ -123,6 +130,16 @@ function _buildJobEnv({ recipe = {}, artifactOut = '/workspace/out', extraEnv = 
   if (recipe.student) env.KOLM_STUDENT = String(recipe.student);
   if (recipe.teacher) env.KOLM_TEACHER = String(recipe.teacher);
   if (recipe.mode) env.KOLM_DISTILL_MODE = String(recipe.mode);
+  const trainLaunchPlan = recipe.train_launch_plan && typeof recipe.train_launch_plan === 'object'
+    ? recipe.train_launch_plan
+    : null;
+  const trainLauncher = recipe.train_launcher || trainLaunchPlan?.kind || null;
+  if (trainLauncher) env.KOLM_TRAIN_LAUNCHER = String(trainLauncher);
+  if (trainLaunchPlan?.env && typeof trainLaunchPlan.env === 'object') {
+    for (const [k, v] of Object.entries(trainLaunchPlan.env)) {
+      if (/^KOLM_[A-Z0-9_]+$/.test(k) && v !== undefined && v !== null) env[k] = String(v);
+    }
+  }
   for (const [k, v] of Object.entries(extraEnv)) env[k] = String(v);
   return env;
 }
@@ -134,6 +151,7 @@ function _buildJobEnv({ recipe = {}, artifactOut = '/workspace/out', extraEnv = 
  */
 export function buildModalLaunchSpec({ recipe = {}, gpu, image = 'kolm/distill:latest', timeout_s = 3600, command, artifactOut = '/workspace/out', extraEnv = {} } = {}) {
   const sel = gpu && gpu.modal ? gpu : selectGpuForJob(recipe, { provider: 'modal', gpu: gpu && gpu.id }).gpu;
+  const selected = sel ? selectGpuForJob(recipe, { provider: 'modal', gpu: sel.id }) : { est_vram_gb: null };
   const modalGpu = sel && sel.modal ? sel.modal : 'A100-80GB';
   const cmd = Array.isArray(command) && command.length ? command
     : ['python', '-m', 'workers.distill.distill', '--recipe', recipe.id || 'inline', '--out-dir', artifactOut];
@@ -149,7 +167,7 @@ export function buildModalLaunchSpec({ recipe = {}, gpu, image = 'kolm/distill:l
       env: _buildJobEnv({ recipe, artifactOut, extraEnv }),
     },
     gpu_id: sel ? sel.id : null,
-    est_vram_gb: sel ? estimateDistillVramGb({ params_b: recipe.student_params_b || recipe.params_b }) : null,
+    est_vram_gb: selected.est_vram_gb,
   });
 }
 
@@ -160,6 +178,7 @@ export function buildModalLaunchSpec({ recipe = {}, gpu, image = 'kolm/distill:l
  */
 export function buildRunpodLaunchSpec({ recipe = {}, gpu, image = 'kolm/distill:latest', timeout_s = 3600, command, artifactOut = '/workspace/out', container_disk_gb = 50, volume_gb = 0, extraEnv = {} } = {}) {
   const sel = gpu && gpu.runpod ? gpu : selectGpuForJob(recipe, { provider: 'runpod', gpu: gpu && gpu.id }).gpu;
+  const selected = sel ? selectGpuForJob(recipe, { provider: 'runpod', gpu: sel.id }) : { est_vram_gb: null };
   const runpodGpu = sel && sel.runpod ? sel.runpod : 'NVIDIA A100 80GB PCIe';
   const cmd = Array.isArray(command) && command.length ? command
     : ['python', '-m', 'workers.distill.distill', '--recipe', recipe.id || 'inline', '--out-dir', artifactOut];
@@ -176,7 +195,7 @@ export function buildRunpodLaunchSpec({ recipe = {}, gpu, image = 'kolm/distill:
     timeout_s: Math.max(60, Math.floor(timeout_s)),
     env: _buildJobEnv({ recipe, artifactOut, extraEnv }),
     gpu_id: sel ? sel.id : null,
-    est_vram_gb: sel ? estimateDistillVramGb({ params_b: recipe.student_params_b || recipe.params_b }) : null,
+    est_vram_gb: selected.est_vram_gb,
   });
 }
 

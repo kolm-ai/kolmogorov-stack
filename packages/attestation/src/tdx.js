@@ -50,7 +50,8 @@ const BODY = Object.freeze({
 });
 
 export function parseTdxAttestation(payload) {
-  const buf = toBuffer(payload);
+  const normalized = normalizePayload(payload);
+  const buf = normalized.quote;
   if (buf.length < TDX_MIN_QUOTE_LEN) {
     throw new Error(`tdx quote too short: ${buf.length} < ${TDX_MIN_QUOTE_LEN}`);
   }
@@ -102,7 +103,7 @@ export function parseTdxAttestation(payload) {
       evidence_tier: 'shape_only',
       verification_note: 'Intel PCS quote-signature verification is not performed by the parser',
     },
-    signing_cert_chain: null,
+    signing_cert_chain: normalized.signing_cert_chain,
   };
 }
 
@@ -129,10 +130,29 @@ function toBuffer(payload) {
   if (Buffer.isBuffer(payload)) return assertSize(payload);
   if (payload instanceof Uint8Array) return assertSize(Buffer.from(payload));
   if (typeof payload === 'string') return decodeString(payload);
-  if (payload && typeof payload === 'object' && payload.quote) {
-    return toBuffer(payload.quote);
-  }
   throw new Error('unsupported tdx payload type');
+}
+
+function normalizePayload(payload) {
+  if (payload && typeof payload === 'object' && !Buffer.isBuffer(payload) && !(payload instanceof Uint8Array)) {
+    return {
+      quote: toBuffer(payload.quote || payload.tdx_quote || payload.attestation_quote),
+      signing_cert_chain: certChainFrom(payload),
+    };
+  }
+  return { quote: toBuffer(payload), signing_cert_chain: null };
+}
+
+function certChainFrom(obj) {
+  if (Array.isArray(obj.signing_cert_chain)) return obj.signing_cert_chain.slice();
+  if (Array.isArray(obj.cert_chain)) return obj.cert_chain.slice();
+  const chain = [
+    obj.pck_cert,
+    obj.pck_signing_cert,
+    obj.pcs_intermediate_cert,
+    obj.intel_root_cert,
+  ].filter(Boolean);
+  return chain.length ? chain : null;
 }
 
 function decodeString(value) {

@@ -25,13 +25,26 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 import { buildPayload } from '../src/artifact.js';
-import { verifyDsseEnvelope, SLSA_PROVENANCE_PREDICATE_TYPE, INTOTO_STATEMENT_TYPE } from '../src/intoto-slsa.js';
+import {
+  verifyDsseEnvelope,
+  SLSA_PROVENANCE_PREDICATE_TYPE,
+  INTOTO_STATEMENT_TYPE,
+  INTOTO_SLSA_SPEC,
+  MODEL_ARTIFACT_SLSA_PROFILE,
+} from '../src/intoto-slsa.js';
 import {
   verifyInTotoBundle,
   toOmsArtifactManifest,
   OMS_SIGNATURE_PREDICATE_TYPE,
 } from '../src/intoto-receipt.js';
 import { generateKeyPair, keyFingerprint } from '../src/ed25519.js';
+import { SLSA_PROVENANCE_SPEC } from '../src/slsa-provenance.js';
+import {
+  SLSA_PROFILE_IDS,
+  getSlsaProfile,
+  resolveSlsaProfileForSurface,
+  validateSlsaProfileRegistry,
+} from '../src/slsa-profile-registry.js';
 
 // A per-test temp HOME so loadOrCreateDefaultSigner mints a fresh stable key at
 // ~/.kolm/signing-key.pem without touching the developer's real key.
@@ -310,6 +323,32 @@ test('toOmsArtifactManifest: throws when no member has a valid sha256 (never sig
   assert.throws(() => toOmsArtifactManifest('not-an-array', signer), /must be an array/);
 });
 
+test('W1023 SLSA profile registry makes model artifacts canonical and ASR reports scoped', () => {
+  const registry = validateSlsaProfileRegistry();
+  assert.equal(registry.ok, true, registry.failures.join(', '));
+  assert.equal(registry.profile_count, 2);
+
+  const modelProfile = getSlsaProfile(SLSA_PROFILE_IDS.MODEL_ARTIFACT);
+  const asrProfile = getSlsaProfile(SLSA_PROFILE_IDS.ASR_REPORT);
+  assert.deepEqual(MODEL_ARTIFACT_SLSA_PROFILE, modelProfile);
+  assert.equal(INTOTO_SLSA_SPEC.profile_id, modelProfile.id);
+  assert.equal(INTOTO_SLSA_SPEC.owner_module, 'src/intoto-slsa.js');
+  assert.equal(INTOTO_SLSA_SPEC.build_type, 'https://kolm.ai/compile/v1');
+  assert.ok(modelProfile.canonical_for.some((row) => /model-signing/i.test(row)));
+
+  assert.equal(SLSA_PROVENANCE_SPEC.profile_id, asrProfile.id);
+  assert.equal(SLSA_PROVENANCE_SPEC.owner_module, 'src/slsa-provenance.js');
+  assert.equal(SLSA_PROVENANCE_SPEC.build_type, 'https://kolm.ai/asr-audit/v1');
+  assert.ok(asrProfile.canonical_for.some((row) => /audit report/i.test(row)));
+
+  assert.equal(resolveSlsaProfileForSurface('.kolm model-signing artifact').id, modelProfile.id);
+  assert.equal(resolveSlsaProfileForSurface('ASR audit report').id, asrProfile.id);
+  assert.equal(modelProfile.predicate_type, asrProfile.predicate_type, 'both profiles speak SLSA v1');
+  assert.notEqual(modelProfile.build_type, asrProfile.build_type, 'product surfaces stay unambiguous');
+  assert.equal(modelProfile.slsa_build_l3_claim_allowed, false);
+  assert.equal(asrProfile.slsa_build_l3_claim_allowed, false);
+});
+
 test('W615/W638 closure: backend spec and depth gate include model-signing sidecar digests', () => {
   const root = process.cwd();
   const spec = fs.readFileSync(path.join(root, 'docs', 'STACK-TECH-SPEC-2026-06-15.md'), 'utf8');
@@ -318,7 +357,9 @@ test('W615/W638 closure: backend spec and depth gate include model-signing sidec
   assert.match(spec, /CLOSED W615: write a build-time OMS\/SLSA DSSE sidecar into the \.kolm container/);
   assert.match(spec, /CLOSED W615: add an OMS file-manifest bundle over the artifact's actual weight members/);
   assert.match(spec, /CLOSED W638: add BLAKE2b digests to SLSA\/OMS subjects and manifests/);
+  assert.match(spec, /CLOSED W1023: canonical SLSA profile registry/);
   assert.doesNotMatch(spec, /SHA-256 only; OMS permits BLAKE2b/);
+  assert.doesNotMatch(spec, /which one is canonical' ambiguous/);
   assert.match(spec, /provenance\.intoto\.dsse\.json/);
   assert.match(spec, /model\.sig\.bundle/);
   assert.match(pkg.scripts['verify:model-signing'], /tests\/model-signing-sidecars\.test\.js/);

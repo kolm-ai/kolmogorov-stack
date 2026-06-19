@@ -99,6 +99,7 @@ import {
 // this as ML#7. The wrapper below preserves the (rows, splitSeed:number)
 // signature this file calls with while delegating the actual logic.
 import { splitSeeds as canonicalSplitSeeds } from '../../src/seeds.js';
+import { buildTrainLaunchPlan } from '../../src/distill-recipe-loader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = path.dirname(__filename);
@@ -389,6 +390,9 @@ let mlReport = null;
 let trainerSummary = null;
 let portableExport = null;
 let rejectionRan = false;   // C4 - true ONLY when the real best-of-N trainer ran
+let trainLaunchPlan = null;
+let trainLaunchPlanPath = null;
+let trainLaunchPlanHash = null;
 const trainPreset = String(args['train-preset'] || process.env.KOLM_TRAIN_PRESET || spec?.train?.preset || '').trim().toLowerCase() || null;
 const trainMethod = String(args['train-method'] || process.env.KOLM_TRAIN_METHOD || spec?.train?.method || (trainPreset === 'qdora' ? 'qlora' : '')).trim().toLowerCase() || null;
 if (trainPreset && !new Set(['qdora']).has(trainPreset)) {
@@ -399,9 +403,28 @@ if (trainMethod && !new Set(['qlora', 'lora', 'full']).has(trainMethod)) {
   console.error(`[distill-worker] train method must be one of [qlora, lora, full]; got ${JSON.stringify(trainMethod)}`);
   process.exit(2);
 }
+try {
+  trainLaunchPlan = buildTrainLaunchPlan(spec, {
+    pairsPath,
+    outDir,
+    studentOut: path.join(outDir, 'student'),
+    studentHoldoutPath,
+    trainMethod,
+    trainPreset,
+    dryRun: truthyArg(args['train-launch-dry-run']) || spec?.train?.launch_dry_run === true,
+  });
+  trainLaunchPlanPath = path.join(outDir, 'train-launch-plan.json');
+  writeJson(trainLaunchPlanPath, trainLaunchPlan);
+  trainLaunchPlanHash = fileSha256(trainLaunchPlanPath);
+} catch (e) {
+  fail(`invalid train launch plan: ${e && e.message ? e.message : e}`);
+}
 if (mode === 'full') {
   const ready = await doctor();
-  if (!ready.python_ok || !ready.torch_ok) {
+  const dryRunLargeLauncher = trainLaunchPlan
+    && trainLaunchPlan.kind !== 'local_worker'
+    && trainLaunchPlan.dry_run;
+  if (!ready.python_ok || (!ready.torch_ok && !dryRunLargeLauncher)) {
     console.error('[distill-worker] python+torch required for --mode=full; falling back to collect-only.');
     console.error('  install hint: pip install torch transformers peft bitsandbytes accelerate datasets sentencepiece');
   } else if (distillMethodArg === 'rejection_sampling') {
@@ -483,7 +506,15 @@ if (mode === 'full') {
     }
   } else {
     const pyScript = path.join(__dirname, 'scripts', 'train_lora.py');
-    if (!fs.existsSync(pyScript)) {
+    if (trainLaunchPlan && trainLaunchPlan.kind !== 'local_worker') {
+      const launched = runTrainLaunchPlan({
+        plan: trainLaunchPlan,
+        outDir,
+        pairsPath,
+      });
+      mlRun = launched.mlRun;
+      mlReport = launched.mlReport;
+    } else if (!fs.existsSync(pyScript)) {
       console.error(`[distill-worker] expected scripts/train_lora.py; not found.`);
     } else {
       console.log('[distill-worker] invoking Python LoRA trainer (this may take a while)...');
@@ -622,6 +653,9 @@ const manifest = {
   trainer_summary: trainerSummary,
   train_preset: trainPreset,
   train_method: trainMethod,
+  train_launch_plan: trainLaunchPlan,
+  train_launch_plan_path: trainLaunchPlanPath ? path.relative(outDir, trainLaunchPlanPath) : null,
+  train_launch_plan_hash: trainLaunchPlanHash,
   training_pair_source: trainFromSeeds ? 'seed_output' : 'teacher',
   portable_export: portableExport,
   portable_weight_path: portableExport && portableExport.ok && portableExport.output_path
@@ -778,18 +812,19 @@ function writeJson(p, obj) {
 }
 
 async function doctor() {
-  const python = spawnSync('python3', ['--version'], { encoding: 'utf8' });
+  const py = pythonBin();
+  const python = spawnSync(py, ['--version'], { encoding: 'utf8' });
   const python_ok = python.status === 0;
   let torch_ok = false;
   let torch_version = null;
   if (python_ok) {
-    const t = spawnSync('python3', ['-c', 'import torch; print(torch.__version__)'], { encoding: 'utf8' });
+    const t = spawnSync(py, ['-c', 'import torch; print(torch.__version__)'], { encoding: 'utf8' });
     torch_ok = t.status === 0;
     torch_version = torch_ok ? (t.stdout || '').trim() : null;
   }
   let transformers_ok = false;
   if (python_ok) {
-    const tr = spawnSync('python3', ['-c', 'import transformers; print(transformers.__version__)'], { encoding: 'utf8' });
+    const tr = spawnSync(py, ['-c', 'import transformers; print(transformers.__version__)'], { encoding: 'utf8' });
     transformers_ok = tr.status === 0;
   }
   const node = process.versions.node;
@@ -815,6 +850,134 @@ function truthyArg(v) {
   if (v === true) return true;
   const s = String(v || '').trim().toLowerCase();
   return ['1', 'true', 'yes', 'on'].includes(s);
+}
+
+function repoPath(rel) {
+  return path.isAbsolute(rel) ? rel : path.join(ROOT, rel);
+}
+
+function writeDistillTrainJsonlFromPairs(pairsPath, trainJsonl) {
+  const rows = [];
+  const text = fs.existsSync(pairsPath) ? fs.readFileSync(pairsPath, 'utf8') : '';
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    let row;
+    try { row = JSON.parse(line); } catch (_) { continue; }
+    const promptRaw = row.input ?? row.prompt;
+    const responseRaw = row.teacher_output ?? row.response ?? row.output ?? row.seed_output;
+    if (promptRaw === undefined || responseRaw === undefined) continue;
+    const prompt = typeof promptRaw === 'string' ? promptRaw : JSON.stringify(promptRaw);
+    const response = typeof responseRaw === 'string' ? responseRaw : JSON.stringify(responseRaw);
+    rows.push(JSON.stringify({
+      id: row.id || row.event_id || `pair_${rows.length + 1}`,
+      prompt,
+      response,
+    }));
+  }
+  fs.mkdirSync(path.dirname(trainJsonl), { recursive: true });
+  fs.writeFileSync(trainJsonl, rows.join('\n') + (rows.length ? '\n' : ''), 'utf8');
+  return {
+    path: trainJsonl,
+    rel_path: path.relative(path.dirname(trainJsonl), trainJsonl),
+    row_count: rows.length,
+    hash: fileSha256(trainJsonl),
+  };
+}
+
+function runTrainLaunchPlan({ plan, outDir, pairsPath }) {
+  const startedAt = new Date().toISOString();
+  const scriptPath = repoPath(plan.script);
+  const base = {
+    trainer: path.basename(plan.script || ''),
+    train_launcher: plan.kind,
+    train_launch_plan_version: plan.version || null,
+    execution: null,
+    exit_code: null,
+    signal: null,
+    started_at: startedAt,
+    finished_at: null,
+  };
+
+  if (!fs.existsSync(scriptPath)) {
+    return {
+      mlRun: false,
+      mlReport: {
+        ...base,
+        execution: 'not_started',
+        error: 'train_launcher_script_missing',
+        script: plan.script,
+        finished_at: new Date().toISOString(),
+      },
+    };
+  }
+
+  if (plan.kind === 'multinode_fsdp') {
+    let trainJsonlReport = null;
+    if (plan.consumes_training_pairs && plan.train_jsonl) {
+      trainJsonlReport = writeDistillTrainJsonlFromPairs(pairsPath, path.resolve(plan.train_jsonl));
+    }
+    if (plan.required_args_missing?.length && !plan.dry_run) {
+      return {
+        mlRun: false,
+        mlReport: {
+          ...base,
+          execution: 'not_started',
+          error: 'train_launcher_required_args_missing',
+          required_args_missing: plan.required_args_missing,
+          train_jsonl: trainJsonlReport,
+          finished_at: new Date().toISOString(),
+        },
+      };
+    }
+    console.log(`[distill-worker] invoking ${plan.kind} launcher${plan.dry_run ? ' dry-run' : ''}...`);
+    const res = spawnSync(pythonBin(), [scriptPath, ...plan.args], {
+      stdio: 'inherit',
+      env: { ...process.env, ...(plan.env || {}) },
+    });
+    return {
+      mlRun: res.status === 0 && !plan.dry_run,
+      mlReport: {
+        ...base,
+        execution: plan.dry_run ? 'dry_run' : 'executed',
+        exit_code: res.status,
+        signal: res.signal || null,
+        train_jsonl: trainJsonlReport,
+        distributed: plan.distributed || null,
+        finished_at: new Date().toISOString(),
+      },
+    };
+  }
+
+  if (plan.dry_run) {
+    return {
+      mlRun: false,
+      mlReport: {
+        ...base,
+        execution: 'dry_run_planned',
+        reason: 'single_32b_launcher_has_no_gpu_free_dry_run',
+        finished_at: new Date().toISOString(),
+      },
+    };
+  }
+
+  console.log(`[distill-worker] invoking ${plan.kind} launcher (this may take a while)...`);
+  const env = { ...process.env, ...(plan.env || {}) };
+  if (!env.KOLM_32B_OUT) env.KOLM_32B_OUT = path.join(outDir, 'student');
+  const res = spawnSync(pythonBin(), [scriptPath, ...(plan.args || [])], {
+    stdio: 'inherit',
+    env,
+  });
+  return {
+    mlRun: res.status === 0,
+    mlReport: {
+      ...base,
+      execution: 'executed',
+      exit_code: res.status,
+      signal: res.signal || null,
+      pair_env: plan.pair_env || null,
+      finished_at: new Date().toISOString(),
+    },
+  };
 }
 
 function tailText(s, n = 2048) {

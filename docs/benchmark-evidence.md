@@ -45,10 +45,21 @@ The provider matrix must also include:
 - one non-duplicated row per required lane
 - `reports/benchmarks/*.json` or `reports/benchmarks/*.jsonl` report paths
 - SHA-256 references for every hash field
+- a `publication` packet with HTTPS leaderboard URL, dataset manifest path,
+  signed raw-output bundle path, hardware/provider manifest path, harness
+  configuration manifest path, statistical analysis path, contamination report
+  path, leaderboard stability path, reproducer command, matching reproducer
+  command SHA-256, and freshness expiration
+
+The audit only marks `public_claim_ready` when the provider matrix validates and
+the lane report paths plus every publication packet file exist under
+`reports/benchmarks/`. A complete-looking lane table is not enough to promote
+the `benchmarking-infra` gate.
 
 ```bash
 node scripts/benchmark-evidence.mjs --template
 node scripts/benchmark-evidence.mjs --validate reports/benchmarks/provider-matrix.json
+node scripts/bench-compare.mjs --matrix reports/benchmarks/provider-matrix.json --public
 ```
 
 ## Research Baseline
@@ -65,10 +76,27 @@ node scripts/benchmark-evidence.mjs --validate reports/benchmarks/provider-matri
 - OpenTelemetry GenAI semantic conventions are the interoperability target for
   trace and metric fields:
   https://opentelemetry.io/docs/specs/semconv/gen-ai/
+- LiveBench is the contamination/freshness baseline: public benchmark packets
+  must include task provenance, freshness windows, and objective scoring where
+  possible:
+  https://arxiv.org/abs/2406.19314
+- Chatbot Arena is the pairwise-preference statistics baseline: leaderboards
+  need uncertainty and agreement reporting, not only a single rank:
+  https://arxiv.org/abs/2403.04132
+- Leaderboard stability work shows close rankings can be fragile; public claims
+  need robustness and manipulation/stability analysis:
+  https://arxiv.org/abs/2605.15761
+- Harness-Bench shows agent benchmark results belong to a model plus harness
+  configuration, so public rows must identify tool/runtime constraints and
+  recovery behavior:
+  https://arxiv.org/abs/2605.27922
 
 ## Next External Proof
 
 Generate `reports/benchmarks/provider-matrix.json` and the companion raw output
-files from a locked run. When those files contain every required lane and field,
-the `benchmarking-infra` requirement can move from
+files from a locked run. Include `dataset-manifest.json`,
+`raw-output-bundle.json`, `hardware-providers.json`, `harness-configs.json`,
+`statistical-analysis.json`, `contamination-report.json`, and
+`leaderboard-stability.json`. When those files contain every required lane and
+field, the `benchmarking-infra` requirement can move from
 `needs_public_benchmark_data` to `implemented`.

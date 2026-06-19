@@ -53,6 +53,7 @@ const SUPPORTED_WEIGHT_ARTIFACT_FORMATS = new Set([
   'gguf',
   'mlc',
   'onnx',
+  'pte',
   'wasm',
   'safetensors',
   'tokenizer',
@@ -66,6 +67,7 @@ const SUPPORTED_WEIGHT_RUNTIME_TARGETS = new Set([
   'webllm',
   'onnxruntime-node',
   'onnxruntime-web',
+  'executorch',
   'webgpu',
   'native',
   'mlc',
@@ -103,6 +105,7 @@ function inferArtifactFormat(file) {
   if (explicit && SUPPORTED_WEIGHT_ARTIFACT_FORMATS.has(explicit)) return explicit;
   if (path.endsWith('.gguf')) return 'gguf';
   if (path.endsWith('.onnx')) return 'onnx';
+  if (path.endsWith('.pte')) return 'pte';
   if (path.endsWith('.wasm')) return 'wasm';
   if (path.endsWith('.safetensors')) return 'safetensors';
   if (path.endsWith('.json')) {
@@ -116,6 +119,7 @@ function inferArtifactFormat(file) {
 function runtimeTargetsForFormat(format) {
   if (format === 'gguf') return ['llama.cpp', 'llama.cpp-webgpu'];
   if (format === 'onnx') return ['onnxruntime-node', 'onnxruntime-web'];
+  if (format === 'pte') return ['executorch'];
   if (format === 'mlc') return ['webllm', 'mlc'];
   if (format === 'wasm') return ['webgpu'];
   if (format === 'native') return ['native'];

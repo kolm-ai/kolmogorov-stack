@@ -96,8 +96,8 @@ test('W951 package wiring makes the OTEL matrix a depth and control-file gate', 
     pkg.scripts['verify:otel-matrix'],
     'node scripts/build-otel-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave951-otel-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:bench-harness-matrix && npm run build:otel-matrix && npm run build:readiness-proof-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['build:control-files'], /build:bench-harness-matrix && npm run build:otel-matrix && npm run build:readiness-proof-matrix && npm run build:frontier-delta-freshness && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:frontier-delta-freshness && npm run verify:file-ledger/);
   assert.match(pkg.scripts['verify:depth'], /verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:meta-routes/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');

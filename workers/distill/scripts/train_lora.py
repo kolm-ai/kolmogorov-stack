@@ -64,6 +64,9 @@ UNSLOTH_FAMILIES = (
     "gpt-oss",
 )
 
+UNSLOTH_NATIVE_LORA_VARIANTS = ("lora", "rslora", "dora", "qdora")
+UNSLOTH_NATIVE_LORA_INITS = ("default", "gaussian", "pissa", "pissa_niter_16", "olora")
+
 _MODEL_ALIASES = {
     "qwen2.5-0.5b": "Qwen/Qwen2.5-0.5B-Instruct",
     "qwen2.5-0.5b-instruct": "Qwen/Qwen2.5-0.5B-Instruct",
@@ -322,14 +325,10 @@ def _backend_hf_only_features(args, lora_variant, lora_init, trainer_optim, pack
         features.append("curriculum")
     if args.importance_weights:
         features.append("importance_weights")
-    if lora_variant != "lora":
+    if lora_variant not in UNSLOTH_NATIVE_LORA_VARIANTS:
         features.append(f"lora_variant:{lora_variant}")
-    if lora_init != "default":
+    if lora_init not in UNSLOTH_NATIVE_LORA_INITS:
         features.append(f"lora_init:{lora_init}")
-    if trainer_optim.startswith("galore"):
-        features.append(f"optim:{trainer_optim}")
-    if packing_enabled:
-        features.append("packing")
     return features
 
 
@@ -351,11 +350,24 @@ def _backend_plan_for_args(args, lora_variant, lora_init, trainer_optim, packing
         "unsloth_importable": _unsloth_importable(),
         "unsloth_supported": _is_unsloth_supported(args.student_base),
         "unsloth_families": list(UNSLOTH_FAMILIES),
+        "unsloth_native_lora_variants": list(UNSLOTH_NATIVE_LORA_VARIANTS),
+        "unsloth_native_lora_inits": list(UNSLOTH_NATIVE_LORA_INITS),
+        "unsloth_native_feature_parity": {
+            "rslora": True,
+            "dora": True,
+            "qdora": True,
+            "pissa_olora_init": True,
+            "galore_training_args": True,
+            "packing": True,
+            "loraplus_lora_fa": False,
+        },
         "hf_only_features": hf_only,
     }
 
 
-def _exec_unsloth_backend(args, backend_reason, neftune_alpha, trainer_optim):
+def _exec_unsloth_backend(args, backend_reason, neftune_alpha, trainer_optim,
+                          lora_variant, lora_init, packing_enabled,
+                          galore_args, galore_targets):
     script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "train_lora_unsloth.py")
     if not os.path.exists(script):
         sys.stderr.write(f"[train_lora] expected Unsloth backend mirror not found: {script}\n")
@@ -378,7 +390,17 @@ def _exec_unsloth_backend(args, backend_reason, neftune_alpha, trainer_optim):
         "--warmup-ratio", str(args.warmup_ratio),
         "--save-total-limit", str(args.save_total_limit),
         "--backend-reason", backend_reason,
+        "--lora-variant", str(lora_variant),
+        "--lora-init", str(lora_init),
     ]
+    if packing_enabled:
+        argv.append("--packing")
+    if trainer_optim:
+        argv.extend(["--optim", str(trainer_optim)])
+    if galore_args:
+        argv.extend(["--galore-args", str(galore_args)])
+    if galore_targets:
+        argv.extend(["--galore-targets", str(galore_targets)])
     if args.resume_from_checkpoint:
         argv.extend(["--resume-from-checkpoint", args.resume_from_checkpoint])
     if args.save_steps and args.save_steps > 0:
@@ -391,8 +413,6 @@ def _exec_unsloth_backend(args, backend_reason, neftune_alpha, trainer_optim):
         argv.extend(["--holdout", args.holdout])
     if args.qlora:
         argv.append("--qlora")
-    if trainer_optim and trainer_optim != "adamw_torch":
-        argv.extend(["--optim", trainer_optim])
     if neftune_alpha:
         argv.extend(["--neftune-noise-alpha", str(neftune_alpha)])
     os.execv(sys.executable, argv)
@@ -755,7 +775,17 @@ def main():
     if args.student_base != requested_student_base:
         print(f"[train_lora] resolved student base '{requested_student_base}' -> '{args.student_base}'")
     if backend_plan["selected"] == "unsloth":
-        _exec_unsloth_backend(args, backend_plan["reason"], neftune_alpha, trainer_optim)
+        _exec_unsloth_backend(
+            args,
+            backend_plan["reason"],
+            neftune_alpha,
+            trainer_optim,
+            lora_variant,
+            lora_init,
+            packing_enabled,
+            galore_args,
+            galore_targets,
+        )
 
     # Hard dependency check — give the operator a single-line install hint
     # instead of a Python traceback.

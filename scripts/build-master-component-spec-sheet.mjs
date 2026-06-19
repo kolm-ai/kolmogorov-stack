@@ -8,6 +8,7 @@ const ATOMIC = path.join(ROOT, 'docs', 'backend-atomic-component-deep-dive-2026-
 const SOTA = path.join(ROOT, 'docs', 'whole-stack-sota-deep-dive-2026-06-17.json');
 const READINESS = path.join(ROOT, 'docs', 'product-sota-readiness.json');
 const READINESS_PROOF = path.join(ROOT, 'docs', 'internal', 'readiness-proof-matrix.json');
+const FRONTIER_FRESHNESS = path.join(ROOT, 'docs', 'internal', 'frontier-delta-freshness.json');
 const OUT_JSON = path.join(ROOT, 'docs', 'master-component-spec-sheet-2026-06-17.json');
 const OUT_MD = path.join(ROOT, 'docs', 'master-component-spec-sheet-2026-06-17.md');
 
@@ -15,6 +16,11 @@ const args = new Set(process.argv.slice(2));
 
 function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+function readJsonIfExists(file, fallback = {}) {
+  if (!fs.existsSync(file)) return fallback;
+  return readJson(file);
 }
 
 function pct(n, d) {
@@ -132,6 +138,7 @@ function build() {
   const sota = readJson(SOTA);
   const readiness = readJson(READINESS);
   const readinessProof = readJson(READINESS_PROOF);
+  const frontierFreshness = readJsonIfExists(FRONTIER_FRESHNESS, {});
   const readinessCounts = readReadinessCounts(readiness);
   const readinessProofSummary = readinessProof.summary || {};
   const readinessProofHillClimb = readinessProof.over_100_hill_climb || null;
@@ -229,6 +236,7 @@ function build() {
       stack_sota_ledger: normalize(path.relative(ROOT, SOTA)),
       readiness_ledger: normalize(path.relative(ROOT, READINESS)),
       readiness_proof_matrix: normalize(path.relative(ROOT, READINESS_PROOF)),
+      frontier_delta_freshness: normalize(path.relative(ROOT, FRONTIER_FRESHNESS)),
     },
     perfection_model: {
       local_engineering_score: localEngineeringScore,
@@ -240,6 +248,7 @@ function build() {
         'Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.',
         'Claimable product readiness is separate from local proof coverage: package releases, public benchmarks, live certification, and external partner adoption must not be marked shipped without real external evidence.',
         'Scores above 100 are permitted only for non-claim hill-climb surplus, such as extra local closeout evidence beyond the minimum. They do not convert external gates into shipped claims.',
+        'Historical raw frontier-delta findings are retained for research traceability, but the current optimization target is this generated sheet plus the stack SOTA ledger and frontier freshness audit.',
       ],
       weights: {
         local_engineering_score: {
@@ -285,6 +294,12 @@ function build() {
           safety_guards: readinessProof.language_fit?.safety_guards || {},
         },
       },
+      frontier_delta_freshness: {
+        authority_status: frontierFreshness.authority?.status || 'not_generated',
+        historical_raw_severe_gap_count: frontierFreshness.summary?.historical_raw_severe_gap_count || 0,
+        superseded_severe_categories: frontierFreshness.summary?.superseded_severe_categories || 0,
+        current_severe_category_count: frontierFreshness.summary?.current_severe_category_count || 0,
+      },
       components_by_domain: summarizeBy(components, 'domain'),
       components_by_surface: summarizeBy(components, 'surface'),
       top_gap_count: topGaps.length,
@@ -307,7 +322,7 @@ function build() {
   const md = [
     '# Master Component Spec Sheet',
     '',
-    `Generated ${UPDATED_AT}. Source of truth: \`${doc.sources.atomic_ledger}\`, \`${doc.sources.stack_sota_ledger}\`, and \`${doc.sources.readiness_ledger}\`.`,
+    `Generated ${UPDATED_AT}. Source of truth: \`${doc.sources.atomic_ledger}\`, \`${doc.sources.stack_sota_ledger}\`, \`${doc.sources.readiness_ledger}\`, and \`${doc.sources.frontier_delta_freshness}\`.`,
     '',
     'This is the optimization sheet for the deep-dive workflow. The JSON companion contains one row per backend component; this Markdown file carries the operating summary and the highest-priority gaps.',
     '',
@@ -325,6 +340,7 @@ function build() {
     `- Language fit: **${readinessProof.language_fit?.architecture || 'unknown'}**`,
     `- SOTA categories still carrying critical work: **${criticalOpen}/${categoryCount}**`,
     `- SOTA categories still carrying major work: **${majorOpen}/${categoryCount}**`,
+    `- Frontier delta authority: **${frontierFreshness.authority?.status || 'not_generated'}** (${frontierFreshness.summary?.superseded_severe_categories || 0} historical severe categories superseded; ${frontierFreshness.summary?.current_severe_category_count || 0} current severe categories)`,
     '',
     'Interpretation: local code/spec discipline and readiness proof coverage are now complete, but claimable frontier/product perfection remains lower because partner adoption, package release, public benchmark data, certification, and SOTA category gaps are still external or frontier-open. Above-100 scoring is limited to local proof surplus and never upgrades an external gate into a shipped claim.',
     '',

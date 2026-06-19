@@ -6,18 +6,20 @@
     "atomic_ledger": "docs/backend-atomic-component-deep-dive-2026-06-17.json",
     "stack_sota_ledger": "docs/whole-stack-sota-deep-dive-2026-06-17.json",
     "readiness_ledger": "docs/product-sota-readiness.json",
-    "readiness_proof_matrix": "docs/internal/readiness-proof-matrix.json"
+    "readiness_proof_matrix": "docs/internal/readiness-proof-matrix.json",
+    "frontier_delta_freshness": "docs/internal/frontier-delta-freshness.json"
   },
   "perfection_model": {
     "local_engineering_score": 100,
     "frontier_product_score": 97.2,
-    "readiness_proof_surplus_score": 104.3,
+    "readiness_proof_surplus_score": 105.8,
     "readiness_proof_surplus_ceiling": 110,
     "score_notes": [
       "Local engineering score weights atomic inventory completeness, direct test coverage, high-priority test coverage, and local readiness proof coverage.",
       "Frontier product score adds unresolved critical/major SOTA categories, so it stays lower until external/product/frontier gaps are actually closed.",
       "Claimable product readiness is separate from local proof coverage: package releases, public benchmarks, live certification, and external partner adoption must not be marked shipped without real external evidence.",
-      "Scores above 100 are permitted only for non-claim hill-climb surplus, such as extra local closeout evidence beyond the minimum. They do not convert external gates into shipped claims."
+      "Scores above 100 are permitted only for non-claim hill-climb surplus, such as extra local closeout evidence beyond the minimum. They do not convert external gates into shipped claims.",
+      "Historical raw frontier-delta findings are retained for research traceability, but the current optimization target is this generated sheet plus the stack SOTA ledger and frontier freshness audit."
     ],
     "weights": {
       "local_engineering_score": {
@@ -36,10 +38,10 @@
     }
   },
   "summary": {
-    "component_count": 978,
-    "atomic_deep_dive_complete": 978,
+    "component_count": 984,
+    "atomic_deep_dive_complete": 984,
     "atomic_deep_dive_complete_pct": 100,
-    "direct_test_referenced_components": 978,
+    "direct_test_referenced_components": 984,
     "direct_test_reference_pct": 100,
     "components_without_direct_test_reference": 0,
     "high_priority_components": 68,
@@ -68,14 +70,14 @@
       "claimable_readiness_pct": 86,
       "local_proof_coverage_pct": 100,
       "local_proof_requirement_count": 57,
-      "workorder_surplus_points": 34,
+      "workorder_surplus_points": 46,
       "over_100_hill_climb": {
         "metric": "local_readiness_proof_surplus_score",
-        "score": 104.3,
+        "score": 105.8,
         "ceiling": 110,
         "base_score_meaning": "100 means every readiness requirement is either claimably shipped/implemented or has an executable local closeout/workorder contract.",
         "surplus_meaning": "Points above 100 count extra local files, evidence requirements, and closeout detail beyond the W599 minimum. They do not convert external gates into shipped claims.",
-        "surplus_points": 34
+        "surplus_points": 46
       },
       "language_fit": {
         "architecture": "js_control_plane_with_python_rust_native_escape_hatches",
@@ -100,25 +102,31 @@
         }
       }
     },
+    "frontier_delta_freshness": {
+      "authority_status": "current_spec_verified",
+      "historical_raw_severe_gap_count": 59,
+      "superseded_severe_categories": 15,
+      "current_severe_category_count": 0
+    },
     "components_by_domain": {
       "api_surface": 32,
       "billing_marketplace": 22,
       "capture_data_eval": 85,
       "compile_artifact_runtime": 151,
       "developer_distribution": 70,
-      "identity_access": 32,
+      "identity_access": 33,
       "infra_cloud_device": 71,
-      "platform_support": 223,
+      "platform_support": 224,
       "runtime_serving_routing": 26,
       "storage_state": 28,
       "training_model_optimization": 174,
-      "trust_security_compliance": 64
+      "trust_security_compliance": 68
     },
     "components_by_surface": {
       "api-http": 31,
       "cli": 3,
-      "core-backend": 638,
-      "package-distribution": 92,
+      "core-backend": 643,
+      "package-distribution": 93,
       "service": 3,
       "worker": 211
     },
@@ -209,11 +217,11 @@
       "id": "finetune-frameworks",
       "stack_area": "training",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 12,
+      "already_at_frontier_count": 14,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 3,
+      "minor_gaps": 0,
       "required_components": 3,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -229,7 +237,7 @@
       "improvement_count": 2,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 1,
+      "minor_gaps": 0,
       "required_components": 3,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -257,11 +265,11 @@
       "id": "ondevice-inference",
       "stack_area": "cross-device",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 10,
+      "already_at_frontier_count": 11,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 1,
+      "minor_gaps": 0,
       "required_components": 3,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -305,11 +313,11 @@
       "id": "verifiable-inference",
       "stack_area": "trust",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 15,
+      "already_at_frontier_count": 16,
       "improvement_count": 2,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 1,
+      "minor_gaps": 0,
       "required_components": 5,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -321,11 +329,11 @@
       "id": "model-signing-standards",
       "stack_area": "trust",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 9,
+      "already_at_frontier_count": 11,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 2,
+      "minor_gaps": 0,
       "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -341,7 +349,7 @@
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 1,
+      "minor_gaps": 0,
       "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -357,7 +365,7 @@
       "improvement_count": 2,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 1,
+      "minor_gaps": 0,
       "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -369,11 +377,11 @@
       "id": "compile-api-to-model-competitors",
       "stack_area": "compiler-platform",
       "status": "sota_review_complete_external_or_release_gate_open",
-      "already_at_frontier_count": 12,
+      "already_at_frontier_count": 13,
       "improvement_count": 1,
       "critical_gaps": 0,
       "major_gaps": 0,
-      "minor_gaps": 3,
+      "minor_gaps": 0,
       "required_components": 4,
       "suggested_verification": [
         "npm run verify:stack-sota",
@@ -532,11 +540,11 @@
           "tests/finalized-c8-durable-compute-scheduler.test.js",
           "tests/secure-training.test.js",
           "tests/sota-persistence.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave250-remote-compute.test.js",
           "tests/wave553-codegraph-cloud-platform.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js",
-          "tests/wave558-object-storage-cloud-contract.test.js",
-          "tests/wave583-cloud-compute-broker.test.js"
+          "tests/wave558-object-storage-cloud-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "route_contract_auth_idempotency_and_error_shape_matrix",
@@ -1232,6 +1240,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave957-apps-atomic-scope.test.js",
           "tests/wave146-export-provenance.test.js"
         ],
@@ -2137,11 +2146,11 @@
           "tests/wave957-apps-atomic-scope.test.js",
           "tests/product-kernel-envelope.test.js",
           "tests/wave1004-compile-api-readiness.test.js",
+          "tests/wave1021-frontier-delta-freshness.test.js",
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave144-verifier-states.test.js",
           "tests/wave195-quantize-worker.test.js",
-          "tests/wave464-multimodal-audio-redact.test.js",
-          "tests/wave593-invention-implementation-spec.test.js",
-          "tests/wave595-product-frontier-map.test.js"
+          "tests/wave464-multimodal-audio-redact.test.js"
         ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
@@ -2359,10 +2368,10 @@
           "tests/wave957-apps-atomic-scope.test.js",
           "tests/product-kernel-envelope.test.js",
           "tests/wave1004-compile-api-readiness.test.js",
+          "tests/wave1021-frontier-delta-freshness.test.js",
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave144-verifier-states.test.js",
-          "tests/wave195-quantize-worker.test.js",
-          "tests/wave464-multimodal-audio-redact.test.js",
-          "tests/wave593-invention-implementation-spec.test.js"
+          "tests/wave195-quantize-worker.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -3040,10 +3049,10 @@
           "tests/finalized-c8-durable-compute-scheduler.test.js",
           "tests/secure-training.test.js",
           "tests/sota-persistence.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave250-remote-compute.test.js",
           "tests/wave553-codegraph-cloud-platform.test.js",
-          "tests/wave555-user-completion-cloud-optimizer.test.js",
-          "tests/wave558-object-storage-cloud-contract.test.js"
+          "tests/wave555-user-completion-cloud-optimizer.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -3255,12 +3264,12 @@
         "direct_test_refs": [
           "tests/wave957-apps-atomic-scope.test.js",
           "tests/finalized-c1-distillation-pipeline.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave162-sigstore-rekor.test.js",
           "tests/wave242-enterprise-proxy.test.js",
           "tests/wave249-cross-platform.test.js",
           "tests/wave250-remote-compute.test.js",
-          "tests/wave284-group-aware-split.test.js",
-          "tests/wave318-321-cli-artifacts.test.js"
+          "tests/wave284-group-aware-split.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -7308,7 +7317,7 @@
           "tests/wave1004-compile-api-readiness.test.js",
           "tests/wave258-audit-fixes.test.js",
           "tests/wave584-distill-strategy.test.js",
-          "tests/wave810-kscore-calibration.test.js"
+          "tests/wave588-package-release-readiness.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -7413,6 +7422,7 @@
         "direct_test_refs": [
           "tests/wave957-apps-atomic-scope.test.js",
           "tests/wave482-sdk-catalog-honesty.test.js",
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave693-python-framework-adapters-contract.test.js",
           "tests/wave754-python-onnx-text-contract.test.js"
         ],
@@ -8609,8 +8619,8 @@
       "language": "json",
       "composition": {
         "metrics": {
-          "bytes": 715,
-          "lines": 32,
+          "bytes": 782,
+          "lines": 33,
           "imports": 0,
           "exports": 0,
           "routes": 0,
@@ -8627,7 +8637,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "4b1db4c23809480da0aef4a1dba347a1272745b6002fc325e7e106fa357d08ec"
+        "sha256": "c1f2880e792e143e004e048f9828c9e7b7868d8f57aef0ceec5cf0cf31261104"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8712,7 +8722,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 2945,
+          "bytes": 2921,
           "lines": 75,
           "imports": 3,
           "exports": 1,
@@ -8730,7 +8740,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "8b74744ae276149e7a1d625aff9f9e62aadb634655151d0da84c3c75a91cc442"
+        "sha256": "058dc6710a6176f4d661829ab5564f422074ca013fc85c5c88a12695d41a8312"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8740,6 +8750,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/byoc-gpu-attestation.test.js",
+          "tests/wave1026-attestation-vendor-chain-verifiers.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js"
         ],
         "category_links": [],
@@ -8761,7 +8772,7 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1728,
+          "bytes": 1715,
           "lines": 46,
           "imports": 2,
           "exports": 1,
@@ -8779,7 +8790,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "0a4bd5b55b572c41ff0529c22680248fd2fd05db73a27ef894ab3d4a536df85a"
+        "sha256": "0cc1de8d8f09efa875e02cbde0d09a49a1f38faedde54ffac3fa5d324e23486d"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8789,6 +8800,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/byoc-gpu-attestation.test.js",
+          "tests/wave1026-attestation-vendor-chain-verifiers.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js"
         ],
         "category_links": [],
@@ -8810,8 +8822,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 9394,
-          "lines": 258,
+          "bytes": 9623,
+          "lines": 265,
           "imports": 5,
           "exports": 10,
           "routes": 0,
@@ -8828,7 +8840,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "1d6b26c82f565757955f2d35d30b8de652e66bbfe008ed74a8f8ffea1fd1af30"
+        "sha256": "4f6f4dbb3d8bb140828f194151fd0aef30b902a3230bded4f55d79a5f231b99a"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8837,6 +8849,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1026-attestation-vendor-chain-verifiers.test.js",
           "tests/wave602-backend-atomic-deep-dive.test.js",
           "tests/wave670-tdx-attestation-contract.test.js",
           "tests/wave990-attestation-policy-contract.test.js"
@@ -8894,6 +8907,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1026-attestation-vendor-chain-verifiers.test.js",
           "tests/wave409v-confidential-compute.test.js",
           "tests/wave460-attestation-embed.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js",
@@ -8918,8 +8932,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 3404,
-          "lines": 99,
+          "bytes": 4055,
+          "lines": 114,
           "imports": 1,
           "exports": 1,
           "routes": 0,
@@ -8936,7 +8950,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "848caef8b88e61e799ba395dcc0ce36f73eeb86e1283ff6f59b684105e3e08b2"
+        "sha256": "c43c6c395db8e926980d7eeaecb630471f01b6c464d014dea5fa960f81738130"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8945,6 +8959,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1026-attestation-vendor-chain-verifiers.test.js",
           "tests/wave409v-confidential-compute.test.js"
         ],
         "category_links": [],
@@ -8966,8 +8981,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 5114,
-          "lines": 154,
+          "bytes": 5823,
+          "lines": 174,
           "imports": 1,
           "exports": 4,
           "routes": 0,
@@ -8985,7 +9000,7 @@
         ],
         "priority_score": 5,
         "priority_band": "medium",
-        "sha256": "0fc35d772bc5bb1e8541c3a418aea1f53e3289343027210a06ebfc3073012915"
+        "sha256": "bd88eed599bc3ddbfefeb0ec9ba29c5b8e7dac1751a7ac652cd5f6a83b8528f6"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -8994,7 +9009,58 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1026-attestation-vendor-chain-verifiers.test.js",
           "tests/wave670-tdx-attestation-contract.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
+        "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
+        "suggested_verification": [
+          "npm run verify:claims-scope",
+          "npm run verify:compliance-packet"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
+    },
+    {
+      "path": "packages/attestation/src/vendor-chain-verifiers.js",
+      "id": "packages-attestation-src-vendor-chain-verifiers-js",
+      "surface": "package-distribution",
+      "domain": "trust_security_compliance",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 7666,
+          "lines": 217,
+          "imports": 1,
+          "exports": 6,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 1,
+          "network_refs": 1,
+          "crypto_refs": 10,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "distribution_or_worker_surface",
+          "execution_or_subprocess_boundary",
+          "network_or_provider_boundary"
+        ],
+        "priority_score": 6,
+        "priority_band": "medium",
+        "sha256": "6f7ad356ddd2638b5d42a93f15665a1cb11b972260e0721ab775a7d3fee35ac2"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave1026-attestation-vendor-chain-verifiers.test.js"
         ],
         "category_links": [
           {
@@ -9022,8 +9088,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 9143,
-          "lines": 261,
+          "bytes": 10339,
+          "lines": 290,
           "imports": 4,
           "exports": 0,
           "routes": 0,
@@ -9040,7 +9106,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "5387908283778001cd8d889e6a2bb4cf09a4b06e2c2b2b25d4f7f600e5ad20e1"
+        "sha256": "9895f1b89bb6d21d9cb3ff35024973a0b9843ddc6b626963ae019a92ad46cef1"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -9151,14 +9217,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave790-browser-extension-popup-contract.test.js",
           "tests/_fixtures-w422-noop-worker.cjs",
           "tests/artifact-end-to-end.test.js",
           "tests/byoc-gpu-attestation.test.js",
           "tests/cid.test.js",
           "tests/finalized-c1-distillation-pipeline.test.js",
-          "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
-          "tests/finalized-c1-signed-artifact-packaging.test.js"
+          "tests/finalized-c1-provenance-receipt-transparency-chain.test.js"
         ],
         "category_links": [],
         "improvement_track": "generated_cli_package_sdk_conformance_and_release_evidence",
@@ -9378,6 +9444,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave671-homebrew-formula-contract.test.js"
         ],
         "category_links": [],
@@ -10066,6 +10133,7 @@
         "direct_test_refs": [
           "tests/wave693-python-framework-adapters-contract.test.js",
           "tests/wave482-sdk-catalog-honesty.test.js",
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave754-python-onnx-text-contract.test.js",
           "tests/wave957-apps-atomic-scope.test.js"
         ],
@@ -10334,6 +10402,7 @@
         "direct_test_refs": [
           "tests/wave693-python-framework-adapters-contract.test.js",
           "tests/wave482-sdk-catalog-honesty.test.js",
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave754-python-onnx-text-contract.test.js",
           "tests/wave957-apps-atomic-scope.test.js"
         ],
@@ -10539,6 +10608,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave674-runtime-rs-cid-contract.test.js",
           "tests/wave675-runtime-rs-tofu-contract.test.js",
           "tests/wave676-runtime-rs-zip-reader-contract.test.js",
@@ -11412,6 +11482,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave678-sdk-kotlin-contract.test.js",
           "tests/wave591-package-local-build-contract.test.js"
         ],
@@ -11732,6 +11803,7 @@
         "direct_test_refs": [
           "tests/wave754-python-onnx-text-contract.test.js",
           "tests/wave482-sdk-catalog-honesty.test.js",
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave693-python-framework-adapters-contract.test.js",
           "tests/wave957-apps-atomic-scope.test.js"
         ],
@@ -12278,10 +12350,10 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave680-sdk-swift-contract.test.js",
           "tests/asr-packages.test.js",
           "tests/finalized-c1-signed-artifact-packaging.test.js",
-          "tests/wave588-package-release-readiness.test.js",
           "tests/wave591-package-local-build-contract.test.js",
           "tests/wave661-sbom-emit-contract.test.js",
           "tests/wave671-homebrew-formula-contract.test.js",
@@ -12699,6 +12771,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave929-distribution-manifests-contract.test.js"
         ],
         "category_links": [],
@@ -13206,6 +13279,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave929-distribution-manifests-contract.test.js"
         ],
         "category_links": [],
@@ -13254,6 +13328,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave929-distribution-manifests-contract.test.js"
         ],
         "category_links": [],
@@ -13302,6 +13377,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave929-distribution-manifests-contract.test.js"
         ],
         "category_links": [],
@@ -14179,9 +14255,9 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 13097,
-          "lines": 413,
-          "imports": 1,
+          "bytes": 13336,
+          "lines": 420,
+          "imports": 2,
           "exports": 6,
           "routes": 0,
           "env_refs": 0,
@@ -14194,7 +14270,7 @@
         "risk_signals": [],
         "priority_score": 0,
         "priority_band": "normal",
-        "sha256": "ef819e1da8e5eb25945b1a3335c702da733cab67530d1f38c06e121e22b26871"
+        "sha256": "d26c138670faa32cc5c8e8ae31fd17ee433fa570f86765d0bc7e7efd782aca59"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -14204,6 +14280,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave1005-adversarial-bakeoff-route.test.js",
+          "tests/wave1031-agent-security-judge-calibration.test.js",
           "tests/wave646-adversarial-calibration.test.js"
         ],
         "category_links": [],
@@ -14463,6 +14540,55 @@
       },
       "perfection_gaps": [],
       "next_best_action": "Maintain current contract and keep extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests current."
+    },
+    {
+      "path": "src/agent-security-judge.js",
+      "id": "src-agent-security-judge-js",
+      "surface": "core-backend",
+      "domain": "trust_security_compliance",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 13016,
+          "lines": 347,
+          "imports": 2,
+          "exports": 9,
+          "routes": 0,
+          "env_refs": 2,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 2,
+          "crypto_refs": 5,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "environment_configuration_boundary",
+          "network_or_provider_boundary"
+        ],
+        "priority_score": 5,
+        "priority_band": "medium",
+        "sha256": "97a40a14aff035ae552c1f53a177c76f1f63c029602c73022fd31646ba6d05b8"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave1031-agent-security-judge-calibration.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
+        "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
+        "suggested_verification": [
+          "npm run verify:claims-scope",
+          "npm run verify:compliance-packet"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/agent-telemetry.js",
@@ -17195,7 +17321,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/wave144-bench-compare.test.js",
-          "tests/wave144-predibase-demo.test.js"
+          "tests/wave144-predibase-demo.test.js",
+          "tests/wave589-benchmark-evidence-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
@@ -17218,16 +17345,16 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 17118,
-          "lines": 417,
+          "bytes": 24561,
+          "lines": 579,
           "imports": 3,
-          "exports": 9,
+          "exports": 10,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 14,
+          "crypto_refs": 16,
           "markers": 0
         },
         "risk_signals": [
@@ -17235,7 +17362,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "55e74b13adb2e213022fc7fdd31ddcaa2c33187a4cf4a6dc05e1cd2be735275c"
+        "sha256": "0f094fbcca28c004bc9a10010dae4a5d3b9a3b4ff042ed6c9eed2ede9d0f982f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -18232,10 +18359,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 7921,
-          "lines": 192,
-          "imports": 0,
-          "exports": 3,
+          "bytes": 13017,
+          "lines": 348,
+          "imports": 1,
+          "exports": 4,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -18247,7 +18374,7 @@
         "risk_signals": [],
         "priority_score": 0,
         "priority_band": "normal",
-        "sha256": "0e68c52bcbd5507b36e21491805907b517fee7ca05a9e41c9536f248f7bc06a7"
+        "sha256": "64488467e0fecb9991b33aa15b5226a3faa7011e2e414278494545659667ee1b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -18525,22 +18652,24 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 2567,
-          "lines": 72,
-          "imports": 0,
-          "exports": 4,
+          "bytes": 9011,
+          "lines": 288,
+          "imports": 3,
+          "exports": 7,
           "routes": 0,
-          "env_refs": 0,
+          "env_refs": 5,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
           "crypto_refs": 0,
           "markers": 0
         },
-        "risk_signals": [],
-        "priority_score": 0,
+        "risk_signals": [
+          "environment_configuration_boundary"
+        ],
+        "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "5d6eb5744805bd76c3f6334e7a48863a8b293dc6b8909c7dcd09d175833fbac9"
+        "sha256": "4a53a2515f9c9800142bfad8cf896b5430c84117034ef8bf56463eb756b308e2"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -18549,6 +18678,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1029-capture-stream-pubsub.test.js",
           "tests/wave258-audit-fixes.test.js",
           "tests/wave645-capture-stream-replay.test.js"
         ],
@@ -18603,12 +18733,12 @@
         "direct_test_refs": [
           "tests/finalized-c10-capture-idempotency.test.js",
           "tests/sota-persistence.test.js",
+          "tests/wave1029-capture-stream-pubsub.test.js",
           "tests/wave212-capture-durability.test.js",
           "tests/wave368-connector.test.js",
           "tests/wave407b-connector-fixes.test.js",
           "tests/wave409a-canonical-event-store.test.js",
-          "tests/wave409b-privacy-failclosed.test.js",
-          "tests/wave409h-value-loop-e2e.test.js"
+          "tests/wave409b-privacy-failclosed.test.js"
         ],
         "category_links": [],
         "improvement_track": "measurement_harness_data_value_and_holdout_leakage_guards",
@@ -18972,10 +19102,10 @@
           "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
           "tests/finalized-c3-measured-kscore-delta-attribution-and-budget-allocation.test.js",
           "tests/receipt-export-registry.test.js",
+          "tests/wave1027-sigstore-keyless-policy.test.js",
           "tests/wave149-ed25519-default.test.js",
           "tests/wave150-sigstore.test.js",
-          "tests/wave162-sigstore-rekor.test.js",
-          "tests/wave436-artifact-verify-manifest-hash-mismatch.test.js"
+          "tests/wave162-sigstore-rekor.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -19051,12 +19181,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 50189,
-          "lines": 1341,
-          "imports": 6,
+          "bytes": 58006,
+          "lines": 1494,
+          "imports": 8,
           "exports": 15,
           "routes": 0,
-          "env_refs": 16,
+          "env_refs": 18,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 6,
@@ -19071,7 +19201,7 @@
         ],
         "priority_score": 8,
         "priority_band": "high",
-        "sha256": "29b1b234d3e7f886328f80c14f784194ec7f6f12bc518a794914d25e06b12c62"
+        "sha256": "285e127363a2f0236e20b0012cb98fbd7bbb48ff48cdd52a809779ed0b33ea8f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -19081,7 +19211,9 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/finalized-c8-durable-compute-scheduler.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave644-cloud-distill-bridge.test.js",
+          "tests/wave921-trainer-unification.test.js",
           "tests/wave989-cloud-distill-managed-provider.test.js"
         ],
         "category_links": [
@@ -19299,10 +19431,10 @@
           "tests/finalized-c8-durable-compute-scheduler.test.js",
           "tests/secure-training.test.js",
           "tests/sota-persistence.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave250-remote-compute.test.js",
           "tests/wave553-codegraph-cloud-platform.test.js",
-          "tests/wave555-user-completion-cloud-optimizer.test.js",
-          "tests/wave558-object-storage-cloud-contract.test.js"
+          "tests/wave555-user-completion-cloud-optimizer.test.js"
         ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
@@ -19407,10 +19539,10 @@
           "tests/finalized-c8-durable-compute-scheduler.test.js",
           "tests/secure-training.test.js",
           "tests/sota-persistence.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave250-remote-compute.test.js",
           "tests/wave553-codegraph-cloud-platform.test.js",
-          "tests/wave555-user-completion-cloud-optimizer.test.js",
-          "tests/wave558-object-storage-cloud-contract.test.js"
+          "tests/wave555-user-completion-cloud-optimizer.test.js"
         ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
@@ -19559,7 +19691,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/wave1004-compile-api-readiness.test.js"
+          "tests/wave1004-compile-api-readiness.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -19976,7 +20109,7 @@
           "tests/sota-compileartifact.test.js",
           "tests/wave1001-neural-compile-provisioning.test.js",
           "tests/wave1004-compile-api-readiness.test.js",
-          "tests/wave234-chat-templates.test.js"
+          "tests/wave1028-provider-pricing-receipts.test.js"
         ],
         "category_links": [
           {
@@ -20132,16 +20265,16 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 12250,
-          "lines": 293,
-          "imports": 2,
-          "exports": 8,
+          "bytes": 23822,
+          "lines": 534,
+          "imports": 3,
+          "exports": 10,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 2,
+          "crypto_refs": 8,
           "markers": 0
         },
         "risk_signals": [
@@ -20149,7 +20282,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "80fa7b748b1dfa3aa448c03021d1acdbc90b2e238c87d0e94ed5ae7de6d04585"
+        "sha256": "ce22c794131ecf23b091eeec5aa89926fe9a08df28584f6f0beeb0c6d7b42553"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -20306,6 +20439,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/finalized-c8-durable-compute-scheduler.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave644-cloud-distill-bridge.test.js",
           "tests/wave989-cloud-distill-managed-provider.test.js"
         ],
@@ -21161,11 +21295,11 @@
           "tests/finalized-c8-durable-compute-scheduler.test.js",
           "tests/secure-training.test.js",
           "tests/sota-persistence.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave250-remote-compute.test.js",
           "tests/wave553-codegraph-cloud-platform.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js",
-          "tests/wave558-object-storage-cloud-contract.test.js",
-          "tests/wave583-cloud-compute-broker.test.js"
+          "tests/wave558-object-storage-cloud-contract.test.js"
         ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
@@ -21309,13 +21443,13 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/finalized-c1-distillation-pipeline.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave162-sigstore-rekor.test.js",
           "tests/wave242-enterprise-proxy.test.js",
           "tests/wave249-cross-platform.test.js",
           "tests/wave250-remote-compute.test.js",
           "tests/wave284-group-aware-split.test.js",
-          "tests/wave318-321-cli-artifacts.test.js",
-          "tests/wave446-value-loop-audit-finish.test.js"
+          "tests/wave318-321-cli-artifacts.test.js"
         ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
@@ -21502,13 +21636,13 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/r1-runtime-passport.test.js",
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave636-multinode-launch.test.js",
           "tests/wave665-router-boundary-contract.test.js",
           "tests/wave702-forge-fit-contract.test.js",
           "tests/wave724-memory-tier.test.js",
           "tests/wave921-cost-estimator-status.test.js",
-          "tests/wave921-module-load-regression.test.js",
-          "tests/wave921-qad.test.js"
+          "tests/wave921-module-load-regression.test.js"
         ],
         "category_links": [],
         "improvement_track": "capability_probe_attested_byoc_worker_and_deploy_readiness",
@@ -26171,10 +26305,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 27667,
-          "lines": 636,
+          "bytes": 37881,
+          "lines": 853,
           "imports": 6,
-          "exports": 2,
+          "exports": 4,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -26188,7 +26322,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "1b7e8cbe12fdce0043c578ee547c80c2af79bdac04ec945470441ba7944a612a"
+        "sha256": "540cdb3cb3ab967015ce01e55b6798292650e028f0987a7c083ebfe5b0185636"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -26327,8 +26461,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 13443,
-          "lines": 264,
+          "bytes": 14524,
+          "lines": 283,
           "imports": 0,
           "exports": 9,
           "routes": 0,
@@ -26344,7 +26478,7 @@
         ],
         "priority_score": 1,
         "priority_band": "normal",
-        "sha256": "32ada6c841fe7a9e746ab5e0aa2962e69d46f097996fdf177c6371508b56fed2"
+        "sha256": "7eb67e968441c3b9a63630b1c9ee17cd0306db30922f694402c8d5c3034d977f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -28143,7 +28277,8 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/r5-evidence-dag.test.js",
-          "tests/wrapper-r1-r8.test.js"
+          "tests/wrapper-r1-r8.test.js",
+          "tests/wave592-compliance-certification-packet.test.js"
         ],
         "category_links": [],
         "improvement_track": "tenant_scoped_cas_storage_retention_and_migration_simulation",
@@ -28154,6 +28289,56 @@
       },
       "perfection_gaps": [],
       "next_best_action": "Maintain current contract and keep tenant_scoped_cas_storage_retention_and_migration_simulation current."
+    },
+    {
+      "path": "src/executorch-validation-harness.js",
+      "id": "src-executorch-validation-harness-js",
+      "surface": "core-backend",
+      "domain": "platform_support",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 14980,
+          "lines": 338,
+          "imports": 1,
+          "exports": 9,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 5,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary"
+        ],
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "5e0fd854d40729b1c57bb11b497f579d001c88cef13ba26c58347a1195f1030e"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave1025-executorch-validation-harness.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
+        "innovation_opportunity": "Keep support modules behind generated lifecycle, verifier, provider, privacy, storage, and claim-scope contracts before adding more daemon, binder, or orchestration behavior.",
+        "suggested_verification": [
+          "npm run verify:daemon-connector-matrix",
+          "npm run verify:binder-contract-matrix",
+          "npm run verify:intent-contract-matrix",
+          "npm run verify:otel-matrix",
+          "npm run verify:codegraph"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
     },
     {
       "path": "src/export-awq.js",
@@ -29651,16 +29836,16 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 8195,
-          "lines": 207,
+          "bytes": 10790,
+          "lines": 270,
           "imports": 3,
-          "exports": 9,
+          "exports": 10,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 11,
+          "crypto_refs": 15,
           "markers": 0
         },
         "risk_signals": [
@@ -29668,7 +29853,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "e5ce7529fb1d0774e3b56db358f56341549842137391723368cb3e0ab5e354c0"
+        "sha256": "2281c5c90f406639ccea1f562c161b50183fd62cad2bdad6552463590cc866a7"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -31228,10 +31413,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 22251,
-          "lines": 566,
-          "imports": 2,
-          "exports": 16,
+          "bytes": 23142,
+          "lines": 578,
+          "imports": 3,
+          "exports": 17,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -31245,7 +31430,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "0799a821394aba1926febcbe257afcc45c87d23fc248d7da1607116e42a2f70e"
+        "sha256": "8dfc92014b0ae14a67752f4b3483d1b4b208125965cc23aa68d41e3b64b92bc9"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -31257,6 +31442,7 @@
           "tests/finalized-c1-provenance-receipt-transparency-chain.test.js",
           "tests/model-signing-build-sidecars.test.js",
           "tests/model-signing-sidecars.test.js",
+          "tests/wave1027-sigstore-keyless-policy.test.js",
           "tests/wave921-govern-crypto.test.js",
           "tests/wave921-govern-receipts-compliance.test.js",
           "tests/wave921-intoto-attestation.test.js",
@@ -33116,6 +33302,7 @@
           "tests/finalized-c5-turnkey-experimental-quant-runners.test.js",
           "tests/wave199-seeds-new.test.js",
           "tests/wave524-release-verify-helpers.test.js",
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave680-sdk-swift-contract.test.js",
           "tests/wave809-structured-output.test.js",
           "tests/wrapper-s3.test.js"
@@ -35473,8 +35660,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 31148,
-          "lines": 811,
+          "bytes": 31263,
+          "lines": 815,
           "imports": 2,
           "exports": 23,
           "routes": 0,
@@ -35490,7 +35677,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "583581a2decbba7fd597c96bb2904801b43cfe3e14b23366ab903cc71ac89893"
+        "sha256": "ae23187e36adc98825bf46b5a6580b3fe635ab76cbe3f8521290b7e1f4b3ae45"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -35499,6 +35686,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave386-model-weights.test.js",
           "tests/wave967-model-weight-artifact-binding.test.js"
         ],
@@ -37222,16 +37410,16 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 30003,
-          "lines": 700,
-          "imports": 2,
-          "exports": 8,
+          "bytes": 32803,
+          "lines": 767,
+          "imports": 3,
+          "exports": 9,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 3,
+          "crypto_refs": 10,
           "markers": 0
         },
         "risk_signals": [
@@ -37239,7 +37427,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "f7c769a4fedc96fa17b3237922bad70cb89859b393f065b7de563f9dd19a2f72"
+        "sha256": "a4ef0fe2ad4780ca74f65df1b41fd99aa38ae1db54bf7be804def830a6e49de1"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -37984,8 +38172,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 43439,
-          "lines": 695,
+          "bytes": 43704,
+          "lines": 696,
           "imports": 1,
           "exports": 13,
           "routes": 0,
@@ -38002,7 +38190,7 @@
         ],
         "priority_score": 4,
         "priority_band": "medium",
-        "sha256": "7862cb78690a2224dfcbbe890da2b448663bc1425ca9792c3f5b04e5e4433928"
+        "sha256": "677df1a233bca8f57dd70f3bfaa5898d50b2cd323ec65c2bc8edad8a5b01e8ae"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -38013,12 +38201,12 @@
         "direct_test_refs": [
           "tests/finalized-c13-product-cohesion.test.js",
           "tests/wave1000-llamaweb-runner.test.js",
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave553-codegraph-cloud-platform.test.js",
           "tests/wave558-object-storage-cloud-contract.test.js",
           "tests/wave611-platform-capability-evidence.test.js",
           "tests/wave697-cerebras-adapter-contract.test.js",
-          "tests/wave959-browser-webgpu-runner.test.js",
-          "tests/wave996-onnx-web-runner.test.js"
+          "tests/wave959-browser-webgpu-runner.test.js"
         ],
         "category_links": [
           {
@@ -38075,6 +38263,7 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave588-package-release-readiness.test.js",
           "tests/wave665-router-boundary-contract.test.js"
         ],
         "category_links": [],
@@ -38972,6 +39161,54 @@
       },
       "perfection_gaps": [],
       "next_best_action": "Maintain current contract and keep maintain_contract_tests_and_claim_scope_mapping current."
+    },
+    {
+      "path": "src/provider-pricing-receipts.js",
+      "id": "src-provider-pricing-receipts-js",
+      "surface": "core-backend",
+      "domain": "trust_security_compliance",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 14217,
+          "lines": 386,
+          "imports": 1,
+          "exports": 10,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 6,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "network_or_provider_boundary"
+        ],
+        "priority_score": 4,
+        "priority_band": "medium",
+        "sha256": "8b359f4efa16c0469f07d5cd7ebdea129ba2fe3af8b892ccad667ef17a5dad28"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave1028-provider-pricing-receipts.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
+        "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
+        "suggested_verification": [
+          "npm run verify:claims-scope",
+          "npm run verify:compliance-packet"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
       "path": "src/provider-registry.js",
@@ -40406,10 +40643,10 @@
           "tests/rag-memory-analyzer.test.js",
           "tests/site.test.js",
           "tests/wave1001-neural-compile-provisioning.test.js",
+          "tests/wave1031-agent-security-judge-calibration.test.js",
           "tests/wave252-backend-fixes.test.js",
           "tests/wave258-audit-fixes.test.js",
-          "tests/wave282-compile-routing.test.js",
-          "tests/wave283-train-only-synthesis.test.js"
+          "tests/wave282-compile-routing.test.js"
         ],
         "category_links": [],
         "improvement_track": "maintain_contract_tests_and_claim_scope_mapping",
@@ -41551,12 +41788,12 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 1477259,
-          "lines": 30970,
-          "imports": 538,
+          "bytes": 1477629,
+          "lines": 30976,
+          "imports": 539,
           "exports": 8,
           "routes": 810,
-          "env_refs": 198,
+          "env_refs": 199,
           "fs_writes": 1,
           "subprocess_refs": 44,
           "network_refs": 34,
@@ -41574,7 +41811,7 @@
         ],
         "priority_score": 13,
         "priority_band": "high",
-        "sha256": "f94a96786f82d0b5d5012d11f2b5650ebdf2b33616674ecdbf0352dbdb233084"
+        "sha256": "d739e59ceae5fd8aadf6c8b6a1ec2bdb70c849b99162add3c36747c7f981fa5f"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -41932,16 +42169,16 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 10919,
-          "lines": 278,
+          "bytes": 13444,
+          "lines": 340,
           "imports": 3,
-          "exports": 9,
+          "exports": 10,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
           "subprocess_refs": 0,
           "network_refs": 0,
-          "crypto_refs": 11,
+          "crypto_refs": 15,
           "markers": 0
         },
         "risk_signals": [
@@ -41949,7 +42186,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "ffc2d9ad6d5412080e74627646d86cc176c11ae58f937c5d0992024d2ee285ef"
+        "sha256": "d09b14137aaf5af7de44249cef5af7516dd736224f507c419d5a023b700f4274"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -42029,8 +42266,8 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 28982,
-          "lines": 697,
+          "bytes": 29621,
+          "lines": 708,
           "imports": 2,
           "exports": 18,
           "routes": 0,
@@ -42046,7 +42283,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "70bea89c30fdceaf26e8b50503e3b319a72821c935d222d2d30b5744f5b21b1f"
+        "sha256": "36c6b66ecbe5d352d9dfc1b3a2ff9cd1e8d5966201650833daa14cf1f760ce6b"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -42056,6 +42293,7 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/r1-runtime-passport.test.js",
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave921-runtime-passport-w921.test.js",
           "tests/wrapper-r-enrich.test.js",
           "tests/wrapper-r1-r8.test.js"
@@ -42361,13 +42599,13 @@
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
           "tests/r1-runtime-passport.test.js",
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave372-runtime-devices.test.js",
           "tests/wave411-golden-e2e-smoke.test.js",
           "tests/wave417-definition-of-done.test.js",
           "tests/wave555-user-completion-cloud-optimizer.test.js",
           "tests/wave590-governance-runtime-packets.test.js",
-          "tests/wave709-runtime-router.test.js",
-          "tests/wave826-runtime-placement.test.js"
+          "tests/wave709-runtime-router.test.js"
         ],
         "category_links": [],
         "improvement_track": "stage_receipts_dsse_sidecars_and_replayable_artifact_dag",
@@ -44290,6 +44528,55 @@
       "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
     },
     {
+      "path": "src/sigstore-keyless.js",
+      "id": "src-sigstore-keyless-js",
+      "surface": "core-backend",
+      "domain": "identity_access",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 20917,
+          "lines": 551,
+          "imports": 1,
+          "exports": 16,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 1,
+          "crypto_refs": 11,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary",
+          "network_or_provider_boundary",
+          "stateful_storage_boundary"
+        ],
+        "priority_score": 5,
+        "priority_band": "medium",
+        "sha256": "f78fedee0b482f876e3805d8fc94cff2bfead5c057059b062b22445d4ea5847d"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/wave1027-sigstore-keyless-policy.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests",
+        "innovation_opportunity": "Keep the generated auth boundary matrix as the RBAC, SSO, SCIM, key-rotation, and tenant-isolation contract, then make access decisions replayable as policy data.",
+        "suggested_verification": [
+          "npm run verify:auth-boundary-matrix",
+          "node --test --test-concurrency=1 tests/*auth*.test.js tests/*rbac*.test.js tests/*org*.test.js"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep extend_generated_auth_boundary_matrix_rbac_sso_and_key_lifecycle_tests current."
+    },
+    {
       "path": "src/sigstore.js",
       "id": "src-sigstore-js",
       "surface": "core-backend",
@@ -44326,14 +44613,14 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
+          "tests/wave1027-sigstore-keyless-policy.test.js",
           "tests/wave150-sigstore.test.js",
           "tests/wave162-sigstore-rekor.test.js",
           "tests/wave258-audit-fixes.test.js",
           "tests/wave612-sigstore-merkle-reuse.test.js",
           "tests/wave948-artifact-matrix.test.js",
           "tests/model-signing-sidecars.test.js",
-          "tests/server.test.js",
-          "tests/wave149-ed25519-default.test.js"
+          "tests/server.test.js"
         ],
         "category_links": [
           {
@@ -44512,6 +44799,54 @@
       "next_best_action": "Maintain current contract and keep closed_loop_routing_outcome_learning_and_verified_cache current."
     },
     {
+      "path": "src/slsa-profile-registry.js",
+      "id": "src-slsa-profile-registry-js",
+      "surface": "core-backend",
+      "domain": "trust_security_compliance",
+      "language": "javascript",
+      "composition": {
+        "metrics": {
+          "bytes": 6161,
+          "lines": 169,
+          "imports": 0,
+          "exports": 8,
+          "routes": 0,
+          "env_refs": 0,
+          "fs_writes": 0,
+          "subprocess_refs": 0,
+          "network_refs": 0,
+          "crypto_refs": 0,
+          "markers": 0
+        },
+        "risk_signals": [
+          "cryptographic_or_proof_boundary"
+        ],
+        "priority_score": 3,
+        "priority_band": "normal",
+        "sha256": "59c21a66198d42b1da6d7bf0ac3c2f06d3326e000ac8474dcd3d9a42b1dd9614"
+      },
+      "target_state": {
+        "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
+        "perfection_definition": "No undocumented risk boundary, no untested high-priority behavior, no stale SOTA gap linked to this component, and no unsupported public claim."
+      },
+      "current_state": {
+        "deep_dive_status": "atomic_deep_dive_complete",
+        "direct_test_refs": [
+          "tests/model-signing-sidecars.test.js",
+          "tests/wave1027-sigstore-keyless-policy.test.js"
+        ],
+        "category_links": [],
+        "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
+        "innovation_opportunity": "Anchor every report, receipt, MCP tool call, and compliance export into one transparency-log proof fabric.",
+        "suggested_verification": [
+          "npm run verify:claims-scope",
+          "npm run verify:compliance-packet"
+        ]
+      },
+      "perfection_gaps": [],
+      "next_best_action": "Maintain current contract and keep unified_proof_chain_revocation_transparency_and_audit_exports current."
+    },
+    {
       "path": "src/slsa-provenance.js",
       "id": "src-slsa-provenance-js",
       "surface": "core-backend",
@@ -44519,10 +44854,10 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 9901,
-          "lines": 243,
-          "imports": 3,
-          "exports": 12,
+          "bytes": 10394,
+          "lines": 250,
+          "imports": 4,
+          "exports": 13,
           "routes": 0,
           "env_refs": 0,
           "fs_writes": 0,
@@ -44536,7 +44871,7 @@
         ],
         "priority_score": 3,
         "priority_band": "normal",
-        "sha256": "a3388f262a4f6f45dae3ce791a9bb8d0a1f5f60e0bc11b12bce98c41ec711d6f"
+        "sha256": "89dbd3006c501bdc442a0f4f6034363da00aacbda1cedd5b1ba424b0ce67fca2"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -44545,7 +44880,8 @@
       "current_state": {
         "deep_dive_status": "atomic_deep_dive_complete",
         "direct_test_refs": [
-          "tests/jws-slsa.test.js"
+          "tests/jws-slsa.test.js",
+          "tests/model-signing-sidecars.test.js"
         ],
         "category_links": [],
         "improvement_track": "unified_proof_chain_revocation_transparency_and_audit_exports",
@@ -49499,6 +49835,7 @@
           "tests/offline-inclusion-proof.test.js",
           "tests/sota-capturedata.test.js",
           "tests/wave1008-embedding-provider-routing-cache.test.js",
+          "tests/wave1028-provider-pricing-receipts.test.js",
           "tests/wave658-forge-inspect-contract.test.js",
           "tests/wave954-learned-embedding-provider.test.js"
         ],
@@ -49891,14 +50228,14 @@
       "language": "javascript",
       "composition": {
         "metrics": {
-          "bytes": 45237,
-          "lines": 1000,
-          "imports": 11,
+          "bytes": 50649,
+          "lines": 1163,
+          "imports": 12,
           "exports": 0,
           "routes": 0,
-          "env_refs": 6,
+          "env_refs": 8,
           "fs_writes": 5,
-          "subprocess_refs": 8,
+          "subprocess_refs": 10,
           "network_refs": 0,
           "crypto_refs": 20,
           "markers": 0
@@ -49913,7 +50250,7 @@
         ],
         "priority_score": 10,
         "priority_band": "high",
-        "sha256": "33518742cf4f3fa1f2a2753485d10a1e9d2318429f33f1cf42f41fb4379506f7"
+        "sha256": "927762bdc31913d716977a91df9fa6b522e3f8e6733b4fa913daac2b91f01a3e"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -50081,11 +50418,11 @@
           "tests/wave921-trainer-unification.test.js",
           "tests/product-kernel-envelope.test.js",
           "tests/wave1004-compile-api-readiness.test.js",
+          "tests/wave1021-frontier-delta-freshness.test.js",
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave144-verifier-states.test.js",
           "tests/wave195-quantize-worker.test.js",
-          "tests/wave464-multimodal-audio-redact.test.js",
-          "tests/wave593-invention-implementation-spec.test.js",
-          "tests/wave595-product-frontier-map.test.js"
+          "tests/wave464-multimodal-audio-redact.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",
@@ -50839,10 +51176,10 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 21669,
-          "lines": 498,
+          "bytes": 27743,
+          "lines": 639,
           "imports": 0,
-          "exports": 9,
+          "exports": 13,
           "routes": 0,
           "env_refs": 7,
           "fs_writes": 0,
@@ -50859,7 +51196,7 @@
         ],
         "priority_score": 6,
         "priority_band": "medium",
-        "sha256": "4c2813241f033742a133fb0593fcfefebffc9cef944a60e58d4139fd40ffcef5"
+        "sha256": "7d0abd36d8b4d7b3a7c5d38cad7e7be9c63f1b10a591fa489c767400cefa6cac"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -50898,8 +51235,8 @@
       "language": "python",
       "composition": {
         "metrics": {
-          "bytes": 54876,
-          "lines": 1203,
+          "bytes": 55942,
+          "lines": 1233,
           "imports": 0,
           "exports": 30,
           "routes": 1,
@@ -50919,7 +51256,7 @@
         ],
         "priority_score": 9,
         "priority_band": "high",
-        "sha256": "b315eb08a281080e2253970701899e59d6bee6888364b66529d6085dcb19a19f"
+        "sha256": "5c555011f2aabf3c9b5f520de2322e4338e8983d7e987fe85b80cd4e2a0ca6f3"
       },
       "target_state": {
         "role": "Atomic backend component with explicit ownerable surface/domain, static composition, risk signals, tests, improvement track, innovation opportunity, and verification command.",
@@ -50932,6 +51269,7 @@
           "tests/wave921-trainer-unification.test.js",
           "tests/finalized-c3-gradient-influence-valuation-tracin-ekfac-less.test.js",
           "tests/finalized-c4-distill-method-truthfulness.test.js",
+          "tests/wave1030-gpu-trainer-variant-e2e.test.js",
           "tests/wave945-distill-pipeline-matrix.test.js"
         ],
         "category_links": [
@@ -51400,11 +51738,11 @@
           "tests/wave607-kv-cache-cli-dispatch.test.js",
           "tests/product-kernel-envelope.test.js",
           "tests/wave1004-compile-api-readiness.test.js",
+          "tests/wave1021-frontier-delta-freshness.test.js",
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave144-verifier-states.test.js",
           "tests/wave195-quantize-worker.test.js",
-          "tests/wave464-multimodal-audio-redact.test.js",
-          "tests/wave593-invention-implementation-spec.test.js",
-          "tests/wave595-product-frontier-map.test.js"
+          "tests/wave464-multimodal-audio-redact.test.js"
         ],
         "category_links": [],
         "improvement_track": "closed_loop_routing_outcome_learning_and_verified_cache",
@@ -52156,10 +52494,10 @@
           "tests/wave931-worker-safety-contracts.test.js",
           "tests/product-kernel-envelope.test.js",
           "tests/wave1004-compile-api-readiness.test.js",
+          "tests/wave1021-frontier-delta-freshness.test.js",
+          "tests/wave1025-executorch-validation-harness.test.js",
           "tests/wave144-verifier-states.test.js",
-          "tests/wave464-multimodal-audio-redact.test.js",
-          "tests/wave593-invention-implementation-spec.test.js",
-          "tests/wave595-product-frontier-map.test.js"
+          "tests/wave464-multimodal-audio-redact.test.js"
         ],
         "category_links": [],
         "improvement_track": "frontier_method_wiring_probe_harness_and_method_bakeoff",

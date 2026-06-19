@@ -30,6 +30,9 @@ import {
   ADVERSARIAL_PROMPTS_VERSION,
   generateAdversarialPrompts,
 } from './adversarial-prompts.js';
+import {
+  calibratePromptClassifierPublicSuites,
+} from './agent-security-judge.js';
 
 export const ADVERSARIAL_BAKEOFF_VERSION = 'w762-v1';
 export const ADVERSARIAL_HEURISTIC_CALIBRATION_VERSION = 'w646-adversarial-heuristic-calibration-v1';
@@ -310,10 +313,13 @@ export async function runAdversarialBakeoff({
     };
   }
 
-  const judge_kind = typeof judge === 'function' ? 'callable' : 'heuristic';
+  const judge_kind = typeof judge === 'function'
+    ? (judge.kolm_judge_kind || 'callable')
+    : 'heuristic';
   const heuristic_calibration = judge_kind === 'heuristic'
     ? calibrateHeuristicJudge()
     : null;
+  const prompt_classifier_calibration = calibratePromptClassifierPublicSuites();
 
   // Per-category counters.
   const byCat = Object.create(null);
@@ -344,7 +350,7 @@ export async function runAdversarialBakeoff({
       : _resultText(runResult);
 
     let verdict;
-    if (judge_kind === 'callable') {
+    if (typeof judge === 'function') {
       try {
         const j = await judge(prompt, responseText, expected);
         verdict = {
@@ -399,6 +405,7 @@ export async function runAdversarialBakeoff({
     failures,
     judge_kind,
     heuristic_calibration,
+    prompt_classifier_calibration,
     created_at: new Date().toISOString(),
   };
 }

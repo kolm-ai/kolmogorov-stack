@@ -106,8 +106,9 @@ export const MODEL_FRAMEWORK_TARGETS = Object.freeze([
     model_types: ['mobile-llm', 'classifier', 'vision'],
     runtime_formats: ['pte'],
     env: ['KOLM_EXECUTORCH_TARGET'],
-    evidence: ['docs/kolm-format-v1.md', 'docs/product-surfaces.json'],
-    status: 'target-declared',
+    evidence: ['apps/export/executorch.py', 'src/executorch-validation-harness.js', 'src/model-weights-manifest.js', 'docs/kolm-format-v1.md'],
+    status: 'manifest-supported',
+    note: 'ExecuTorch .pte artifacts are signed-weight-manifest aware and have a device-side validation report/passport contract; physical iOS/Android execution remains external evidence.',
   },
   {
     id: 'litert-android',

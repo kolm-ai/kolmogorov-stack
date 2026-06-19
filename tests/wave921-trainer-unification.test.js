@@ -9,6 +9,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import {
+  buildTrainLaunchPlan,
+  loadRecipe,
+  normalizeTrainLauncher,
+} from '../src/distill-recipe-loader.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PY = process.env.KOLM_PYTHON || process.env.PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
@@ -33,6 +38,8 @@ const PY_FILES = [
   'workers/distill/scripts/train_gkd.py',
   'workers/distill/scripts/train_preference.py',
   'workers/distill/scripts/merge_adapters.py',
+  'scripts/train-32b-unsloth.py',
+  'scripts/train-32b-qlora.py',
   'apps/trainer/distill.py',
   'apps/trainer/merge.py',
   'apps/trainer/grpo.py',
@@ -98,6 +105,43 @@ print(json.dumps({"hf": mod.load_holdout_rows(holdout), "unsloth": umod.load_hol
   ];
   assert.deepEqual(got.hf, expected);
   assert.deepEqual(got.unsloth, expected);
+});
+
+test('W1024 Unsloth mirror plans native variant, init, GaLore, and packing parity GPU-free', { skip: !HAVE_PY }, () => {
+  const scriptDir = path.join(repoRoot, 'workers/distill/scripts');
+  const probe = `
+import importlib.util, json, os, sys
+here = ${JSON.stringify(scriptDir)}
+sys.path.insert(0, here)
+spec = importlib.util.spec_from_file_location("train_lora_unsloth_parity_probe", os.path.join(here, "train_lora_unsloth.py"))
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+print(json.dumps({
+  "qdora": mod.build_unsloth_variant_plan("qdora", "pissa_niter_16", "paged_adamw_8bit", True),
+  "galore": mod.build_unsloth_variant_plan("dora", "olora", "galore_adamw", False),
+  "variants": list(mod.UNSLOTH_NATIVE_LORA_VARIANTS),
+  "inits": list(mod.UNSLOTH_NATIVE_LORA_INITS),
+}))
+`;
+  const r = spawnSync(PY, ['-c', probe], { stdio: 'pipe', timeout: 60000 });
+  assert.equal(r.status, 0, (r.stderr || '').toString());
+  const got = JSON.parse((r.stdout || '').toString());
+  assert.deepEqual(got.qdora.peft_kwargs, {
+    use_rslora: true,
+    use_dora: true,
+    init_lora_weights: 'pissa_niter_16',
+  });
+  assert.equal(got.qdora.packing, true);
+  assert.ok(got.qdora.features.includes('packing'));
+  assert.ok(got.qdora.native_parity.rslora);
+  assert.ok(got.qdora.native_parity.dora);
+  assert.ok(got.qdora.native_parity.pissa_olora_init);
+  assert.equal(got.galore.optim, 'galore_adamw');
+  assert.ok(got.galore.native_parity.galore_training_args);
+  assert.ok(got.variants.includes('rslora'));
+  assert.ok(got.variants.includes('dora'));
+  assert.ok(got.inits.includes('pissa_niter_16'));
+  assert.ok(got.inits.includes('olora'));
 });
 
 test('train_lora.py backend selector helpers are GPU-free', { skip: !HAVE_PY }, () => {
@@ -182,8 +226,9 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   const defJson = JSON.parse((def.stdout || '').toString());
   assert.equal(defJson.ok, true);
   assert.equal(defJson.config.lora_variant, 'rslora');
-  assert.equal(defJson.backend.selected, 'hf');
-  assert.ok(defJson.backend.hf_only_features.includes('lora_variant:rslora'));
+  assert.equal(defJson.backend.hf_only_features.includes('lora_variant:rslora'), false);
+  assert.equal(defJson.backend.unsloth_native_feature_parity.rslora, true);
+  assert.equal(defJson.backend.selected, defJson.checks.unsloth_importable ? 'unsloth' : 'hf');
   assert.equal(typeof defJson.checks.unsloth_importable, 'boolean');
   assert.equal(defJson.config.liger.requested, false);
   assert.equal(defJson.config.liger.skipped_reason, 'disabled');
@@ -198,7 +243,8 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   assert.equal(dora.status, 0);
   const doraJson = JSON.parse((dora.stdout || '').toString());
   assert.equal(doraJson.config.lora_variant, 'dora');
-  assert.equal(doraJson.backend.selected, 'hf');
+  assert.equal(doraJson.backend.hf_only_features.includes('lora_variant:dora'), false);
+  assert.equal(doraJson.backend.selected, doraJson.checks.unsloth_importable ? 'unsloth' : 'hf');
   const qdora = spawnSync(PY, [script, '--pairs', pairs, '--out', out, '--preflight-only'], {
     stdio: 'pipe', timeout: 60000, env: { ...process.env, KOLM_USE_LIGER: '0', KOLM_TRAIN_PRESET: 'qdora' },
   });
@@ -210,8 +256,9 @@ test('train_lora.py --preflight-only (default + dora) GPU-free', { skip: !HAVE_P
   assert.equal(qdoraJson.config.lora_variant, 'qdora');
   assert.equal(qdoraJson.config.optim, 'paged_adamw_8bit');
   assert.equal(qdoraJson.config.packing, true);
-  assert.equal(qdoraJson.backend.selected, 'hf');
-  assert.ok(qdoraJson.backend.hf_only_features.includes('lora_variant:qdora'));
+  assert.equal(qdoraJson.backend.hf_only_features.includes('lora_variant:qdora'), false);
+  assert.equal(qdoraJson.backend.hf_only_features.includes('packing'), false);
+  assert.equal(qdoraJson.backend.selected, qdoraJson.checks.unsloth_importable ? 'unsloth' : 'hf');
   assert.equal(typeof qdoraJson.checks.bitsandbytes_importable, 'boolean');
   const liger = spawnSync(PY, [script, '--student-base', 'Qwen/Qwen2.5-0.5B-Instruct', '--preflight-only'], {
     stdio: 'pipe', timeout: 60000, env: {
@@ -265,8 +312,16 @@ test('W616 trainer backend wiring spans recipe, CLI, worker, and mirror', () => 
   const train = fs.readFileSync(path.join(repoRoot, 'workers/distill/scripts/train_lora.py'), 'utf8');
   assert.match(train, /UNSLOTH_FAMILIES/);
   assert.match(train, /def _exec_unsloth_backend/);
-  assert.match(train, /_exec_unsloth_backend\(args, backend_plan\["reason"\]/);
+  assert.match(train, /_exec_unsloth_backend\([\s\S]+backend_plan\["reason"\]/);
+  assert.match(train, /UNSLOTH_NATIVE_LORA_VARIANTS/);
+  assert.match(train, /unsloth_native_feature_parity/);
   assert.match(train, /if args\.holdout:[\s\S]+--holdout/);
+  const unsloth = fs.readFileSync(path.join(repoRoot, 'workers/distill/scripts/train_lora_unsloth.py'), 'utf8');
+  assert.match(unsloth, /def build_unsloth_variant_plan/);
+  assert.match(unsloth, /use_rslora/);
+  assert.match(unsloth, /use_dora/);
+  assert.match(unsloth, /init_lora_weights/);
+  assert.match(unsloth, /build_packed_dataset/);
   assert.match(train, /train_preset == "qdora"[\s\S]+args\.qlora = True/);
   assert.match(train, /if qlora_active:[\s\S]+BitsAndBytesConfig/);
   assert.match(train, /LIGER_KERNEL_APIS/);
@@ -281,12 +336,108 @@ test('W616 trainer backend wiring spans recipe, CLI, worker, and mirror', () => 
   assert.match(worker, /train preset must be one of \[qdora\]/);
   assert.match(worker, /train method must be one of \[qlora, lora, full\]/);
   assert.match(worker, /pyArgs\.push\('--backend'/);
+  assert.match(worker, /buildTrainLaunchPlan/);
+  assert.match(worker, /train-launch-plan\.json/);
+  assert.match(worker, /trainLaunchPlan\.kind !== 'local_worker'/);
+  assert.match(worker, /dryRunLargeLauncher/);
+  assert.match(worker, /const py = pythonBin\(\)/);
+  assert.match(worker, /writeDistillTrainJsonlFromPairs/);
   const cli = fs.readFileSync(path.join(repoRoot, 'cli/kolm.js'), 'utf8');
   assert.match(cli, /const trainerBackend = pick\('--backend'\)/);
   assert.match(cli, /--backend=\$\{trainerBackend\}/);
   const loader = fs.readFileSync(path.join(repoRoot, 'src/distill-recipe-loader.js'), 'utf8');
   assert.match(loader, /VALID_TRAIN_BACKENDS/);
+  assert.match(loader, /VALID_TRAIN_LAUNCHERS/);
+  assert.match(loader, /buildTrainLaunchPlan/);
   assert.match(loader, /train\.backend must be one of/);
+  assert.match(loader, /train\.launcher must be one of/);
+  const u32 = fs.readFileSync(path.join(repoRoot, 'scripts/train-32b-unsloth.py'), 'utf8');
+  assert.match(u32, /KOLM_32B_PAIRS/);
+  const hf32 = fs.readFileSync(path.join(repoRoot, 'scripts/train-32b-qlora.py'), 'utf8');
+  assert.match(hf32, /KOLM_32B_PAIRS/);
+  const cloud = fs.readFileSync(path.join(repoRoot, 'src/cloud-distill.js'), 'utf8');
+  assert.match(cloud, /train_launch_plan/);
+  assert.match(cloud, /buildTrainLaunchPlan/);
+});
+
+test('W1020 train.launcher recipes build first-class 32B and FSDP launch plans', () => {
+  assert.equal(normalizeTrainLauncher('32b-unsloth'), 'single_32b_unsloth');
+  assert.equal(normalizeTrainLauncher('multinode'), 'multinode_fsdp');
+
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w1020-recipe-'));
+  const baseRecipe = {
+    name: 'w1020-large-launch',
+    version: '1',
+    seeds: { target: 2, generator: 'fixtures/seeds.js' },
+    teachers: [{ slug: 'local:Qwen/Qwen2.5-72B-Instruct', rows: 2 }],
+    scrub: {},
+    train: {
+      method: 'qlora',
+      student_base: 'unsloth/Qwen2.5-32B-Instruct-bnb-4bit',
+      epochs: 1,
+      batch_size: 1,
+      lr: 0.0001,
+      max_seq_len: 2048,
+      lora: { r: 32, alpha: 64 },
+      launcher: 'single_32b_unsloth',
+      steps: 12,
+      rows: 64,
+    },
+    eval: {},
+  };
+  const singlePath = path.join(tmp, 'single.json');
+  fs.writeFileSync(singlePath, JSON.stringify(baseRecipe, null, 2));
+  const loaded = loadRecipe(singlePath);
+  assert.equal(loaded.ok, true, JSON.stringify(loaded.issues || loaded.message));
+  const single = buildTrainLaunchPlan(loaded.recipe, {
+    outDir: '/workspace/out/w1020',
+    studentOut: '/workspace/out/w1020/student',
+    pairsPath: '/workspace/input/training-pairs.jsonl',
+  });
+  assert.equal(single.kind, 'single_32b_unsloth');
+  assert.equal(single.script, 'scripts/train-32b-unsloth.py');
+  assert.equal(single.env.KOLM_32B_BASE, 'unsloth/Qwen2.5-32B-Instruct-bnb-4bit');
+  assert.equal(single.env.KOLM_32B_PAIRS, '/workspace/input/training-pairs.jsonl');
+  assert.equal(single.consumes_training_pairs, true);
+
+  const fsdpRecipe = structuredClone(baseRecipe);
+  fsdpRecipe.name = 'w1020-fsdp-launch';
+  fsdpRecipe.train.student_base = 'Qwen/Qwen2.5-72B-Instruct';
+  fsdpRecipe.train.teacher_model = 'Qwen/Qwen2.5-72B-Instruct';
+  fsdpRecipe.train.launcher = 'multinode';
+  fsdpRecipe.train.launch_dry_run = true;
+  fsdpRecipe.train.distributed = {
+    nodes: 2,
+    gpus_per_node: 8,
+    gpu: 'a100-80gb',
+    launcher: 'torchrun',
+    trainer: 'distill',
+    params_b: 72,
+  };
+  const fsdpPath = path.join(tmp, 'fsdp.json');
+  fs.writeFileSync(fsdpPath, JSON.stringify(fsdpRecipe, null, 2));
+  const loadedFsdp = loadRecipe(fsdpPath);
+  assert.equal(loadedFsdp.ok, true, JSON.stringify(loadedFsdp.issues || loadedFsdp.message));
+  const fsdp = buildTrainLaunchPlan(loadedFsdp.recipe, {
+    outDir: '/workspace/out/w1020',
+    studentOut: '/workspace/out/w1020/student',
+    pairsPath: '/workspace/input/training-pairs.jsonl',
+    dryRun: true,
+  });
+  assert.equal(fsdp.kind, 'multinode_fsdp');
+  assert.equal(fsdp.distributed.world_size, 16);
+  assert.ok(fsdp.args.includes('--dry-run'));
+  assert.ok(fsdp.args.includes('--teacher-model'));
+  assert.ok(fsdp.args.includes('--train-jsonl'));
+  assert.equal(fsdp.required_args_missing.length, 0);
+
+  const invalid = structuredClone(baseRecipe);
+  invalid.train.launcher = 'warp-drive';
+  const badPath = path.join(tmp, 'bad.json');
+  fs.writeFileSync(badPath, JSON.stringify(invalid, null, 2));
+  const bad = loadRecipe(badPath);
+  assert.equal(bad.ok, false);
+  assert.ok(bad.issues.some((i) => i.includes('train.launcher must be one of')));
 });
 
 test('train_grpo.py + train_gkd.py + train_preference.py preflights GPU-free', { skip: !HAVE_PY }, () => {

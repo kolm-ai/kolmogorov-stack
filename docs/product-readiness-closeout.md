@@ -25,11 +25,11 @@ This file is the DoD backstop for every readiness item that is not yet `shipped`
 
 Build or proof required:
 - Run public tasks against Kolm artifacts, OpenAI, Anthropic, Gemini, local GGUF, browser worker, and at least one hosted open-model baseline.
-- Publish raw JSON, command lines, model versions, hardware, latency, cost, and scoring method.
-- Add freshness and retest cadence to /benchmarks.
+- Publish raw JSON, command lines, model versions, hardware, latency, cost, scoring method, and benchmark harness configuration.
+- Attach statistical uncertainty, contamination provenance, leaderboard stability analysis, freshness windows, and retest cadence to /benchmarks.
 
 Done when:
-- /benchmarks contains reproducible multi-provider data and raw report links.
+- /benchmarks contains reproducible multi-provider data, raw report links, uncertainty intervals, contamination checks, and leaderboard-stability artifacts.
 - Marketing copy cites only benchmarked claims and includes dataset/date context.
 - verify:sota passes with public leaderboard evidence attached.
 
@@ -37,6 +37,7 @@ Verification:
 - `npm run verify:benchmark-evidence`
 - `npm run verify:sota`
 - `node scripts/bench-compare.mjs --help`
+- `node scripts/bench-compare.mjs --matrix reports/benchmarks/provider-matrix.json --public`
 
 Evidence paths:
 - `src/benchmark-evidence.js`
@@ -56,11 +57,13 @@ Evidence paths:
 Build or proof required:
 - Collect SOC 2, ISO 27001, HIPAA BAA, GDPR DPA, FedRAMP boundary, SBOM, and SLSA evidence packets.
 - Attach auditor reports or signed attestations through reports/compliance-certification-manifest.json.
+- Attach authority-reference crosswalks, control-period dates, system-boundary scope, evidence-register hashes, and chain-of-custody reviewer-independence metadata for every claimed control.
 - Update public trust pages to distinguish controls implemented from certifications awarded.
 
 Done when:
 - Trust pages link dated auditor/certification evidence or stay scoped to implemented controls.
 - Enterprise readiness exports include the same evidence IDs and manifest hashes.
+- Compliance audit promotes live_certification_verified only after retained evidence, evidence-register, and signature artifacts all hash-match.
 - verify:sota passes with certification evidence attached or this item remains explicitly blocked.
 
 Verification:
@@ -197,6 +200,7 @@ Verification:
 - `npm run verify:sdk-manifest`
 - `node scripts/verify-sdk-dist.mjs sdk-ts --json`
 - `node scripts/verify-sdk-dist.mjs sdk-rn --json`
+- `node scripts/verify-python-package-dist.mjs --json`
 - `npm run verify:package-release`
 - `node scripts/build-browser-extension.mjs --dry-run --json`
 - `node --test --test-concurrency=1 tests/wave591-package-local-build-contract.test.js`
@@ -215,6 +219,7 @@ Evidence paths:
 - `src/package-release-readiness.js`
 - `scripts/package-release-readiness.mjs`
 - `scripts/verify-sdk-dist.mjs`
+- `scripts/verify-python-package-dist.mjs`
 - `docs/package-release-readiness.md`
 - `packages/sdk-ts/dist/index.js`
 - `packages/sdk-rn/dist/index.js`

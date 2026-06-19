@@ -35,17 +35,20 @@
 
 import { sign as ed25519Sign, verify as ed25519Verify, keyFingerprint } from './ed25519.js';
 import { canonicalJson } from './cid.js';
+import { SLSA_PROFILE_IDS, getSlsaProfile } from './slsa-profile-registry.js';
+
+export const MODEL_ARTIFACT_SLSA_PROFILE = getSlsaProfile(SLSA_PROFILE_IDS.MODEL_ARTIFACT);
 
 // ---------------------------------------------------------------------------
 // Spec constants (authoritative type URIs - primary sources).
 // ---------------------------------------------------------------------------
-export const INTOTO_STATEMENT_TYPE = 'https://in-toto.io/Statement/v1';
-export const SLSA_PROVENANCE_PREDICATE_TYPE = 'https://slsa.dev/provenance/v1';
-export const INTOTO_DSSE_PAYLOAD_TYPE = 'application/vnd.in-toto+json';
-export const KOLM_BUILD_TYPE = 'https://kolm.ai/compile/v1';
+export const INTOTO_STATEMENT_TYPE = MODEL_ARTIFACT_SLSA_PROFILE.statement_type;
+export const SLSA_PROVENANCE_PREDICATE_TYPE = MODEL_ARTIFACT_SLSA_PROFILE.predicate_type;
+export const INTOTO_DSSE_PAYLOAD_TYPE = MODEL_ARTIFACT_SLSA_PROFILE.payload_type;
+export const KOLM_BUILD_TYPE = MODEL_ARTIFACT_SLSA_PROFILE.build_type;
 // Honest conformance bar - see header. NEVER bump to L3 without a hardened,
 // identity-bound builder.
-export const KOLM_SLSA_CONFORMANCE = 'SLSA Provenance v1 (Build L2 shape)';
+export const KOLM_SLSA_CONFORMANCE = MODEL_ARTIFACT_SLSA_PROFILE.conformance;
 
 const HEX64_RE = /^[0-9a-f]{64}$/;
 const HEX128_RE = /^[0-9a-f]{128}$/;
@@ -557,9 +560,18 @@ export function emitArtifactAttestation({
 }
 
 export const INTOTO_SLSA_SPEC = {
+  profile_id: MODEL_ARTIFACT_SLSA_PROFILE.id,
+  product_surface: MODEL_ARTIFACT_SLSA_PROFILE.product_surface,
+  owner_module: MODEL_ARTIFACT_SLSA_PROFILE.owner_module,
   statement_type: INTOTO_STATEMENT_TYPE,
   predicate_type: SLSA_PROVENANCE_PREDICATE_TYPE,
   payload_type: INTOTO_DSSE_PAYLOAD_TYPE,
   build_type: KOLM_BUILD_TYPE,
   conformance: KOLM_SLSA_CONFORMANCE,
+  key_identity_mode: MODEL_ARTIFACT_SLSA_PROFILE.key_identity_mode,
+  optional_identity_modes: MODEL_ARTIFACT_SLSA_PROFILE.optional_identity_modes,
+  keyless_oidc_option_supported: MODEL_ARTIFACT_SLSA_PROFILE.keyless_oidc_option_supported,
+  keyless_policy_module: MODEL_ARTIFACT_SLSA_PROFILE.keyless_policy_module || null,
+  slsa_build_l3_claim_allowed: MODEL_ARTIFACT_SLSA_PROFILE.slsa_build_l3_claim_allowed,
+  requires_hardened_builder_for_l3: MODEL_ARTIFACT_SLSA_PROFILE.requires_hardened_builder_for_l3,
 };

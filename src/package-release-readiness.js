@@ -1,11 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 
 export const PACKAGE_RELEASE_SPEC = 'kolm-package-release-readiness-1';
 export const PACKAGE_RELEASE_MANIFEST_SPEC = 'kolm-package-release-manifest-1';
 
 const SECRET_VALUE_RE = /\b(?:ks_[a-z0-9_]{12,}|sk-[a-z0-9_-]{12,}|AKIA[0-9A-Z]{16}|AIza[0-9A-Za-z_-]{20,})\b/i;
 const SHA256_RE = /^(?:sha256:)?[a-f0-9]{64}$/i;
+const RELEASE_ARTIFACT_PATH_RE = /^reports\/releases\/[a-z0-9][a-z0-9._/-]*\.(?:tgz|tar\.gz|zip|whl|deb|crate|vsix|json|jsonl|sig|pem|txt)$/i;
 
 export const PACKAGE_REQUIREMENT_IDS = [
   'runtime-wasm',
@@ -73,7 +75,7 @@ export const PACKAGE_RELEASE_TARGETS = [
     manifests: ['pyproject.toml'],
     docs: ['README.md'],
     requirement_ids: ['sdk-depth'],
-    checks: ['python -m build .'],
+    checks: ['python -m build .', 'node scripts/verify-python-package-dist.mjs --package packages/sdk-python'],
   },
   {
     id: 'langchain-python',
@@ -83,7 +85,7 @@ export const PACKAGE_RELEASE_TARGETS = [
     manifests: ['pyproject.toml'],
     docs: ['README.md'],
     requirement_ids: ['sdk-depth'],
-    checks: ['python -m build .'],
+    checks: ['python -m build .', 'node scripts/verify-python-package-dist.mjs --package packages/python-langchain-kolm'],
   },
   {
     id: 'llamaindex-python',
@@ -93,7 +95,7 @@ export const PACKAGE_RELEASE_TARGETS = [
     manifests: ['pyproject.toml'],
     docs: ['README.md'],
     requirement_ids: ['sdk-depth'],
-    checks: ['python -m build .'],
+    checks: ['python -m build .', 'node scripts/verify-python-package-dist.mjs --package packages/python-llamaindex-kolm'],
   },
   {
     id: 'runtime-rs',
@@ -230,6 +232,21 @@ function validSha(v) {
   return typeof v === 'string' && SHA256_RE.test(v) && !/^(?:sha256:)?0{64}$/i.test(v);
 }
 
+function normalizeSha(v) {
+  return String(v || '').replace(/^sha256:/i, '').toLowerCase();
+}
+
+function sha256Buffer(buffer) {
+  return crypto.createHash('sha256').update(buffer).digest('hex');
+}
+
+function validReleaseArtifactPath(v) {
+  return typeof v === 'string'
+    && RELEASE_ARTIFACT_PATH_RE.test(v)
+    && !v.includes('..')
+    && !v.includes('\\');
+}
+
 function parseJsonFile(root, rel) {
   const full = path.join(root, rel);
   if (!fs.existsSync(full)) return null;
@@ -259,9 +276,13 @@ export function packageReleaseManifestTemplate() {
       published_at: 'REPLACE_WITH_ISO_TIMESTAMP',
       registry_url: null,
       artifact_url: null,
+      artifact_path: `reports/releases/${target.id}/artifact.tgz`,
       artifact_sha256: null,
+      sbom_path: `reports/releases/${target.id}/sbom.spdx.json`,
       sbom_sha256: null,
+      provenance_path: `reports/releases/${target.id}/provenance.intoto.jsonl`,
       provenance_sha256: null,
+      signature_bundle_path: `reports/releases/${target.id}/signature-bundle.sig`,
       signature_bundle_sha256: null,
       local_checks_passed: false,
       local_checks: target.checks.slice(),
@@ -294,6 +315,9 @@ export function validatePackageReleaseManifest(manifest = {}) {
     if (!nonEmpty(row.version)) failures.push(`${target.id}:version_missing`);
     if (!nonEmpty(row.published_at) || Number.isNaN(Date.parse(row.published_at))) failures.push(`${target.id}:published_at_invalid`);
     if (!isHttpsUrl(row.registry_url) && !isHttpsUrl(row.artifact_url)) failures.push(`${target.id}:registry_or_artifact_https_url_missing`);
+    for (const field of ['artifact_path', 'sbom_path', 'provenance_path', 'signature_bundle_path']) {
+      if (!validReleaseArtifactPath(row[field])) failures.push(`${target.id}:${field}_invalid`);
+    }
     for (const field of ['artifact_sha256', 'sbom_sha256', 'provenance_sha256', 'signature_bundle_sha256']) {
       if (!validSha(row[field])) failures.push(`${target.id}:${field}_invalid`);
     }
@@ -318,6 +342,40 @@ export function validatePackageReleaseManifest(manifest = {}) {
       complete_targets: failures.length === 0 ? PACKAGE_RELEASE_TARGETS.length : 0,
       failures: failures.length,
     },
+    failures,
+  };
+}
+
+export function validatePackageReleaseArtifacts(root, manifest = {}) {
+  const failures = [];
+  const rows = Array.isArray(manifest.targets) ? manifest.targets : [];
+  for (const row of rows) {
+    const id = row && row.id ? row.id : 'unknown';
+    for (const [pathField, hashField] of [
+      ['artifact_path', 'artifact_sha256'],
+      ['sbom_path', 'sbom_sha256'],
+      ['provenance_path', 'provenance_sha256'],
+      ['signature_bundle_path', 'signature_bundle_sha256'],
+    ]) {
+      const rel = row && row[pathField];
+      if (!validReleaseArtifactPath(rel)) {
+        failures.push(`${id}:${pathField}_invalid`);
+        continue;
+      }
+      const full = path.join(root, rel);
+      if (!fs.existsSync(full)) {
+        failures.push(`${id}:${rel}:missing`);
+        continue;
+      }
+      const actual = sha256Buffer(fs.readFileSync(full));
+      if (validSha(row[hashField]) && actual !== normalizeSha(row[hashField])) {
+        failures.push(`${id}:${hashField}_mismatch`);
+      }
+    }
+  }
+  return {
+    ok: failures.length === 0,
+    artifact_count: rows.length * 4,
     failures,
   };
 }
@@ -598,9 +656,13 @@ export function auditPackageReleaseReadiness(options = {}) {
   const releaseVersion = rootVersion(root);
   let release_manifest = null;
   let release_manifest_validation = null;
+  let release_artifact_validation = null;
   try {
     release_manifest = parseJsonFile(root, 'reports/package-release-manifest.json');
     release_manifest_validation = release_manifest ? validatePackageReleaseManifest(release_manifest) : null;
+    release_artifact_validation = release_manifest && release_manifest_validation && release_manifest_validation.ok
+      ? validatePackageReleaseArtifacts(root, release_manifest)
+      : null;
   } catch (e) {
     release_manifest_validation = {
       spec: PACKAGE_RELEASE_MANIFEST_SPEC,
@@ -610,8 +672,12 @@ export function auditPackageReleaseReadiness(options = {}) {
       counts: { targets: 0, required_targets: PACKAGE_RELEASE_TARGETS.length, complete_targets: 0, failures: 1 },
       failures: [`reports/package-release-manifest.json:invalid_json:${String(e.message || e)}`],
     };
+    release_artifact_validation = null;
   }
-  const releaseManifestPublishReady = Boolean(release_manifest_validation && release_manifest_validation.ok);
+  const releaseManifestPublishReady = Boolean(
+    release_manifest_validation && release_manifest_validation.ok
+    && release_artifact_validation && release_artifact_validation.ok
+  );
   const targets = [];
   for (const target of PACKAGE_RELEASE_TARGETS) {
     const failures = [];
@@ -689,6 +755,7 @@ export function auditPackageReleaseReadiness(options = {}) {
       path: 'reports/package-release-manifest.json',
       exists: Boolean(release_manifest),
       validation: release_manifest_validation,
+      artifacts: release_artifact_validation,
     },
     failures,
     publish_blockers,

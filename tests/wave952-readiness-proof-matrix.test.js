@@ -25,8 +25,8 @@ test('W952 package wiring makes readiness proof a control and depth gate', () =>
     pkg.scripts['verify:readiness-proof-matrix'],
     'node scripts/build-readiness-proof-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave952-readiness-proof-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:otel-matrix && npm run build:readiness-proof-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['build:control-files'], /build:otel-matrix && npm run build:readiness-proof-matrix && npm run build:frontier-delta-freshness && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:frontier-delta-freshness && npm run verify:file-ledger/);
   assert.match(pkg.scripts['verify:depth'], /verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:meta-routes/);
 
   const releaseVerify = fs.readFileSync(path.join(ROOT, 'scripts', 'release-verify.cjs'), 'utf8');

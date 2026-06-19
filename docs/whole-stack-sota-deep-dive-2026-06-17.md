@@ -33,6 +33,16 @@ Each category is tied back to the backend atomic component ledger, product SOTA
 readiness, frontier maps, math frontier, research atlas, buildbook, and
 implementation spec.
 
+## Source Authority
+
+`research/strategy-2026/frontier-deltas.json` is retained as the historical
+research baseline. Current readiness is controlled by
+`docs/STACK-TECH-SPEC-2026-06-15.md`, this generated SOTA ledger, the master
+component spec sheet, and
+`docs/internal/frontier-delta-freshness.json`. The freshness report prevents old
+critical or major raw-delta claims from being treated as live after later
+W-wave closures land.
+
 ## Review Standard
 
 Every category must carry:
@@ -80,7 +90,8 @@ the improvement tracks aligned with current external references.
 
 ## Gate
 
-`npm run verify:stack-sota` checks that the generated ledger is current and that
-all 16 stack categories have local evidence, frontier gaps, atomic components,
-improvement tracks, and verification commands. The gate is included in
-`npm run verify:depth`.
+`npm run verify:stack-sota` checks that the generated ledger is current, that
+the frontier-delta freshness report is current, and that all 16 stack
+categories have local evidence, frontier gaps, atomic components, improvement
+tracks, and verification commands. The gate is included in `npm run
+verify:depth`.

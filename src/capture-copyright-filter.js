@@ -1,4 +1,4 @@
-// W708-4 - Copyright risk flagger for capture rows.
+// W708-4 + W1022 - Copyright risk flagger for capture rows.
 //
 // kolm.ai captures user inputs/outputs as training data. External reviewer
 // flagged the risk that captures could contain copyrighted material (book
@@ -11,16 +11,19 @@
 //   - OBSERVABILITY ONLY. This module never blocks a capture write. The
 //     wiring site (capture-store.js insertCapture) calls attachCopyrightFlag
 //     inside a try/catch so any failure here is silent.
-//   - Small + obvious. The denylist below is intentionally tiny (~25 entries)
-//     and matches things that scream "I am copyrighted prose." A real
-//     content-classifier belongs in a worker package; this is the lightweight
-//     in-process scanner that gets called on every capture.
+//   - Bounded + local. The scanner is dependency-free, caps bytes scanned, and
+//     reuses the in-repo copyright fingerprint detector instead of calling an
+//     external classifier from the capture hot path.
 //   - Low-confidence reasons are flagged as such so downstream consumers can
 //     decide whether to act on prose-shape heuristics (high comma density,
 //     long lines) versus high-confidence matches (literal "Subscribe to read
 //     more", "© 2024 NYT Co.").
 //
 // Returns a structured envelope; never throws on malformed input.
+
+import { scanText as scanCopyrightFingerprints } from './copyright-detector.js';
+
+export const CAPTURE_COPYRIGHT_FILTER_VERSION = 'w1022-license-aware-copyright-filter-v1';
 
 // Hardcoded corpus of high-confidence copyright-risk markers. Keep small and
 // obvious. Each entry is a literal lowercase substring matched against the
@@ -72,6 +75,42 @@ const COPYRIGHT_YEAR_RE = /(©|copyright\s*\(c\)|copyright\s+©|\(c\)\s*\d{4})\s
 // also catches anyone explaining something in long sentences.
 const PROSE_LINE_MIN_LEN = 200;
 const PROSE_LINE_COMMA_DENSITY = 1 / 80;
+const LONGFORM_SOURCE_MIN_CHARS = 300;
+const FINGERPRINT_RISK_WEIGHT = 0.25;
+
+const PERMISSIVE_LICENSES = new Set([
+  'apache-2.0',
+  'mit',
+  'bsd-2-clause',
+  'bsd-3-clause',
+  'isc',
+  'cc0-1.0',
+  'cc-by-4.0',
+  'public-domain',
+  'unlicense',
+]);
+
+const RESTRICTED_LICENSES = new Set([
+  'all-rights-reserved',
+  'proprietary',
+  'closed',
+  'unknown',
+  'cc-by-nc-4.0',
+  'cc-by-nc-sa-4.0',
+  'cc-by-nd-4.0',
+  'cc-by-nc-nd-4.0',
+]);
+
+const SOURCE_TYPES_REQUIRING_LICENSE = new Set([
+  'article',
+  'book',
+  'dataset',
+  'pdf',
+  'public_corpus',
+  'scrape',
+  'web',
+  'webpage',
+]);
 
 function toFlaggableText(input) {
   if (input == null) return '';
@@ -84,6 +123,65 @@ function toFlaggableText(input) {
   }
 }
 
+function normalizeLicense(value) {
+  if (value == null) return null;
+  const s = String(value).trim().toLowerCase();
+  if (!s) return null;
+  return s
+    .replace(/^spdx:/, '')
+    .replace(/^license:/, '')
+    .replace(/\s+/g, '-')
+    .replace(/_/g, '-');
+}
+
+function pickSourceLicense(opts = {}) {
+  return opts.source_license
+    ?? opts.license
+    ?? opts.content_license
+    ?? opts.dataset_license
+    ?? opts.metadata?.source_license
+    ?? opts.metadata?.license
+    ?? null;
+}
+
+function pickSourceType(opts = {}) {
+  return opts.source_type
+    ?? opts.source_kind
+    ?? opts.capture_source
+    ?? opts.metadata?.source_type
+    ?? opts.metadata?.source_kind
+    ?? null;
+}
+
+function licensePolicyFor(opts = {}, scanChars = 0) {
+  const normalized = normalizeLicense(pickSourceLicense(opts));
+  const sourceType = pickSourceType(opts);
+  const normalizedSourceType = sourceType == null ? null : String(sourceType).trim().toLowerCase();
+  const sourceRequiresLicense = SOURCE_TYPES_REQUIRING_LICENSE.has(normalizedSourceType || '');
+  const requireLicense = opts.require_source_license === true
+    || (sourceRequiresLicense && scanChars >= LONGFORM_SOURCE_MIN_CHARS);
+  const permitted = normalized ? PERMISSIVE_LICENSES.has(normalized) : false;
+  const restricted = normalized ? RESTRICTED_LICENSES.has(normalized) : false;
+  return {
+    source_type: normalizedSourceType,
+    normalized_license: normalized,
+    permitted,
+    restricted,
+    require_source_license: requireLicense,
+    missing_required_license: requireLicense && !normalized,
+    version: CAPTURE_COPYRIGHT_FILTER_VERSION,
+  };
+}
+
+function pushReason(result, reason) {
+  if (!result.reasons.includes(reason)) result.reasons.push(reason);
+}
+
+function addRisk(result, score) {
+  result.risk_score = Math.min(1, Math.max(0, result.risk_score + score));
+  if (result.risk_score > 0) result.flagged = true;
+}
+
 // Flag a single text blob for copyright risk. Returns:
 //   { flagged: boolean, reasons: string[], matched_phrases: string[] }
 //
@@ -94,11 +192,21 @@ function toFlaggableText(input) {
 // opts:
 //   - max_scan_chars: cap how much of the text to scan (default 32K)
 export function flagCopyrightRisk(captureText, opts = {}) {
-  const result = { flagged: false, reasons: [], matched_phrases: [] };
+  const result = {
+    flagged: false,
+    reasons: [],
+    matched_phrases: [],
+    fingerprint_hits: [],
+    risk_score: 0,
+    scanned_chars: 0,
+    license_policy: null,
+    version: CAPTURE_COPYRIGHT_FILTER_VERSION,
+  };
   const text = toFlaggableText(captureText);
   if (!text) return result;
   const maxScan = Number(opts && opts.max_scan_chars) || 32768;
   const scan = text.length > maxScan ? text.slice(0, maxScan) : text;
+  result.scanned_chars = scan.length;
   const lower = scan.toLowerCase();
 
   // High-confidence substring matches against the hardcoded corpus.
@@ -108,17 +216,28 @@ export function flagCopyrightRisk(captureText, opts = {}) {
     }
   }
   if (result.matched_phrases.length > 0) {
-    result.flagged = true;
-    result.reasons.push('flagged-phrase-match');
+    addRisk(result, 0.75);
+    pushReason(result, 'flagged-phrase-match');
   }
 
   // Copyright header near the start of the text.
   const head = scan.slice(0, 500);
   if (COPYRIGHT_YEAR_RE.test(head)) {
-    result.flagged = true;
-    if (!result.reasons.includes('copyright-header')) {
-      result.reasons.push('copyright-header');
-    }
+    addRisk(result, 0.75);
+    pushReason(result, 'copyright-header');
+  }
+
+  // W1022: reuse the richer local fingerprint pack so this hot-path filter is
+  // not weaker than the staged-capture quarantine scanner.
+  const fingerprint = scanCopyrightFingerprints(scan, { max_scan_chars: maxScan });
+  if (fingerprint.ok && Array.isArray(fingerprint.hits) && fingerprint.hits.length > 0) {
+    result.fingerprint_hits = fingerprint.hits.slice(0, 16).map((hit) => ({
+      kind: hit.kind,
+      matched: hit.matched,
+      index: hit.index,
+    }));
+    addRisk(result, Math.min(1, fingerprint.risk_score || (result.fingerprint_hits.length * FINGERPRINT_RISK_WEIGHT)));
+    pushReason(result, 'copyright-fingerprint-match');
   }
 
   // Low-confidence prose heuristic: any single line >200 chars with high
@@ -130,12 +249,23 @@ export function flagCopyrightRisk(captureText, opts = {}) {
     const commaCount = (line.match(/,/g) || []).length;
     const density = commaCount / line.length;
     if (density >= PROSE_LINE_COMMA_DENSITY) {
-      result.flagged = true;
-      if (!result.reasons.includes('possibly-copyrighted-prose:low-confidence')) {
-        result.reasons.push('possibly-copyrighted-prose:low-confidence');
-      }
+      addRisk(result, 0.25);
+      pushReason(result, 'possibly-copyrighted-prose:low-confidence');
       break; // one suspicious line is enough; don't spam reasons
     }
+  }
+
+  // W1022: license-aware local policy. This is still not a legal verdict; it
+  // makes source provenance explicit and gives downstream filters a stable
+  // reason when a web/public-corpus row lacks an allowed source license.
+  const policy = licensePolicyFor(opts, scan.length);
+  result.license_policy = policy;
+  if (policy.restricted) {
+    addRisk(result, 1);
+    pushReason(result, 'source-license-disallowed');
+  } else if (policy.missing_required_license) {
+    addRisk(result, 0.5);
+    pushReason(result, 'source-license-missing');
   }
 
   return result;
@@ -150,6 +280,9 @@ export function flagCopyrightRisk(captureText, opts = {}) {
 //   eventRow.copyright_flagged: boolean
 //   eventRow.copyright_reasons: string[]      (combined, deduped)
 //   eventRow.copyright_matched_phrases: string[]  (combined, deduped, capped)
+//   eventRow.copyright_fingerprint_hits: string[] (combined, capped)
+//   eventRow.copyright_risk_score: number 0..1
+//   eventRow.copyright_policy: source-license policy envelope
 export function attachCopyrightFlag(eventRow) {
   if (!eventRow || typeof eventRow !== 'object') return eventRow;
   try {
@@ -158,17 +291,31 @@ export function attachCopyrightFlag(eventRow) {
     // either layer.
     const inputText = eventRow.prompt != null ? eventRow.prompt : eventRow.prompt_redacted;
     const outputText = eventRow.response != null ? eventRow.response : eventRow.response_redacted;
+    const meta = {
+      source_type: eventRow.source_type || eventRow.capture_source || eventRow.content_source || null,
+      source_license: eventRow.source_license || eventRow.content_license || eventRow.dataset_license || eventRow.license || null,
+    };
 
-    const inFlag = flagCopyrightRisk(inputText);
-    const outFlag = flagCopyrightRisk(outputText);
+    const inFlag = flagCopyrightRisk(inputText, meta);
+    const outFlag = flagCopyrightRisk(outputText, meta);
 
     const flagged = inFlag.flagged || outFlag.flagged;
     const reasons = Array.from(new Set([...inFlag.reasons, ...outFlag.reasons]));
     const matched = Array.from(new Set([...inFlag.matched_phrases, ...outFlag.matched_phrases])).slice(0, 16);
+    const fingerprints = [...inFlag.fingerprint_hits, ...outFlag.fingerprint_hits]
+      .map((hit) => ({ kind: hit.kind, matched: hit.matched }))
+      .slice(0, 16);
 
     eventRow.copyright_flagged = flagged;
     eventRow.copyright_reasons = reasons;
     eventRow.copyright_matched_phrases = matched;
+    eventRow.copyright_fingerprint_hits = fingerprints;
+    eventRow.copyright_risk_score = Math.max(inFlag.risk_score || 0, outFlag.risk_score || 0);
+    eventRow.copyright_policy = {
+      version: CAPTURE_COPYRIGHT_FILTER_VERSION,
+      input: inFlag.license_policy,
+      output: outFlag.license_policy,
+    };
   } catch (_) {
     // Honesty contract: if scanning fails for any reason, stamp the row with
     // a "scan failed" marker so downstream can tell apart "not flagged" from
@@ -177,6 +324,9 @@ export function attachCopyrightFlag(eventRow) {
       eventRow.copyright_flagged = false;
       eventRow.copyright_reasons = ['scan-error'];
       eventRow.copyright_matched_phrases = [];
+      eventRow.copyright_fingerprint_hits = [];
+      eventRow.copyright_risk_score = 0;
+      eventRow.copyright_policy = { version: CAPTURE_COPYRIGHT_FILTER_VERSION, error: 'scan-error' };
     } catch (_) { /* row is frozen or otherwise unwritable - give up */ }
   }
   return eventRow;
@@ -188,4 +338,10 @@ export const _internals = {
   COPYRIGHT_YEAR_RE,
   PROSE_LINE_MIN_LEN,
   PROSE_LINE_COMMA_DENSITY,
+  LONGFORM_SOURCE_MIN_CHARS,
+  PERMISSIVE_LICENSES,
+  RESTRICTED_LICENSES,
+  SOURCE_TYPES_REQUIRING_LICENSE,
+  normalizeLicense,
+  licensePolicyFor,
 };

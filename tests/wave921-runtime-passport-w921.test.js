@@ -141,6 +141,31 @@ test('planRemoteDistill: runpod 14B -> ok spec with gpu_type_id', () => {
   assert.ok(plan.spec.env.KOLM_OUT_DIR);
 });
 
+test('W1020 planRemoteDistill carries train launcher env into remote specs', () => {
+  const plan = planRemoteDistill({
+    recipe: {
+      id: 'frontier-32b',
+      student: 'unsloth/Qwen2.5-32B-Instruct-bnb-4bit',
+      student_params_b: 32,
+      train_launcher: 'single_32b_unsloth',
+      train_launch_plan: {
+        kind: 'single_32b_unsloth',
+        env: {
+          KOLM_32B_BASE: 'unsloth/Qwen2.5-32B-Instruct-bnb-4bit',
+          KOLM_32B_STEPS: '12',
+        },
+      },
+    },
+    provider: 'runpod',
+    gpu: 'RTX5090',
+  });
+  assert.equal(plan.ok, true);
+  assert.equal(plan.gpu.id, 'RTX5090');
+  assert.equal(plan.spec.env.KOLM_TRAIN_LAUNCHER, 'single_32b_unsloth');
+  assert.equal(plan.spec.env.KOLM_32B_BASE, 'unsloth/Qwen2.5-32B-Instruct-bnb-4bit');
+  assert.equal(plan.spec.env.KOLM_32B_STEPS, '12');
+});
+
 test('planRemoteDistill: modal spec carries gpu + env', () => {
   const plan = planRemoteDistill({ recipe: { id: 'x', student: 'Qwen/Qwen3-8B', student_params_b: 8 }, provider: 'modal' });
   assert.equal(plan.spec.provider, 'modal');

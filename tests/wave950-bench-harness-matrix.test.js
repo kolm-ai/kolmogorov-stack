@@ -31,8 +31,8 @@ test('W950 package wiring makes the bench harness matrix a depth and control-fil
     pkg.scripts['verify:bench-harness-matrix'],
     'node scripts/build-bench-harness-matrix.cjs --check --summary && node --test --test-concurrency=1 tests/wave950-bench-harness-matrix.test.js',
   );
-  assert.match(pkg.scripts['build:control-files'], /build:artifact-matrix && npm run build:tui-workbench-matrix && npm run build:bench-harness-matrix && npm run build:otel-matrix && npm run build:readiness-proof-matrix && npm run build:file-ledger/);
-  assert.match(pkg.scripts['verify:control-files'], /verify:artifact-matrix && npm run verify:tui-workbench-matrix && npm run verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:file-ledger/);
+  assert.match(pkg.scripts['build:control-files'], /build:artifact-matrix && npm run build:tui-workbench-matrix && npm run build:bench-harness-matrix && npm run build:otel-matrix && npm run build:readiness-proof-matrix && npm run build:frontier-delta-freshness && npm run build:file-ledger/);
+  assert.match(pkg.scripts['verify:control-files'], /verify:artifact-matrix && npm run verify:tui-workbench-matrix && npm run verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:frontier-delta-freshness && npm run verify:file-ledger/);
   assert.match(pkg.scripts['verify:depth'], /verify:artifact-matrix && npm run verify:tui-workbench-matrix && npm run verify:bench-harness-matrix && npm run verify:otel-matrix && npm run verify:readiness-proof-matrix && npm run verify:meta-routes/);
 
   const ledgerBuilder = fs.readFileSync(path.join(ROOT, 'scripts', 'build-codebase-file-ledger.cjs'), 'utf8');

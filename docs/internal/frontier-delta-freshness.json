@@ -1,0 +1,610 @@
+{
+  "schema": "kolm-frontier-delta-freshness-1",
+  "updated_at": "2026-06-17",
+  "purpose": "Prevents historical frontier-delta research notes from being mistaken for current SOTA readiness after later W-wave closures land.",
+  "authority": {
+    "current_sources": [
+      "docs/STACK-TECH-SPEC-2026-06-15.md",
+      "docs/whole-stack-sota-deep-dive-2026-06-17.json",
+      "docs/master-component-spec-sheet-2026-06-17.json"
+    ],
+    "historical_research_baseline": "research/strategy-2026/frontier-deltas.json",
+    "rule": "Raw frontier deltas can preserve the original research audit, but current readiness must be read from the stack spec and generated ledgers.",
+    "status": "current_spec_verified"
+  },
+  "summary": {
+    "category_count": 16,
+    "historical_raw_gap_counts": {
+      "critical": 21,
+      "major": 38,
+      "minor": 33,
+      "closed": 3,
+      "external": 1,
+      "other": 0
+    },
+    "historical_raw_severe_gap_count": 59,
+    "categories_with_historical_raw_severe_gaps": 15,
+    "current_stack_gap_counts": {
+      "critical": 0,
+      "major": 0,
+      "minor": 0
+    },
+    "current_severe_category_count": 0,
+    "superseded_severe_categories": 15,
+    "open_external_or_release_requirements": 8,
+    "open_external_or_release_status_counts": {
+      "needs_external_partner": 2,
+      "needs_package_release": 4,
+      "needs_public_benchmark_data": 1,
+      "needs_live_certification": 1
+    }
+  },
+  "rows": [
+    {
+      "id": "distillation",
+      "current_status": "sota_review_complete_local_frontier_aligned",
+      "source_stack_spec_line": 211,
+      "raw_delta_gap_counts": {
+        "critical": 1,
+        "major": 1,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 2,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 8,
+      "closure_markers": [
+        "- [closed W956] GAD (arXiv:2511.10643), the #1 frontier black-box adversarial distillation method, is implemented with a Python minimax core/trainer (apps/trainer/gad.py), Node dispatch/doctor/prompt build (src/distill-onpolicy.js), CLI (`kolm distill onpolicy --gad`), recipe validation (support-gad), and planner defaulting for API teachers. It is logit-free and teacher-TEXT-only.",
+        "- [closed W973] Local BOND-style distribution matching now exists: W619 creates BoN target rows, W973 adds the Python Jeffreys objective and planner/catalog wiring, and W972 can report SeqKD-vs-BOND deltas hash-only. Remaining limitation: public paper-level GPU benchmark numbers for a named backbone are still external/live-run evidence, not a local fixture claim.",
+        "- [closed W972] Local SeqKD-vs-ROPD-vs-GAD method bake-off reporting now exists through `src/distill-bakeoff.js` and `scripts/distill-method-bakeoff.mjs`. Remaining limitation: hosted GPT/Claude judge selection and artifact execution are still DI/operator supplied, not default provider calls.",
+        "- (completed-local, W604) **Add ROPD/GKD/DistiLLM-2/CoT strategies to the recommender + stop recommending logit-KD against API teachers** - Implemented in src/distill-strategy.js with teacher-access classification, ROPD/GKD/DistiLLM-2/reverse-KL/cot_distill catalog entries, logit-required blockers, and CLI/script `--teacher-local` simulation. Gated by tests/wave584-distill-strategy.test.js.",
+        "- (completed-local, W619, M/low, v7) **CLOSED W619: Expose a --bon (best-of-N) rejection-sampling curation flag layering on rollout candidates** - buildBonTargets(rows, {n, judge}) selects the top candidate by scoreCandidateLocal or an injected judge, emits SeqKD/SFT JSONL rows with input/output/teacher_output, and the CLI exposes `distill preference bon --bon N`; local-worker rejection_sampling also accepts `--bon N` as the public alias for `--rs-n`. Gated by `npm run verify:distill-bon`. _[where: src/distill-preference.js buildBonTargets; cli/kolm.js preference bon + --bon alias; tests/wave921-preference-miner.test.js + tests/wave921-studio-cli.test.js]_",
+        "- (completed-local, W956, M/low, v10) **CLOSED W956: Implement GAD (Generative Adversarial Distillation) black-box trainer** - Implemented the arXiv:2511.10643 minimax loop with a pure stdlib discriminator/reward/GRPO core, lazy torch/transformers/peft LoRA training path, Node trainer resolution/doctor/prompt build/train dispatch, `kolm distill onpolicy --gad`, `support-gad` recipe validation, and planner defaulting to GAD for text-only API teachers. Gated by `npm run verify:distill-strategy` and tests/wave956-gad-onpolicy.test.js + tests/wave956-gad-cli.test.js. _[where: apps/trainer/gad.py; src/distill-onpolicy.js; src/distill-strategy.js; src/distill-recipe-loader.js; cli/kolm.js; recipes/support-gad.json]_",
+        "- (completed-local, W972, L/low, v8) **CLOSED W972: Add a method bake-off eval harness reporting numeric SeqKD vs ROPD vs GAD deltas** - Added `src/distill-bakeoff.js` with precomputed-output and injected-runner paths, callable judge and K-score seams, baseline deltas, win-rate gates, hash-only row evidence, plus `scripts/distill-method-bakeoff.mjs` for local JSONL reports. Hosted GPT/Claude judge/runners remain explicit DI, not silent defaults. _[where: src/distill-bakeoff.js; scripts/distill-method-bakeoff.mjs; tests/wave972-distill-method-bakeoff.test.js; verify:distill-strategy]_",
+        "- (completed-local, W973, M/med, v9) **CLOSED W973: Add true BOND-style distribution matching and measured BoN-vs-SeqKD delta report path** - Added `bond_jeffreys` to the Python trainer objective enum and CLI, implemented the Jeffreys token-distribution loss in torch plus a torch-free self-test, stamped BOND receipt metadata, surfaced BOND in the strategy planner only for local-logit teachers, stamped BoN targets with the BOND objective hint, and proved W972 can report SeqKD-vs-BOND deltas hash-only. Public GPU benchmark evidence remains a live-run requirement, not a local fixture claim. _[where: apps/trainer/distill.py; src/distill-preference.js; src/distill-strategy.js; src/distill-bakeoff.js; tests/wave973-bond-jeffreys-trainer.test.js; verify:distill-strategy]_"
+      ]
+    },
+    {
+      "id": "moe-distill-quant",
+      "current_status": "sota_review_complete_local_frontier_aligned",
+      "source_stack_spec_line": 275,
+      "raw_delta_gap_counts": {
+        "critical": 2,
+        "major": 2,
+        "minor": 1,
+        "closed": 1,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 4,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W958] The zero-code MoE->dense structural path is closed locally: apps/trainer/moe_to_dense.py scores experts, selects a diverse high-activation subset, concatenates selected expert FFNs into dense gate/up/down tensors, and writes a dense-init checkpoint + manifest. This is the structural stage of arXiv:2605.28207; large-model recovery KD quality still needs measured runs.",
+        "- [closed W980] The one-command MoE->dense structural collapse -> staged recovery-KD orchestration envelope now exists locally. It writes a durable pipeline manifest with recovery commands, holdout paths, measured_quality pending state, and artifact_signing pending state.",
+        "- [closed W1012] Reduced-MoE checkpoint pruning is now a first-class local output. forge-experts.analyzeExperts prune_candidates can feed executeExpertPrune(), which shells the MoE worker's residual-prune mode, writes a smaller sparse-MoE checkpoint, and carries source-analysis digests into the result envelope.",
+        "- [closed W1013] Quantization is no longer only uniform-bit per group in the MoE planning/receipt path. quantize.py now carries per-expert precision from DAQ profiles into `expert_precision_by_id`, per-expert run metadata, and byte accounting while preserving router fp16. Dense bitsandbytes kernels remain uniform where the underlying backend requires it, but the MoE expert assignment surface is no longer missing.",
+        "- [closed W629/W980] distill-strategy.js now knows about MoE teacher/base signals, recommends the worker-ready `moe_to_dense_distill` structural-collapse + recovery-plan strategy for local/open-weight MoE teachers with logits, blocks it for text-only/API teachers, and carries krafton-ai/moe-to-dense + SlimMoE method names in references.",
+        "- [closed W631/W1013] quantization-oracle.js now accepts MoE profile signals (`moe_info`, `--moe-family`, `--model-dir` detection path), surfaces `moe_mixed_policy` with router fp16 + shared/expert precision policy from `recommendQuantPolicy`, names MC-MoE/GEMQ as MoE-only candidates, and W1013 wires those candidates to experimental command-backed worker methods instead of leaving them as planning-only rows.",
+        "- [closed W1013] DynaExq, expert-parallelism, and expert offloading are now first-class MoE recommendation candidates. recommendMoeRuntimePlan emits EP/offload placement and runtime dynamic-precision args, and quantization-oracle attaches that runtime_plan under `recommendation.moe_quantization`.",
+        "- [closed W1019] MoE quant/prune planning priors can now be calibrated from measured rows: quantization-oracle consumes receipt-backed MoE quality-loss rows by method, and forge-experts derives prune impact factors/caps from measured prune rows while preserving explicit heuristic_default fallback labels.",
+        "- (completed-local, W629, S/low, v6) **CLOSED W629: Add MoE-aware strategies + frontier method names to distill-strategy oracle** - Added `moe_to_dense_distill` with krafton-ai/moe-to-dense + SlimMoE references, MoE profile inference from teacher/base family or architecture signals, local-logit and MoE-required blockers, CLI/script flags, and a worker-ready command that now routes to `kolm distill moe-to-dense --pipeline`. Gated by `npm run verify:distill-strategy`. _[where: src/distill-strategy.js STRATEGIES/moeProfileFrom/scoreStrategy/commandFor; scripts/distill-strategy.mjs; cli/kolm.js; tests/wave584-distill-strategy.test.js]_",
+        "- (completed-local, W631, M/low, v7) **CLOSED W631: Wire detectMoE into quantization-oracle so MoE inputs get expert-aware recommendations** - `rankQuantizationStrategies()` now accepts `moe_info`, CLI/script `--moe-family` / `--model-dir` signals, resolves a MoE topology, calls `recommendQuantPolicy()`, returns `recommendation.moe_quantization`, and adds `moe_mixed_policy`, `mc_moe`, and `gemq` catalog entries. `moe_mixed_policy` remains an advisory policy; W1013 upgrades MC-MoE/GEMQ from planning-only external repo rows to experimental command-backed worker methods when enabled. Gated by `npm run verify:quant-oracle`. _[where: src/quantization-oracle.js; scripts/quantization-oracle.mjs; cli/kolm.js; tests/wave582-quantization-oracle.test.js; tests/wave605-quantization-oracle-frontier.test.js]_",
+        "- (completed-local, W958, M/low, v10) **CLOSED W958: Implement MoE->dense FFN structural collapse + DO-ACP expert scoring** - Added `apps/trainer/moe_to_dense.py` and `src/moe-to-dense.js`: DO-ACP-style activation-probability plus D-optimal diversity expert selection, selected-expert dense FFN concat, torch/safetensors/JSON checkpoint paths, GPU-free self-test, manifest `recovery_distillation` handoff to `apps/trainer/distill.py`, and `kolm distill moe-to-dense`. Gated by `tests/wave958-moe-to-dense.test.js` inside `npm run verify:distill-strategy`. _[where: apps/trainer/moe_to_dense.py; src/moe-to-dense.js; cli/kolm.js; src/distill-strategy.js; tests/wave958-moe-to-dense.test.js]_",
+        "- (completed-local, W980, M/low, v10) **CLOSED W980: Add MoE->dense recovery-KD pipeline manifest** - Added `runMoeToDenseRecoveryPipeline()` and `buildMoeToDenseRecoveryPlan()` so one command runs structural collapse into `01-structural-collapse`, builds staged LM-warmup + forward-KL recovery commands in `02-recovery-kd`, records holdout inputs, and keeps measured_quality/artifact_signing pending until a real recovery run emits evidence. `distill-strategy` now recommends `kolm distill moe-to-dense --pipeline`, and CLI help exposes the path. Gated by `tests/wave958-moe-to-dense.test.js` and `tests/wave584-distill-strategy.test.js` inside `npm run verify:distill-strategy`. _[where: src/moe-to-dense.js; cli/kolm.js; src/distill-strategy.js; tests/wave958-moe-to-dense.test.js; tests/wave584-distill-strategy.test.js]_"
+      ]
+    },
+    {
+      "id": "quantization",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 333,
+      "raw_delta_gap_counts": {
+        "critical": 2,
+        "major": 4,
+        "minor": 1,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 6,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W632] quantize-bakeoff.js no longer exposes the misleading scoreJaccard fallback: when eval rows carry candidate text (`model_output`, `candidate_output`, profile-keyed output maps, etc.) it computes token-Jaccard against `eval_set.output`; otherwise the advisory fallback is named `bits_coverage_surrogate` and carries score_details instead of pretending to be accuracy.",
+        "- [closed W1009] Measured quant bakeoff rows now attach the W993 digest-only paired measurement receipt. Remaining external/product caveat: an operated GPU worker or external scorer still must supply real fp16/quant holdout metrics before a public artifact can be promoted; the local receipt contract no longer blocks this.",
+        "- [closed W1010] Rotation/distribution-shaping methods are no longer planner-only: `spinquant`, `respinquant`, and `infoquant` have experimental worker methods backed by `KOLM_*_CMD` external-command adapters, and the worker refuses success if the command produces no artifact files. Remaining caveat: Kolm does not bundle those upstream research repos or validate their pinned commits by default.",
+        "- [closed W1011] export-nvfp4.js now consumes opt-in fp4_calibration by invoking a pre-round FP4 fusion helper before modelopt quantization and recording `fp4_calibration_fusion`. Remaining caveat: full BATQuant paper-parity dense/online diagonal transform deployment needs real-model validation and runtime support; W1011 closes the previous no-consumption path.",
+        "- [closed W1013] MoE expert quant is no longer only an oracle label: `mc_moe` and `gemq` are accepted worker methods behind the experimental gate, and the MoE run metadata records `expert_precision_by_id` from DAQ-profile expert signals. Remaining caveat: Kolm still requires operator-supplied/pinned upstream MC-MoE/GEMQ commands and measured quality receipts before public claims.",
+        "- [closed W1014] NVFP4-vs-MXFP4 scale-format distinction is now surfaced to users and receipts. src/fp4-calib-plan.js exports FP4_SCALE_FORMATS, oracle/catalog candidates carry scale_format, NVFP4 recommendations emit `--calib-fp4-scale-format=nvfp4 --calib-fp4-block=16`, MXFP4 keeps block 32/E8M0 metadata, export-nvfp4 propagates the plan, and quantize.py records the chosen scale_format in fp4_calibration/fusion receipts.",
+        "- (completed-local, W605) **NVFP4/MXFP4 oracle routing: add method entries + Blackwell device preset to the oracle** - Implemented in src/quantization-oracle.js: nvfp4/mxfp4 entries carry execution_status `export_nvfp4`, export_format `nvfp4`, quant levels w4a8/w4a4, blackwell_required:true, B200/GB200/RTX-5090 presets carry blackwell:true, scoreCandidate gives a hardware-native bonus only on compatible Blackwell runtimes, and recommendation.command emits the nvfp4 export command. Gated by tests/wave605-quantization-oracle-frontier.test.js.",
+        "- (completed-local, W613) **Wire the FP4 calibration plan into the oracle recommendation** - Implemented in src/quantization-oracle.js: FP4-family primary recommendations call buildFp4CalibPlan({target:{dtype:'nvfp4',quant_level:...}}), expose recommendation.fp4_calibration_plan, add the calibration proof line, and append plan.python_flags to the NVFP4 command. cli/kolm.js now parses both `--calib-fp4-block=16` and separated flag forms, and src/export-nvfp4.js accepts fp4_calibration/fp4_calibration_plan and records run_fp4_calibration output on real exports. Gated by tests/wave613-fp4-calib-oracle.test.js.",
+        "- (completed-local, W606) **Add an enforced post-quant accuracy gate to the bakeoff + oracle proof** - Implemented in src/quantize-bakeoff.js with DEFAULT_QUANT_ACCURACY_MAX_REL_DROP=0.03 and enforceAccuracyFloor(results): measured rows above the relative K-score drop floor are rejected with accuracy_below_floor, kscore_gate failures are rejected with kscore_gate_failed, and surrogate-only rows fail closed with accuracy_gate_unmeasured unless explicitly advisory-only. quantization-oracle.js now emits recommendation.accuracy_gate and proof text names the enforced gate. Gated by tests/wave606-quant-accuracy-floor.test.js.",
+        "- (completed-local, W632, S/low, v6) **CLOSED W632: Fix scoreJaccard to actually score against eval_set or document the surrogate** - Removed the misleading scoreJaccard wrapper. `scoreProfile()` now prefers external/receipt K-score, then computes `eval_set_token_jaccard` only when candidate outputs are present, and otherwise emits the explicit `bits_coverage_surrogate` with score_details. Accuracy promotion still fails closed unless measured K-score exists. Gated by tests/wave606-quant-accuracy-floor.test.js. _[where: src/quantize-bakeoff.js; tests/wave606-quant-accuracy-floor.test.js]_",
+        "- (completed-local, W964, M/low, v8) **CLOSED W964: Make oracle quality_loss size-aware for FP4 (model-size recovery curve)** - `src/quantization-oracle.js` now gives NVFP4/MXFP4 a paramsB-dependent `quality_loss_model_size_curve`, threads the chosen prior/source/band into candidate estimates, and applies that loss before quality-floor feasibility. A 7B medical Blackwell plan now avoids NVFP4 when the floor is too high, while a 70B Blackwell plan still selects NVFP4. Gated by `npm run verify:quant-oracle` and `tests/wave605-quantization-oracle-frontier.test.js`. _[where: src/quantization-oracle.js; tests/wave605-quantization-oracle-frontier.test.js]_",
+        "- (completed-local, W965, M/low, v9) **CLOSED W965: Add W4A4 rotation/distribution frontier methods to the oracle without worker overclaim** - `src/quantization-oracle.js` catalogs SpinQuant, ReSpinQuant, and InfoQuant with activation/KV metadata and transform-family/source labels. W1010 now upgrades those rows from planning-only to experimental command-backed worker methods. Gated by `npm run verify:quant-oracle` and `tests/wave582/wave605`. _[where: src/quantization-oracle.js; tests/wave582-quantization-oracle.test.js; tests/wave605-quantization-oracle-frontier.test.js]_"
+      ]
+    },
+    {
+      "id": "kv-cache",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 389,
+      "raw_delta_gap_counts": {
+        "critical": 1,
+        "major": 2,
+        "minor": 3,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 3,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 11,
+      "closure_markers": [
+        "- [closed W1006] probe.py no longer records only the kv_policy name: live runs now expose `kv_cache` telemetry from serve.py, run a paired no-KV baseline by default, and emit digest-only `kv-cache` receipts carrying compression_ratio, retained_tokens, evicted_tokens, and peak_kv_mb when runtime/model accounting is available.",
+        "- [closed W633] Sidecar referenced but missing is closed: workers/itkv/scripts/kvpolicy.py now exists with build_press()/quantized_cache_for() parity helpers and workers/itkv/requirements.txt pins kvpress/hqq for the isolated worker. The remaining open work is runtime-side selective compression and measured quality/memory evidence, not file/package parity.",
+        "- [closed W1015] Low-rank axis (Palu/Eigen Attention) is no longer absent from KV_POLICIES: palu/eigen-attn are registered as kind:'lowrank' with rank/compression defaults, CLI aliases, passport executor metadata, and serve.py advisory handling. Runtime enforcement remains external-executor-required rather than overclaimed.",
+        "- [closed W1016] Runtime-frontier path is no longer absent from KV_POLICIES: kvquant3/kvquant4/vllm-kvcompress/sglang-hicache are registered with advisory defaults, CLI aliases, passport executor metadata, vLLM config notes, and serve.py inactive-until-executor handling. Base vLLM still only enforces fp8/KIVI-compatible quant today; active KVQuant/KV-Compress/HiCache requires upstream/custom executor evidence before public claims.",
+        "- (completed-local, W607) **Wire the real policy dispatcher into `kolm serve`** - `cli/kolm.js` now calls selectKvCachePolicy({format:runtime, modelMeta:{family,has_rope,num_hidden_layers}, hardware, workload, requested, budget/sink/window/group/residual}), sets structured KOLM_KV_POLICY for serve.py, accepts the full policy set {auto,off,streaming,h2o,snapkv,pyramidkv,kivi2,kivi4,shard}, exposes tuning flags, keeps KOLM_KV_CACHE_BACKEND='shard' only for back-compat, and applies the vLLM fallback path before emitting env.",
+        "- (completed-local, W621) **CLOSED W621: Fuse the ITKV importance profile into the dispatched policy params** - selectKvCachePolicy now consumes modelMeta/explicit kv_profile or builds a default buildItkvProfile profile, derives sink_tokens/window_tokens for streaming/shard from sink_anchor/recent_window_size unless explicit flags override them, and carries kv_profile_hash/kv_profile_version/precision_by_class/prefix_cache_enabled in params so KOLM_KV_POLICY and kvPolicyPassportEntry bind the profile. cli/kolm.js threads manifest kv_profile into the resolver. Gated by tests/wave921-serve-config.test.js + tests/wave607-kv-cache-cli-dispatch.test.js under `npm run verify:kv-cache`.",
+        "- (completed-local, W633, S/low, v4) **CLOSED W633: Add workers/itkv/scripts/kvpolicy.py + requirements.txt to satisfy the referenced parity contract** - Added workers/itkv/scripts/kvpolicy.py with dependency-free describe/self-test, build_press()/quantized_cache_for() parity helpers, and a --doctor path that exits 2 when kvpress/transformers/hqq are missing. Added workers/itkv/requirements.txt with isolated optional sidecar deps and updated worker metadata. Gated by tests/wave607-kv-cache-cli-dispatch.test.js under `npm run verify:kv-cache`. _[where: workers/itkv/scripts/kvpolicy.py; workers/itkv/requirements.txt; workers/itkv/package.json; tests/wave607-kv-cache-cli-dispatch.test.js]_",
+        "- (completed-local, W993, M/low, v8) **CLOSED W993: Add shared paired-measurement KV receipt contract** - `src/probe-harness.js measuredKvPolicyFromPair()` now computes tested KV policy fields only from matched baseline/candidate runs, carries compression_ratio/retained_tokens/evicted_tokens/peak_kv_mb/quality_delta, and returns unmeasured on missing or mismatched baselines. Gated by tests/wave993-probe-harness-paired-metrics.test.js under `npm run verify:agent-security-eval`. _[where: src/probe-harness.js; tests/wave993-probe-harness-paired-metrics.test.js]_",
+        "- (completed-local, W1006, M/low, v8) **CLOSED W1006: Measure KV policy rows against a no-KV baseline in probe.py** - apps/runtime/serve.py now reports live KV token/accounting telemetry through `KvPolicyMeter`; apps/export/probe.py defaults to `paired_kv_baseline=True`, reboots the same artifact/workload with KV off, derives tested KV fields only for matched runtime/target/workload pairs, emits `paired_kv_baseline`, and attaches digest-only `kolm.probe_measurement_receipt.v1` receipts under `probe_measurement_receipts[\"kv-cache\"]`. A `--no-paired-kv-baseline` opt-out exists for operators who need a single boot. Gated by tests/wave1006-runtime-probe-kv-baseline.test.js inside `npm run verify:kv-cache`. _[where: apps/runtime/serve.py KvPolicyMeter; apps/export/probe.py probe_artifact/_attach_paired_kv_measurement; tests/wave1006-runtime-probe-kv-baseline.test.js; package.json verify:kv-cache]_",
+        "- (completed-local, W1015, S/low, v9) **CLOSED W1015: Add low-rank KV policy registry specs without executor overclaim** - src/serve-config.js now registers palu and eigen-attn as kind:'lowrank' policies with rank/compression/reconstruction defaults, validates rank/compression inputs, exposes aliases, marks executor_status:'external_required', and emits passport metadata. cli/kolm.js exposes --kv-cache palu|eigen-attn plus --kv-rank/--kv-compression, while apps/runtime/serve.py records the request but keeps policy_active=default until a Palu/Eigen cache executor is installed. Gated by tests/wave921-serve-config.test.js, tests/wave607-kv-cache-cli-dispatch.test.js, tests/wave1006-runtime-probe-kv-baseline.test.js, and tests/wrapper-shard-wire.test.js under `npm run verify:kv-cache`. _[where: src/serve-config.js KV_POLICIES/selectKvCachePolicy/kvPolicyPassportEntry; cli/kolm.js serve handler; apps/runtime/serve.py _build_kv_cache_for_policy; tests/wave921/wave607/wave1006/wrapper-shard-wire]_",
+        "- (completed-local, W1016, S/low, v10) **CLOSED W1016: Add runtime-frontier KVQuant/KV-Compress/HiCache policy specs without upstream overclaim** - src/serve-config.js now registers kvquant3/kvquant4/vllm-kvcompress/sglang-hicache with method-specific defaults, aliases, external/upstream executor gates, vLLM emission notes, and passport metadata. cli/kolm.js exposes the policies through --kv-cache, while apps/runtime/serve.py records the request, exposes future memory-accounting math, and keeps policy_active=default until a KVQuant/KV-Compress/HiCache executor is installed. Gated by tests/wave921-serve-config.test.js, tests/wave607-kv-cache-cli-dispatch.test.js, tests/wave1006-runtime-probe-kv-baseline.test.js, and tests/wrapper-shard-wire.test.js under `npm run verify:kv-cache`. _[where: src/serve-config.js KV_POLICIES/selectKvCachePolicy/emitKvPolicyVllmConfig; cli/kolm.js serve handler; apps/runtime/serve.py _kv_policy_memory_fraction/_build_kv_cache_for_policy/_try_vllm; tests/wave921/wave607/wave1006/wrapper-shard-wire]_"
+      ]
+    },
+    {
+      "id": "speculative-decoding",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 440,
+      "raw_delta_gap_counts": {
+        "critical": 1,
+        "major": 2,
+        "minor": 3,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 3,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W957] EAGLE-3 head training now exists locally: `apps/trainer/eagle3_train.py` is the default in-repo trainer, implements multi-layer feature fusion and training-time-test acceptance scheduling in Python, and writes the manifest shape consumed by `resolveEagleHead()`. The remaining gap is measured GPU training quality/throughput evidence, not a missing trainer boundary. Medusa remains covered by the legacy `train_specdecode.py` worker path.",
+        "- [closed W630] Serve-time acceptance-rate / accepted-length passport plumbing now exists for vLLM: `serve.py` parses the documented spec_decode Prometheus counters, `/info` exposes metrics + a `speculative_decoding` evidence block, `apps/export/probe.py` preserves `accepted_length`, and `src/serve-config.js speculativeHeadPassportEntry` accepts the legacy `mean_accept_length` alias.",
+        "- [closed W994] Net `throughput_speedup` is now measured by `apps/export/probe.py` when a speculative run is active and the paired no-draft baseline completes on the same runtime/target/workload. If the baseline fails or mismatches, the value remains null and the digest-only receipt carries the failure reason.",
+        "- [closed W1017] P-EAGLE/`eagle3_parallel`, DeepSeek native MTP/`deepseek_mtp`, and Hydra/`hydra` now exist as advisory method specs with alias normalization, executor metadata, passport fields, and JS/Python guards. The remaining gap is a real upstream/custom executor plus paired probe receipts before claiming them as shipped runtime modes.",
+        "- [closed W635] Registry drift is closed for the draft-model auto-pairing maps: apps/trainer/speculative.py now matches src/speculative-decoding.js exactly, including qwen3, gemma-3/2, llama-3.1, qwen2.5-72b, and Mistral entries plus the quant-suffix fallback. EAGLE_HEAD_REGISTRY remains separate by design and is tested as head-repo-only.",
+        "- [closed W634] apps/runtime/medusa.py SpecConfig.for_vllm now routes draft_model, medusa, eagle, and eagle2 modes through apps/runtime/eagle3.py build_vllm_speculative_config, emits raw `model` plus `method` where required, and has a GPU-free self-test asserting no deprecated flat key or unsupported batch-disable key is produced.",
+        "- (completed-local, W625, S/low, v7) **CLOSED W625: Preserve EAGLE draft-tree params through the vLLM runtime contract without unsupported vLLM keys** - `buildServeConfig()` now emits `KOLM_SPEC_EAGLE_TOPK` / `KOLM_SPEC_NUM_STEPS` / `KOLM_SPEC_NUM_DRAFT_TOKENS`, `buildSpeculativeTreePolicy()` records the sidecar in the serve envelope and dry-run report, `serve.py` reads it into `speculative_tree_policy` for `--print-config` and `/info`, and `eagle3.py` mirrors the sidecar helper while keeping `build_vllm_speculative_config()` limited to documented vLLM keys. Gated by `tests/wave921-serve-config.test.js`, `apps/runtime/eagle3.py --self-test`, and `apps/runtime/serve.py --self-test`. _[where: src/serve-config.js; apps/runtime/serve.py; apps/runtime/eagle3.py; tests/wave921-serve-config.test.js]_",
+        "- (completed-local, W635, S/low, v5) **CLOSED W635: Consolidate draft-pairing registries and test the intentional EAGLE split** - apps/trainer/speculative.py now carries the same 17-entry DRAFT_PAIRINGS map as src/speculative-decoding.js and mirrors JS's quant-suffix fallback. tests/wave635-speculative-registry-sync.test.js imports the JS map, loads the Python map through Python, deep-compares them, checks fallback behavior, and asserts EAGLE_HEAD_REGISTRY remains a head-repo registry rather than a draft-model duplicate. Gated by `npm run verify:kv-cache`. _[where: src/speculative-decoding.js; apps/trainer/speculative.py; src/serve-config.js; tests/wave635-speculative-registry-sync.test.js; package.json]_",
+        "- (completed-local, W630, M/low, v6) **CLOSED W630: Capture vLLM spec-decode acceptance metrics into the runtime passport** - `serve.py` now parses `vllm:spec_decode_num_accepted_tokens_total`, `vllm:spec_decode_num_draft_tokens_total`, and `vllm:spec_decode_num_drafts`, surfaces `/info.metrics.acceptance_rate` / `accepted_length`, emits `/info.speculative_decoding`, and keeps invalid/missing counters null. `apps/export/probe.py` carries `accepted_length` into passport JSON, and `speculativeHeadPassportEntry` normalizes the legacy `mean_accept_length` alias. Covered by `apps/runtime/serve.py --self-test`, `apps/export/probe.py --self-test`, and `tests/wave921-serve-config.test.js`. _[where: apps/runtime/serve.py; apps/export/probe.py; src/serve-config.js; tests/wave921-serve-config.test.js]_",
+        "- (completed-local, W993, M/low, v6) **CLOSED W993: Add shared paired-measurement spec-decode receipt contract** - `src/probe-harness.js measuredSpeculativeFromPair()` now derives `throughput_speedup = tok_s_spec / tok_s_baseline` only from matched runtime/target/workload baseline and candidate runs, returns unmeasured on missing/mismatched baselines, and preserves digest-only workload evidence. Gated by tests/wave993-probe-harness-paired-metrics.test.js. _[where: src/probe-harness.js; tests/wave993-probe-harness-paired-metrics.test.js]_",
+        "- (completed-local, W994, M/low, v6) **CLOSED W994: Measure speculative `throughput_speedup` against a no-draft baseline in probe.py** - `apps/export/probe.py` now defaults to `paired_speculative_baseline=True`: when the candidate run reports speculative decoding, it launches the same artifact/workload with `KOLM_SERVE_SPECULATIVE_DRAFT=''`, computes `throughput_speedup` only for matched runtime/target/workload pairs, emits `paired_speculative_baseline`, and attaches a digest-only `kolm.probe_measurement_receipt.v1`. A `--no-paired-speculative-baseline` opt-out exists for operators who need a single boot. Gated by tests/wave994-runtime-probe-paired-baseline.test.js inside `npm run verify:kv-cache`. _[where: apps/export/probe.py probe_artifact/_attach_paired_speculative_speedup; tests/wave994-runtime-probe-paired-baseline.test.js; package.json verify:kv-cache]_",
+        "- (completed-local, W634, S/low, v4) **CLOSED W634: Route apps/runtime/medusa.py for_vllm() through the modern builder** - Replaced deprecated flat vLLM emission with eagle3.build_vllm_speculative_config for draft, Medusa, EAGLE, and EAGLE-2 modes. Medusa now emits `{method:'medusa', model:<head>, num_speculative_tokens:K}` instead of a prefixed model string, EAGLE tree knobs stay out of vLLM config, and `apps/runtime/medusa.py --self-test` plus `tests/wave921-serve-config.test.js` assert the modern shape. _[where: apps/runtime/medusa.py; tests/wave921-serve-config.test.js]_"
+      ]
+    },
+    {
+      "id": "finetune-frameworks",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 478,
+      "raw_delta_gap_counts": {
+        "critical": 0,
+        "major": 3,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 3,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 11,
+      "closure_markers": [
+        "- [closed W1024] Unsloth mirror parity for native variant knobs is no longer only plain LoRA/QLoRA: the mirror now receives rsLoRA/DoRA/QDoRA, PiSSA/OLoRA init, GaLore optimizer metadata, and packing from the production worker and records the exact native-parity plan in `training-summary.json`. Curriculum/importance and LoRA+/LoRA-FA remain HF-only by design because they require ordering/sampler or custom optimizer-group behavior outside the Unsloth mirror.",
+        "- [closed W1030] GPU-gated e2e coverage now exists as an opt-in harness: `scripts/run-gpu-trainer-variant-e2e.mjs` requires `KOLM_RUN_GPU_TRAINER_E2E=1`, probes `torch.cuda.is_available()`, requires a local/cached base model unless downloads are explicitly allowed, invokes `workers/distill/scripts/train_lora.py --backend hf` for real PiSSA/DoRA/packing and GaLore cases, and verifies `training-summary.json.variants` after training. Local CI pins the harness contract in `tests/wave1030-gpu-trainer-variant-e2e.test.js`.",
+        "- (completed-local, W616) **CLOSED W616: Wire --backend=auto|unsloth dispatch in the production worker** - Added `--backend=auto|hf|unsloth`, import-probe auto-detection, `_exec_unsloth_backend`, recipe/CLI/worker forwarding, preflight backend diagnostics, and a parity guard that keeps HF-only variant/curriculum features on HF instead of silently changing the training objective. Gated by `npm run verify:finetune-frameworks` and wired into `verify:depth`. _[where: workers/distill/scripts/train_lora.py; workers/distill/distill.mjs; cli/kolm.js; src/distill-recipe-loader.js; tests/wave921-trainer-unification.test.js; tests/wave921-lora-variants-galore-packing.test.js]_",
+        "- (completed-local, W623) **CLOSED W623: Plumb Liger Kernel into the production worker train_lora.py** - Added `LIGER_KERNEL_APIS`, `_liger_api_for_model`, and `_maybe_apply_liger` to the worker HF path. `KOLM_USE_LIGER=1` now opportunistically applies the matching upstream Liger patch before `AutoModelForCausalLM.from_pretrained`; `KOLM_USE_LIGER=strict|required` fails before spend when the package/API/family is unavailable. Preflight returns the selected family/API and availability, and `training-summary.efficiency` records `liger_kernel` plus the full Liger decision envelope. Gated by `npm run verify:finetune-frameworks`. _[where: workers/distill/scripts/train_lora.py; workers/distill/requirements.txt; tests/wave921-trainer-unification.test.js]_",
+        "- (completed-local, W624) **CLOSED W624: Default rsLoRA on in the worker** - `workers/distill/scripts/train_lora.py` now falls back to `KOLM_LORA_VARIANT=rslora`; `src/distill-efficiency.js` exposes `DEFAULT_LORA_VARIANT='rslora'` and always emits `KOLM_LORA_VARIANT`, including explicit `lora` for the plain-LoRA opt-out. Preflight now shows `lora_variant:rslora`; W1024 lets the Unsloth mirror carry that native rsLoRA objective when Unsloth is installed. Gated by `npm run verify:finetune-frameworks`. _[where: workers/distill/scripts/train_lora.py; src/distill-efficiency.js; cli/kolm.js; tests/wave921-lora-variants-galore-packing.test.js; tests/wave921-trainer-unification.test.js]_",
+        "- (completed-local, W636, S/low, v6) **CLOSED W636: Add GPU-free coverage for multinode_launch --dry-run + memory estimator** - `tests/wave636-multinode-launch.test.js` now compiles the launcher, spawns the 70B/2x8 A100 QLoRA dry-run JSON path, pins FULL_SHARD, world_size=16, the torchrun rendezvous command, and the 11.87 GiB/GPU estimate. It also covers the accelerate launcher branch, asserts FSDP YAML content, and confirms dry-run does not write the generated config file. Gated by `npm run verify:finetune-frameworks`. _[where: apps/trainer/multinode_launch.py; tests/wave636-multinode-launch.test.js; package.json]_",
+        "- (completed-local, W963, M/med, v8) **CLOSED W963: Add a QDoRA quality_preset path + recipe field for one-click best-quality distill** - `train.preset=qdora`, `--train-preset qdora`, and `--quality-preset qdora` now expand to QLoRA + DoRA + rsLoRA + paged 8-bit AdamW + NEFTune + packing + Liger, with fail-closed recipe validation and receipt/preflight provenance. The Python worker now supports HF NF4 QLoRA via bitsandbytes when Unsloth would drop variant parity. Gated by `tests/wave921-lora-variants-galore-packing.test.js`, `tests/wave921-trainer-unification.test.js`, and `tests/wave921-studio-cli.test.js`. _[where: src/distill-efficiency.js; src/distill-recipe-loader.js; cli/kolm.js; workers/distill/distill.mjs; workers/distill/scripts/train_lora.py; workers/distill/scripts/lora_variants.py]_",
+        "- (completed-local, W979, S/low, v8) **CLOSED W979: Wire optional torch.compile through the HF Python trainer path** - `src/distill-efficiency.js` now normalizes a `torch_compile` envelope and emits `KOLM_TORCH_COMPILE*`; `cli/kolm.js`, `src/distill-pipeline.js`, `src/distill-bridge.js`, and `src/router.js` forward the option across local and hosted distill entrypoints. `train_lora.py` probes compile GPU-free, applies `torch.compile` only when requested, records the decision plan, and unwraps compiled PEFT modules for save/PiSSA conversion. Gated by `tests/wave921-lora-variants-galore-packing.test.js`, `tests/wave921-trainer-unification.test.js`, `tests/wave921-studio-cli.test.js`, `tests/wave364-distill-bridge.test.js`, and `tests/wave945-distill-pipeline-matrix.test.js`. _[where: src/distill-efficiency.js; src/distill-pipeline.js; src/distill-bridge.js; src/router.js; cli/kolm.js; workers/distill/scripts/train_lora.py]_",
+        "- (completed-local, W1020, M/med, v9) **CLOSED W1020: Expose 32B-on-5090 and FSDP >32B through the distill recipe/worker/cloud contract** - `train.launcher` now selects `single_32b_unsloth`, `single_32b_hf`, or `multinode_fsdp`; the loader validates the enum and builds deterministic launch plans; the worker writes `train-launch-plan.json`, runs large launchers with dry-run honesty, converts collected pairs for FSDP, and passes `KOLM_32B_PAIRS` to the 32B scripts; managed cloud-distill specs preserve `train_launch_plan`/`KOLM_TRAIN_LAUNCHER` and plan RTX5090. Gated by `tests/wave921-trainer-unification.test.js`, `tests/wave921-runtime-passport-w921.test.js`, `tests/wave989-cloud-distill-managed-provider.test.js`, and `verify:finetune-frameworks`. _[where: src/distill-recipe-loader.js; workers/distill/distill.mjs; scripts/train-32b-unsloth.py; scripts/train-32b-qlora.py; src/distill-runners/index.js; src/cloud-distill.js]_",
+        "- (completed-local, W1024, S/low, v7) **CLOSED W1024: Add native Unsloth mirror parity for frontier variant knobs** - `_exec_unsloth_backend()` now forwards `--lora-variant`, `--lora-init`, `--packing`, and GaLore metadata; `train_lora_unsloth.py` exposes `build_unsloth_variant_plan()` for rsLoRA/DoRA/QDoRA, PiSSA/OLoRA init, GaLore, and packing; runtime PEFT kwarg rejection exits 12 instead of silently dropping objectives; and training summaries record the native parity plan. Gated by `npm run verify:finetune-frameworks`. _[where: workers/distill/scripts/train_lora.py; workers/distill/scripts/train_lora_unsloth.py; tests/wave921-trainer-unification.test.js]_",
+        "- (completed-local, W1030, S/low, v10) **CLOSED W1030: Add opt-in GPU e2e harness for trainer variant evidence** - Added `scripts/run-gpu-trainer-variant-e2e.mjs`, which exits as an explicit skip by default, but with `KOLM_RUN_GPU_TRAINER_E2E=1` probes CUDA, requires `KOLM_GPU_TRAINER_E2E_BASE_MODEL`, runs the production HF trainer path for real PiSSA/DoRA/packing and GaLore jobs, and asserts the emitted `training-summary.json.variants` values. Gated by `tests/wave1030-gpu-trainer-variant-e2e.test.js` inside `npm run verify:finetune-frameworks`; live GPU runs fail closed on missing CUDA, deps, or local model evidence. _[where: scripts/run-gpu-trainer-variant-e2e.mjs; workers/distill/scripts/train_lora.py; tests/wave1030-gpu-trainer-variant-e2e.test.js; package.json]_"
+      ]
+    },
+    {
+      "id": "synthetic-data-curation",
+      "current_status": "sota_review_complete_local_frontier_aligned",
+      "source_stack_spec_line": 524,
+      "raw_delta_gap_counts": {
+        "critical": 1,
+        "major": 2,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 3,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 11,
+      "closure_markers": [
+        "- [closed W954] Semantic curation is no longer forced through the 256-d hash-bag embedder: SemDeDup, embedding near-dup fallback, clustering, diversity/DSIR-lite selection, and label-error topic agreement can consume provider vectors via `embedBatchAsync` and report backend provenance. Remaining caveat: real DSIR still uses hashed n-gram importance resampling by design.",
+        "- [closed W1008] Learned embeddings are now reused by semantic cache and provider-trained route scoring through explicit provider/vector seams. Remaining product caveat: learned embeddings are not yet the default per tenant, thresholds are not calibrated per tenant, and per-capture vectors are not yet persisted as a reusable event-store/lake column.",
+        "- [closed W1007] AUGMENT is no longer templated-only: `orchestratePipeline` can run `augment_strategy:'self-synthesis'` and produce filled Magpie/Auto-Evol rows behind the same cost gate. Remaining product caveat: operators still must configure an allowed teacher/local generator and approval budget before live generation can run.",
+        "- [closed W628] Quality scoring is no longer output-only by default: curatePairs now defaults to the learned input+output classifier with DCLM-style percentile retention and stamps quality_score on kept rows. Remaining improvement: per-tenant LLM-judge label bootstrap, DEITA-style complexity scorer, and MIG information-gain graph selection could further improve quality.",
+        "- [closed W1022] Copyright filtering is no longer only a tiny paywall/phrase list plus comma-density prose heuristic: `src/capture-copyright-filter.js` now reuses the richer local `copyright-detector.js` fingerprint pack, emits bounded fingerprint hits and risk score, and stamps a source-license policy envelope that flags restricted or missing source licenses for web/public-corpus rows. This still is not a legal verdict or external corpus match, but it closes the local license-compliance signal gap.",
+        "- (completed-local, W954, M/low, v9) **CLOSED W954: Pluggable learned/provider embeddings for CURATE semantic stages** - `src/embedding.js` now supports `embedBatchAsync`, registered providers, the existing Python `workers/data/scripts/_embed.py` sentence-transformers backend, OpenAI-compatible local HTTP with remote egress refusal, and safe hash-bag fallback. CURATE lazily caches provider vectors per run and feeds them into SemDeDup, embedding near-dup fallback, clustering, diversity/DSIR-lite selection, and label-error output embeddings. Gated by `tests/wave954-learned-embedding-provider.test.js`, `verify:data-curation`, and the regenerated data-curate matrix. _[where: src/embedding.js; src/data-curate.js; src/data-semdedup.js; src/data-select.js; src/data-diversity-select.js; src/data-label-errors.js; src/data-cluster-label.js]_",
+        "- (completed-local, W1007, S/low, v10) **CLOSED W1007: Wire Magpie/self-synthesis through the data-engine AUGMENT cost gate** - `src/data-engine.js` dispatches `augment_strategy:'self-synthesis'` to `src/self-synthesis-engine.js`; Magpie and Auto-Evol-Instruct return the canonical augment envelope, preserve preview-only default behavior, and write filled synthetic pairs only when `approve_cost_usd` clears the preview. Gated by `tests/wave1007-data-engine-self-synthesis-route.test.js` and `verify:data-curation`. _[where: src/data-engine.js; src/self-synthesis-engine.js; tests/wave1007-data-engine-self-synthesis-route.test.js]_",
+        "- (completed-local, W1008, M/low, v10) **CLOSED W1008: Reuse learned/provider embeddings in semantic cache and provider-trained routing** - `semantic-cache` now calls `embedBatchAsync` when `cache.embedder:'provider'`, `semantic-router` accepts a same-dimension `prompt_vector` for provider-trained centroids, and `router.js` can compute that vector from namespace `route_embedding_backend`. Gated by `tests/wave1008-embedding-provider-routing-cache.test.js` and `verify:llm-routing`. _[where: src/semantic-cache.js; src/semantic-router.js; src/router.js; tests/wave1008-embedding-provider-routing-cache.test.js]_",
+        "- (completed-local, W1022, S/low, v13) **CLOSED W1022: Make capture copyright filtering license-aware and fingerprint-backed** - `flagCopyrightRisk` now emits a stable W1022 version, risk score, local fingerprint hits from `src/copyright-detector.js`, and source-license policy reasons (`source-license-disallowed`, `source-license-missing`) while preserving the old `flagged/reasons/matched_phrases` contract. `attachCopyrightFlag` stamps those fields on capture rows without blocking writes. Gated by tests/wave708-copyright-and-geo.test.js. _[where: src/capture-copyright-filter.js; src/copyright-detector.js; tests/wave708-copyright-and-geo.test.js]_",
+        "- (completed-local, W628, S/low, v6) **CLOSED W628: Default quality stage to the learned classifier + percentile keep** - curatePairs now defaults qualityClassifier:true with percentile keep_fraction, scores input+output relevance through the shipped learned-default logistic head, stamps quality_score on kept rows, records report.quality, and preserves the legacy heuristic path via qualityClassifier:false. Gated by tests/wave921-data-engine-modules.test.js plus neighboring curation suites. _[where: src/data-curate.js default opts/quality stage; tests/wave921-data-engine-modules.test.js]_",
+        "- (completed-local, W637, M/low, v6) **CLOSED W637: Add embedding-cosine near-dup fallback to the dedup stage report** - When python dedup is unavailable, curatePairs now runs a JS embedding-cosine near-dup pass using data-select's `_embedPairs`/`_cosineSim`, defaults to threshold 0.93, records `report.embedding_near_dup`, increments `report.deduped`, and composes `backend_used` with earlier minhash/SemDeDup tiers. The fallback can be disabled with `embeddingNearDup:false`. Gated by `npm run verify:data-curation`. _[where: src/data-curate.js; tests/wave637-data-curate-neardup-fallback.test.js; package.json]_"
+      ]
+    },
+    {
+      "id": "small-llm-students",
+      "current_status": "sota_review_complete_local_frontier_aligned",
+      "source_stack_spec_line": 574,
+      "raw_delta_gap_counts": {
+        "critical": 2,
+        "major": 3,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 5,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 11,
+      "closure_markers": [
+        "- [closed W1001] The local neural-distillation/provisioning path is now wired as an opt-in, proof-gated compile lane with local train/holdout metric plumbing, no-teacher labeled SFT, Unsloth holdout parity, real adapter-to-GGUF export attempt, and a pre-worker provisioning envelope that refuses unsupported portable targets and records exactly which execution/export prerequisites remain.",
+        "- (completed-local, W610) **Add 2026 frontier students to the default registry** - Implemented Qwen3-4B-Instruct-2507, Qwen3-8B, Phi-4-mini-instruct, SmolLM3-3B, and LFM2.5-1.2B rows in src/models.js. LFM2.5 is deliberately `license:'lfm-1.0'` and excluded from permissive filters.",
+        "- (completed-local, W610) **Re-point default/3-4B tier picks off Qwen2.5** - DEFAULT_MODEL/default/chat/agent/domain defaults now point at Qwen3-4B-Instruct-2507, reasoning points at Phi-4-mini, and quality/reasoning-quality point at Qwen3-8B.",
+        "- (completed-local, W610/W978) **Refresh student-arch-recommender family slugs to current backbones** - ARCH_1B now points at the permissive MiniCPM5-1B row; ARCH_3B/7B/MoE carry Qwen3 backbone_id fields and resolve via models.info(); gated by tests/wave610-small-llm-frontier-registry.test.js.",
+        "- (completed-local, W610) **Promote current verified rows into FRONTIER_MODELS** - Qwen3-4B-Instruct-2507 and Phi-4-mini-instruct are verified rows with exact model-card and license URLs; `resolveTier('4090')` returns Qwen3-4B.",
+        "- (completed-local, W960, M/med, v9) **CLOSED W960: Fail-closed neural compile lane + portable weight bundling** - `createJob` and `/v1/compile` now preserve `recipe_class=distilled_model`; `runJob` delegates that lane to the Python-backed distill worker, feeds only TRAIN rows, fails closed unless `ml_pipeline_run=true` plus student holdout plus portable weights exist, and packages `.gguf`/`.onnx`/`.wasm` bytes through `compileSpec({ modelWeightsPath })`. Gated by tests/wave282-compile-routing.test.js plus spec-compile matrix verification.",
+        "- (completed-local, W961, M/med, v8) **CLOSED W961: Measured Python trainer holdout for neural compile** - `runJob` passes compile HOLDOUT rows through `distill({ holdout_override })`; `distill-pipeline.js` stages `holdout-eval.jsonl` separately from train seeds; `workers/distill/distill.mjs` forwards it as `--student-holdout`; and `train_lora.py --holdout` measures response-token next-token accuracy/loss and writes the metrics into `training-summary.json`. Gated by tests/wave282-compile-routing.test.js, tests/wave381-pipeline.test.js, and tests/wave921-trainer-unification.test.js.",
+        "- (completed-local, W962, M/med, v8) **CLOSED W962: No-teacher Python neural compile + portable export attempt** - `runNeuralDistillForCompile()` now calls `distill({train_from_pairs:true, portable_export:'gguf'})`; `distill-pipeline.js` forces full worker mode for labeled pairs and forwards `--train-from-seeds`/`--export-portable`; `workers/distill/distill.mjs` builds training pairs from seed labels, stamps `training_pair_source`, waits for JSONL flush before hashing, runs Python `merge_lora_to_base()` plus `exportGguf()` after successful training, and records `manifest.portable_export`; `train_lora_unsloth.py` now accepts/evaluates `--holdout`. Gated by tests/wave144-distill-worker.test.js, tests/wave282-compile-routing.test.js, tests/wave381-pipeline.test.js, tests/wave921-trainer-unification.test.js, and tests/wave945-distill-pipeline-matrix.test.js.",
+        "- (completed-local, W977, M/med, v7) **CLOSED W977: Add benchmark score fields to registry rows + score-aware ranking** - `src/models.js` now exports canonical benchmark metrics, normalized aliases, provenance-bearing per-row `benchmarks` blocks, and an explicit `optimize_for` / `benchmark_metric` recommender path. The frontier rows carry sourced, dated MMLU-Pro/IFEval/GSM8K/BFCL score fields with nulls where the cited card/report does not publish the metric, and `recommend()` returns benchmark score/source metadata in the top list. Gated by tests/wave610-small-llm-frontier-registry.test.js.",
+        "- (completed-local, W978, S/low, v7) **CLOSED W978: Add MiniCPM5 and Gemma 4 edge frontier rows** - `src/models.js` now has sourced rows for openbmb/MiniCPM5-1B, google/gemma-4-E2B-it, and google/gemma-4-E4B-it; `TIER_BY_USE.edge` and ARCH_1B point at MiniCPM5, generic multimodal points at Gemma 4 E4B, BACKBONES can name all three, and tests pin license/context/modalities/benchmark metadata plus recommender behavior.",
+        "- (completed-local, W1001, S/low, v8) **CLOSED W1001: Add fail-closed neural compile provisioning contract** - `src/neural-compile-provisioning.js` builds the deterministic pre-worker envelope for distilled-model compiles, `src/compile.js` records it as `distill.neural.provisioning`, unsupported portable targets fail before worker dispatch, unknown bases fail strict registry preflight with an explicit opt-in escape hatch, and the plan distinguishes registered training backbones from missing prebuilt runtime GGUF rows. Gated by tests/wave1001-neural-compile-provisioning.test.js inside `npm run verify:small-llm`. _[where: src/neural-compile-provisioning.js; src/compile.js; tests/wave1001-neural-compile-provisioning.test.js]_"
+      ]
+    },
+    {
+      "id": "ondevice-inference",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 619,
+      "raw_delta_gap_counts": {
+        "critical": 1,
+        "major": 3,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 4,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W959] Browser model execution proof boundary now exists locally: /verify and public/device/webgpu-runner.html verify signed weight bytes and execute a tiny model in-browser. The closure is intentionally scoped to a proof harness, not a production WebLLM/LlamaWeb LLM runtime.",
+        "- [closed W611] Phantom evidence integrity bug: src/platform-capabilities.js evidence paths are now audited, and tests fail if any platform capability evidence path does not exist locally. W959 later adds real public/device runner evidence instead of reverting to phantom paths.",
+        "- [closed W959] Client-side signed weight-byte binding exists for the tiny fixture: the browser checks weights_sha256 and an Ed25519-signed manifest before execution.",
+        "- [closed W967] Production model-weight artifact binding is generalized locally: full GGUF/MLC/ONNX/WASM bundles have signed per-file SHA-256 manifests, puller cache sidecars, and `.kolm` sidecar/hash-chain binding. This closes the byte-identity prerequisite for production browser downloads without claiming an LLM browser engine.",
+        "- [closed W995] Browser runtime selection rows now exist for the frontier in-browser engines: GGUF -> `llama.cpp-webgpu`/LlamaWeb, MLC -> WebLLM, and ONNX -> `onnxruntime-web`; they are browser-only, signed-weight-required deploy specs and the CLI refuses to spawn them as local daemons.",
+        "- [closed W996] ONNX browser routing now has an execution sibling: public/device/onnx-web-runner.js verifies signed ONNX bytes before `onnxruntime-web` session creation, defaults to WebGPU EP, refuses implicit CDN/runtime fetches, and caps plain tensor outputs.",
+        "- [closed W999] WebLLM MLC execution now has a signed runner sibling: public/device/webllm-runner.js verifies signed MLC bytes before WebLLM/MLC engine byte loading and chat, refuses implicit CDN/runtime import and unsigned engine-managed fetch, supports explicit cache/byte-loader bridges, and emits runtime passports.",
+        "- [closed W1000] LlamaWeb GGUF execution now has a signed runner sibling: public/device/llamaweb-runner.js verifies signed GGUF bytes before LlamaWeb engine byte loading and generation, refuses implicit CDN/runtime import and unsigned engine-managed fetch, supports explicit cache/byte-loader bridges and streaming token collection, and emits runtime passports.",
+        "- [closed W1025] ExecuTorch is no longer only target-declared locally: `.pte` signed weight manifests, `executorch` runtime passport rows, and an iOS/Android device-side validation report contract now exist. This closes the local harness gap; physical device/simulator runs remain external execution evidence.",
+        "- (completed-local, S/low, v8) **CLOSED W611: Fix phantom WebGPU-runner evidence in platform-capabilities** - Removed non-existent public/device/webgpu-runner.js and .html from the wasm-webgpu evidence array, rewrote the note/status to target-declared/planned at the time, corrected five other stale platform evidence paths, and added a full local evidence-path regression test. W959 later added real public/device evidence and promoted the browser proof target. _[where: src/platform-capabilities.js + tests/wave611-platform-capability-evidence.test.js]_",
+        "- (completed-local, W959, M/low, v10) **CLOSED W959: Browser verify-then-run signed-weight proof harness** - Added a dependency-free browser runner that loads a signed tiny-model manifest, SHA-256s the exact weight bytes, verifies Ed25519 over canonical manifest fields, executes a tiny linear model through WebGPU or CPU fallback only after verification, and surfaces the proof on /verify. This closes the local proof boundary but is not a production WebLLM/LlamaWeb LLM runtime. Gated by tests/wave959-browser-webgpu-runner.test.js and verify:ondevice. _[where: public/device/webgpu-runner.js; public/device/webgpu-runner.html; public/device/fixtures/tiny-linear.manifest.json; public/device/fixtures/tiny-linear.weights.json; public/verify.html; src/platform-capabilities.js; tests/wave959-browser-webgpu-runner.test.js]_",
+        "- (completed-local, W967, M/low, v9) **CLOSED W967: Generalize signed production weight artifact manifests** - Added `kolm.model_weight_artifact_manifest.v1` with required per-file bytes/SHA-256 rows, runtime-target inference for GGUF/MLC/ONNX/WASM, canonical Ed25519 signatures, puller-written cache sidecars, and `.kolm`-embedded `model.weight.manifest.json` bound into `manifest.hashes` plus `artifact_hash_input`. Gated by tests/wave967-model-weight-artifact-binding.test.js and verify:ondevice. _[where: src/model-weights-manifest.js; src/model-weights-puller.js; src/artifact.js; tests/wave967-model-weight-artifact-binding.test.js]_"
+      ]
+    },
+    {
+      "id": "llm-routing",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 660,
+      "raw_delta_gap_counts": {
+        "critical": 2,
+        "major": 2,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 4,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W991] Quality bar / 'meets-bar' predictor is closed locally: scoreRoute can now choose the cheapest model whose predicted lower-bound quality clears a calibrated effective_bar, using route-quality-store holdout calibration and a quality_bar audit block rather than only a raw min_quality floor.",
+        "- [closed W984] Per-candidate similarity routing is closed locally: route_weights.similarity now uses each candidate model's own historical top-p cluster-fit score, so similarity can reorder candidates instead of only scaling absolute confidence.",
+        "- [closed W985] Escalation-rate monitoring is closed locally: routing summaries now expose mixed/teacher escalation rate plus 1h/24h/7d rollups for dashboard/API/CLI consumers.",
+        "- [closed W986] Safety/jailbreak/PII route fusion is closed locally: route_weights.safety now uses classifyPromptAdversarial()+scanSensitive() to create a privacy-safe risk summary and candidate safety-tier signal without putting raw prompt text into the receipt audit.",
+        "- [closed W987] Category-aware semantic cache on the route path is closed locally: semantic cache partitions on workload/risk category, supports per-category threshold/TTL/quota overrides, and router.js gates lookup/write with a privacy-safe cache policy that defaults sensitive/adversarial prompts to no-cache.",
+        "- [closed W988] Automated retrain scheduler / promotion / rollback policy is closed locally: route-training now plans due retrains from cadence/staleness/new-label deltas, gates promotion on candidate coverage and learned route-signal evidence, stores a previous snapshot rollback slot, and exposes `kolm route retrain` plus `kolm route rollback`.",
+        "- (completed-local, W608) **Load trained ClusterRouterStats in the live dispatch path** - src/router.js now calls route-training.loadRouteStatsForNamespace({tenant,namespace,namespaceConfig,candidates}) in the semantic routing block and passes the restored stats into scoreRoute, falling back to stats:null only when no snapshot exists.",
+        "- (completed-local, W608) **Close the flywheel: call recordRouteOutcome after dispatch** - src/router.js now calls route-training.recordRouteOutcomeFromDispatch() after the final provider result and signed receipt exist, recording cluster_id/model/provider/cost/latency/receipt_id as a tenant-fenced route-quality event.",
+        "- (completed-local, W608) **Ship a `kolm route train` CLI + persisted snapshot the gateway loads** - cli/kolm.js `route train` calls route-training.buildRouteTrainingSnapshot(), merges live route-quality outcomes, persists route_stats_snapshot to the namespace row, and supports `--activate` to opt into cost_quality mode.",
+        "- (completed-local, W984, M/low, v8) **CLOSED W984: Make routing similarity a per-candidate signal** - Replaced the shared clusterSimilarity contribution in the multi-signal branch with candidate-specific cluster-fit over each model's own historical samples in the top-p cluster window, while preserving the request-level cluster_similarity audit field and legacy scorer behavior. Gated by `npm run verify:llm-routing` and tests/wave921-multi-signal-routing.test.js #8. _[where: src/semantic-router.js; tests/wave921-multi-signal-routing.test.js]_",
+        "- (completed-local, W985, S/low, v9) **CLOSED W985: Make escalation rate a first-class monitored metric** - `summarizeRouting()` now returns escalation_count, escalation_rate, route-mix rates, cascade_health, and fixed last_1h/last_24h/last_7d cascade_rollups; `/v1/routing/summary` inherits the fields and `kolm route doctor` prints escalation_rate from the canonical summary. Gated by tests/wave709-routing-events.test.js #7 and `npm run verify:llm-routing`. _[where: src/routing-events.js; cli/kolm.js; tests/wave709-routing-events.test.js]_",
+        "- (completed-local, W986, S/low, v10) **CLOSED W986: Fuse safety/jailbreak/PII into semantic routing** - `route_weights.safety` now scores risky prompts with adversarial categories plus PII/secret classes and explicit per-candidate safety tiers, leaves benign prompts neutral, and stamps a route_safety audit block that never includes raw prompt text. Gated by tests/wave921-multi-signal-routing.test.js #14 and `npm run verify:llm-routing`. _[where: src/semantic-router.js; tests/wave921-multi-signal-routing.test.js]_"
+      ]
+    },
+    {
+      "id": "mcp-tool-gateway-receipts",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 726,
+      "raw_delta_gap_counts": {
+        "critical": 2,
+        "major": 3,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 5,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W966] Tool-metadata pinning / rug-pull detection is closed at the receipt and upstream-registry layer: MCP tool-call receipts sign `tool_contract_hash` and `tool_contract_source`, configured upstream descriptors are hashed canonically, and stale `expected_tool_contract_hash` requests return 409 before execution.",
+        "- [closed W981] Per-tool authorization / ACL is closed locally: `src/mcp-tool-policy.js` supports allow/deny lists, wildcard tool patterns, tenant/server scopes, default deny, and caller trust levels; `src/mcp-gateway-routes.js` evaluates it before any tool spend or receipt minting.",
+        "- [closed W982] Per-call caller/agent/session/upstream provenance is closed locally: `mcp-tool-call-2` signs caller_subject_hash/caller_api_key_hash/caller_agent_hash/mcp_session_hash/caller_scopes_hash and upstream_request_hash/upstream_response_hash, and in-toto export preserves those fields in the tool-call predicate.",
+        "- [closed W983] Full MCP session transcript continuity is closed locally: `mcp-tool-call-3` signs a verifier-facing transcript summary over initialize, initialized, tools/list, tools/call, upstream response, and the hashed upstream MCP session id.",
+        "- (completed-local, W609) **Wire MCP gateway to durable store + signer in prod** - router.js now passes a store facade and default Ed25519 signer resolver into both mcp-gateway-routes and intoto-receipt-routes; /v1/mcp/verify/:id survives a fresh route instance when backed by the durable store.",
+        "- (completed-local, W609) **Anchor MCP receipts into the existing Merkle transparency log path** - router.js now supplies a transparency-anchor batcher to the MCP route, stamps batch proofs back onto `mcp_tool_receipts`, and mcp-gateway-routes merges stored anchors into verify responses as non-signed additive receipt fields.",
+        "- (completed-local, W620) **CLOSED W620: Screen MCP tool args+output through the existing guardrail** - wrapToolCall screens canonicalized arguments before execution and result text after execution; tests/wave-mcp-anchor-guardrail.test.js covers detect_only, block-mode input rejection before tool spend, output-poisoning rejection, and route-level guardrailFor. Gated by `npm run verify:mcp-receipts`.",
+        "- (completed-local, W640) **CLOSED W640: Let the in-toto route resolve mcp_tool_receipts by call_id** - intoto-receipt-routes now searches `mcp_tool_receipts` in the tenant-scoped row-store fallback and matches receipt_id, call_id, or row id; intoto-receipt Statement/OMS export uses the descriptor registry by default, so stored mcp-tool-call-1 receipts export as receipt/call_id + args/result subjects with the tool-call predicate. Gated by tests/wave921-intoto-attestation.test.js and npm run verify:model-signing. _[where: src/intoto-receipt-routes.js _resolveReceipt; src/intoto-receipt.js registry-backed toInTotoStatement/toOmsBundle; src/receipt-export-registry.js multi-digest subjects; tests/wave921-intoto-attestation.test.js]_",
+        "- (completed-local, W641) **CLOSED W641: Wire a production upstream MCP executor/registry** - Added an env-backed HTTP/Streamable-HTTP MCP registry that maps explicit server/tool/tenant allow-lists to JSON-RPC `tools/call`; router.js now passes that executor into /v1/mcp/dispatch when configured, so dispatch can call live upstream tools and sign the produced result instead of requiring caller-supplied precomputed results. Gated by tests/wave641-mcp-upstream-registry.test.js and npm run verify:mcp-receipts. _[where: src/mcp-upstream-registry.js; src/mcp-gateway.js execute metadata; src/mcp-gateway-routes.js upstream error mapping; src/router.js W641 execute wiring; tests/wave641-mcp-upstream-registry.test.js]_",
+        "- (completed-local, W966, M/low, v9) **CLOSED W966: Pin + sign tool metadata to catch rug-pulls** - `src/mcp-gateway.js` now canonicalizes MCP tool descriptors and signs `tool_contract_hash` plus `tool_contract_source`; `verifyMcpToolContract()` checks the non-signed descriptor against the signed hash; `src/mcp-upstream-registry.js` accepts descriptor objects/tool_contracts maps; `src/mcp-gateway-routes.js` rejects stale `expected_tool_contract_hash` with 409 before upstream execution; router.js wires the registry resolver into production dispatch. Gated by `npm run verify:mcp-receipts` and tests/wave966-mcp-tool-contract-pinning.test.js. _[where: src/mcp-gateway.js; src/mcp-upstream-registry.js; src/mcp-gateway-routes.js; src/router.js; tests/wave966-mcp-tool-contract-pinning.test.js]_",
+        "- (completed-local, W981, M/low, v10) **CLOSED W981: Add pre-execution per-tool ACL/policy gate on MCP dispatch** - Added `src/mcp-tool-policy.js` with JSON/env allow/deny/trust-level rules, wired `src/mcp-gateway-routes.js` to fail denied calls with 403 before guardrail/upstream execution/signing/persistence/anchoring, stamped allowed decisions as non-signed receipt metadata, and wired router.js to load the env-backed policy only when configured. Gated by `npm run verify:mcp-receipts` and tests/wave981-mcp-tool-policy.test.js. _[where: src/mcp-tool-policy.js; src/mcp-gateway-routes.js; src/router.js; tests/wave981-mcp-tool-policy.test.js; tests/wave609-mcp-prod-wiring.test.js]_",
+        "- (completed-local, W982, M/low, v11) **CLOSED W982: Bind caller, agent, MCP session, and upstream response provenance into signed MCP receipts** - Added `mcp-tool-call-2` as the then-current signed receipt schema while preserving v1 verification, signed privacy-safe caller_subject/api_key/agent/session/scope hashes, signed upstream JSON-RPC request/response envelope hashes, route extraction from authenticated context and MCP session headers, upstream-registry non-enumerable provenance attachment, and v2 in-toto/OMS predicate export. W983 subsequently promoted the current default to `mcp-tool-call-3`. Gated by `npm run verify:mcp-receipts`, `npm run verify:model-signing`, and tests/wave982-mcp-provenance-binding.test.js. _[where: src/mcp-gateway.js; src/mcp-gateway-routes.js; src/mcp-upstream-registry.js; src/receipt-export-registry.js; tests/wave982-mcp-provenance-binding.test.js]_"
+      ]
+    },
+    {
+      "id": "verifiable-inference",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 768,
+      "raw_delta_gap_counts": {
+        "critical": 2,
+        "major": 2,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 4,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W968] Proven-Compute Receipt prototype now exists: kolm can locally sign and verify a digest-only receipt binding artifact identity, input_digest, output_digest, nonce-bound verified attestation state, and transparency-log inclusion. It is not yet a default live service because real token capture/root deployment remains open.",
+        "- [closed W969] Verified BYOC callbacks can now emit/persist Proven-Compute Receipts when the verifier returns `verified:true`, nonce binding matches input/output digests, and artifact hash/CID is explicit. This closes the local route seam but still depends on operator-supplied verifier/root/token capture.",
+        "- [closed W970] Generated BYOC deploy scripts now include explicit confidential-GPU targets and NRAS collector hooks, plus compact EAT/JWT token shape support. This closes the local script-generation gap but does not prove a real cloud run happened.",
+        "- [closed W992] Runtime inference now has a local proof-binding path: OpenAI-compatible adapters can accept runtime-returned NRAS evidence, recompute canonical request/response digests with proof metadata stripped, verify nonce binding, attach a signed Proven-Compute Receipt, and fail closed when `require_proven_compute` is true.",
+        "- [closed W1002] NRAS is now a fail-closed default-live local contract rather than only an env-gated verifier shim: `src/nras-live-readiness.js` requires `KOLM_NRAS_VERIFIER=1`, a present root PEM, matching `KOLM_NRAS_ROOT_CERT_SHA256`, bundled worker, configured runtime URL/auth, default `require_proven_compute`, artifact identity, and collector declaration before local readiness is green.",
+        "- [closed W990] Generic hardware TEE parser output is no longer accepted as valid by default: packages/attestation verifyAttestation now fails hardware targets as `parsed_unverified` unless a registered verifier returns ok; explicit `allow_tofu:true` is labeled `tofu_measurement`; BYOC persists parsed verification metadata and no longer promotes unverified Nitro/TDX/SNP/CVM parser measurements over the operator measurement.",
+        "- [closed W612] src/sigstore.js no longer hand-rolls its own RFC 6962 inner hashing and tree walk; verifyRekorInclusionProof now delegates to merkle.verifyInclusion and has a right-edge unbalanced proof regression.",
+        "- [closed W998] opML and zkML proof tiers now exist as typed, fail-closed interfaces: they can be represented in signed reports and Proven-Compute Receipts, but cannot become a `proven_compute` claim unless a registered verifier state plus input/output nonce/public-input binding proves the specific inference. This closes the local interface gap without claiming a production opML/zkML backend.",
+        "- [closed W1026] Built-in TDX/SEV-SNP/Nitro vendor-chain verifier plugins now exist as fail-closed root-pin plugins: Nitro requires a pinned cabundle root, SEV-SNP requires VCEK/ASK/ARK chain material plus nonzero report signature bytes, and TDX requires PCS/PCK collateral plus quote-signature bytes. Real operated quote-signature fixtures remain external evidence before live proven-compute claims upgrade.",
+        "- [closed W626] Customer-facing proof-scope disclaimer now ships inside the signed report envelope, with stronger wording gated by `proofScopeLabel()` only when a real verifier returns verified:true.",
+        "- (completed-local, S/low, v8) **CLOSED W612: Migrate sigstore inclusion verification to the audited merkle.js** - Replaced the hand-rolled Rekor tree walk with merkle.verifyInclusion, decoded Rekor hex/base64 proof material to 32-byte buffers first, removed duplicate local rfc6962 helpers, and added right-edge unbalanced proof plus overlong-root regressions. Keeps one audited Merkle implementation and removes the branch merkle.js flags as broken. _[where: src/sigstore.js verifyRekorInclusionProof; tests/wave612-sigstore-merkle-reuse.test.js]_",
+        "- (completed-local, W626, S/low, v7) **CLOSED W626: Ship an explicit proof-scope caveat in the signed report** - `buildReportEnvelope()` now carries a signed `proof_scope` block and `buildCaveats()` emits fixed proof-scope text: default reports prove integrity/evidence binding/timestamp/log inclusion, not proof-of-compute; real verified TEE/opML/zkML evidence gets stronger wording only through `proofScopeLabel()`. Gated by `tests/agent-attestation-report.test.js`. _[where: src/attestation-report-builder.js buildReportProofScope/buildCaveats]_"
+      ]
+    },
+    {
+      "id": "model-signing-standards",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 819,
+      "raw_delta_gap_counts": {
+        "critical": 1,
+        "major": 2,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 3,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W615] The SLSA in-toto attestation for the .kolm ARTIFACT is now emitted into the container at build time as `provenance.intoto.dsse.json`, using emitArtifactAttestation over the real member-byte digest map.",
+        "- [closed W615] The artifact build now writes `model.sig.bundle`, an OMS-shaped file-manifest bundle whose subjects are the artifact's actual bundled members (weights when present, recipe bundle for rule artifacts) rather than only inference receipts.",
+        "- [closed W638] SLSA/OMS subject digest maps now include BLAKE2b alongside sha256 wherever the builder has real member bytes or canonical receipt bytes; verifiers accept legacy sha256 strings and multi-algorithm digest objects.",
+        "- [closed W639] The receipt transparency block no longer labels a hand-shaped JSON shim with the official Sigstore bundle mediaType. It emits a Kolm-namespaced shim mediaType plus compatibility metadata, while keeping legacy v0.2 verification for existing artifacts. Full Fulcio/cosign bundle support remains a separate spec-followup.",
+        "- [closed W997] Model-card and EU AI Act Annex XI/XII documentation digests are now bound into the artifact SLSA predicate when those optional members are bundled: `externalParameters.model_documentation` indexes them and `runDetails.byproducts` carries their digest maps and document roles.",
+        "- [closed W1023] `src/slsa-profile-registry.js` now makes the split explicit: `model_artifact` is canonical for `.kolm` / model-signing sidecars and `asr_report` is canonical for ASR audit-report provenance. Both keep the same SLSA v1/DSSE shape, but buildType/owner_module/product_surface are tested so the model platform path is no longer ambiguous.",
+        "- [closed W1027] `src/sigstore-keyless.js` now provides an optional Fulcio/OIDC policy path: offline verification requires a pinned Fulcio root, exact OIDC issuer and identity, Rekor log/inclusion evidence, and fails SLSA Build L3 eligibility unless separate hardened-builder evidence is present.",
+        "- [closed W615] Build-time SLSA DSSE sidecar is written into the .kolm artifact as `provenance.intoto.dsse.json`, gated behind the existing Ed25519 signer and verified by model-signing sidecar tests.",
+        "- [closed W615] The build-time OMS bundle now subjects actual artifact member bytes and ships as `model.sig.bundle`, closing the receipt-only OMS gap for the artifact path.",
+        "- [closed W639] The receipt transparency shim no longer mislabels itself with `application/vnd.dev.sigstore.bundle+json;version=0.2`; it emits `application/vnd.kolm.sigstore-shim+json;version=1`, carries explicit non-protobuf/non-cosign compatibility metadata, and still verifies legacy v0.2 receipts.",
+        "- [closed W1023] The two SLSA implementations are now differentiated by a tested registry rather than naming convention: model artifacts use `model_artifact`/`src/intoto-slsa.js`; ASR reports use `asr_report`/`src/slsa-provenance.js`; both profiles explicitly refuse SLSA Build L3 claims until keyless identity and hardened builder evidence exist.",
+        "- [closed W638] The SHA-256-only digest-map gap is closed for artifact sidecars and canonical receipt subjects; output receipt subjects remain sha256-only unless output bytes are available."
+      ]
+    },
+    {
+      "id": "confidential-compute",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 873,
+      "raw_delta_gap_counts": {
+        "critical": 2,
+        "major": 3,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 5,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W953] Air-gap distillation is no longer queue-only: processOfflineDistillRun/processOfflineDistillQueue consume ~/.kolm/airgap-distill-runs/<id>.json, delegate to the Python KD worker under offline env, and persist completed/failed status. Remaining limitation: production operators still need local model snapshots and the Python ML stack installed inside the enclave.",
+        "- [closed W970] Confidential-GPU BYOC generation now exists: `gcp-cvm-gpu` and `azure-cvm-gpu` produce GPU confidential-VM templates and NRAS collector startup scripts. Remaining limitation: no committed real-hardware run fixture and no default root/driver/tool provisioning guarantee.",
+        "- [closed W971] DP-SGD is now available in the actual student trainer: `apps/trainer/distill.py` reads DP env/CLI knobs, requires Opacus, wraps the trainer privately, computes conservative RDP spend, and stamps `privacy_budget`.",
+        "- [closed W1003] User-level DP local contract now exists: `src/dp-training.js` clips rows by user, computes user-sampled budgets, exposes regulated/balanced/utility-first presets, carries user-level metadata into `privacy_budget`, and refuses default regulated claims without measured utility evidence.",
+        "- [closed W627] GPU-TEE / NRAS attestation is reachable through live BYOC enrollment: /v1/byoc/attestation now reads gpu_attestation/nras_report, computes the gpu state server-side, persists it, and refuses caller-forged gpu state. Generated deploy scripts still need provider-specific NRAS token collection.",
+        "- [closed W969] Verified BYOC GPU attestations can now emit/persist signed Proven-Compute Receipts when the callback includes artifact identity and input/output digest binding; `require_proven_compute:true` fails closed instead of returning a key-custody-only posture.",
+        "- [closed W1026] Generic CPU TEE verifier plugins are no longer absent locally: W1026 bundles Nitro, SEV-SNP, TDX, GCP-CVM, and Azure-CVM fail-closed root-pin plugins and preserves vendor collateral through parser wrappers. Real operated-hardware evidence and quote-signature fixtures are still required before public proven-compute claims can upgrade.",
+        "- [closed W974] BYOC module and route-level test coverage now exists for GPU attestation state, reproducible manifest signing, ownership checks, malformed/valid docker attestation recording, live callback persistence, and caller-forged gpu-state rejection (tests/wave974-byoc-core-contract.test.js; tests/byoc-gpu-attestation.test.js).",
+        "- (completed-local, W617) **CLOSED W617: Redact the training corpus before distillation** - Added redactTrainingJsonl to stream the JSONL corpus, redact every string leaf through the privacy membrane, fail closed on allow/override policy leakage, write a sibling *.redacted.jsonl without a vault, point the queued spec at that redacted file, and stamp redaction_applied/detector_version/source+redacted hashes/counts for receipts. Gated by W831 air-gap tests. _[where: src/airgap-distill.js redactTrainingJsonl/offlineDistill; tests/wave831-airgap.test.js]_",
+        "- (completed-local, W627, M/low, v7) **CLOSED W627: Wire NRAS / GPU-TEE attestation through the BYOC HTTP callback** - /v1/byoc/attestation now accepts gpu_attestation/nras_report, normalizes object or token+metadata forms, calls byoc.verifyGpuAttestation() with optional input/output digests, persists the computed gpu state, returns it, and ignores caller-supplied gpu state without a report. Gated by tests/byoc-gpu-attestation.test.js and wired into `npm run verify:verifiable-inference`. _[where: src/router.js /v1/byoc/attestation; src/byoc.js normalizeGpuAttestationReport/gpuAttestationVerifyOptions]_",
+        "- (completed-local, W953, M/low, v8) **CLOSED W953: Make air-gap distill end-to-end locally** - Added a JS queue consumer that picks queued specs, revalidates no-network/redaction/hash evidence, strips cloud secret env keys, sets offline ML env, delegates to apps/trainer/airgap_distill_worker.py, and writes running/completed/failed status back atomically. The Python worker invokes the existing KD trainer with local teacher/student paths; receipt-only mode is diagnostic and explicitly labeled non-training. _[where: src/airgap-distill.js processOfflineDistillRun/processOfflineDistillQueue; apps/trainer/airgap_distill_worker.py; tests/wave953-airgap-distill-worker.test.js; verify:airgap]_",
+        "- (completed-local, W969, M/low, v9) **CLOSED W969: Persist Proven-Compute Receipts from verified BYOC GPU attestations** - Added `buildProvenComputeReceiptForAttestation()` and route wiring so BYOC callbacks with verified GPU state, explicit artifact hash/CID, and input/output digests return and persist a signed `kolm.proven_compute_receipt.v1`; required proven-compute callbacks fail closed when those prerequisites are absent. _[where: src/byoc.js; src/router.js /v1/byoc/attestation; tests/byoc-gpu-attestation.test.js BYOC GPU #10-#11]_"
+      ]
+    },
+    {
+      "id": "agent-security-eval",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 934,
+      "raw_delta_gap_counts": {
+        "critical": 1,
+        "major": 4,
+        "minor": 2,
+        "closed": 0,
+        "external": 0,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 5,
+      "current_severe_gap_count": 0,
+      "resolution": "historical_raw_deltas_superseded_by_current_stack_spec",
+      "closure_marker_count": 9,
+      "closure_markers": [
+        "- [closed W1031] Agent-security judge/calibration is no longer heuristic-only locally: `src/agent-security-judge.js` defines a fail-closed default hosted judge profile (`kolm-agent-security-judge-v1` over an explicit OpenAI-compatible endpoint/key), a public-suite-shaped prompt-classifier calibration fixture spanning AgentDojo/InjecAgent/AgentHarm/Gray-Swan rows, and an env-gated hosted judge callable. `runAdversarialBakeoff()` now reports both response-heuristic calibration and full prompt-classifier calibration, and `/v1/redteam/bakeoff` uses the hosted judge only when the operator explicitly configures it; otherwise it keeps the honest heuristic label.",
+        "- (completed-local, S/low, v8) **CLOSED W618: Add an explicit public-benchmark cross-walk table to the signed report** - Every passive/domain probe now carries static public-benchmark task-class refs in signed JSON and rendered HTML/PDF, with a bounded caveat that these refs are descriptive and the public suites were not executed. Gated by `npm run verify:agent-security-eval`. _[where: src/red-team.js BENCHMARK_MAP/benchmark_refs; src/attestation-report-builder.js buildRedTeamBlock/rendering; tests/red-team.test.js + tests/agent-attestation-report.test.js]_",
+        "- (completed-local, W643, M/med, v8) **CLOSED W643: Wire active red-team + merge into the report API path behind a consent body** - POST `/v1/redteam/active` now runs the existing passive audit, executes runActiveBattery only after the consent record names the endpoint, merges active evidence through mergeActiveResults, signs the report via buildAndSignReport, and returns only active status + transcript digest metadata. The signed red_team block now preserves active summary metadata and per-probe transcript_digest. Gated by tests/wave643-active-redteam-report-route.test.js inside `npm run verify:agent-security-eval`. _[where: src/audit-routes.js /v1/redteam/active + _runAndSignWithActive; src/attestation-report-builder.js buildRedTeamBlock transcript_digest/summary.active; tests/wave643-active-redteam-report-route.test.js]_",
+        "- (completed-local, W642) **CLOSED W642: Bring ACTIVE_PROBES to parity with CORE_PROBES (5 -> 12) and bump spec version** - Added active descriptors for every generic passive core probe, including tool-arg-escalation, mcp-discovery, runtime-guardrails-absent, unbounded-tool-calls, credential-in-log, and exfil-to-untrusted-host; ACTIVE_RED_TEAM_SPEC_VERSION and the corpus seed now move to `asr-active-redteam/0.2` so re-attestations pin the new corpus. Gated by tests/active-redteam.test.js and `npm run verify:agent-security-eval`. _[where: src/active-redteam.js ACTIVE_PROBES/ACTIVE_RED_TEAM_SPEC_VERSION; tests/active-redteam.test.js exact parity assertions; tests/red-team.test.js active-run fixture version]_",
+        "- (completed-local, W646, S/low, v5) **CLOSED W646: Publish heuristic calibration numbers for adversarial bakeoff fallback scoring** - adversarial-bakeoff now exports a frozen labeled calibration fixture and calibrateHeuristicJudge(), reports true_pass/true_fail/false_pass/false_fail plus false-pass/false-fail rates, precision, recall, accuracy, caveat, and misclassified examples whenever the fallback heuristic path is used. Callable judge runs stay explicit with judge_kind:'callable' and no heuristic calibration block. Gated by tests/wave646-adversarial-calibration.test.js inside `npm run verify:agent-security-eval`. _[where: src/adversarial-bakeoff.js ADVERSARIAL_HEURISTIC_CALIBRATION_FIXTURES/calibrateHeuristicJudge/runAdversarialBakeoff; tests/wave646-adversarial-calibration.test.js]_",
+        "- (completed-local, W955, M/low, v9) **CLOSED W955: Execute public-benchmark-shaped agent-security rows and merge ASR/utility evidence into signed reports** - Added a JSONL adapter for AgentDojo/InjecAgent/AgentHarm/Gray-Swan/ART-shaped rows, consent-gated endpoint execution or injected executor mode, no-raw-content transcript digests, ASR + benign_utility_rate summaries, worst-wins mergeBenchmarkResults, signed `summary.benchmark_execution`, and a CLI wrapper. Gated by tests/wave955-agent-benchmark-adapter.test.js inside `npm run verify:agent-security-eval`. _[where: src/agent-benchmark-adapter.js; scripts/agent-benchmark-adapter.mjs; src/red-team.js mergeBenchmarkResults/BENCHMARK_EXECUTION_NOTE; src/attestation-report-builder.js buildRedTeamBlock summary.benchmark_execution; package.json verify:agent-security-eval]_",
+        "- (completed-local, W993, M/low, v9) **CLOSED W993: Add paired utility-under-attack benchmark metric and signed summary propagation** - `src/agent-benchmark-adapter.js` now scores under-attack task utility for rows that opt into paired utility or carry explicit under-attack expectations, aggregates utility_under_attack_rate/tasks/success/paired coverage, and `src/red-team.js` plus `src/attestation-report-builder.js` preserve those fields in signed report summaries. Gated by tests/wave993-probe-harness-paired-metrics.test.js inside `npm run verify:agent-security-eval`. _[where: src/agent-benchmark-adapter.js; src/probe-harness.js summarizeAgentUtilityUnderAttack; src/red-team.js; src/attestation-report-builder.js; tests/wave993-probe-harness-paired-metrics.test.js]_",
+        "- (completed-local, W1005, S/low, v9) **CLOSED W1005: Wire hosted adversarial bakeoff to the signed artifact runner** - POST `/v1/redteam/bakeoff` now requires artifact_path, defaults to `runArtifact()` with tenant-scoped runtime options, still allows operator-injected runner/judge seams, and has an authenticated HTTP regression test proving the hosted path no longer returns `runtime_not_wired` by default. Gated by tests/wave1005-adversarial-bakeoff-route.test.js inside `npm run verify:agent-security-eval`. _[where: src/router.js /v1/redteam/bakeoff; tests/wave1005-adversarial-bakeoff-route.test.js; package.json verify:agent-security-eval]_",
+        "- (completed-local, W1031, S/low, v10) **CLOSED W1031: Add fail-closed hosted agent-security judge and public-suite prompt-classifier calibration** - Added `src/agent-security-judge.js` with a default hosted judge model profile, explicit env/key endpoint requirements, OpenAI-compatible JSON judge requests, no-secret plan metadata, and public-suite-shaped prompt-classifier calibration across AgentDojo/InjecAgent/AgentHarm/Gray-Swan rows. Adversarial bakeoff now attaches full prompt-classifier calibration and labels hosted judge calls as `hosted_judge_model`; the HTTP route only uses the hosted judge when explicitly configured. Gated by `tests/wave1031-agent-security-judge-calibration.test.js` inside `npm run verify:agent-security-eval`. _[where: src/agent-security-judge.js; src/adversarial-bakeoff.js; src/router.js /v1/redteam/bakeoff; tests/wave1031-agent-security-judge-calibration.test.js]_"
+      ]
+    },
+    {
+      "id": "compile-api-to-model-competitors",
+      "current_status": "sota_review_complete_external_or_release_gate_open",
+      "source_stack_spec_line": 985,
+      "raw_delta_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 3,
+        "closed": 2,
+        "external": 1,
+        "other": 0
+      },
+      "current_stack_gap_counts": {
+        "critical": 0,
+        "major": 0,
+        "minor": 0
+      },
+      "raw_severe_gap_count": 0,
+      "current_severe_gap_count": 0,
+      "resolution": "no_severe_raw_delta",
+      "closure_marker_count": 12,
+      "closure_markers": [
+        "- [closed W1004] Continuous-RL / online-optimization loop is now locally claimable: `src/compile-api-readiness.js` proves the load-bearing seams, and `tests/wave1004-compile-api-readiness.test.js` executes the autopilot lifecycle with strategy-bandit observe plus the propose-only deployment guard. This closes the local OpenPipe ART-parity loop without claiming autonomous deployment or hosted fleet operations.",
+        "- [closed W1018] Worker progress parsing now promotes measured step telemetry only from explicit Kolm JSON progress events emitted by the worker, keeps synthetic stub/collect curves labeled synthetic, and refuses raw trainer logs so noisy stdout cannot become measured evidence.",
+        "- [closed W1032] No-code Studio UI now exists for the distill loop: `public/studio.html` is a static-first app cockpit for namespace capture preview, cluster readiness, teacher-source policy, strategy planning, QDoRA/backend/provider settings, local distill submit, cloud distill submit, and run monitoring over the production `/v1/distill/*`, `/v1/cloud/distill/submit`, and `/v1/captures/list` routes. `public/account/train.html` links to Studio, and the contract is gated by `tests/wave1032-distill-studio-ui.test.js` inside `npm run verify:distill-captures`.",
+        "- [closed W1029] Live capture SSE tail now has an opt-in cross-instance local pubsub bridge: `src/capture-stream.js` exposes brokerized memory/fs backends, appends capture envelopes to a JSONL bus when configured, tails from other replicas, preserves tenant/namespace filtering, skips publishing-broker duplicates, and keeps W645 durable replay as the correctness fallback.",
+        "- [closed W1028] Per-token/fine-tune pricing transparency is now locally claimable: `src/provider-pricing-receipts.js` normalizes provider-published snapshots into source/date/rate-row receipts, computes workload cost across token/GPU/replica/job units, emits a public_display block plus receipt_hash, and `src/cloud-distill.js` persists the hash/display/cost on job, scheduler, and meter rows. The contract deliberately does not hardcode live provider prices.",
+        "- (completed-local, W614) **Label synthetic vs measured progress in distill telemetry** - Synthetic progress events, run-meta, listDistillRuns/readDistillRun, and the done envelope now carry telemetry_source/progress_telemetry_source plus k_source/loss_source. Run-level telemetry_source is promoted to 'measured' only when the worker manifest contains measured final loss/k or W1018 measured worker progress has been parsed. _[where: src/distill-pipeline.js summarizeDistillTelemetry/resolveDistillFinalK/listDistillRuns/readDistillRun; tests/wave614-distill-telemetry-source.test.js]_",
+        "- (completed-local, W1018, S/low, v6) **CLOSED W1018: Parse measured worker progress without raw-log promotion** - distill() now tails the worker log during full training, parses only explicit Kolm JSON progress events into measured step telemetry, writes those events to progress.jsonl, and keeps unmarked trainer stdout from becoming evidence. HF and Unsloth trainer paths emit passive scalar progress callbacks without changing training behavior. Gated by parser assertions and an integration fake-worker run in tests/wave945-distill-pipeline-matrix.test.js. _[where: src/distill-pipeline.js parseDistillWorkerProgressLine/_readWorkerProgressSince; workers/distill/scripts/train_lora.py; workers/distill/scripts/train_lora_unsloth.py; tests/wave945-distill-pipeline-matrix.test.js]_",
+        "- (completed-local, W622) **CLOSED W622: Expose teacher-source TOS-risk verdict on the capture+distill API surface** - /v1/distill/from-captures/preview and POST /v1/distill/from-captures now summarize captured teacher/model slugs with classifyTeacher and return teacher_source ('open-weights'|'proprietary'|'unknown'), teacher_source_tos_risk, policy_enforced, teacher_source_policy, teacher_source_counts, and teacher_models on preview, success, and honest error responses. Gated by tests/wave622-teacher-source-api.test.js and `npm run verify:distill-captures`, now wired into `npm run verify:depth`.",
+        "- (completed-local, W644, M/med, v7) **CLOSED W644: Make cloud-distill auto-bridge to a configured external trainer instead of only queuing** - When KOLM_CLOUD_DISTILL_ENDPOINT is unset but KOLM_TRAINER_BRIDGE_URL+token are set, submitJob now POSTs to the trainer bridge `/distill`, records bridge_job_id/bridge_status_url/poll_url, surfaces cloud_backend_status:'reachable_via_bridge', and preserves idempotent replay without resubmitting the external job. The HTTP route now awaits async submission and accepts Idempotency-Key; the CLI prints bridge poll metadata. Gated by `npm run verify:cloud-broker`. _[where: src/cloud-distill.js getCloudBackendStatus/submitJob/getJobStatus; src/router.js /v1/cloud/distill/submit; cli/kolm.js cloud distill output; tests/wave644-cloud-distill-bridge.test.js]_",
+        "- (completed-local, W989, M/med, v8) **CLOSED W989: Submit cloud-distill to managed provider lanes** - When KOLM_MANAGED_DISTILL_PROVIDER is `runpod`, `modal`, or `together` and the matching provider credentials are present, submitJob now builds a deterministic provider launch spec, posts to the provider lane, records provider_job_id/provider_status_url/poll_url plus launch_spec_hash, labels scheduler jobs with `managed-distill-provider-*`, and preserves idempotent replay without resubmitting. Missing provider credentials fail closed before scheduling. Gated by `npm run verify:cloud-broker`. _[where: src/cloud-distill.js MANAGED_DISTILL_PROVIDERS/getCloudBackendStatus/submitJob/getJobStatus; src/router.js /v1/cloud/distill/submit provider knobs; cli/kolm.js cloud distill --provider output; tests/wave989-cloud-distill-managed-provider.test.js]_",
+        "- (completed-local, W645, M/low, v5) **CLOSED W645: Cross-instance capture live-tail via durable replay fallback** - `/v1/capture/stream` now subscribes first, then emits a bounded durable replay filtered by `?since`/`?last_seen` before keeping the in-process SSE tail open. Replay resolves both historical tenant names and tenant_record ids, preserves namespace filtering, emits replay_complete/replay_error events, and de-duplicates rows seen live during replay. Gated by tests/wave645-capture-stream-replay.test.js inside `npm run verify:distill-captures`. _[where: src/router.js /v1/capture/stream; src/capture-store.js listCaptures/allCapturesForTenant; tests/wave645-capture-stream-replay.test.js]_",
+        "- (completed-local, W1029, S/low, v6) **CLOSED W1029: Add opt-in cross-instance capture-stream pubsub** - `src/capture-stream.js` now has a broker factory with default memory delivery and an opt-in file/JSONL bus for local multi-replica fanout. Independent brokers can publish and tail live capture envelopes across process boundaries, tenant/namespace filtering remains enforced at delivery, publishing brokers do not duplicate their own events, and the default route can be env-configured through `KOLM_CAPTURE_PUBSUB_DRIVER=fs`. Gated by `tests/wave1029-capture-stream-pubsub.test.js` inside `npm run verify:distill-captures`. _[where: src/capture-stream.js; src/router.js /v1/capture/stream comments; tests/wave1029-capture-stream-pubsub.test.js; package.json verify:distill-captures]_"
+      ]
+    }
+  ],
+  "failures": []
+}

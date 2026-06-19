@@ -74,6 +74,24 @@ const ORCHESTRATOR_MAP = {
 const VALID_TRAIN_METHODS = new Set(['qlora', 'lora', 'full']);
 const VALID_TRAIN_BACKENDS = new Set(['auto', 'hf', 'unsloth']);
 const VALID_TRAIN_PRESETS = new Set(['qdora']);
+const VALID_TRAIN_LAUNCHERS = new Set(['local_worker', 'single_32b_unsloth', 'single_32b_hf', 'multinode_fsdp']);
+const TRAIN_LAUNCHER_ALIASES = new Map([
+  ['local', 'local_worker'],
+  ['worker', 'local_worker'],
+  ['distill_worker', 'local_worker'],
+  ['local_worker', 'local_worker'],
+  ['32b_unsloth', 'single_32b_unsloth'],
+  ['unsloth_32b', 'single_32b_unsloth'],
+  ['single_gpu_32b_unsloth', 'single_32b_unsloth'],
+  ['single_32b_unsloth', 'single_32b_unsloth'],
+  ['32b_hf', 'single_32b_hf'],
+  ['hf_32b', 'single_32b_hf'],
+  ['single_gpu_32b_hf', 'single_32b_hf'],
+  ['single_32b_hf', 'single_32b_hf'],
+  ['fsdp', 'multinode_fsdp'],
+  ['multinode', 'multinode_fsdp'],
+  ['multinode_fsdp', 'multinode_fsdp'],
+]);
 
 // W921 - additive recipe vocabulary.
 // Distillation OBJECTIVE (loss). seqkd is the SFT-on-strings default; the
@@ -125,6 +143,163 @@ function _teacherIsLocal(recipe) {
 function _sha256OfFile(absPath) {
   const buf = fs.readFileSync(absPath);
   return 'sha256:' + crypto.createHash('sha256').update(buf).digest('hex');
+}
+
+function _positiveIntOr(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.trunc(n) : fallback;
+}
+
+function _optionalPositiveIntIssue(issues, obj, key, label) {
+  if (obj[key] !== undefined && (!Number.isInteger(obj[key]) || obj[key] <= 0)) {
+    issues.push(`${label}.${key} must be a positive integer`);
+  }
+}
+
+function _trainDist(recipe) {
+  return _isPlainObject(recipe?.train?.distributed) ? recipe.train.distributed : {};
+}
+
+function _teacherModelFromRecipe(recipe) {
+  if (typeof recipe?.train?.teacher_model === 'string' && recipe.train.teacher_model.trim()) {
+    return recipe.train.teacher_model.trim();
+  }
+  if (typeof recipe?.teacher_model === 'string' && recipe.teacher_model.trim()) {
+    return recipe.teacher_model.trim();
+  }
+  const teachers = Array.isArray(recipe?.teachers) ? recipe.teachers : [];
+  for (const t of teachers) {
+    const slug = typeof t?.slug === 'string' ? t.slug.trim() : '';
+    if (!slug.includes(':')) continue;
+    const vendor = slug.split(':')[0].toLowerCase();
+    if (vendor === 'hf' || vendor === 'local' || vendor === 'vllm') {
+      return slug.slice(slug.indexOf(':') + 1);
+    }
+  }
+  return null;
+}
+
+export function normalizeTrainLauncher(value) {
+  if (value === undefined || value === null || value === '') return null;
+  if (typeof value !== 'string') return null;
+  const key = value.trim().toLowerCase().replace(/[-\s]+/g, '_');
+  return TRAIN_LAUNCHER_ALIASES.get(key) || null;
+}
+
+export function buildTrainLaunchPlan(recipe = {}, opts = {}) {
+  const train = _isPlainObject(recipe.train) ? recipe.train : {};
+  const kind = normalizeTrainLauncher(opts.launcher ?? train.launcher) || 'local_worker';
+  const trainMethod = String(opts.trainMethod || train.method || (train.preset === 'qdora' ? 'qlora' : 'lora')).toLowerCase();
+  const studentBase = String(opts.studentBase || train.student_base || recipe.student || 'Qwen/Qwen2.5-0.5B').trim();
+  const pairsPath = opts.pairsPath ? String(opts.pairsPath) : null;
+  const outDir = opts.outDir ? String(opts.outDir) : 'out';
+  const studentOut = opts.studentOut || `${outDir}/student`;
+  const dryRunRequested = Boolean(opts.dryRun || train.launch_dry_run);
+
+  if (kind === 'local_worker') {
+    return Object.freeze({
+      version: 'w1020-train-launch-plan-v1',
+      kind,
+      command_kind: 'train_lora',
+      script: 'workers/distill/scripts/train_lora.py',
+      args: pairsPath
+        ? ['--pairs', pairsPath, '--out', studentOut, '--student-base', studentBase]
+        : ['--out', studentOut, '--student-base', studentBase],
+      env: {},
+      dry_run: false,
+      dry_run_supported: false,
+      consumes_training_pairs: true,
+      trainer_summary_rel: 'student/training-summary.json',
+    });
+  }
+
+  if (kind === 'single_32b_unsloth' || kind === 'single_32b_hf') {
+    const unsloth = kind === 'single_32b_unsloth';
+    const env = {
+      KOLM_32B_BASE: studentBase,
+      KOLM_32B_OUT: studentOut,
+      KOLM_32B_STEPS: String(_positiveIntOr(train.steps, unsloth ? 500 : 400)),
+      KOLM_32B_MAXLEN: String(_positiveIntOr(train.max_seq_len, unsloth ? 2048 : 1024)),
+      KOLM_32B_ROWS: String(_positiveIntOr(train.rows, unsloth ? 8000 : 6000)),
+    };
+    if (pairsPath) env.KOLM_32B_PAIRS = pairsPath;
+    return Object.freeze({
+      version: 'w1020-train-launch-plan-v1',
+      kind,
+      command_kind: 'single_gpu_32b',
+      script: unsloth ? 'scripts/train-32b-unsloth.py' : 'scripts/train-32b-qlora.py',
+      args: [],
+      env,
+      dry_run: dryRunRequested,
+      dry_run_supported: false,
+      recommended_gpu: 'RTX-5090',
+      train_method: trainMethod,
+      consumes_training_pairs: Boolean(pairsPath),
+      pair_env: pairsPath ? 'KOLM_32B_PAIRS' : null,
+      trainer_summary_rel: 'student/training-summary.json',
+    });
+  }
+
+  const dist = _trainDist(recipe);
+  const nodes = _positiveIntOr(dist.nodes ?? train.nodes, 1);
+  const gpusPerNode = _positiveIntOr(dist.gpus_per_node ?? train.gpus_per_node, 8);
+  const gpu = String(dist.gpu || train.gpu || 'h100-80gb').toLowerCase();
+  const launcher = String(dist.launcher || train.distributed_launcher || 'torchrun').toLowerCase();
+  const trainer = String(dist.trainer || train.trainer || 'distill');
+  const mode = trainMethod === 'full' ? 'full' : (trainMethod === 'lora' ? 'lora' : 'qlora');
+  const teacherModel = _teacherModelFromRecipe(recipe);
+  const trainJsonl = opts.trainJsonl || (pairsPath ? `${outDir}/distill-train.jsonl` : null);
+  const script = 'apps/trainer/multinode_launch.py';
+  const args = [
+    '--model', studentBase,
+    '--nodes', String(nodes),
+    '--gpus-per-node', String(gpusPerNode),
+    '--gpu', gpu,
+    '--mode', mode,
+    '--trainer', trainer,
+    '--launcher', launcher,
+    '--json',
+  ];
+  if (dryRunRequested) args.push('--dry-run');
+  const trainerArgs = [];
+  if (teacherModel) trainerArgs.push('--teacher-model', teacherModel);
+  trainerArgs.push('--student-model', studentBase);
+  if (trainJsonl) trainerArgs.push('--train-jsonl', trainJsonl);
+  trainerArgs.push('--out-dir', studentOut);
+  if (Number.isFinite(Number(train.epochs))) trainerArgs.push('--num-epochs', String(Math.trunc(Number(train.epochs))));
+  if (Number.isFinite(Number(train.batch_size))) trainerArgs.push('--batch-size', String(Math.trunc(Number(train.batch_size))));
+  if (Number.isFinite(Number(train.lr))) trainerArgs.push('--learning-rate', String(train.lr));
+  if (Number.isFinite(Number(train.max_seq_len))) trainerArgs.push('--max-length', String(Math.trunc(Number(train.max_seq_len))));
+  if (train.lora && Number.isFinite(Number(train.lora.r))) trainerArgs.push('--lora-r', String(Math.trunc(Number(train.lora.r))));
+  if (train.lora && Number.isFinite(Number(train.lora.alpha))) trainerArgs.push('--lora-alpha', String(Math.trunc(Number(train.lora.alpha))));
+  const requiredMissing = [];
+  if (!teacherModel) requiredMissing.push('teacher_model');
+  if (!trainJsonl) requiredMissing.push('train_jsonl');
+  return Object.freeze({
+    version: 'w1020-train-launch-plan-v1',
+    kind,
+    command_kind: 'multinode_launcher',
+    script,
+    args: trainerArgs.length ? [...args, '--', ...trainerArgs] : args,
+    env: {},
+    dry_run: dryRunRequested,
+    dry_run_supported: true,
+    recommended_gpu: gpu,
+    train_method: mode,
+    consumes_training_pairs: Boolean(pairsPath),
+    train_jsonl: trainJsonl,
+    required_args_missing: requiredMissing,
+    distributed: Object.freeze({
+      nodes,
+      gpus_per_node: gpusPerNode,
+      world_size: nodes * gpusPerNode,
+      gpu,
+      launcher,
+      trainer,
+      params_b: Number.isFinite(Number(dist.params_b ?? train.params_b)) ? Number(dist.params_b ?? train.params_b) : null,
+    }),
+    trainer_summary_rel: 'student/training-summary.json',
+  });
 }
 
 // Resolve a recipe identifier to an absolute path.
@@ -237,8 +412,15 @@ function _validateTrain(train) {
   if (train.preset !== undefined && !VALID_TRAIN_PRESETS.has(train.preset)) {
     issues.push(`train.preset must be one of: ${Array.from(VALID_TRAIN_PRESETS).join(', ')} (got ${JSON.stringify(train.preset)})`);
   }
+  const trainLauncher = normalizeTrainLauncher(train.launcher);
+  if (train.launcher !== undefined && !trainLauncher) {
+    issues.push(`train.launcher must be one of: ${Array.from(VALID_TRAIN_LAUNCHERS).join(', ')} (got ${JSON.stringify(train.launcher)})`);
+  }
   if (train.preset === 'qdora' && train.method !== undefined && train.method !== 'qlora') {
     issues.push('train.preset=qdora requires train.method=qlora so the receipt cannot claim QDoRA while running plain LoRA');
+  }
+  if ((trainLauncher === 'single_32b_unsloth' || trainLauncher === 'single_32b_hf') && effectiveMethod !== 'qlora') {
+    issues.push(`train.launcher=${trainLauncher} requires train.method=qlora`);
   }
   const numericKeys = ['epochs', 'batch_size', 'lr', 'max_seq_len'];
   for (const k of numericKeys) {
@@ -293,6 +475,41 @@ function _validateTrain(train) {
         if (train.galore[k] !== undefined && (typeof train.galore[k] !== 'number' || train.galore[k] <= 0)) {
           issues.push(`train.galore.${k} must be a positive number`);
         }
+      }
+    }
+  }
+  _optionalPositiveIntIssue(issues, train, 'steps', 'train');
+  _optionalPositiveIntIssue(issues, train, 'rows', 'train');
+  if (train.launch_dry_run !== undefined && typeof train.launch_dry_run !== 'boolean') {
+    issues.push('train.launch_dry_run must be a boolean');
+  }
+  if (train.launch_execute !== undefined && typeof train.launch_execute !== 'boolean') {
+    issues.push('train.launch_execute must be a boolean');
+  }
+  if (train.teacher_model !== undefined && (typeof train.teacher_model !== 'string' || train.teacher_model.length === 0)) {
+    issues.push('train.teacher_model must be a non-empty string if present');
+  }
+  if (train.distributed !== undefined) {
+    if (!_isPlainObject(train.distributed)) {
+      issues.push('train.distributed must be an object if present');
+    } else {
+      _optionalPositiveIntIssue(issues, train.distributed, 'nodes', 'train.distributed');
+      _optionalPositiveIntIssue(issues, train.distributed, 'gpus_per_node', 'train.distributed');
+      _optionalPositiveIntIssue(issues, train.distributed, 'master_port', 'train.distributed');
+      if (train.distributed.node_rank !== undefined && (!Number.isInteger(train.distributed.node_rank) || train.distributed.node_rank < 0)) {
+        issues.push('train.distributed.node_rank must be a non-negative integer');
+      }
+      if (train.distributed.gpu !== undefined && (typeof train.distributed.gpu !== 'string' || train.distributed.gpu.length === 0)) {
+        issues.push('train.distributed.gpu must be a non-empty string if present');
+      }
+      if (train.distributed.launcher !== undefined && !['torchrun', 'accelerate'].includes(train.distributed.launcher)) {
+        issues.push('train.distributed.launcher must be one of: torchrun, accelerate');
+      }
+      if (train.distributed.trainer !== undefined && (typeof train.distributed.trainer !== 'string' || train.distributed.trainer.length === 0)) {
+        issues.push('train.distributed.trainer must be a non-empty string if present');
+      }
+      if (train.distributed.params_b !== undefined && (typeof train.distributed.params_b !== 'number' || train.distributed.params_b <= 0)) {
+        issues.push('train.distributed.params_b must be a positive number if present');
       }
     }
   }

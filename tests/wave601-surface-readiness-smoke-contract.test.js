@@ -18,6 +18,7 @@ test('W601 - readiness-gated public evidence probes accept only explicit gated r
   const evidence = loadSurfaceProbe('public-docs-sdk', 'evidence-readiness');
   const benchmark = loadSurfaceProbe('capture-data-eval-training', 'benchmark-evidence-public');
   const smoke = fs.readFileSync(path.join(ROOT, 'scripts', 'prod-surface-smoke.cjs'), 'utf8');
+  const router = fs.readFileSync(path.join(ROOT, 'src', 'router.js'), 'utf8');
 
   for (const probe of [evidence, benchmark]) {
     assert.deepEqual(probe.expect, [200, 503]);
@@ -28,6 +29,9 @@ test('W601 - readiness-gated public evidence probes accept only explicit gated r
   assert.match(smoke, /readiness-gated envelope missing ok\/readiness/);
   assert.match(smoke, /readiness-gated 503 did not include blocked\/gated proof requirements/);
   assert.match(smoke, /readiness-gated 200 reported non-ready status/);
+  assert.match(router, /\/v1\/evidence\/readiness[\s\S]*res\.status\(readiness\.external_ready \? 200 : 503\)\.json\(envelope\)/);
+  assert.match(router, /\/v1\/eval\/benchmark-evidence[\s\S]*res\.status\(audit\.public_claim_ready \? 200 : 503\)\.json\(envelope\)/);
+  assert.match(router, /\/v1\/compliance\/certification-packet[\s\S]*res\.status\(audit\.live_certification_verified \? 200 : 503\)\.json\(envelope\)/);
 });
 
 test('W601 - local surface smoke stamps SDK assets before serving static manifests', () => {

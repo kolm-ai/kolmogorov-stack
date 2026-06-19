@@ -30,6 +30,13 @@ import { parseSevSnpAttestation } from './sev-snp.js';
 import { parseTdxAttestation } from './tdx.js';
 import { parseGcpCvmAttestation } from './gcp-cvm.js';
 import { parseAzureCvmAttestation } from './azure-cvm.js';
+export {
+  BUILTIN_VENDOR_CHAIN_VERIFIER_VERSION,
+  buildBuiltinAttestationVerifier,
+  fingerprintChainMaterial,
+  listBuiltinAttestationVerifierSpecs,
+  registerBuiltinAttestationVerifiers,
+} from './vendor-chain-verifiers.js';
 
 export const SUPPORTED_TARGETS = ['aws-nitro', 'sev-snp', 'tdx', 'gcp-cvm', 'azure-cvm', 'docker'];
 export const HARDWARE_ATTESTATION_TARGETS = Object.freeze(['aws-nitro', 'sev-snp', 'tdx', 'gcp-cvm', 'azure-cvm']);

@@ -50,6 +50,9 @@ test('W616 master component spec sheet keeps perfection distance explicit', () =
   assert.ok(sheet.perfection_model.readiness_proof_surplus_score > 100);
   assert.equal(sheet.summary.categories_with_critical_frontier_work_open, 0);
   assert.equal(sheet.summary.categories_with_major_frontier_work_open, 0);
+  assert.equal(sheet.summary.frontier_delta_freshness.authority_status, 'current_spec_verified');
+  assert.equal(sheet.summary.frontier_delta_freshness.current_severe_category_count, 0);
+  assert.ok(sheet.summary.frontier_delta_freshness.historical_raw_severe_gap_count >= 50);
   assert.equal(sheet.summary.components_without_direct_test_reference, 0);
   assert.equal(sheet.summary.direct_test_reference_pct, 100);
   assert.equal(sheet.top_component_gaps.length, 0);
@@ -60,4 +63,5 @@ test('W616 master component spec sheet keeps perfection distance explicit', () =
   assert.match(md, /Frontier\/product perfection/);
   assert.match(md, /Local readiness proof coverage/);
   assert.match(md, /Claimable readiness closed locally/);
+  assert.match(md, /Frontier delta authority/);
 });

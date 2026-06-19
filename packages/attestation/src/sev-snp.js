@@ -52,7 +52,8 @@ const OFFSET_SIGNATURE = 672;
 const LEN_SIGNATURE = 512;
 
 export function parseSevSnpAttestation(payload) {
-  const buf = toBuffer(payload);
+  const normalized = normalizePayload(payload);
+  const buf = normalized.report;
   if (buf.length < REPORT_LEN) {
     throw new Error(`sev-snp report too short: ${buf.length} < ${REPORT_LEN}`);
   }
@@ -77,9 +78,26 @@ export function parseSevSnpAttestation(payload) {
       chip_id,
       signed_at: null,  // SEV-SNP doesn't embed a timestamp; caller's RX time is the upper bound
     },
-    signing_cert_chain: null,  // VCEK fetched out-of-band from AMD KDS
+    signing_cert_chain: normalized.signing_cert_chain,
     raw_signature: signature,
   };
+}
+
+function normalizePayload(payload) {
+  if (payload && typeof payload === 'object' && !Buffer.isBuffer(payload) && !(payload instanceof Uint8Array)) {
+    return {
+      report: toBuffer(payload.report || payload.sevsnp_report || payload.attestation_report),
+      signing_cert_chain: certChainFrom(payload, ['vcek_cert', 'ask_cert', 'ark_cert']),
+    };
+  }
+  return { report: toBuffer(payload), signing_cert_chain: null };
+}
+
+function certChainFrom(obj, orderedKeys) {
+  if (Array.isArray(obj.signing_cert_chain)) return obj.signing_cert_chain.slice();
+  if (Array.isArray(obj.cert_chain)) return obj.cert_chain.slice();
+  const chain = orderedKeys.map((k) => obj[k]).filter(Boolean);
+  return chain.length ? chain : null;
 }
 
 function toBuffer(payload) {
@@ -90,9 +108,6 @@ function toBuffer(payload) {
       return Buffer.from(payload, 'hex');
     }
     return Buffer.from(payload, 'base64');
-  }
-  if (payload && typeof payload === 'object' && payload.report) {
-    return toBuffer(payload.report);
   }
   throw new Error('unsupported sev-snp payload type');
 }

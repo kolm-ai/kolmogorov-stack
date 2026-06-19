@@ -188,6 +188,48 @@ test('W989 runpod managed provider submission persists provider handle and is id
   assert.equal(calls.length, 1);
 });
 
+test('W1020 managed provider launch spec carries recipe train launcher metadata', async (t) => {
+  freshEnv(t);
+  process.env.KOLM_MANAGED_DISTILL_PROVIDER = 'runpod';
+  process.env.KOLM_RUNPOD_TOKEN = 'runpod-secret';
+  process.env.KOLM_RUNPOD_DISTILL_ENDPOINT_ID = 'rp-endpoint-32b';
+
+  const fetchImpl = async (_url, init) => {
+    const payload = JSON.parse(init.body);
+    assert.equal(payload.input.launch_spec.gpu_id, 'RTX5090');
+    assert.equal(payload.input.launch_spec.env.KOLM_TRAIN_LAUNCHER, 'single_32b_unsloth');
+    assert.equal(payload.input.launch_spec.env.KOLM_32B_BASE, 'unsloth/Qwen2.5-32B-Instruct-bnb-4bit');
+    assert.equal(payload.input.launch_spec.env.KOLM_32B_PAIRS, '/workspace/input/training-pairs.jsonl');
+    assert.equal(payload.input.launch_spec.est_vram_gb, 26.4);
+    return {
+      ok: true,
+      status: 200,
+      text: async () => JSON.stringify({ id: 'rp-job-32b', status: 'IN_QUEUE' }),
+    };
+  };
+
+  const submitted = await submitJob({
+    tenant: 'tenant_provider_32b',
+    namespace: 'support',
+    recipe_id: 'recipe-32b-frontier',
+    gpu_sku: 'RTX-5090',
+    student: 'unsloth/Qwen2.5-32B-Instruct-bnb-4bit',
+    student_params_b: 32,
+    train_launcher: 'single_32b_unsloth',
+    train: {
+      method: 'qlora',
+      student_base: 'unsloth/Qwen2.5-32B-Instruct-bnb-4bit',
+      max_seq_len: 2048,
+      steps: 12,
+      rows: 64,
+    },
+    fetchImpl,
+  });
+  assert.equal(submitted.ok, true, JSON.stringify(submitted));
+  assert.equal(submitted.managed_provider, 'runpod');
+  assert.match(submitted.managed_provider_launch_spec_hash, /^[a-f0-9]{64}$/);
+});
+
 test('W989 router and CLI expose managed-provider submit knobs', () => {
   const router = fs.readFileSync(path.join(ROOT, 'src', 'router.js'), 'utf8');
   const marker = "r.post('/v1/cloud/distill/submit'";

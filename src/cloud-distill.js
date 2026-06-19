@@ -42,6 +42,11 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { planRemoteDistill } from './distill-runners/index.js';
+import { buildTrainLaunchPlan } from './distill-recipe-loader.js';
+import {
+  PROVIDER_PRICING_RECEIPT_VERSION,
+  buildProviderPricingReceipt,
+} from './provider-pricing-receipts.js';
 import {
   submitSchedulerJob,
   cancelSchedulerJob,
@@ -49,7 +54,7 @@ import {
   _resetSchedulerForTests,
 } from './compute-scheduler.js';
 
-export const CLOUD_DISTILL_VERSION = 'w785/w989-v2';
+export const CLOUD_DISTILL_VERSION = 'w785/w1028-v3';
 
 // Closed set of legal job lifecycle states. Frozen so a refactor cannot
 // quietly add a new state without bumping the version stamp. queued is the
@@ -101,6 +106,7 @@ export const CLOUD_METER_RATES = Object.freeze({
   // Inference meter is documented here ONLY to make explicit that it is
   // a different ledger; the actual inference rates live in src/usage.js.
   inference_per_1k_tokens_usd_documented_in: 'src/usage.js',
+  provider_price_receipts_documented_in: 'src/provider-pricing-receipts.js',
   unit_training: 'gpu_hour',
   unit_inference: '1k_tokens',
 });
@@ -224,6 +230,65 @@ function _sha256Json(value) {
   return crypto.createHash('sha256').update(_canonicalJson(value)).digest('hex');
 }
 
+function _providerPricingSnapshot(opts) {
+  const o = opts || {};
+  const raw = o.provider_pricing_snapshot || o.provider_pricing || o.provider_price_snapshot || o.provider_price_receipt || null;
+  return raw && typeof raw === 'object' ? raw : null;
+}
+
+function _requiresProviderPriceReceipt(opts) {
+  const o = opts || {};
+  if (o.require_provider_price_receipt === true || o.require_provider_pricing_receipt === true) return true;
+  const raw = process.env.KOLM_REQUIRE_PROVIDER_PRICE_RECEIPT || process.env.KOLM_REQUIRE_PROVIDER_PRICING_RECEIPT || '';
+  return /^(1|true|yes)$/i.test(String(raw).trim());
+}
+
+function _mergeProviderPricingUsage(raw, opts) {
+  const o = opts || {};
+  const r = raw && typeof raw === 'object' ? raw : {};
+  const usage = r.usage && typeof r.usage === 'object' ? r.usage : {};
+  return {
+    ...usage,
+    input_tokens: o.input_tokens ?? o.prompt_tokens ?? r.input_tokens ?? usage.input_tokens,
+    output_tokens: o.output_tokens ?? o.completion_tokens ?? r.output_tokens ?? usage.output_tokens,
+    total_tokens: o.total_tokens ?? r.total_tokens ?? usage.total_tokens,
+    training_tokens: o.training_tokens ?? o.fine_tune_tokens ?? o.estimated_training_tokens
+      ?? r.training_tokens ?? r.fine_tune_tokens ?? usage.training_tokens,
+    gpu_hours: o.gpu_hours ?? o.estimated_gpu_hours ?? r.gpu_hours ?? usage.gpu_hours,
+    gpu_seconds: o.gpu_seconds ?? r.gpu_seconds ?? usage.gpu_seconds,
+    replica_hours: o.replica_hours ?? r.replica_hours ?? usage.replica_hours,
+    jobs: o.jobs ?? r.jobs ?? usage.jobs ?? 1,
+  };
+}
+
+function _buildProviderPriceReceipt({ opts, provider, job_id, launch_spec_hash }) {
+  const raw = _providerPricingSnapshot(opts);
+  const required = _requiresProviderPriceReceipt(opts);
+  if (!raw) {
+    return required
+      ? { ok: false, error: 'provider_price_receipt_required' }
+      : null;
+  }
+  const receipt = buildProviderPricingReceipt({
+    ...raw,
+    provider: raw.provider || provider || opts?.managed_provider || opts?.provider,
+    operation: raw.operation || (provider === 'together' ? 'fine_tune' : 'training'),
+    model: raw.model || opts?.student || opts?.base_model || opts?.model,
+    usage: _mergeProviderPricingUsage(raw, opts),
+    kolm_job_id: job_id,
+    launch_spec_hash,
+  });
+  if (!receipt.ok) {
+    return {
+      ok: false,
+      error: 'provider_price_receipt_invalid',
+      detail: receipt.error,
+      provider_price_receipt_error: receipt,
+    };
+  }
+  return receipt;
+}
+
 function _managedProviderRaw(opts) {
   const o = opts || {};
   const raw = o.managed_provider || o.provider || process.env.KOLM_MANAGED_DISTILL_PROVIDER
@@ -318,6 +383,7 @@ function _runnerGpuFromSku(gpuSku) {
   if (sku.includes('A100-40')) return 'A100-40GB';
   if (sku.includes('A100')) return 'A100-80GB';
   if (sku.includes('L40')) return 'L40S';
+  if (sku.includes('5090')) return 'RTX5090';
   if (sku.includes('4090')) return 'RTX4090';
   return null;
 }
@@ -327,18 +393,52 @@ function _numOrNull(value) {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
+function _isPlainObject(x) {
+  return x !== null && typeof x === 'object' && !Array.isArray(x);
+}
+
+function _recipeContractFromOpts(opts, recipe_id) {
+  const o = opts || {};
+  if (_isPlainObject(o.recipe)) {
+    return {
+      ...o.recipe,
+      name: typeof o.recipe.name === 'string' && o.recipe.name ? o.recipe.name : recipe_id,
+      id: typeof o.recipe.id === 'string' && o.recipe.id ? o.recipe.id : recipe_id,
+    };
+  }
+  const train = _isPlainObject(o.train) ? { ...o.train } : {};
+  if (typeof o.train_launcher === 'string' && o.train_launcher.trim()) train.launcher = o.train_launcher.trim();
+  if (typeof o.train_method === 'string' && o.train_method.trim()) train.method = o.train_method.trim();
+  if (!train.method) train.method = 'qlora';
+  if (!train.student_base) {
+    train.student_base = typeof o.student === 'string' && o.student.trim()
+      ? o.student.trim()
+      : (typeof o.base_model === 'string' && o.base_model.trim() ? o.base_model.trim() : undefined);
+  }
+  if (typeof o.teacher_model === 'string' && o.teacher_model.trim()) train.teacher_model = o.teacher_model.trim();
+  if (_isPlainObject(o.distributed)) train.distributed = { ...o.distributed };
+  return { id: recipe_id, name: recipe_id, train };
+}
+
 function _managedRecipe(opts, recipe_id) {
   const o = opts || {};
   const paramsB = _numOrNull(o.student_params_b ?? o.params_b ?? o.paramsB);
+  const contract = _recipeContractFromOpts(o, recipe_id);
+  const contractTrain = _isPlainObject(contract.train) ? contract.train : {};
   return {
     id: recipe_id,
     student: typeof o.student === 'string' && o.student.trim()
       ? o.student.trim()
-      : (typeof o.base_model === 'string' && o.base_model.trim() ? o.base_model.trim() : undefined),
-    teacher: typeof o.teacher === 'string' && o.teacher.trim() ? o.teacher.trim() : undefined,
+      : (typeof o.base_model === 'string' && o.base_model.trim()
+        ? o.base_model.trim()
+        : (typeof contractTrain.student_base === 'string' && contractTrain.student_base.trim() ? contractTrain.student_base.trim() : undefined)),
+    teacher: typeof o.teacher === 'string' && o.teacher.trim()
+      ? o.teacher.trim()
+      : (typeof contractTrain.teacher_model === 'string' && contractTrain.teacher_model.trim() ? contractTrain.teacher_model.trim() : undefined),
     mode: typeof o.mode === 'string' && o.mode.trim() ? o.mode.trim() : undefined,
     student_params_b: paramsB || undefined,
     params_b: paramsB || undefined,
+    train: _isPlainObject(contract.train) ? contract.train : undefined,
   };
 }
 
@@ -346,6 +446,18 @@ function _buildManagedProviderLaunch({ config, opts, recipe_id, gpu_sku, job_id 
   const provider = config && config.provider;
   const recipe = _managedRecipe(opts, recipe_id);
   const artifactOut = '/workspace/out/' + job_id;
+  const contract = _recipeContractFromOpts(opts || {}, recipe_id);
+  const trainLaunchPlan = buildTrainLaunchPlan(contract, {
+    outDir: artifactOut,
+    studentOut: artifactOut + '/student',
+    pairsPath: opts?.pairs_path || opts?.training_pairs_path || '/workspace/input/training-pairs.jsonl',
+    dryRun: opts?.train_launch_dry_run === true || opts?.launch_dry_run === true,
+  });
+  if (trainLaunchPlan && trainLaunchPlan.kind !== 'local_worker') {
+    recipe.train_launcher = trainLaunchPlan.kind;
+    recipe.train_launch_plan = trainLaunchPlan;
+    if (trainLaunchPlan.distributed?.world_size) recipe.gpu_count = trainLaunchPlan.distributed.world_size;
+  }
   if (provider === 'runpod' || provider === 'modal') {
     const plan = planRemoteDistill({
       recipe,
@@ -743,6 +855,24 @@ export async function submitJob(opts) {
       version: CLOUD_DISTILL_VERSION,
     };
   }
+  const providerPriceReceipt = _buildProviderPriceReceipt({
+    opts: o,
+    provider: managedProviderConfig?.provider || backend.managed_provider || _managedProviderRaw(o),
+    job_id,
+    launch_spec_hash: managedLaunch?.launch_spec_hash || null,
+  });
+  if (providerPriceReceipt && !providerPriceReceipt.ok) {
+    return {
+      ok: false,
+      error: providerPriceReceipt.error || 'provider_price_receipt_invalid',
+      detail: providerPriceReceipt.detail || null,
+      provider_price_receipt_error: providerPriceReceipt.provider_price_receipt_error || null,
+      managed_provider: backend.managed_provider || managedProviderConfig?.provider || null,
+      cloud_backend_status: backend.status,
+      provider_pricing_receipt_version: PROVIDER_PRICING_RECEIPT_VERSION,
+      version: CLOUD_DISTILL_VERSION,
+    };
+  }
   const scheduler_idempotency_key = (typeof o.idempotency_key === 'string' && o.idempotency_key)
     ? o.idempotency_key
     : null;
@@ -771,16 +901,21 @@ export async function submitJob(opts) {
       managed_provider: managedProviderConfig?.provider || null,
       managed_provider_launch_spec_hash: managedLaunch?.launch_spec_hash || null,
       managed_provider_launch_spec: managedLaunch?.launch_spec || null,
+      provider_price_receipt_hash: providerPriceReceipt?.receipt_hash || null,
+      provider_price_receipt_public_display: providerPriceReceipt?.public_display || null,
+      estimated_provider_price_usd: providerPriceReceipt?.estimated_cost_usd ?? null,
     },
     labels: {
       source: 'cloud-distill',
       backend_status: backend.status,
       managed_provider: managedProviderConfig?.provider || null,
+      provider_price_receipt_hash: providerPriceReceipt?.receipt_hash || null,
     },
     lineage: {
       cloud_distill_job_id: job_id,
       meter_ledger: 'training',
       managed_provider_launch_spec_hash: managedLaunch?.launch_spec_hash || null,
+      provider_price_receipt_hash: providerPriceReceipt?.receipt_hash || null,
     },
   });
   if (!scheduler.ok) {
@@ -810,6 +945,9 @@ export async function submitJob(opts) {
         provider_job_id: existing.provider_job_id || null,
         provider_status_url: existing.provider_status_url || null,
         managed_provider_launch_spec_hash: existing.managed_provider_launch_spec_hash || null,
+        provider_price_receipt_hash: existing.provider_price_receipt_hash || null,
+        provider_price_receipt_public_display: existing.provider_price_receipt_public_display || null,
+        estimated_provider_price_usd: existing.estimated_provider_price_usd ?? null,
         poll_url: existing.poll_url || existing.provider_status_url || existing.bridge_status_url || null,
         scheduler_job_id: scheduler.job_id,
         scheduler_state: scheduler.job?.state || null,
@@ -876,6 +1014,9 @@ export async function submitJob(opts) {
     provider_job_id: providerDispatch && providerDispatch.ok ? providerDispatch.provider_job_id : null,
     provider_status_url: providerDispatch && providerDispatch.ok ? providerDispatch.provider_status_url : null,
     managed_provider_launch_spec_hash: managedLaunch?.launch_spec_hash || null,
+    provider_price_receipt_hash: providerPriceReceipt?.receipt_hash || null,
+    provider_price_receipt_public_display: providerPriceReceipt?.public_display || null,
+    estimated_provider_price_usd: providerPriceReceipt?.estimated_cost_usd ?? null,
     poll_url: providerDispatch && providerDispatch.ok
       ? providerDispatch.poll_url
       : (bridge && bridge.ok ? bridge.bridge_status_url : null),
@@ -924,6 +1065,8 @@ export async function submitJob(opts) {
     cost_usd: 0,
     rate_per_gpu_hour_usd: CLOUD_METER_RATES.training_per_gpu_hour_usd[gpu_sku]
       * CLOUD_METER_RATES.vram_tier_multiplier[vram_tier],
+    provider_price_receipt_hash: providerPriceReceipt?.receipt_hash || null,
+    estimated_provider_price_usd: providerPriceReceipt?.estimated_cost_usd ?? null,
     ts: now,
     version: CLOUD_DISTILL_VERSION,
   };
@@ -942,6 +1085,9 @@ export async function submitJob(opts) {
       cloud_backend_endpoint: row.cloud_backend_endpoint,
       managed_provider: row.managed_provider,
       launch_spec_hash: row.managed_provider_launch_spec_hash,
+      provider_price_receipt_hash: row.provider_price_receipt_hash,
+      provider_price_receipt_public_display: row.provider_price_receipt_public_display,
+      estimated_provider_price_usd: row.estimated_provider_price_usd,
       scheduler_job_id: scheduler.job_id,
       scheduler_state: row.scheduler_state,
       version: CLOUD_DISTILL_VERSION,
@@ -961,6 +1107,9 @@ export async function submitJob(opts) {
     provider_job_id: row.provider_job_id,
     provider_status_url: row.provider_status_url,
     managed_provider_launch_spec_hash: row.managed_provider_launch_spec_hash,
+    provider_price_receipt_hash: row.provider_price_receipt_hash,
+    provider_price_receipt_public_display: row.provider_price_receipt_public_display,
+    estimated_provider_price_usd: row.estimated_provider_price_usd,
     poll_url: row.poll_url,
     scheduler_job_id: scheduler.job_id,
     scheduler_state: scheduler.job?.state || 'queued',
@@ -1012,6 +1161,9 @@ export function getJobStatus(opts) {
     provider_job_id: row.provider_job_id || null,
     provider_status_url: row.provider_status_url || null,
     managed_provider_launch_spec_hash: row.managed_provider_launch_spec_hash || null,
+    provider_price_receipt_hash: row.provider_price_receipt_hash || null,
+    provider_price_receipt_public_display: row.provider_price_receipt_public_display || null,
+    estimated_provider_price_usd: row.estimated_provider_price_usd ?? null,
     poll_url: row.poll_url || row.provider_status_url || row.bridge_status_url || null,
     scheduler_job_id: row.scheduler_job_id || null,
     scheduler_state: row.scheduler_state || null,
@@ -1327,6 +1479,7 @@ export default {
   CLOUD_DISTILL_STATES,
   CLOUD_BACKEND_STATUSES,
   CLOUD_METER_RATES,
+  PROVIDER_PRICING_RECEIPT_VERSION,
   MANAGED_DISTILL_PROVIDERS,
   getCloudBackendStatus,
   submitJob,

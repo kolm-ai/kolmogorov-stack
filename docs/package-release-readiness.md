@@ -18,6 +18,7 @@ node scripts/package-release-readiness.mjs --catalog
 node scripts/package-release-readiness.mjs --target=sdk-ts --json
 node scripts/package-release-readiness.mjs --smoke-installers --json
 node scripts/package-release-readiness.mjs --run-local-checks --target=langchain-npm --json
+node scripts/verify-python-package-dist.mjs --json
 ```
 
 The checker covers:
@@ -26,6 +27,13 @@ The checker covers:
 - `ios-android-sdk`: SwiftPM, Android/Kotlin, and React Native package surfaces.
 - `sdk-depth`: Node-style packages, Python packages, Rust runtime, mobile SDKs, extension packaging, and integrations.
 - `one-line-install`: direct install scripts, Homebrew, apt, and winget manifests.
+
+Publish promotion requires a retained release packet, not only channel URLs. A
+valid `reports/package-release-manifest.json` must name each target's registry
+or artifact URL plus local `reports/releases/...` paths for the release
+artifact, SBOM, provenance, and signature bundle. The audit verifies those files
+exist and that their SHA-256 digests match the manifest before setting
+`publish_ready=true`.
 
 Version alignment:
 
@@ -43,6 +51,7 @@ Local package checks:
 - `--run-local-checks` executes safe local package commands from the package directory instead of only listing them.
 - npm package checks run with a workspace-local npm cache so Windows and restricted shells do not write to the user profile.
 - Missing toolchains or blocked dependency indexes are reported as explicit skips in normal mode and as failures with `--strict-local-checks`.
+- PyPI targets also run `scripts/verify-python-package-dist.mjs`, which inspects checked-in wheels and sdists without requiring the optional Python `build` module.
 - npm SDK dist verification, npm `pack --dry-run`, winget manifest validation, browser extension build dry-run, installer `-WhatIf`, and Debian dry-run checks are expected to pass on this Windows shell; Swift, Gradle, Homebrew, POSIX shell, and some Cargo paths may be skipped when the host lacks toolchains, dependency caches, or permission to execute build scripts.
 
 SDK dist verification:

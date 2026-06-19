@@ -194,20 +194,25 @@
       ],
       "external_actions": [
         "Freeze benchmark dataset versions, hardware targets, model/provider versions, pricing assumptions, and exact commands.",
-        "Run public reproducible benchmark jobs and publish raw logs, manifests, receipts, and signed result bundle.",
-        "Update public benchmark pages only after raw data is linked."
+        "Run public reproducible benchmark jobs and publish raw logs, manifests, receipts, signed result bundle, and harness configuration.",
+        "Update public benchmark pages only after raw data, statistical uncertainty, contamination checks, and leaderboard-stability artifacts are linked."
       ],
       "evidence_required": [
         "public benchmark dataset manifest",
         "signed raw output bundle",
         "hardware and provider version record",
+        "benchmark harness configuration manifest",
+        "statistical uncertainty analysis",
+        "contamination provenance report",
+        "leaderboard stability and close-rank robustness report",
         "reproducer command and checksum",
         "published leaderboard URL"
       ],
       "failure_modes": [
         "Synthetic fixture results are marketed as public benchmark evidence.",
         "Competitor comparisons use stale prices or unpinned model versions.",
-        "Benchmark page links summaries without raw reproducible output."
+        "Benchmark page links summaries without raw reproducible output.",
+        "Close leaderboard ranks are presented as deterministic without uncertainty or stability analysis."
       ]
     },
     {
@@ -225,12 +230,14 @@
         "packages/runtime-rs/Cargo.toml",
         "packages/sdk-swift/Package.swift",
         "packages/sdk-kotlin/build.gradle.kts",
-        "packages/browser-extension/manifest.json"
+        "packages/browser-extension/manifest.json",
+        "scripts/verify-python-package-dist.mjs"
       ],
       "local_commands": [
         "npm run verify:package-release",
         "node scripts/package-release-readiness.mjs --run-local-checks --summary",
         "node scripts/verify-sdk-dist.mjs",
+        "node scripts/verify-python-package-dist.mjs --json",
         "node scripts/simulate-product-invention-buildbook.cjs --invention=w598-codegraph-product-indexer --summary"
       ],
       "external_actions": [
@@ -241,6 +248,7 @@
       "evidence_required": [
         "registry URL or signed release URL per SDK",
         "checksum per release artifact",
+        "Python wheel/sdist artifact verifier output",
         "clean-install log per package manager",
         "SDK manifest synced to docs"
       ],
@@ -291,11 +299,15 @@
         "signed ISO 27001 certificate when claimed",
         "countersigned BAA/DPA templates when claimed",
         "FedRAMP boundary/authorization evidence when claimed",
-        "signed SLSA/SBOM provenance evidence when claimed"
+        "signed SLSA/SBOM provenance evidence when claimed",
+        "authority references and framework crosswalks for each claimed control family",
+        "control-period start/end dates, system boundary, and scoped exclusions",
+        "retained evidence registers with SHA-256 hashes and chain-of-custody reviewer independence"
       ],
       "failure_modes": [
         "Security page claims certification because controls are implemented locally.",
         "Compliance packet contains placeholders or unsigned templates.",
+        "Manifest passes without retained evidence-register files or reviewer-independence metadata.",
         "Product copy collapses HIPAA-ready workflow into HIPAA-certified status."
       ]
     },

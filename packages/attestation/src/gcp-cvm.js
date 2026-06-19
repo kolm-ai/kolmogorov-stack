@@ -19,11 +19,11 @@ import { parseTdxAttestation } from './tdx.js';
 export function parseGcpCvmAttestation(payload) {
   const env = normalizeEnvelope(payload);
   if (env.technology === 'sev-snp' && env.report) {
-    const inner = parseSevSnpAttestation(env.report);
+    const inner = parseSevSnpAttestation(env);
     return { ...inner, vendor: 'gcp', claims: { ...inner.claims, technology: 'sev-snp', csp: 'gcp' } };
   }
   if (env.technology === 'tdx' && env.quote) {
-    const inner = parseTdxAttestation(env.quote);
+    const inner = parseTdxAttestation(env);
     return { ...inner, vendor: 'gcp', claims: { ...inner.claims, technology: 'tdx', csp: 'gcp' } };
   }
   throw new Error('gcp-cvm payload missing technology=sev-snp|tdx + report|quote');

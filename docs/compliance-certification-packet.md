@@ -31,12 +31,30 @@ until external auditor/legal/release artifacts are attached.
 ## External Evidence Manifest
 
 `reports/compliance-certification-manifest.json` is the promotion file for the
-live certification gate. It must stay secret-free and include:
+live certification gate. It must stay secret-free, placeholder-free, and include:
 
 - SOC 2, ISO 27001, HIPAA BAA, GDPR DPA, FedRAMP, and SLSA/SBOM rows.
-- HTTPS evidence URLs, SHA-256 evidence hashes, and SHA-256 signature hashes.
+- Authority references for AICPA TSC, ISO/IEC 27001, HHS HIPAA Security Rule,
+  EU GDPR, FedRAMP Rev. 5 baselines, NIST SP 800-53 Rev. 5, SLSA Provenance
+  v1.0, in-toto Statement v1, and SPDX specifications as applicable.
+- Framework crosswalk references for each row, including SOC 2 CC1-CC9,
+  ISO/IEC 27001 clauses/Annex A, HIPAA 45 CFR safeguards, GDPR processor and
+  security articles, FedRAMP/NIST baselines, and SLSA/in-toto/SPDX supply-chain
+  evidence.
+- HTTPS evidence URLs, retained `reports/compliance/...` evidence artifact
+  paths, retained evidence-register artifact paths, retained signature artifact
+  paths, and SHA-256 hashes for all three retained artifacts.
 - production `/health`, `/ready`, and authenticated-probe hashes.
-- issuer, issued date, scope summary, tenant boundary, and data region.
+- issuer, issued date, expiration date, control-period start/end, scope summary,
+  system boundary, tenant boundary, and data region.
+- Chain-of-custody metadata naming who collected the evidence, who reviewed it,
+  reviewer independence (`external_auditor`, `external_counsel`, or
+  `internal_independent_reviewer`), retention date, and matching evidence
+  register path/hash.
 
-Without that manifest, the packet can prove implemented controls but not a live
-certification claim.
+`--validate` checks the manifest schema and reports when it is ready for local
+artifact verification. It does not claim live certification by itself. The audit
+only promotes `live_certification_verified=true` after the manifest validates
+and all retained evidence, evidence-register, and signature files exist with
+matching hashes. Without that complete retained-artifact set, the packet can
+prove implemented controls but not a live certification claim.

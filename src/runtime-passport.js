@@ -8,7 +8,8 @@
 //     target_id:       'gguf-q4_k_m-llama.cpp' | 'mlx-fp16' | ...
 //     status:          'tested' | 'estimated' | 'unsupported'
 //     runtime:         'llama.cpp' | 'vllm' | 'ollama' | 'mlx' |
-//                      'transformers' | 'tensorrt-llm' | 'sglang' | 'tgi'
+//                      'transformers' | 'tensorrt-llm' | 'sglang' | 'tgi' |
+//                      'executorch'
 //     runtime_version: 'b3415' | '0.6.4' | 'mlx-lm 0.20.0' (string, free-form)
 //     precision:       'fp16' | 'bf16' | 'fp8' | 'int8' | 'q4_k_m' | ...
 //     memory_mb:       working-set memory the artifact occupies on this runtime
@@ -93,6 +94,7 @@ export const RUNTIME_PASSPORT_FIELDS_V2 = Object.freeze([
   // est-or-measured speedup so the receipt can quote "served via awq_marlin
   // (est 10.9x vs naive AWQ on sm_89)".
   'serving_kernel',
+  'executorch_device_validation',
   'unsupported_features',
   'notes',
 ]);
@@ -128,6 +130,7 @@ export const VALID_RUNTIMES = [
   'tensorrt-llm',
   'sglang',
   'tgi',
+  'executorch',
 ];
 
 // Numeric fields that MUST be a finite non-negative number when status='tested'.
@@ -364,6 +367,11 @@ const ESTIMATED_PERFORMANCE = Object.freeze({
     fp16: { latency_p50_ms: 22, latency_p95_ms: 38, time_to_first_token_ms: 110, max_context_tested: 4096 },
     int4: { latency_p50_ms: 18, latency_p95_ms: 30, time_to_first_token_ms: 90,  max_context_tested: 4096 },
   }),
+  executorch: Object.freeze({
+    pte:  { latency_p50_ms: 35, latency_p95_ms: 70, time_to_first_token_ms: 220, max_context_tested: 2048 },
+    int4: { latency_p50_ms: 28, latency_p95_ms: 56, time_to_first_token_ms: 180, max_context_tested: 2048 },
+    fp16: { latency_p50_ms: 45, latency_p95_ms: 90, time_to_first_token_ms: 260, max_context_tested: 2048 },
+  }),
   transformers: Object.freeze({
     fp16: { latency_p50_ms: 60, latency_p95_ms: 120, time_to_first_token_ms: 350, max_context_tested: 2048 },
     bf16: { latency_p50_ms: 60, latency_p95_ms: 120, time_to_first_token_ms: 350, max_context_tested: 2048 },
@@ -380,6 +388,7 @@ function _inferRuntimeAndPrecision(artifactPath, format, targetHardware) {
     if (lower.endsWith('.gguf')) inferredFormat = 'gguf';
     else if (lower.endsWith('.safetensors')) inferredFormat = 'safetensors';
     else if (lower.endsWith('.mlx')) inferredFormat = 'mlx';
+    else if (lower.endsWith('.pte')) inferredFormat = 'pte';
     else inferredFormat = 'unknown';
   }
   // Precision from a typical Q-suffix in the filename: Q4_K_M, Q5_K_M, Q8_0, …
@@ -390,9 +399,11 @@ function _inferRuntimeAndPrecision(artifactPath, format, targetHardware) {
   if (!precision && inferredFormat === 'safetensors' && tgt === 'cuda') precision = 'fp16';
   if (!precision && inferredFormat === 'safetensors') precision = 'bf16';
   if (!precision && inferredFormat === 'mlx') precision = 'fp16';
+  if (!precision && inferredFormat === 'pte') precision = 'pte';
   let runtime = null;
   if (inferredFormat === 'gguf') runtime = 'llama.cpp';
   else if (inferredFormat === 'mlx') runtime = 'mlx';
+  else if (inferredFormat === 'pte') runtime = 'executorch';
   else if (inferredFormat === 'safetensors' && tgt === 'cuda') runtime = 'vllm';
   else if (inferredFormat === 'safetensors' && tgt === 'metal') runtime = 'mlx';
   else if (inferredFormat === 'safetensors') runtime = 'transformers';

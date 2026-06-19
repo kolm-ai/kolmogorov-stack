@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Distill Studio - kolm.ai</title>
+<meta name="description" content="No-code workspace for capture preview, distill strategy, trainer settings, cloud dispatch, and run monitoring.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#08090A">
+<link rel="canonical" href="https://kolm.ai/studio">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preload" href="/fonts/Geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/GeistMono.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/kolm-2026.css">
+<style>
+  body{background:var(--room);color:var(--ink)}
+  body::before,body::after{display:none}
+  .studio{max-width:1360px;margin:0 auto;padding:28px max(18px,env(safe-area-inset-right)) 72px max(18px,env(safe-area-inset-left))}
+  .studio-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+  .brand{display:inline-flex;align-items:center;gap:10px;min-height:42px;color:var(--ink);font-weight:620;letter-spacing:-.01em}
+  .brand svg{width:23px;height:23px;fill:var(--accent)}
+  .studio-nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .studio-grid{display:grid;grid-template-columns:292px minmax(0,1fr);gap:16px;align-items:start}
+  .rail,.pane,.meter,.run-row,.flow-step{border:1px solid var(--line);border-top-color:var(--line-top);border-radius:8px;background:var(--panel);box-shadow:var(--plate)}
+  .rail{position:sticky;top:18px;padding:16px;display:grid;gap:14px}
+  .pane{padding:16px;min-width:0}
+  .eyebrow{font:var(--w-ui) 11px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+  h1{font-size:clamp(28px,4vw,48px);line-height:1.02;letter-spacing:0;margin:0 0 8px;max-width:13ch}
+  h2{font-size:17px;letter-spacing:0;margin:0 0 12px}
+  h3{font-size:14px;letter-spacing:0;margin:0}
+  p{margin:0;color:var(--ink-2);font-size:13.5px;line-height:1.55;max-width:72ch}
+  label{display:grid;gap:6px;color:var(--ink-3);font:var(--w-ui) 11px/1.25 var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
+  input,select,textarea{width:100%;min-height:40px;border:1px solid var(--line-2);border-radius:6px;background:var(--well);color:var(--ink);padding:9px 10px;font:13px/1.4 var(--font-mono)}
+  textarea{min-height:78px;resize:vertical}
+  input::placeholder,textarea::placeholder{color:var(--ink-4)}
+  .btnbar{display:flex;gap:8px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:0 12px;border:1px solid var(--line-2);border-radius:6px;background:var(--cta-ghost-bg);color:var(--ink);font:var(--w-ui) 13px/1 var(--font-sans);cursor:pointer}
+  .btn:hover{background:var(--cta-ghost-bg-h)}
+  .btn--primary{background:var(--cta-fill);color:var(--cta-ink);border-color:transparent}
+  .btn--primary:hover{background:var(--cta-fill-hover)}
+  .btn:disabled{opacity:.48;cursor:not-allowed}
+  .status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+  .meter{padding:13px;min-height:92px}
+  .meter span{display:block;color:var(--ink-3);font:11px/1.35 var(--font-mono);text-transform:uppercase;letter-spacing:.08em}
+  .meter b{display:block;margin-top:10px;color:var(--ink);font:var(--w-display) 27px/1 var(--font-mono);font-variant-numeric:tabular-nums}
+  .meter small{display:block;margin-top:8px;color:var(--ink-3);font:12px/1.35 var(--font-mono)}
+  .workspace{display:grid;gap:16px}
+  .split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:16px}
+  .settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:14px}
+  .flow-step{padding:10px;min-height:92px}
+  .flow-step b{display:block;color:var(--ink);font-size:13px;margin-bottom:5px}
+  .flow-step span{display:block;color:var(--ink-3);font:12px/1.45 var(--font-mono)}
+  .table{display:grid;gap:6px}
+  .row{display:grid;grid-template-columns:minmax(0,1fr) 76px 76px;gap:10px;align-items:center;min-height:42px;border:1px solid var(--line);border-radius:6px;background:var(--well);padding:8px 10px}
+  .row b{font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+  .row span{font:12px/1.35 var(--font-mono);color:var(--ink-3);text-align:right}
+  .log{min-height:170px;max-height:360px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--well);padding:12px;color:var(--ink-2);font:12px/1.55 var(--font-mono);white-space:pre-wrap}
+  .runs{display:grid;gap:8px}
+  .run-row{display:grid;grid-template-columns:minmax(0,1fr) 112px 112px;gap:10px;align-items:center;padding:10px}
+  .run-row b{font-size:13px;color:var(--ink);overflow-wrap:anywhere}
+  .run-row span{font:12px/1.35 var(--font-mono);color:var(--ink-3);text-align:right}
+  .badge{display:inline-flex;align-items:center;min-height:22px;padding:2px 7px;border:1px solid var(--line-2);border-radius:5px;background:var(--well);color:var(--ink-2);font:11px/1 var(--font-mono)}
+  .badge.ok{border-color:var(--accent-edge);color:var(--accent)}
+  .banner{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:11px 12px;color:var(--ink-2);font-size:13px;line-height:1.5}
+  .banner.warn{border-color:rgba(214,158,46,.45);background:rgba(214,158,46,.10);color:var(--ink)}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+  [hidden]{display:none!important}
+  @media (max-width:980px){.studio-grid,.split{grid-template-columns:1fr}.rail{position:static}.status,.flow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:620px){.studio{padding-top:18px}.studio-top{align-items:flex-start;flex-direction:column}.studio-nav{justify-content:flex-start}.status,.flow,.settings{grid-template-columns:1fr}.run-row,.row{grid-template-columns:1fr}.row span,.run-row span{text-align:left}.btnbar .btn{flex:1 1 auto}}
+</style>
+</head>
+<body data-studio-version="w1032-distill-studio-v1">
+<a class="skip-link" href="#main">Skip to content</a>
+<main id="main" class="studio">
+  <header class="studio-top">
+    <a class="brand" href="/account/overview" aria-label="kolm workspace">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="6" width="4.5" height="20" rx=".4"/><rect x="13" y="9" width="4.5" height="14" rx=".4"/><rect x="22" y="12" width="4.5" height="8" rx=".4"/></svg>
+      <span>kolm studio</span>
+    </a>
+    <nav class="studio-nav" aria-label="Workspace">
+      <a class="badge" href="/account/train">Train</a>
+      <a class="badge" href="/account/api-control-center">API Control</a>
+      <a class="badge" href="/account/overview">Overview</a>
+      <a class="badge" href="/docs">Docs</a>
+    </nav>
+  </header>
+
+  <section class="studio-grid">
+    <aside class="rail" aria-label="Studio controls">
+      <div>
+        <p class="eyebrow">Distill Studio</p>
+        <h1>No-code distill loop</h1>
+        <p>Capture preview, strategy selection, trainer settings, dispatch, and run status in one workspace.</p>
+      </div>
+      <label>API key
+        <input id="apiKey" type="password" autocomplete="off" placeholder="ks_..." aria-describedby="keyNote">
+      </label>
+      <p id="keyNote" class="sr-only">The API key is stored in local storage for this browser.</p>
+      <label>Namespace
+        <input id="namespace" value="default" autocomplete="off">
+      </label>
+      <label>Teacher
+        <select id="teacher">
+          <option value="anthropic">Anthropic</option>
+          <option value="openai">OpenAI</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="local">Local/Open weights</option>
+        </select>
+      </label>
+      <div class="btnbar">
+        <button class="btn btn--primary" id="loadPreview" type="button">Load Preview</button>
+        <button class="btn" id="loadRuns" type="button">Runs</button>
+      </div>
+      <div id="notice" class="banner" aria-live="polite">Idle.</div>
+    </aside>
+
+    <section class="workspace" aria-label="Distill workspace">
+      <section class="status" aria-label="Current namespace meters">
+        <div class="meter"><span>Captures</span><b id="mCaptures">0</b><small id="mNamespace">default</small></div>
+        <div class="meter"><span>Recipe ready</span><b id="mRecipe">No</b><small>template cluster</small></div>
+        <div class="meter"><span>Specialist ready</span><b id="mSpecialist">No</b><small>1,000+ pairs</small></div>
+        <div class="meter"><span>Teacher source</span><b id="mTeacher">-</b><small id="mPolicy">policy pending</small></div>
+      </section>
+
+      <section class="split">
+        <div class="pane">
+          <p class="eyebrow">Preview</p>
+          <h2>Captured clusters</h2>
+          <div id="clusterRows" class="table" aria-live="polite"></div>
+          <div class="flow" aria-label="Distill phases">
+            <div class="flow-step"><b>Capture</b><span id="phaseCapture">waiting</span></div>
+            <div class="flow-step"><b>Curate</b><span id="phaseCurate">waiting</span></div>
+            <div class="flow-step"><b>Train</b><span id="phaseTrain">waiting</span></div>
+            <div class="flow-step"><b>Package</b><span id="phasePackage">waiting</span></div>
+          </div>
+        </div>
+
+        <div class="pane">
+          <p class="eyebrow">Settings</p>
+          <h2>Run configuration</h2>
+          <div class="settings">
+            <label>Mode
+              <select id="mode">
+                <option value="auto">Auto</option>
+                <option value="recipe">Recipe</option>
+                <option value="specialist">Specialist</option>
+              </select>
+            </label>
+            <label>Quality preset
+              <select id="preset">
+                <option value="qdora">QDoRA</option>
+                <option value="default">Default LoRA</option>
+                <option value="rslora">rsLoRA</option>
+              </select>
+            </label>
+            <label>Backend
+              <select id="backend">
+                <option value="auto">Auto</option>
+                <option value="hf">HF</option>
+                <option value="unsloth">Unsloth</option>
+              </select>
+            </label>
+            <label>Compute
+              <select id="provider">
+                <option value="local">Local worker</option>
+                <option value="runpod">RunPod</option>
+                <option value="modal">Modal</option>
+                <option value="together">Together</option>
+              </select>
+            </label>
+          </div>
+          <label style="margin-top:10px">Notes
+            <textarea id="notes" placeholder="optional run label"></textarea>
+          </label>
+          <div class="btnbar" style="margin-top:12px">
+            <button class="btn" id="planStrategy" type="button">Plan Strategy</button>
+            <button class="btn btn--primary" id="startDistill" type="button">Start Distill</button>
+            <button class="btn" id="submitCloud" type="button">Cloud Submit</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="split">
+        <div class="pane">
+          <p class="eyebrow">Runs</p>
+          <h2>Recent distill runs</h2>
+          <div id="runs" class="runs" aria-live="polite"></div>
+        </div>
+        <div class="pane">
+          <p class="eyebrow">Output</p>
+          <h2>Response</h2>
+          <pre id="output" class="log" aria-live="polite"></pre>
+        </div>
+      </section>
+    </section>
+  </section>
+</main>
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  var storeKey = 'kolm_studio_api_key';
+  var state = { captures: 0, preview: null };
+  function text(id, value){ var el = $(id); if (el) el.textContent = String(value == null ? '' : value); }
+  function val(id){ var el = $(id); return el ? String(el.value || '').trim() : ''; }
+  function number(n){ return Number.isFinite(Number(n)) ? Number(n).toLocaleString() : '0'; }
+  function notice(msg, warn){ var el = $('notice'); el.textContent = msg; el.className = warn ? 'banner warn' : 'banner'; }
+  function write(obj){ $('output').textContent = typeof obj === 'string' ? obj : JSON.stringify(obj, null, 2); }
+  function key(){ return val('apiKey') || localStorage.getItem(storeKey) || ''; }
+  function headers(body){
+    var h = { accept: 'application/json' };
+    var k = key();
+    if (k) h.authorization = 'Bearer ' + k;
+    if (body) h['content-type'] = 'application/json';
+    return h;
+  }
+  async function api(path, opts){
+    var res = await fetch(path, opts || {});
+    var raw = await res.text();
+    var data;
+    try { data = raw ? JSON.parse(raw) : {}; } catch (_) { data = { raw: raw }; }
+    if (!res.ok) {
+      var err = new Error(data.error || data.message || ('HTTP ' + res.status));
+      err.payload = data;
+      throw err;
+    }
+    return data;
+  }
+  function clearNode(node){ while (node.firstChild) node.removeChild(node.firstChild); }
+  function row(parent, a, b, c){
+    var el = document.createElement('div'); el.className = 'row';
+    var left = document.createElement('b'); left.textContent = a;
+    var mid = document.createElement('span'); mid.textContent = b;
+    var right = document.createElement('span'); right.textContent = c;
+    el.append(left, mid, right); parent.appendChild(el);
+  }
+  function runRow(parent, a, b, c){
+    var el = document.createElement('div'); el.className = 'run-row';
+    var left = document.createElement('b'); left.textContent = a;
+    var mid = document.createElement('span'); mid.textContent = b;
+    var right = document.createElement('span'); right.textContent = c;
+    el.append(left, mid, right); parent.appendChild(el);
+  }
+  function renderPreview(data){
+    state.preview = data || {};
+    state.captures = Number(data.total_captures || data.count || 0);
+    text('mCaptures', number(state.captures));
+    text('mNamespace', val('namespace') || 'default');
+    text('mRecipe', data.recipe_eligible ? 'Yes' : 'No');
+    text('mSpecialist', data.specialist_eligible ? 'Yes' : 'No');
+    text('mTeacher', data.teacher_source || data.teacher_source_policy || '-');
+    text('mPolicy', data.teacher_source_tos_risk || data.policy_enforced || 'policy checked');
+    text('phaseCapture', state.captures ? 'ready' : 'empty');
+    text('phaseCurate', data.total_captures ? 'previewed' : 'waiting');
+    text('phaseTrain', data.specialist_eligible ? 'eligible' : 'gated');
+    text('phasePackage', data.recipe_eligible || data.specialist_eligible ? 'available after run' : 'waiting');
+    var list = $('clusterRows'); clearNode(list);
+    var clusters = Array.isArray(data.top_clusters) ? data.top_clusters : [];
+    if (!clusters.length) row(list, 'No cluster yet', '0', 'capture more');
+    clusters.slice(0, 8).forEach(function(c, i){
+      row(list, c.template_preview || c.template_hash || ('cluster ' + (i + 1)), number(c.count || 0), c.ready ? 'ready' : 'review');
+    });
+  }
+  async function loadPreview(){
+    try {
+      localStorage.setItem(storeKey, key());
+      notice('Loading preview...');
+      var ns = encodeURIComponent(val('namespace') || 'default');
+      var data = await api('/v1/distill/from-captures/preview?namespace=' + ns, { headers: headers() });
+      renderPreview(data);
+      write(data);
+      notice('Preview loaded.');
+    } catch (err) {
+      notice(err.message, true);
+      write(err.payload || err.message);
+    }
+  }
+  async function planStrategy(){
+    try {
+      notice('Planning strategy...');
+      var rows = state.captures || 0;
+      var teacher = encodeURIComponent(val('teacher') || 'anthropic');
+      var data = await api('/v1/distill/strategy?task=generation&real_pairs=' + rows + '&teacher=' + teacher, { headers: headers() });
+      write(data);
+      notice('Strategy ready.');
+    } catch (err) {
+      notice(err.message, true);
+      write(err.payload || err.message);
+    }
+  }
+  async function startDistill(){
+    try {
+      notice('Starting distill...');
+      var body = {
+        namespace: val('namespace') || 'default',
+        mode: val('mode'),
+        train_preset: val('preset'),
+        backend: val('backend'),
+        label: val('notes'),
+      };
+      var data = await api('/v1/distill/from-captures', { method: 'POST', headers: headers(true), body: JSON.stringify(body) });
+      write(data);
+      notice('Distill submitted.');
+      loadRuns();
+    } catch (err) {
+      notice(err.message, true);
+      write(err.payload || err.message);
+    }
+  }
+  async function submitCloud(){
+    try {
+      notice('Submitting cloud distill...');
+      var body = {
+        namespace: val('namespace') || 'default',
+        provider: val('provider'),
+        quality_preset: val('preset'),
+        backend: val('backend'),
+        notes: val('notes'),
+      };
+      var data = await api('/v1/cloud/distill/submit', { method: 'POST', headers: headers(true), body: JSON.stringify(body) });
+      write(data);
+      notice('Cloud request submitted.');
+    } catch (err) {
+      notice(err.message, true);
+      write(err.payload || err.message);
+    }
+  }
+  async function loadRuns(){
+    try {
+      notice('Loading runs...');
+      var data = await api('/v1/distill/runs', { headers: headers() });
+      var parent = $('runs'); clearNode(parent);
+      var runs = Array.isArray(data.runs) ? data.runs : [];
+      if (!runs.length) runRow(parent, 'No distill runs yet', '-', '-');
+      runs.slice(0, 8).forEach(function(r){
+        runRow(parent, r.id || r.run_id || 'run', r.status || r.telemetry_source || '-', r.namespace || r.created_at || '-');
+      });
+      write(data);
+      notice('Runs loaded.');
+    } catch (err) {
+      notice(err.message, true);
+      write(err.payload || err.message);
+    }
+  }
+  function init(){
+    var existing = localStorage.getItem(storeKey);
+    if (existing) $('apiKey').value = existing;
+    $('loadPreview').addEventListener('click', loadPreview);
+    $('loadRuns').addEventListener('click', loadRuns);
+    $('planStrategy').addEventListener('click', planStrategy);
+    $('startDistill').addEventListener('click', startDistill);
+    $('submitCloud').addEventListener('click', submitCloud);
+    renderPreview({ total_captures: 0, top_clusters: [] });
+    write({ studio_version: 'w1032-distill-studio-v1', endpoints: ['/v1/distill/from-captures/preview', '/v1/distill/from-captures', '/v1/distill/strategy', '/v1/cloud/distill/submit', '/v1/distill/runs', '/v1/captures/list'] });
+  }
+  init();
+})();
+</script>
+</body>
+</html>

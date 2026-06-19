@@ -25,7 +25,11 @@ process.env.KOLM_HOME = TEST_DATA_DIR;
 process.env.HOME = TEST_DATA_DIR;
 process.env.USERPROFILE = TEST_DATA_DIR;
 
-const { flagCopyrightRisk, attachCopyrightFlag } = await import('../src/capture-copyright-filter.js');
+const {
+  CAPTURE_COPYRIGHT_FILTER_VERSION,
+  flagCopyrightRisk,
+  attachCopyrightFlag,
+} = await import('../src/capture-copyright-filter.js');
 const { isGeoFenced, EXPORT_CONTROL_DENYLIST } = await import('../src/auth.js');
 
 // =============================================================================
@@ -49,6 +53,41 @@ test('W708 #1 — flagCopyrightRisk flags paywall snippet AND copyright header',
   assert.equal(lyrics.flagged, true, 'song-lyrics markers should flag');
   assert.ok(lyrics.matched_phrases.some((p) => p.startsWith('[verse') || p.startsWith('[chorus')),
     'lyrics markers should appear in matched_phrases');
+});
+
+test('W708 #1b - W1022 copyright filter reuses local fingerprints and source-license policy', () => {
+  const fingerprinted = flagCopyrightRisk(
+    'SPDX-License-Identifier: MIT\nCopyright (c) 2026 Acme\nMickey Mouse reference'
+  );
+  assert.equal(fingerprinted.flagged, true);
+  assert.equal(fingerprinted.version, CAPTURE_COPYRIGHT_FILTER_VERSION);
+  assert.ok(fingerprinted.reasons.includes('copyright-fingerprint-match'));
+  assert.ok(fingerprinted.fingerprint_hits.some((hit) => hit.kind === 'spdx'));
+  assert.ok(fingerprinted.fingerprint_hits.some((hit) => hit.kind === 'code_copyright'));
+  assert.ok(fingerprinted.fingerprint_hits.some((hit) => hit.kind === 'disney_character'));
+  assert.ok(fingerprinted.risk_score > 0);
+
+  const disallowed = flagCopyrightRisk('This is a public-corpus row from a web scrape.', {
+    source_type: 'web',
+    source_license: 'all-rights-reserved',
+  });
+  assert.equal(disallowed.flagged, true);
+  assert.ok(disallowed.reasons.includes('source-license-disallowed'));
+  assert.equal(disallowed.license_policy.normalized_license, 'all-rights-reserved');
+  assert.equal(disallowed.license_policy.restricted, true);
+
+  const longWebText = 'A source paragraph. '.repeat(40);
+  const missing = flagCopyrightRisk(longWebText, { source_type: 'web' });
+  assert.equal(missing.flagged, true);
+  assert.ok(missing.reasons.includes('source-license-missing'));
+  assert.equal(missing.license_policy.require_source_license, true);
+
+  const permitted = flagCopyrightRisk(longWebText, {
+    source_type: 'web',
+    source_license: 'Apache-2.0',
+  });
+  assert.equal(permitted.flagged, false);
+  assert.equal(permitted.license_policy.permitted, true);
 });
 
 // =============================================================================
@@ -88,6 +127,8 @@ test('W708 #3 — attachCopyrightFlag stamps copyright_flagged + copyright_reaso
   assert.ok(row.copyright_reasons.includes('flagged-phrase-match'));
   assert.ok(Array.isArray(row.copyright_matched_phrases));
   assert.ok(row.copyright_matched_phrases.includes('subscribe to read more'));
+  assert.equal(typeof row.copyright_risk_score, 'number');
+  assert.equal(row.copyright_policy.version, CAPTURE_COPYRIGHT_FILTER_VERSION);
 
   // Clean row should be flagged:false with empty reasons.
   const cleanRow = { id: 'cap_clean', prompt: 'hi', response: 'hello' };
@@ -95,6 +136,20 @@ test('W708 #3 — attachCopyrightFlag stamps copyright_flagged + copyright_reaso
   assert.equal(cleanRow.copyright_flagged, false);
   assert.deepEqual(cleanRow.copyright_reasons, []);
   assert.deepEqual(cleanRow.copyright_matched_phrases, []);
+  assert.deepEqual(cleanRow.copyright_fingerprint_hits, []);
+  assert.equal(cleanRow.copyright_risk_score, 0);
+
+  const licensedRow = {
+    id: 'cap_license',
+    source_type: 'dataset',
+    source_license: 'proprietary',
+    prompt: 'Short source row',
+    response: 'OK',
+  };
+  attachCopyrightFlag(licensedRow);
+  assert.equal(licensedRow.copyright_flagged, true);
+  assert.ok(licensedRow.copyright_reasons.includes('source-license-disallowed'));
+  assert.equal(licensedRow.copyright_policy.input.normalized_license, 'proprietary');
 
   // Null row never throws and is returned as-is.
   assert.equal(attachCopyrightFlag(null), null);

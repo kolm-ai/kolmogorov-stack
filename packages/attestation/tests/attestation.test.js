@@ -12,10 +12,13 @@ import {
   evaluateParsedAttestation,
   parseAttestation,
   registerAttestationVerifier,
+  registerBuiltinAttestationVerifiers,
   VERIFICATION_TIERS,
   verifyAttestation,
   extractMeasurement,
   SUPPORTED_TARGETS,
+  fingerprintChainMaterial,
+  listBuiltinAttestationVerifierSpecs,
 } from '../src/index.js';
 
 test('SUPPORTED_TARGETS includes the BYOC targets', () => {
@@ -222,6 +225,32 @@ test('verifyAttestation: registered hardware verifier is the only crypto-valid p
     assert.equal(verified.cryptographic, true);
     assert.equal(verified.verifier, 'unit-nitro-chain');
     assert.equal(verified.trust_root, 'aws-nitro-root-fixture');
+  } finally {
+    clearAttestationVerifier('aws-nitro');
+  }
+});
+
+test('built-in vendor-chain verifier plugin upgrades Nitro only with pinned root collateral', () => {
+  const root = 'kolm-package-fixture-nitro-root';
+  const payload = {
+    module_id: 'i-1234567890abcdef0-enc1234',
+    timestamp: 1700000000000,
+    digest: 'SHA384',
+    pcrs: { 0: '7'.repeat(96) },
+    cabundle: ['kolm-package-fixture-nitro-leaf', root],
+  };
+  const measurement = `pcr0:sha384:${'7'.repeat(96)}`;
+  assert.ok(listBuiltinAttestationVerifierSpecs().some((spec) => spec.target === 'aws-nitro'));
+  try {
+    registerBuiltinAttestationVerifiers(registerAttestationVerifier, { targets: ['aws-nitro'] });
+    const verified = verifyAttestation('aws-nitro', payload, {
+      measurement,
+      vendor: 'aws',
+      trust_roots: { 'aws-nitro-root': fingerprintChainMaterial(root) },
+    });
+    assert.equal(verified.valid, true, verified.reasons.join('\n'));
+    assert.equal(verified.tier, VERIFICATION_TIERS.CRYPTOGRAPHIC_VENDOR_CHAIN);
+    assert.equal(verified.verifier, 'kolm-builtin-aws-nitro-chain');
   } finally {
     clearAttestationVerifier('aws-nitro');
   }

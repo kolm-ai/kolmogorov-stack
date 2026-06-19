@@ -44,4 +44,7 @@ node scripts/format-governance-packet.mjs --validate reports/format-governance-s
 The manifest must stay secret-free and prove accepted neutral governance with
 HTTPS submission/change-control URLs, accepted venue status, conformance-suite
 hash, spec hash, maintainer-policy hash, trademark-policy hash, and accepted
-scope. A placeholder or submitted-only record must not clear the external gate.
+scope. Each hash must point at a retained local artifact under
+`reports/format-governance/` so the audit can hash-match the retained packet
+before promoting the gate. A placeholder, submitted-only record, or manifest
+without retained artifacts must not clear the external gate.
