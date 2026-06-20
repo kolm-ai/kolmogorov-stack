@@ -49,6 +49,8 @@ test('W1032 Studio wires the production distill APIs without unsafe DOM sinks', 
   assert.match(html, /job_id \|\| data\.job/);
   assert.match(html, /step\.start/);
   assert.match(html, /step\.end/);
+  assert.match(html, /mode === 'specialist'[\s\S]*recipe_class = 'distilled_model'/);
+  assert.doesNotMatch(html, /recipe_class:\s*'distilled_model'/);
 });
 
 test('W1032 Studio is linked from the existing train workspace', () => {

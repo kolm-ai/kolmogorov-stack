@@ -8656,6 +8656,55 @@ export function buildRouter() {
   const VALID_CHAT_TEMPLATES = new Set([
     'chatml', 'qwen-3-thinking', 'llama-3', 'phi-3', 'deepseek-v4', 'plain',
   ]);
+  function compileValuePresent(v) {
+    if (v === null || v === undefined) return false;
+    if (typeof v === 'string') return v.trim().length > 0;
+    return true;
+  }
+  function firstCompileValue(...vals) {
+    for (const v of vals) {
+      if (compileValuePresent(v)) return v;
+    }
+    return null;
+  }
+  function outputFromCaptureRow(row) {
+    const out = firstCompileValue(
+      row && row.response,
+      row && row.output,
+      row && row.completion,
+      row && row.response_text,
+      row && row.assistant_output,
+    );
+    if (out && typeof out === 'object') {
+      const provider = String((row && (row.provider || row.vendor)) || '').toLowerCase();
+      const providers = provider ? [provider, 'openai', 'anthropic'] : ['openai', 'anthropic'];
+      for (const p of providers) {
+        const text = extractCompletionText(out, p);
+        if (compileValuePresent(text)) return text;
+      }
+      if (Array.isArray(out.choices) || Array.isArray(out.content)) return null;
+    }
+    return out;
+  }
+  function compileExampleFromCaptureRow(row) {
+    if (!row || typeof row !== 'object') return null;
+    const input = firstCompileValue(
+      row.prompt,
+      row.input,
+      row.request,
+      row.request_text,
+      row.prompt_redacted,
+      row.user_input,
+    );
+    const output = outputFromCaptureRow(row);
+    if (!compileValuePresent(input) || !compileValuePresent(output)) return null;
+    const ex = { input, output };
+    const id = row.id || row.event_id || row.capture_id;
+    if (id) ex.id = String(id);
+    const tags = Array.isArray(row.tags) ? row.tags.filter(Boolean).map(String) : [];
+    ex.tags = [...new Set([...tags, 'capture-store'])];
+    return ex;
+  }
   // Compile job creation - queues a tenant-scoped build and returns job_id, status, and poll URL.
   // Validates task/model/output options, bills usage, and writes the compile audit record.
   r.post('/v1/compile', computeSpawnLimiter, async (req, res) => {
@@ -8706,6 +8755,26 @@ export function buildRouter() {
         if (!VALID_MD.includes(d)) return res.status(400).json({ error: `multi_device entry '${d}' must be one of ${VALID_MD.join(', ')}` });
       }
     }
+    const namespace = corpus_namespace != null ? sanitizeNamespace(String(corpus_namespace)) : null;
+    let compileExamples = Array.isArray(examples) ? examples : [];
+    let compileSeedSource = compileExamples.length > 0 ? 'request' : null;
+    if (!compileExamples.length && namespace) {
+      let captures;
+      try {
+        captures = await listCaptures(req.tenant, namespace, 200);
+      } catch (e) {
+        return res.status(503).json({
+          error: 'capture_store_read_failed',
+          detail: String((e && e.message) || e),
+          namespace,
+        });
+      }
+      compileExamples = captures
+        .map(compileExampleFromCaptureRow)
+        .filter(Boolean)
+        .slice(0, 200);
+      if (compileExamples.length > 0) compileSeedSource = 'capture_store';
+    }
     // W869+ Persona A.7 - VRAM pre-flight gate. Reject before charging when
     // the model + lora + kv obviously won't fit on the picked hw_tier. Skip
     // for 'auto' (let the picker handle it) and 'cpu-server' (CPU has RAM
@@ -8717,7 +8786,7 @@ export function buildRouter() {
       return res.status(422).json(_vramPreflight.envelope);
     }
     const job = createJob({
-      task, examples, corpus_namespace, base_model,
+      task, examples: compileExamples, corpus_namespace: namespace, base_model,
       tenant: req.tenant, tenant_id: req.tenant_record?.id || null,
       deploy_hook, preset, lora_rank, k_threshold,
       recipe_class, hw_tier, output_target, multi_device,
@@ -8745,7 +8814,7 @@ export function buildRouter() {
         }
         return out;
       },
-      examples,
+      examples: compileExamples,
       recall: {
         query: ({ namespace, query, k }) => recall.query({ tenant: req.tenant, namespace, query, k }),
       },
@@ -8780,7 +8849,7 @@ export function buildRouter() {
       tenant_name: req.tenant_record?.name || null,
       actor: 'tenant',
       op: AUDIT_OPS.COMPILE_CREATED,
-      payload: { job_id: job.id, base_model: job.base_model, examples_n: job.examples_n },
+      payload: { job_id: job.id, base_model: job.base_model, examples_n: job.examples_n, seed_source: compileSeedSource },
     });
     const ON_SERVERLESS = !!(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME);
     if (ON_SERVERLESS || req.query.sync === '1') {
@@ -8814,7 +8883,7 @@ export function buildRouter() {
           plan_tier: String((req.tenant_record && req.tenant_record.plan) || 'unknown').toLowerCase(),
           kind: 'compile', outcome: _outcomeC,
           region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
-          namespace_id: corpus_namespace || null,
+          namespace_id: namespace || null,
         });
       } catch (_) {} // deliberate: cleanup
       // LM-8 (V1 launch 2026-05-26) - compile-done email on the sync branch.
@@ -8891,7 +8960,7 @@ export function buildRouter() {
         plan_tier: String((req.tenant_record && req.tenant_record.plan) || 'unknown').toLowerCase(),
         kind: 'compile', outcome: 'queued',
         region: process.env.RAILWAY_REGION || process.env.REGION || process.env.VERCEL_REGION || null,
-        namespace_id: corpus_namespace || null,
+        namespace_id: namespace || null,
       });
     } catch (_) {} // deliberate: cleanup
     res.status(202).json({ job_id: job.id, status: job.status, poll: `/v1/compile/${job.id}` });
