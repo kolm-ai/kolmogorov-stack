@@ -11852,14 +11852,19 @@ export function buildRouter() {
     }
   });
   // ── SSO signing/credential helpers (W-SSO-LIVE) ─────────────────────────────
-  // Normalize + validate an IdP signing certificate. Accepts a full PEM or the
-  // bare base64 DER body an IdP embeds in <X509Certificate>. Throws
-  // 'idp_cert_invalid' when the bytes do not parse as an X.509 certificate so
-  // the configure route returns a clean 400. The cert is PUBLIC key material -
-  // it is stored to verify assertions but is never echoed back in API responses.
+  // Normalize + validate IdP signing material. Accepts a full X.509 cert PEM,
+  // public-key PEM, or the bare base64 DER body an IdP embeds in
+  // <X509Certificate>. Throws 'idp_cert_invalid' when the material cannot be
+  // parsed so the configure route returns a clean 400. This is PUBLIC
+  // verification material and is never echoed back in API responses.
   function _normalizeIdpCert(raw) {
     const s = _str(raw, 40000);
     if (!s) return null;
+    if (/BEGIN [A-Z ]*PRIVATE KEY/.test(s)) throw new Error('idp_cert_invalid');
+    if (s.includes('BEGIN PUBLIC KEY')) {
+      try { crypto.createPublicKey(s); } catch { throw new Error('idp_cert_invalid'); }
+      return s.trim();
+    }
     let pem = s;
     if (!s.includes('BEGIN CERTIFICATE')) {
       const b64 = s.replace(/\s+/g, '');

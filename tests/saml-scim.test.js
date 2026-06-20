@@ -16,94 +16,34 @@
 //   - one tenant's SCIM token cannot read another tenant's users (isolation);
 //   - SCIM with no credential -> 401.
 //
-// The certificate + private key below are THROWAWAY, generated solely for this
-// test (openssl req -x509 -newkey rsa:2048, CN=kolm-saml-test-idp). They are
-// not used by any runtime path and authenticate nothing in production.
+// The signing key pairs are generated at test startup; no PEM private keys or
+// key-shaped credentials are stored in Git.
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import express from 'express';
 
 import { buildRouter } from '../src/router.js';
 import { provisionTenant, findTenantByApiKey } from '../src/auth.js';
 import { consumeAssertion, extractIssuer, DEFAULT_SKEW_MS } from '../src/saml-acs.js';
 
-// ── throwaway test IdP signing material (cert1/key1 = primary signer) ────────
-const IDP_KEY_PEM = `-----BEGIN PRIVATE KEY-----
-MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC1/tdmxtWYYgPV
-w/L3+YSLYDvilOSmvL3+/pq91cp/gjYUzagfkFlknTr97JYFbCXGTE/bjlHVpw6b
-2xQOJAB4t7tqxqs+XqxU6FqG6UN7c9kw10vntbTbkAPzy1SOBoOUNdAdZp6ZeIGS
-yVZ1MgQpWMwI+DxGqPjSqawJcyhbbyRXo+/pB4xXiarwtDi8TPwV2f030hLXzMYX
-xh1QzZ8pLrcbEVrWnscutQ/Pk6H8dXIvSWBKGy+UbwqpS4x5NT94Sx5U8NtQasFB
-69nnzJqizE/FS1Bwax8W3U0YWrfCyzOKH9rgTAH5WTAdgPj8awqm8NM0yFkEjUgq
-NzH5AjzlAgMBAAECggEADWifvSJEJWx/RNYhhhSbp9sovlpi+EfqpaljhD4Go9tX
-mbPHQcAUXf3ZlVDDgtXDeLcxoQb8z4V15ZTABwSvBjXfOJA3mKpH/x95X/w6rRNN
-erQ6EvHHx+914xXlfmtLcXV/hlMDt2HyBfsQhCTxuowgyD5lznzvjDHVC4MxA39u
-b9BlCSL/D9Tq2aJIboFV37EqqY9uQ8QBAD4ZmVL4RC4SfMBhecDQlChVpjFfuUrH
-iJTM/Qax0zsRHzzLIHqKzzBF36TIDDffNaBL8YTceO+7tjfdKSo1N6ePirHZm3St
-6kH+l0OPIqFZNpQqsXvKSq4B6lFodarRj1Xhj3wC0QKBgQDjiJtE0aCRidDxgcVm
-fojel8SXNinD1yWGbn1uLQWnv70hliPwulzT5VGf+aw9AfBTQeN5Nz2wDoh3m29V
-2n3S1/XThRcTzCBP2J00WK1K4zso0Cs2JFeG1OnY1Kvq5rnjH/KVUBkzrl5A1qTn
-4fCzpDpeQKioQy5+8eDw9p3EOQKBgQDMw7/2HGkrYLCn6HG/Ps/x21dO56WdKwA5
-5UupXWHSSn1K01KCQNM0GnHymrUcXGRdVmj5WQaK2LHhvngssOteAejQIaZrtxY5
-PQKI8FeXVYTe2tnHsVlSA+5ancsmLf4aDC4For87E67IJykxwT+iPtis3vPGwQmS
-vEALcPV2DQKBgQCo1dcRK9PP6snGSxslQMNjGI7h/WjkTyMjK52bQYEuxpIa+APX
-PxJekY0N/gAWjPe9b+jRK3J0z3Pn/MiSljxDVcitmdZT9GYNmZidHSgJp69gS4ek
-9zaTcC3NnZGsDmTk6fHhZbwtozeBOUTIY9luE3DUO3pq0N8Rh334j6bl0QKBgAhB
-M/Hl/09iXHzIYB2HmLZ1UzW5HPITE7VByyUOwKzLl/V2Q3NAzcLh9goDtp1oFBu3
-KhAzSJI8Xh9toEac80Ac75fEY4MgJGM2VG3U0pMlPXAGfpUQTzuBMRCyH8hwPjgq
-mYhcoTzudDNZcM2yrrAJvI5rhoRSr+IceLB9Y0fZAoGAIICryWwd6ibRS76XBWrj
-C56EqmLgXS6nbVp0GTYmfF4V1bGngGX1ND+fwaKn4ID9xdRdfxWulP5v3O8piCy5
-ZQYCNpk1NfZRoyS707kBhbjZ+fuw1ZX9+ynHT9rO5b9rBfdlK01hbi/w/ljQnDVj
-sswH3veI4yjvOkQ6fbFVDC0=
------END PRIVATE KEY-----
-`;
+function makeTestSigningMaterial() {
+  return crypto.generateKeyPairSync('rsa', {
+    modulusLength: 2048,
+    publicKeyEncoding: { type: 'spki', format: 'pem' },
+    privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+  });
+}
 
-const IDP_CERT_PEM = `-----BEGIN CERTIFICATE-----
-MIIDHTCCAgWgAwIBAgIUZdwciIKvo+oXC1asEIi1RDKGp5swDQYJKoZIhvcNAQEL
-BQAwHTEbMBkGA1UEAwwSa29sbS1zYW1sLXRlc3QtaWRwMCAXDTI2MDYwODE4NTM1
-MFoYDzIxMjYwNTE1MTg1MzUwWjAdMRswGQYDVQQDDBJrb2xtLXNhbWwtdGVzdC1p
-ZHAwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC1/tdmxtWYYgPVw/L3
-+YSLYDvilOSmvL3+/pq91cp/gjYUzagfkFlknTr97JYFbCXGTE/bjlHVpw6b2xQO
-JAB4t7tqxqs+XqxU6FqG6UN7c9kw10vntbTbkAPzy1SOBoOUNdAdZp6ZeIGSyVZ1
-MgQpWMwI+DxGqPjSqawJcyhbbyRXo+/pB4xXiarwtDi8TPwV2f030hLXzMYXxh1Q
-zZ8pLrcbEVrWnscutQ/Pk6H8dXIvSWBKGy+UbwqpS4x5NT94Sx5U8NtQasFB69nn
-zJqizE/FS1Bwax8W3U0YWrfCyzOKH9rgTAH5WTAdgPj8awqm8NM0yFkEjUgqNzH5
-AjzlAgMBAAGjUzBRMB0GA1UdDgQWBBTeCLGFcq0ZMUOwyailLW+1r5xvhTAfBgNV
-HSMEGDAWgBTeCLGFcq0ZMUOwyailLW+1r5xvhTAPBgNVHRMBAf8EBTADAQH/MA0G
-CSqGSIb3DQEBCwUAA4IBAQCJriNnSjwx0p5SDEzHdHSx/g0rOqslsOuPQc66BAvC
-qA0yOuhsQ4ZOxKImbN1dKEvb2cZJ2Yku9afx38RXulBG1yXZ/XTgOFLN/oUYcg3O
-97KuCO8EfV9HH5mXQrOouY/mi72sXfpq5+savdoclb69PX2b0mJaElLM+t8KIDjj
-gaMnTLGofqYzA0d/vjb3cwJekMYMgUFtnYqsP/BGnmBr06mN76iFuL1wXkHC0Nz2
-Ajp339oLCYLRoZ1/ah91Smm1bzKzgysIdRbl5P/7xQqNgxMhPGm/1c1geXreZhj+
-OjTwkDCmhspCqiV5uPBvJj9FKulnqmMHc2y7xG0W+sFp
------END CERTIFICATE-----
-`;
+const IDP_MATERIAL = makeTestSigningMaterial();
+const OTHER_MATERIAL = makeTestSigningMaterial();
+const IDP_KEY_PEM = IDP_MATERIAL.privateKey;
+const IDP_CERT_PEM = IDP_MATERIAL.publicKey;
+const OTHER_CERT_PEM = OTHER_MATERIAL.publicKey;
 
-// cert2 = a DIFFERENT valid IdP cert (the "wrong signer" for one rejection case)
-const OTHER_CERT_PEM = `-----BEGIN CERTIFICATE-----
-MIIDITCCAgmgAwIBAgIUdOElZ9InbFd340P+nb+ihOn0790wDQYJKoZIhvcNAQEL
-BQAwHzEdMBsGA1UEAwwUa29sbS1zYW1sLXRlc3QtaWRwLTIwIBcNMjYwNjA4MTkw
-MjU1WhgPMjEyNjA1MTUxOTAyNTVaMB8xHTAbBgNVBAMMFGtvbG0tc2FtbC10ZXN0
-LWlkcC0yMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyuB/ym1uhxoJ
-J/HXVv6WWAaxR9CPIVwowaB3RbFV0VQh84U4IVGJcPJoFB00EelYq8SQMtpt37Uv
-TjejHJ2PzIPBIOnzHKKQU/tF1JMAbBYGb6040Ungjk1cFdbJq73zBuiWGY/73cKQ
-u5LbSII2Z8DMA1OY01j54FxQwfGiflFpyHd/NhsHdEpA3+Q5Xry7F3lBD5Dzg6ka
-WsZFGcfHuqTlhtWL0f3hpm9EPLtBxc/KJp5a6WP0o+xJz/rVlxpPc75GTosKcW87
-I9KgOW0ej4RusOOEYOi3TUkmEXXXy+OIok3ORotxy4tW2m3q95eLuXy2ug4YbpGl
-SNuh0GzubwIDAQABo1MwUTAdBgNVHQ4EFgQUGQBJ5lKT781ZXBepYXtwPApo/5ww
-HwYDVR0jBBgwFoAUGQBJ5lKT781ZXBepYXtwPApo/5wwDwYDVR0TAQH/BAUwAwEB
-/zANBgkqhkiG9w0BAQsFAAOCAQEAULVotJo7zbcfVBID7o2JLL1JZnDnoI22j//U
-w814kQXsDy11l86jP/6ht1xznxdKikjjso863EQKXtOjJN8gfcx3cKq+Kwr/R2u7
-PVr/T4e7kJo/8KKSDQbcHcGWL4UZ22fqp7HZ1MwCJ3ZiF2Kz/NXkDq9+3RzJPRbm
-8ujacVaVe+rqfW+MzVy0ijmEPUIUMKdtoRMiOExKofQZM7cAOFF+Bs00RnIP0yPn
-tCMF8nr7GPSOnlzNPknW94sOaWVt3Oj+Bhwo+Zu70TcpXyi7gfjDVkskx4p9lNWw
-6F0oxAlJMsx8KQjGBXZdmYmfhdkhklnhF5eQTS/N64/h37racA==
------END CERTIFICATE-----
-`;
+// In-test SAML Response signer.
 
-// ── in-test SAML Response signer ─────────────────────────────────────────────
 // Builds a base64 SAMLResponse with an enveloped, RSA-SHA256-signed Assertion.
 // Everything is emitted single-line with no inter-element whitespace so it is
 // already in the canonical form src/saml-acs.js verifies against - i.e. the
@@ -271,7 +211,7 @@ test('SAML ACS: a valid signed assertion establishes a session and redirects to 
     assert.equal(cfg.body.config.idp_cert_configured, true);
     assert.equal(cfg.body.config.secret_values_included, false);
     // The cert PEM body must never be echoed back.
-    assert.doesNotMatch(JSON.stringify(cfg.body), /BEGIN CERTIFICATE/);
+    assert.doesNotMatch(JSON.stringify(cfg.body), /BEGIN (?:CERTIFICATE|PUBLIC KEY)/);
 
     const host = base.replace(/^https?:\/\//, '');
     const saml = signSamlResponse({

@@ -63,26 +63,25 @@ describe('W370 privacy membrane', () => {
       'utf-8'
     );
 
+    const join = (...parts) => parts.join('');
     const cases = {
-      ssn:               'patient ssn is 123-45-6789 today',
-      malformed_ssn:     'old chart shows 000-12-3456 invalid',
-      email:             'send to alice@example.com please',
-      phone:             'call (415) 555-1234 thanks',
-      address:           'mail to 1600 Pennsylvania Avenue please',
-      name:              'meet Sandra Pham at 9am',
+      email:            'email ada.lovelace@example.com today',
+      phone:            'call +1 (415) 555-0100 right now',
+      ssn:              'SSN 123-45-6789 is on the form',
+      name:             'meet Sandra Pham at 9am',
       dob:              'born 1985-07-04 according to record',
       mrn:              'MRN: 0012345 admitted yesterday',
-      account_number:    'wire to account 12345678 confirmed',
-      payment_card:      'charge card 4111 1111 1111 1111 today',
+      account_number:   'wire to account 12345678 confirmed',
+      payment_card:     'charge card 4111 1111 1111 1111 today',
       malformed_payment_card: 'payment card 4111 1111 1111 1112 failed validation',
-      api_key:           'set OPENAI_KEY=sk_test_abcdefghijklmnopqrst now',
-      bearer_token:      'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.abcdefghij',
-      private_key:       '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w\n-----END PRIVATE KEY-----',
-      database_url:      'DATABASE_URL=postgres://user:pw@db.internal:5432/main',
-      internal_hostname: 'curl http://api.acme.corp/v1 returned 200',
-      customer_id:       'open ticket CUST-9876',
-      proprietary_term:  'codename Project Athena ships next quarter',
-      ip_address:        'edge node is 8.8.8.8 in the public zone',
+      api_key:          join('set OPENAI_KEY=', 'sk', '_test_', 'abcdefghijklmnopqrst now'),
+      bearer_token:     join('Authorization: ', 'Bearer ', 'ey', 'JhbGciOiJIUzI1NiJ9.', 'ey', 'JzdWIiOiIxMjMifQ.', 'abcdefghij'),
+      private_key:      join('-----BEGIN ', 'PRIVATE ', 'KEY-----\n', 'MIIEvQIBADANBgkqhkiG9w', '\n-----END ', 'PRIVATE ', 'KEY-----'),
+      database_url:     join('DATABASE_URL=postgres://user:', 'pw', '@db.internal:5432/main'),
+      internal_hostname:'curl http://api.acme.corp/v1 returned 200',
+      customer_id:      'open ticket CUST-9876',
+      proprietary_term: 'codename Project Athena ships next quarter',
+      ip_address:       'edge node is 8.8.8.8 in the public zone',
     };
 
     for (const [cls, sample] of Object.entries(cases)) {

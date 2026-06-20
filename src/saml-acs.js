@@ -84,7 +84,7 @@ function _xmlUnescape(s) {
 function _normalizeCertPem(certPem) {
   if (!certPem) return null;
   const p = String(certPem).trim();
-  if (p.includes('BEGIN CERTIFICATE')) return p;
+  if (p.includes('BEGIN CERTIFICATE') || p.includes('BEGIN PUBLIC KEY')) return p;
   // bare base64 DER (as embedded in IdP metadata <X509Certificate>) -> wrap PEM
   const b64 = p.replace(/\s+/g, '');
   const lines = b64.match(/.{1,64}/g) || [b64];
@@ -92,9 +92,13 @@ function _normalizeCertPem(certPem) {
 }
 
 function _certToPublicKey(certPem) {
+  const pem = _normalizeCertPem(certPem);
   try {
-    const x = new crypto.X509Certificate(_normalizeCertPem(certPem));
+    const x = new crypto.X509Certificate(pem);
     return x.publicKey;
+  } catch {}
+  try {
+    return crypto.createPublicKey(pem);
   } catch {
     return null;
   }

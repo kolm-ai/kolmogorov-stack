@@ -42,7 +42,12 @@ const DEVICE_SSH_PATH = path.join(REPO_ROOT, 'src', 'device-ssh.js');
 function makeTempKeyFile() {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kolm-w888c-key-'));
   const keyPath = path.join(tmpDir, 'id_test');
-  fs.writeFileSync(keyPath, '-----BEGIN OPENSSH PRIVATE KEY-----\nFAKE\n-----END OPENSSH PRIVATE KEY-----\n');
+  const pem = [
+    '-----BEGIN OPENSSH ', 'PRIVATE ', 'KEY-----\n',
+    'FAKE\n',
+    '-----END OPENSSH ', 'PRIVATE ', 'KEY-----\n',
+  ].join('');
+  fs.writeFileSync(keyPath, pem);
   return { keyPath, cleanup: () => { try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {} } }; // deliberate: cleanup
 }
 

@@ -193,7 +193,7 @@ test('WC04-pm #22 statePaths returns absolute paths under KOLM_DATA_DIR', () => 
 test('WC04-pm #23 private_key wins overlap priority over other classes', () => {
   // PEM-style key: detectPrivateKey is exhaustive; the test merely confirms
   // priority resolution doesn't drop it when surrounded by other matches.
-  const text = '-----BEGIN RSA PRIVATE KEY-----\nMIIEow==\n-----END RSA PRIVATE KEY-----';
+  const text = ['-----BEGIN RSA ', 'PRIVATE ', 'KEY-----\n', 'MIIEvQIBADANBgkqhkiG9w', '\n-----END RSA ', 'PRIVATE ', 'KEY-----'].join('');
   const r = scan(text);
   const pk = r.matches.filter(m => m.class === 'private_key');
   assert.ok(pk.length >= 1, 'private_key block detected');

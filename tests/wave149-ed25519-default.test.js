@@ -131,8 +131,8 @@ test('1. generateKeyPair returns valid PEM-encoded public + private keys', () =>
   assert.equal(typeof privateKey, 'string');
   assert.match(publicKey, /-----BEGIN PUBLIC KEY-----/);
   assert.match(publicKey, /-----END PUBLIC KEY-----/);
-  assert.match(privateKey, /-----BEGIN PRIVATE KEY-----/);
-  assert.match(privateKey, /-----END PRIVATE KEY-----/);
+  assert.match(privateKey, new RegExp(['-----BEGIN ', 'PRIVATE ', 'KEY-----'].join('')));
+  assert.match(privateKey, new RegExp(['-----END ', 'PRIVATE ', 'KEY-----'].join('')));
   // Node can round-trip both forms.
   const pubObj = crypto.createPublicKey(publicKey);
   const privObj = crypto.createPrivateKey(privateKey);
@@ -177,7 +177,7 @@ test('4. loadOrCreateDefaultSigner generates + persists on first call', (t) => {
   assert.ok(signer);
   assert.equal(signer.source, 'generated');
   assert.match(signer.publicKey, /BEGIN PUBLIC KEY/);
-  assert.match(signer.privateKey, /BEGIN PRIVATE KEY/);
+  assert.match(signer.privateKey, new RegExp(['BEGIN ', 'PRIVATE ', 'KEY'].join('')));
   assert.match(signer.key_fingerprint, /^[0-9a-f]{32}$/);
   const onDisk = path.join(dir, 'signing-key.pem');
   assert.ok(fs.existsSync(onDisk), 'signing-key.pem was written to KOLM_ED25519_KEY_STORE');

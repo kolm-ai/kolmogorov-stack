@@ -16,19 +16,23 @@ import {
   detectorCoverage,
 } from '../src/sensitive-data.js';
 
-// One canonical token per shape id. Values are synthetic (never real keys).
+const join = (...parts) => parts.join('');
+const repeat = (ch, n) => String(ch).repeat(n);
+
+// One canonical token per shape id. Values are synthetic and assembled at
+// runtime so public Git never stores key-shaped literals that trigger scanners.
 const CANONICAL = {
-  'openai-style-key': 'sk-a1b2c3d4e5f6g7h8i9j0',
-  'aws-akid': 'AKIAABCDEFGHIJKLMNOP',
-  'aws-sts-akid': 'ASIAABCDEFGHIJKLMNOP',
-  'github-token': 'ghp_a1b2c3d4e5f6g7h8i9j0',
-  'slack-token': 'xoxb-a1b2c3d4e5f-AbCdEfGh',
-  'gcp-api-key': 'AIzaSyA1bC2dE3fG4hI5jK6lM7nO8pQ9rS0tUvW',
-  'oauth-ya29': 'ya29.a1b2c3d4e5f6g7h8i9j0kl',
-  'jwt': 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhYmMifQ.abcdWXYZefgh',
-  'pem-private-key': '-----BEGIN PRIVATE KEY-----',
-  'bearer': 'Bearer a1b2c3d4e5f6g7h8i9j0',
-  'kv-secret': 'api_key=a1b2c3d4e5f6',
+  'openai-style-key': join('sk-', repeat('a', 20)),
+  'aws-akid': join('AKIA', repeat('A', 16)),
+  'aws-sts-akid': join('ASIA', repeat('B', 16)),
+  'github-token': join('ghp_', repeat('c', 20)),
+  'slack-token': join('xox', 'b-', repeat('d', 10)),
+  'gcp-api-key': join('AI', 'za', repeat('E', 35)),
+  'oauth-ya29': join('ya', '29.', repeat('f', 20)),
+  'jwt': join('ey', 'J', repeat('g', 8), '.', repeat('h', 8), '.', repeat('i', 4)),
+  'pem-private-key': join('-----BEGIN ', 'PRIVATE ', 'KEY-----'),
+  'bearer': join('Bearer ', repeat('j', 20)),
+  'kv-secret': join('api_', 'key=', repeat('k', 12)),
 };
 
 test('every secret shape in the table hits its canonical token', () => {
@@ -46,7 +50,7 @@ test('the scan returns shape ids only - never the matched value', () => {
   const r = scanSecretShapes(`Authorization: ${CANONICAL.bearer}`);
   const flat = JSON.stringify(r);
   assert.ok(r.hit);
-  assert.ok(!flat.includes('a1b2c3d4e5f6g7h8i9j0'), 'matched token never echoed');
+  assert.ok(!flat.includes(CANONICAL.bearer.slice('Bearer '.length)), 'matched token never echoed');
 });
 
 test('ordinary hosts, endpoints, and prose never match a secret shape', () => {

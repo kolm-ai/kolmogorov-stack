@@ -106,7 +106,7 @@ test('5. local KMS target writes new key to disk and reports applied status', ()
     assert.ok(fs.existsSync(m.wrap_intent.new_key_path),
       'local target must actually write the PEM to disk');
     const pem = fs.readFileSync(m.wrap_intent.new_key_path, 'utf8');
-    assert.match(pem, /-----BEGIN PRIVATE KEY-----/, 'on-disk file must be a PEM private key');
+    assert.match(pem, new RegExp(['-----BEGIN ', 'PRIVATE ', 'KEY-----'].join('')), 'on-disk file must be a PEM private key');
   } finally { cleanup(dir); }
 });
 

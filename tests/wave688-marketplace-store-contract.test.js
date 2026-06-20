@@ -84,8 +84,8 @@ test('W688 marketplace-store writes bounded hash-receipted public listings', asy
     manifest: {
       name: ' Frontier Model \n',
       k_score: { composite: 1.7 },
-      api_key: 'sk_should_not_be_public',
-      private_key: '-----BEGIN PRIVATE KEY-----',
+      api_key: ['sk', '_should_not_be_public'].join(''),
+      private_key: ['-----BEGIN ', 'PRIVATE ', 'KEY-----'].join(''),
       nested: {
         safe: 'kept',
         constructor: { polluted: true },

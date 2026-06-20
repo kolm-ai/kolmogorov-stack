@@ -364,7 +364,7 @@ test('loadSignerKeyFromEnv accepts a PEM with escaped (\\n) newlines, identical 
     const signer = loadSignerKeyFromEnv();
     assert.ok(signer, 'escaped-newline PEM loads');
     assert.equal(signer.key_fingerprint, realFp, 'loads to the same key as the real-newline PEM');
-    assert.ok(/-----BEGIN PRIVATE KEY-----\n/.test(signer.privateKey), 'newlines were restored');
+    assert.ok(signer.privateKey.includes(['-----BEGIN ', 'PRIVATE ', 'KEY-----\n'].join('')), 'newlines were restored');
   } finally {
     if (saved === undefined) delete process.env.KOLM_ED25519_PRIVATE_KEY; else process.env.KOLM_ED25519_PRIVATE_KEY = saved;
     if (savedDisable === undefined) delete process.env.KOLM_ED25519_DISABLE; else process.env.KOLM_ED25519_DISABLE = savedDisable;

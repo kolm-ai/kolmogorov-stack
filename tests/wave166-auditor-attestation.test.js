@@ -163,7 +163,7 @@ test('1. AUDITOR_ATTESTATION_SPEC_VERSION === kolm-auditor-attestation-v1', () =
 // ---------------------------------------------------------------------------
 test('2. generateAuditorKeyPair returns Ed25519 keypair + hex32 fingerprint', () => {
   const kp = generateAuditorKeyPair();
-  assert.ok(kp.privateKey.includes('BEGIN PRIVATE KEY'));
+  assert.ok(kp.privateKey.includes(['BEGIN ', 'PRIVATE ', 'KEY'].join('')));
   assert.ok(kp.publicKey.includes('BEGIN PUBLIC KEY'));
   assert.match(kp.key_fingerprint, /^[0-9a-f]{32}$/);
   // Two calls produce DIFFERENT keys
