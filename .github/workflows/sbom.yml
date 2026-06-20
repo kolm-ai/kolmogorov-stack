@@ -58,7 +58,7 @@ jobs:
             --output kolm-stack-sbom.spdx.json
 
       - name: upload sbom artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom-${{ github.sha }}
           path: |
