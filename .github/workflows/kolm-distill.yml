@@ -81,7 +81,7 @@ jobs:
 
       - name: publish .kolm artifacts to GitHub Releases
         if: ${{ steps.verify.outcome != 'success' || github.event.inputs.force_distill == 'true' }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: kolm-distill-${{ github.sha }}
           name: 'kolm distill ${{ github.sha }}'
